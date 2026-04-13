@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/neotherapper/claude-plugins/blob/main/plugins/beacon/schemas/output.schema.json",
+  "title": "Beacon Research Output",
+  "description": "Documents the required structure of a docs/research/{site}/ folder produced by site-recon.",
+  "type": "object",
+  "properties": {
+    "required_files": {
+      "type": "array",
+      "description": "Files that must exist in every research output folder",
+      "items": { "type": "string" },
+      "minItems": 4,
+      "examples": [
+        ["INDEX.md", "tech-stack.md", "site-map.md", "constants.md"]
+      ]
+    },
+    "index_sections": {
+      "type": "array",
+      "description": "Required sections in INDEX.md",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Infrastructure",
+          "Tool Availability",
+          "Quick API Reference",
+          "Discovered Endpoints"
+        ]
+      }
+    },
+    "graceful_degradation_signals": {
+      "type": "array",
+      "description": "Allowed [SIGNAL] tokens that INDEX.md may contain",
+      "items": {
+        "type": "string",
+        "pattern": "^\\[.+\\]$"
+      },
+      "examples": [
+        [
+          "[TOOL-UNAVAILABLE:wappalyzer]",
+          "[TOOL-UNAVAILABLE:firecrawl]",
+          "[TECH-PACK-UNAVAILABLE:framework:version]",
+          "[PHASE-11-SKIPPED]",
+          "[FRAMEWORK-UNKNOWN]",
+          "[GENERATED-INLINE:path]"
+        ]
+      ]
+    },
+    "openapi_sources": {
+      "type": "string",
+      "description": "Allowed values for x-beacon-source in the OpenAPI spec",
+      "enum": ["auto-downloaded", "har-generated", "scaffolded"]
+    }
+  },
+  "required": ["required_files", "index_sections"],
+  "additionalProperties": false,
+  "x-beacon-note": "This schema documents the output contract. Phase 12 validates output against this schema before writing files."
+}

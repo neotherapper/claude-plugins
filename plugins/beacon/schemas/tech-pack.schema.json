@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/neotherapper/claude-plugins/blob/main/plugins/beacon/schemas/tech-pack.schema.json",
+  "title": "Beacon Tech Pack",
+  "description": "Validates a Beacon framework tech pack file. All 10 sections are required.",
+  "type": "object",
+  "properties": {
+    "frontmatter": {
+      "type": "object",
+      "description": "YAML frontmatter fields",
+      "properties": {
+        "framework": { "type": "string", "description": "kebab-case framework name" },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.x$|^[a-z-]+$", "description": "Major version (e.g. 6.x) or descriptor (e.g. storefront)" },
+        "last_updated": { "type": "string", "format": "date" },
+        "author": { "type": "string" },
+        "status": { "type": "string", "enum": ["official", "community"] }
+      },
+      "required": ["framework", "version", "last_updated", "author", "status"]
+    },
+    "sections": {
+      "type": "array",
+      "description": "The 10 required H2 sections",
+      "minItems": 10,
+      "items": {
+        "type": "string",
+        "enum": [
+          "1. Fingerprinting Signals",
+          "2. Default API Surfaces",
+          "3. Config / Constants Locations",
+          "4. Auth Patterns",
+          "5. JS Bundle Patterns",
+          "6. Source Map Patterns",
+          "7. Common Plugins & Extensions",
+          "8. Known Public Data",
+          "9. Probe Checklist",
+          "10. Gotchas"
+        ]
+      }
+    }
+  },
+  "required": ["frontmatter", "sections"],
+  "additionalProperties": false,
+  "x-beacon-note": "This schema describes the logical structure. Actual validation is performed by tests/validate-tech-pack.sh which checks H2 headings and frontmatter keys in the markdown file directly."
+}
