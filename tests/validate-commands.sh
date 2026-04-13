@@ -14,8 +14,8 @@ FAIL=0
 
 check() {
   local label="$1"
-  local result="$2"   # "pass" or "fail"
-  if [ "$result" = "pass" ]; then
+  local result="$2"   # "true" or "false"
+  if [ "$result" = "true" ]; then
     echo "PASS: $label"
     PASS=$((PASS + 1))
   else
@@ -28,60 +28,60 @@ check() {
 
 # 1. File exists
 if [ -f "$ANALYZE_FILE" ]; then
-  check "beacon-analyze.md exists" "pass"
+  ANALYZE_EXISTS=true
+  check "beacon-analyze.md exists" true
 else
-  check "beacon-analyze.md does not exist" "fail"
+  ANALYZE_EXISTS=false
+  check "beacon-analyze.md exists" false
 fi
 
-# 2. Frontmatter has name:
-if [ -f "$ANALYZE_FILE" ] && grep -q '^name:' "$ANALYZE_FILE"; then
-  check "beacon-analyze.md frontmatter contains name:" "pass"
-else
-  check "beacon-analyze.md frontmatter missing name:" "fail"
-fi
+if $ANALYZE_EXISTS; then
+  # 2. Opening frontmatter fence at line 1
+  head -1 "$ANALYZE_FILE" | grep -q '^---$' && check "beacon-analyze.md has opening frontmatter fence" true || check "beacon-analyze.md has opening frontmatter fence" false
 
-# 3. Frontmatter has description:
-if [ -f "$ANALYZE_FILE" ] && grep -q '^description:' "$ANALYZE_FILE"; then
-  check "beacon-analyze.md frontmatter contains description:" "pass"
-else
-  check "beacon-analyze.md frontmatter missing description:" "fail"
-fi
+  # 3. Frontmatter has name: (position-aware: inside first frontmatter block)
+  awk '/^---/{f++} f==1 && /^name:/{found=1} END{exit !found}' "$ANALYZE_FILE" && check "beacon-analyze.md frontmatter contains name:" true || check "beacon-analyze.md frontmatter contains name:" false
 
-# 4. Body invokes site-recon
-if [ -f "$ANALYZE_FILE" ] && grep -q 'site-recon' "$ANALYZE_FILE"; then
-  check "beacon-analyze.md body references site-recon" "pass"
+  # 4. Exact name value
+  grep -q '^name: beacon:analyze$' "$ANALYZE_FILE" && check "beacon-analyze.md name is beacon:analyze" true || check "beacon-analyze.md name is beacon:analyze" false
+
+  # 5. Frontmatter has description: (position-aware)
+  awk '/^---/{f++} f==1 && /^description:/{found=1} END{exit !found}' "$ANALYZE_FILE" && check "beacon-analyze.md frontmatter contains description:" true || check "beacon-analyze.md frontmatter contains description:" false
+
+  # 6. Body invokes site-recon
+  grep -q 'site-recon' "$ANALYZE_FILE" && check "beacon-analyze.md body references site-recon" true || check "beacon-analyze.md body does not reference site-recon" false
 else
-  check "beacon-analyze.md body does not reference site-recon" "fail"
+  echo "SKIP: content checks for beacon-analyze.md (file missing)"
 fi
 
 # ── beacon-load.md ───────────────────────────────────────────────────────────
 
-# 5. File exists
+# 7. File exists
 if [ -f "$LOAD_FILE" ]; then
-  check "beacon-load.md exists" "pass"
+  LOAD_EXISTS=true
+  check "beacon-load.md exists" true
 else
-  check "beacon-load.md does not exist" "fail"
+  LOAD_EXISTS=false
+  check "beacon-load.md exists" false
 fi
 
-# 6. Frontmatter has name:
-if [ -f "$LOAD_FILE" ] && grep -q '^name:' "$LOAD_FILE"; then
-  check "beacon-load.md frontmatter contains name:" "pass"
-else
-  check "beacon-load.md frontmatter missing name:" "fail"
-fi
+if $LOAD_EXISTS; then
+  # 8. Opening frontmatter fence at line 1
+  head -1 "$LOAD_FILE" | grep -q '^---$' && check "beacon-load.md has opening frontmatter fence" true || check "beacon-load.md has opening frontmatter fence" false
 
-# 7. Frontmatter has description:
-if [ -f "$LOAD_FILE" ] && grep -q '^description:' "$LOAD_FILE"; then
-  check "beacon-load.md frontmatter contains description:" "pass"
-else
-  check "beacon-load.md frontmatter missing description:" "fail"
-fi
+  # 9. Frontmatter has name: (position-aware)
+  awk '/^---/{f++} f==1 && /^name:/{found=1} END{exit !found}' "$LOAD_FILE" && check "beacon-load.md frontmatter contains name:" true || check "beacon-load.md frontmatter contains name:" false
 
-# 8. Body invokes site-intel
-if [ -f "$LOAD_FILE" ] && grep -q 'site-intel' "$LOAD_FILE"; then
-  check "beacon-load.md body references site-intel" "pass"
+  # 10. Exact name value
+  grep -q '^name: beacon:load$' "$LOAD_FILE" && check "beacon-load.md name is beacon:load" true || check "beacon-load.md name is beacon:load" false
+
+  # 11. Frontmatter has description: (position-aware)
+  awk '/^---/{f++} f==1 && /^description:/{found=1} END{exit !found}' "$LOAD_FILE" && check "beacon-load.md frontmatter contains description:" true || check "beacon-load.md frontmatter contains description:" false
+
+  # 12. Body invokes site-intel
+  grep -q 'site-intel' "$LOAD_FILE" && check "beacon-load.md body references site-intel" true || check "beacon-load.md body does not reference site-intel" false
 else
-  check "beacon-load.md body does not reference site-intel" "fail"
+  echo "SKIP: content checks for beacon-load.md (file missing)"
 fi
 
 # ── Summary ──────────────────────────────────────────────────────────────────
