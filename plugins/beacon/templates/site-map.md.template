@@ -1,0 +1,25 @@
+# {{SITE_NAME}} — Site Map
+
+**Last updated:** {{DATE}}
+**Total URLs discovered:** {{URL_COUNT}}
+**Sources:** {{DISCOVERY_SOURCES}}
+
+## Public Routes
+
+{{PUBLIC_ROUTES_TABLE}}
+
+## API Routes
+
+{{API_ROUTES_TABLE}}
+
+## Auth-Gated Routes
+
+{{AUTH_ROUTES_TABLE}}
+
+## Subdomains
+
+{{SUBDOMAIN_LIST}}
+
+## Sitemap Source
+
+{{SITEMAP_URL}} — {{SITEMAP_STATS}}

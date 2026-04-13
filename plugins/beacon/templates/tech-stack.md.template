@@ -1,0 +1,38 @@
+# {{SITE_NAME}} — Tech Stack
+
+**Last updated:** {{DATE}}
+
+## Framework
+
+- **Name:** {{FRAMEWORK}}
+- **Version:** {{VERSION}}
+- **Detection signals:** {{FINGERPRINT_SIGNALS}}
+- **Tech pack used:** {{TECH_PACK_PATH}}
+
+## Infrastructure
+
+- **Web server:** {{SERVER}}
+- **CDN:** {{CDN}}
+- **Hosting:** {{HOSTING}}
+
+## Authentication
+
+- **Mechanism:** {{AUTH_MECHANISM}}
+- **Token location:** {{TOKEN_LOCATION}}
+- **Token validity:** {{TOKEN_VALIDITY}}
+- **Acquisition method:** {{TOKEN_ACQUISITION}}
+
+## Bot Protection
+
+- **Provider:** {{BOT_PROTECTION}}
+- **Signals:** {{BOT_SIGNALS}}
+
+## Detected Plugins / Extensions
+
+{{PLUGIN_LIST}}
+
+## JS Analysis
+
+- **Bundles found:** {{BUNDLE_COUNT}}
+- **Source maps available:** {{SOURCE_MAP_COUNT}}
+- **Notable bundles:** {{NOTABLE_BUNDLES}}

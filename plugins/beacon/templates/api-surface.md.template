@@ -1,0 +1,37 @@
+# {{SURFACE_NAME}} — API Surface
+
+**Site:** {{SITE_NAME}}
+**Base URL:** {{BASE_URL}}
+**Auth required:** {{AUTH_REQUIRED}}
+**Discovered in:** Phase {{DISCOVERY_PHASE}}
+**Last verified:** {{DATE}}
+
+## Endpoints
+
+| Method | Path | Auth | Response shape | Notes |
+|--------|------|------|---------------|-------|
+{{ENDPOINT_ROWS}}
+
+## Authentication
+
+{{AUTH_DETAIL}}
+
+## Rate Limiting
+
+{{RATE_LIMIT_NOTES}}
+
+## Notes
+
+{{SURFACE_NOTES}}
+
+## Example Request
+
+```bash
+{{EXAMPLE_REQUEST}}
+```
+
+## Example Response
+
+```json
+{{EXAMPLE_RESPONSE}}
+```
