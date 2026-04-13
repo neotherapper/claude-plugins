@@ -1,0 +1,3 @@
+# SHA256 checksums for all scripts
+# Format: {hash}  scripts/{category}/{filename}
+# Regenerate with: find scripts -name "*.sh" -o -name "*.py" | xargs shasum -a 256 > scripts/checksums.sha256

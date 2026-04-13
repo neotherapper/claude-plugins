@@ -1,0 +1,14 @@
+{
+  "name": "beacon",
+  "version": "0.1.0",
+  "description": "Map any site's API surface — systematically.",
+  "author": {
+    "name": "Georgios Pilitsoglou",
+    "url": "https://pilitsoglou.com"
+  },
+  "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/beacon",
+  "repository": "https://github.com/neotherapper/claude-plugins",
+  "license": "MIT",
+  "keywords": ["api-mapping", "site-analysis", "osint", "recon", "tech-packs"],
+  "hooks": "./hooks/hooks.json"
+}

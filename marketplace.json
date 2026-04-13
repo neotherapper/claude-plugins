@@ -1,0 +1,24 @@
+{
+  "name": "neotherapper",
+  "owner": {
+    "name": "Georgios Pilitsoglou",
+    "url": "https://pilitsoglou.com",
+    "github": "neotherapper"
+  },
+  "metadata": {
+    "description": "AI-era plugins for systematic site analysis, API mapping, and developer workflows. Works with Claude Code, Gemini CLI, GitHub Copilot, Cursor, and OpenCode.",
+    "website": "https://pilitsoglou.com",
+    "repository": "https://github.com/neotherapper/claude-plugins"
+  },
+  "plugins": [
+    {
+      "name": "beacon",
+      "source": {
+        "source": "github",
+        "repo": "neotherapper/claude-plugins",
+        "path": "plugins/beacon"
+      },
+      "description": "Map any site's API surface — systematically. Detects tech stack, loads framework-specific guides, probes endpoints, runs OSINT, and produces structured persistent documentation."
+    }
+  ]
+}
