@@ -1,39 +1,202 @@
 ---
 name: site-recon
-description: Analyse a website and produce structured API surface documentation. Use when the user wants to research a new site, map its API surfaces, understand its tech stack, or document how to extract data from it. Triggers on: "analyse this site", "research {url}", "map the API surface of", "document endpoints for", or /beacon:analyze.
+description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 12-phase systematic investigation of a website and produces a complete persistent docs/research/{site-name}/ folder.
+version: 0.1.0
 ---
 
 # site-recon — Research Mode
 
-> **Status: Stub** — Full skill implementation pending. Use `skill-creator` to develop this skill following the spec at `docs/specs/site-recon.feature` and the design at the plugin's design document.
+Systematically analyse a target website across 12 ordered phases. Each phase writes
+findings to an in-memory **session brief** (a running markdown document in context).
+Phase 12 flushes everything to disk as structured research files.
 
-## Purpose
+## Output structure
 
-Systematically analyses a website across 12 phases and produces a complete
-`docs/research/{site-name}/` folder containing:
+```
+docs/research/{site-slug}/
+├── INDEX.md                 ← Summary, infrastructure table, quick API reference
+├── tech-stack.md            ← Framework, version, CDN, auth, hosting evidence
+├── site-map.md              ← All discovered URLs by category
+├── constants.md             ← Taxonomy IDs, nonces, enums, public config values
+├── api-surfaces/
+│   └── {surface}.md         ← One file per discovered API surface
+├── specs/
+│   └── {site}.openapi.yaml  ← Auto-downloaded or scaffolded from discoveries
+└── scripts/
+    └── test-{site}.sh       ← Runnable smoke tests for key endpoints
+```
 
-- `INDEX.md` — key findings, infrastructure, quick API reference
-- `tech-stack.md` — detected framework, version, plugins, bot protection
-- `site-map.md` — all discovered routes
-- `constants.md` — taxonomy values, IDs, enums
-- `api-surfaces/*.md` — one file per discovered API surface
-- `specs/*.openapi.yaml` — auto-downloaded or scaffolded OpenAPI spec
-- `scripts/test-*.sh` — runnable smoke tests
+Derive `{site-slug}` from the domain: `example.com` → `example-com`, `api.example.com` → `api-example-com`.
 
-## Phase Sequence
+## The 12 phases — always in this order
 
-1. Scaffold output folder structure
-2. Passive recon (robots.txt, sitemap, security.txt, well-known URLs, crt.sh)
-3. Fingerprint tech stack (Wappalyzer MCP → header/HTML fallback)
-4. Load tech pack from GitHub / context7 / web search
-5. Apply tech-pack probe checklist
-6. Feed & structure discovery (RSS, JSON-LD, GraphQL, API versions)
-7. JS bundle & source map analysis
-8. OpenAPI auto-detection (15 standard paths)
-9. OSINT (Google dorks, GAU/Wayback, CommonCrawl, GitHub code search)
-10. Generate browse plan from all findings
-11. Active browse via cmux / Chrome DevTools MCP (follows browse plan)
-12. Write all output files
+| # | Phase | What happens |
+|---|-------|-------------|
+| 1 | Scaffold | Create output folder; check tool availability |
+| 2 | Passive recon | robots.txt, sitemaps, .well-known, HTTP headers, crt.sh subdomains |
+| 3 | Fingerprint | Detect framework + version (Wappalyzer → headers → HTML → JS) |
+| 4 | Tech pack | Load framework guide from GitHub, context7, or web search |
+| 5 | Known patterns | Apply every item in the tech pack's probe checklist |
+| 6 | Feeds & structure | RSS/Atom, JSON-LD, GraphQL introspection, API version enumeration |
+| 7 | JS & source maps | Download bundles, grep for endpoints and auth patterns, check .map files |
+| 8 | OpenAPI detect | Probe 15 standard paths; download spec if found |
+| 9 | OSINT | Wayback CDX, CommonCrawl CDX, GitHub code search, Google dorks |
+| 10 | Browse plan | Compile a prioritised URL list + actions from all phase 2–9 findings |
+| 11 | Active browse | Execute the browse plan via cmux or Chrome DevTools MCP; HAR → OpenAPI |
+| 12 | Document | Write all output files from the completed session brief |
 
-See `docs/specs/site-recon.feature` for acceptance scenarios.
-See design spec for full phase detail and tool optionality matrix.
+**Why this order:** Phases 2–9 are fully automated (no browser, just curl and APIs). They
+maximise the signal available to Phase 10. Phase 10 is a synthesis step — it compiles
+a concrete target list *before* any browser opens. Phase 11 executes the plan. The AI
+never browses blindly.
+
+## Session brief
+
+Maintain a running markdown document in context throughout the run. This is your
+working memory — append after each phase, never overwrite earlier sections.
+
+```
+## Session Brief — {site-slug}
+
+### Infrastructure
+Framework: {name} {version}   Source: {signal}
+CDN: {name or unknown}
+Auth: {mechanism or unknown}
+Bot protection: {name or none detected}
+
+### Tool Availability
+[AVAILABLE] or [TOOL-UNAVAILABLE:{name}] for each:
+  wappalyzer, firecrawl, chrome-devtools-mcp, cmux-browser, gau
+
+### Tech Pack
+[LOADED:{framework}:{version}] or [TECH-PACK-UNAVAILABLE:{framework}:{version}]
+
+### Discovered Endpoints  ← grows throughout the run
+| Endpoint | Method | Auth | Phase | Notes |
+
+### Browse Plan  ← written in Phase 10
+```
+
+See `references/session-brief-format.md` for the complete schema.
+
+## Phase 1 — Scaffold and tool check
+
+```bash
+SLUG=$(echo "{url}" | sed 's|https\?://||;s|/.*||;s|\.|--|g')
+mkdir -p docs/research/${SLUG}/{api-surfaces,specs,scripts}
+touch docs/research/${SLUG}/{INDEX,tech-stack,site-map,constants}.md
+```
+
+Then check every tool in the tool availability matrix and log results in the session brief.
+See `references/tool-availability.md` for exact detection commands.
+
+## Phase 3 — Fingerprinting (first match wins)
+
+1. **Wappalyzer MCP** (if available): `lookup_site(url)` → framework + version
+2. **HTTP headers**: `curl -sI {url}` → grep `X-Powered-By`, `Ghost-Version`, `x-nuxt`, `X-Inertia`
+3. **HTML signals**: `curl -s {url}` → grep `wp-content/`, `/_next/`, `/_nuxt/`, `laravel_session`
+4. **JS globals**: grep inline scripts for `__NEXT_DATA__`, `window.__nuxt`
+5. **No match**: log `[FRAMEWORK-UNKNOWN]`, continue with generic probes
+
+Log the result: `Framework: WordPress 6.5 (source: wp-content/ in HTML + generator meta, confidence: high)`
+
+Version extraction after identification:
+- WordPress: `grep -oP 'content="WordPress \K[\d.]+'` from generator meta
+- Next.js: `grep -oP '"next":"\K[^"]+'` from `__NEXT_DATA__` inline JSON
+- Ghost: read `Ghost-Version` header directly
+
+## Phase 4 — Tech pack lookup
+
+Once framework and major version are known, try in order:
+
+1. **GitHub** (primary) — version-pinned URL:
+   ```
+   https://raw.githubusercontent.com/neotherapper/claude-plugins/v{PLUGIN_VERSION}/plugins/beacon/technologies/{framework}/{major}.x.md
+   ```
+   Read plugin version from `.claude-plugin/plugin.json` — never use `main` branch.
+
+2. **context7 MCP** (if available) — ask for framework's official API documentation
+
+3. **Web search fallback** — search `{framework} {major}.x API routes endpoints file structure`
+
+4. **No pack, no internet** — log `[TECH-PACK-UNAVAILABLE:{framework}:{version}]`, continue with generic probes
+
+If web search fallback used, offer a PR at the end of Phase 12:
+> "I built a temporary tech pack for {framework} {version} from web search.
+> Would you like me to open a PR to add it permanently to the community library?"
+
+Version mismatch: if `15.x` requested but only `14.x` exists, use `14.x` and log
+`[TECH-PACK-VERSION-MISMATCH:nextjs:15.x→14.x]`.
+
+## Phase 8 — OpenAPI auto-detection
+
+Probe these paths in order; stop at the first 200 response that returns JSON or YAML:
+
+```
+/openapi.json    /openapi.yaml    /swagger.json    /swagger.yaml
+/api/openapi.json   /api/swagger.json   /api/docs   /api/docs.json
+/docs/openapi.json  /v1/api-docs  /api-docs  /api-docs.json  /spec.json  /redoc
+```
+
+If found: save to `specs/{slug}.openapi.yaml`, mark `source: auto-downloaded`.  
+If not found: continue — Phase 12 will scaffold a spec from all discovered endpoints.
+
+## Phase 10 — Browse plan
+
+Before opening any browser, compile a prioritised list from all phase 2–9 findings:
+
+```markdown
+## Browse Plan
+
+Priority 1 — Auth flow
+- [ ] GET /login — capture POST target from form action
+- [ ] POST /api/auth/login — test with dummy creds, observe response shape
+
+Priority 2 — Authenticated API surface
+- [ ] GET /dashboard — capture XHR from DevTools after login
+
+Priority 3 — Admin / discovery pages
+- [ ] GET {admin-subdomain-from-crt.sh}/api — explore admin API
+```
+
+The browse plan is the synthesis of everything gathered so far — it tells Phase 11
+exactly where to go and what to capture.
+
+## Phase 11 — Active browse
+
+Detect which browser tool is available (logged in Phase 1):
+
+- `$CMUX_SURFACE_ID` non-empty → use `cmux browser` commands
+- `mcp__chrome-devtools__new_page` in tool list → use Chrome DevTools MCP
+- Neither available → log `[PHASE-11-SKIPPED]`, proceed to Phase 12
+
+After executing the browse plan, convert captured network traffic to OpenAPI:
+```bash
+bunx har-to-openapi .beacon/capture.har \
+  --include-domains {domain} \
+  --format yaml > docs/research/{slug}/specs/{slug}.openapi.yaml
+```
+
+See `references/tool-availability.md` for full browser command reference.
+
+## Graceful degradation signals
+
+Log these in the session brief and repeat in the generated INDEX.md:
+
+| Signal | Meaning |
+|--------|---------|
+| `[TOOL-UNAVAILABLE:wappalyzer]` | Used header/HTML grep instead |
+| `[TOOL-UNAVAILABLE:firecrawl]` | Used curl fallbacks |
+| `[TOOL-UNAVAILABLE:chrome-devtools-mcp]` | Phase 11 used cmux or was skipped |
+| `[PHASE-11-SKIPPED]` | No browser tool available; static analysis only |
+| `[TECH-PACK-UNAVAILABLE:name:ver]` | No pack found; used web search |
+| `[TECH-PACK-VERSION-MISMATCH:name:found→used]` | Nearest major version used |
+| `[GENERATED-INLINE:path]` | Script generated inline, not downloaded |
+
+## Reference files
+
+Load these when you need detailed guidance — they are not always necessary:
+
+- **`references/phase-detail.md`** — Every probe URL, bash command, grep pattern, and CDX API parameter for phases 2, 5, 6, 7, and 9
+- **`references/session-brief-format.md`** — Complete session brief schema with all fields
+- **`references/tool-availability.md`** — Tool detection commands, full fallback matrix, browser command reference

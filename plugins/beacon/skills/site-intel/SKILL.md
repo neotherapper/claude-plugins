@@ -1,32 +1,74 @@
 ---
 name: site-intel
-description: Route questions about a known site to its pre-built research docs in docs/research/{site}/. Use when the user asks questions about a site that has already been analysed — how to query it, what endpoints exist, what tech it uses, what category IDs it has. Triggers on questions about specific sites that have a docs/research/ folder.
+description: This skill should be used when the user asks questions about a site that has already been analysed with site-recon — "what endpoints does X have?", "how do I query Y?", "what did we find on Z?", "load research for...", "tell me about [site]", "what auth does X use?", "give me the API for...". If a docs/research/ folder exists for the site, use this skill rather than re-analysing. Routes to the right pre-built file without re-running the full analysis.
+version: 0.1.0
 ---
 
 # site-intel — Router Mode
 
-> **Status: Stub** — Full skill implementation pending. Use `skill-creator` to develop this skill following the spec at `docs/specs/site-intel.feature`.
+Answer questions about a previously-analysed site by routing to the correct
+pre-built research file. Read the file, then answer directly — do not re-analyse.
 
-## Purpose
+## Step 1: Find the research folder
 
-Routes questions about a known site to the correct pre-built research file.
-Mirrors the `data-source-research` pattern.
+```bash
+ls docs/research/ | grep -i "{keyword-from-question}"
+```
 
-## Routing Logic
+If no folder matches → tell the user to run `/beacon:analyze {url}` first:
+```
+No research found for {site}. Run /beacon:analyze {url} to analyse it first.
+```
 
-1. Open `docs/research/{site-name}/INDEX.md` first.
-2. Based on the question, route to one specific file:
+If multiple folders could match → list them and ask which one:
+```
+Multiple researched sites found:
+- docs/research/example-com/ (see INDEX.md for analysis date)
+- docs/research/example-api-com/
 
-| Question about | Open |
-|---------------|------|
-| Tech stack, infrastructure | `tech-stack.md` |
-| Available pages, URL patterns | `site-map.md` |
-| Taxonomy values, IDs, enums | `constants.md` |
-| A specific API endpoint | `api-surfaces/{surface}.md` |
-| OpenAPI spec | `specs/{site}.openapi.yaml` |
-| How to query the site | `scripts/test-{site}.sh` |
+Which site are you asking about?
+```
 
-3. Quote concrete endpoint constraints, auth requirements, and field names.
-4. If no research exists: direct user to run `/beacon:analyze {url}`.
+## Step 2: Open INDEX.md first
 
-See `docs/specs/site-intel.feature` for acceptance scenarios.
+Always read `docs/research/{site}/INDEX.md` first — it has the infrastructure summary,
+quick API reference, and links to every other file. This gives you context before
+diving into a specific file.
+
+## Step 3: Route to the specific file
+
+| Question type | File to open |
+|--------------|-------------|
+| Tech stack, framework, hosting, CDN, bot protection | `tech-stack.md` |
+| Available pages, URL patterns, site structure | `site-map.md` |
+| Category IDs, taxonomy values, enums, nonces, public config | `constants.md` |
+| A specific API endpoint (REST, GraphQL, AJAX) | `api-surfaces/{surface}.md` |
+| Full endpoint list, OpenAPI spec | `specs/{site}.openapi.yaml` |
+| How to query / test the site | `scripts/test-{site}.sh` |
+| General overview, key findings | `INDEX.md` (already open) |
+
+If the question spans multiple surfaces, open all relevant files before answering.
+
+## Step 4: Answer directly
+
+After reading the relevant file(s):
+
+1. Answer the question — quote specific endpoints, field names, status codes, constraints
+2. Include auth requirements for any endpoint mentioned  
+3. Cite the source file
+4. Keep it concrete: "The endpoint is `GET /wp-json/wp/v2/posts?per_page=10`, returns
+   a JSON array of post objects. No auth required. Found in Phase 5 via the WordPress
+   tech pack probe checklist."
+
+## When research is incomplete
+
+If the file exists but doesn't answer the question (e.g., a section says
+"Phase 11 skipped — no browser available"):
+
+```
+The research file notes that [reason]. The {specific data} was not captured.
+To get this, re-run /beacon:analyze {url} with a browser tool available,
+or manually visit {url} and share what you see.
+```
+
+Do not guess or fabricate endpoint details. Only report what the research files contain.
