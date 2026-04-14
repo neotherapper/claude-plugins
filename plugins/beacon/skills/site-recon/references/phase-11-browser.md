@@ -46,6 +46,8 @@ If not found, offer 3 options:
 
 ## Phase 11b — Browse Plan Execution
 
+Execute each URL from the Phase 10 browse plan (up to 10 URLs, in priority order):
+
 ### Chrome DevTools MCP Per-URL Loop — CORRECTED v0.21.0 Signatures
 
 ```
@@ -120,9 +122,12 @@ npx har-to-openapi .beacon/capture.har \
 
 If har-to-openapi unavailable: log `[OPENAPI-SKIPPED:har-to-openapi-unavailable]`
 
-**Passive spec merge:** If Phase 8 saved `openapi-passive.yaml`, merge it in:
-- Mark added endpoints with `x-beacon-source: passive`
-- Write a single merged file at the same output path
+**Passive spec merge** (if Phase 8 saved `specs/{site-slug}.openapi-passive.yaml`):
+1. Read both specs
+2. Add endpoints from passive spec not present in observed spec; mark with `x-beacon-source: passive`
+3. Flag conflicts between specs: add `x-beacon-note: "passive spec claims {passive_status}, observed {observed_status}"` to conflicting endpoints
+4. Write single merged `specs/{site-slug}.openapi.yaml`
+5. Remove `specs/{site-slug}.openapi-passive.yaml` (prevents stale duplicate in output)
 
 ---
 
