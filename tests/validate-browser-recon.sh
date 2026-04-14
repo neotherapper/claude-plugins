@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-FILE="plugins/beacon/skills/site-recon/references/phase-11-browser.md"
+FILE="plugins/beacon/skills/site-recon/references/browser-recon.md"
 PASS=0
 FAIL=0
 
@@ -21,7 +21,7 @@ check() {
   fi
 }
 
-echo "Validating phase-11-browser reference: $FILE"
+echo "Validating browser-recon reference: $FILE"
 echo "========================================"
 
 # Check 1: File exists
