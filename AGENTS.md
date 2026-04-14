@@ -53,3 +53,38 @@ Never write site-specific data into the plugin directories.
 | "I already know the framework, skip fingerprinting" | Version matters — wrong version = wrong tech pack |
 | "OSINT is overkill for this" | Phase 9 regularly finds subdomains and historical endpoints missed by all other phases |
 | "I'll skip the browse plan and just open the browser" | Unplanned browsing misses systematic coverage. Always compile the plan first. |
+
+## Plugin Development
+
+This repo is also a plugin-building workspace. The following plugins are active for this purpose (see `.claude/settings.json`):
+
+- **`plugin-dev@claude-plugins-official`** — scaffolding, skill/command development, validation agents
+- **`agent-skills@addy-agent-skills`** — spec, planning, browser testing, API design, incremental implementation
+- **`superpowers@claude-plugins-official`** — brainstorming, planning, TDD, debugging (globally active)
+- **`skill-creator@claude-plugins-official`** — create and iterate on skills (globally active)
+
+The **chrome-devtools MCP server** is wired via `.mcp.json` for live browser testing.
+
+### Plugin Development Intent → Tool Mapping
+
+When the user's request matches any of these patterns, use the corresponding tool:
+
+| User intent | Tool to use |
+|-------------|-------------|
+| "spec out this plugin" / "I want to build X plugin" | `agent-skills:spec-driven-development` skill |
+| "break this into tasks" / "plan the work" | `agent-skills:planning-and-task-breakdown` skill |
+| "create a new plugin" / "scaffold this plugin" | `plugin-dev:/create-plugin` command |
+| "write a skill for X" | `plugin-dev:skill-development` skill |
+| "write a command for X" | `plugin-dev:command-development` skill |
+| "validate this skill" / "review this skill" | `plugin-dev:skill-reviewer` agent |
+| "test this in the browser" / "check browser output" | `agent-skills:browser-testing-with-devtools` skill + chrome-devtools MCP |
+| "design the API / interface for this plugin" | `agent-skills:api-and-interface-design` skill |
+| "implement this incrementally" | `agent-skills:incremental-implementation` skill |
+| "create a skill" / "write a new skill" | `skill-creator@claude-plugins-official` skill |
+
+### Execution Rules (Plugin Development)
+
+1. When a plugin-building intent matches the table above, load and follow the mapped skill before doing any implementation work
+2. The chrome-devtools MCP is available for browser testing — use it via `agent-skills:browser-testing-with-devtools`, not directly
+3. All new plugin code goes in `plugins/<plugin-name>/` — never in `docs/` or project root
+4. Specs for new plugins go in `docs/superpowers/specs/` before any implementation begins
