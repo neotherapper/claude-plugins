@@ -164,7 +164,7 @@ exactly where to go and what to capture.
 
 ## Phase 11 — Active browse
 
-**Load `references/phase-11-browser.md` before executing this phase** — it contains
+**Load `references/browser-recon.md` before executing this phase** — it contains
 corrected tool signatures, auth setup logic, per-URL loop instructions, HAR reconstruction,
 and OpenAPI generation commands.
 
