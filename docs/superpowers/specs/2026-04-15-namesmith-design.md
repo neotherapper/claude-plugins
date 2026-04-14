@@ -1,7 +1,7 @@
 # Namesmith Plugin — Design Spec
 
 **Date:** 2026-04-15
-**Status:** Approved
+**Status:** Approved (v2 — post-audit)
 **Author:** Georgios Pilitsoglou
 
 ---
@@ -10,7 +10,7 @@
 
 Namesmith is a standalone Claude Code plugin that helps users find available, well-named domains for their projects. It differentiates from all existing tools through a structured brand personality interview that shapes generation strategy before a single name is produced, then generates names across 7 archetypes using 10 proven techniques, checks availability and pricing via a 3-tier API stack, and persists a shortlist to `names.md` in the project directory.
 
-**Target users:** Developers, indie hackers, and builders who need to name a project, product, or startup.
+**Target users:** Developers, indie hackers, and builders who need to name a project, product, startup, or personal brand.
 
 **Plugin name:** `namesmith`
 **Location in repo:** `plugins/namesmith/`
@@ -20,7 +20,7 @@ Namesmith is a standalone Claude Code plugin that helps users find available, we
 
 ## Problem Statement
 
-Existing domain naming tools (domain-name-brainstormer, domain-puppy, domain-finder-mcp) share a common weakness: they take a flat project description and immediately generate names. None of them conduct a brand positioning interview before generation. This means the output is generic — it does not reflect whether the user wants something cool and media-brand like Letterboxd, authoritative like Linear, or playful like Notion. Namesmith fills this gap.
+Existing domain naming tools (domain-name-brainstormer, domain-puppy, domain-finder-mcp) share a common weakness: they take a flat project description and immediately generate names. None conduct a brand positioning interview before generation. The output is generic — it does not reflect whether the user wants something cool and media-brand like Letterboxd, authoritative like Linear, or playful like Notion. Namesmith fills this gap.
 
 ---
 
@@ -35,24 +35,36 @@ User prompt (naming intent detected)
         → offer to read for context (supplements brand interview)
         │
         ▼
-[2] Brand Interview (6 questions, one at a time)
+[2] Personal Brand Detection
+    └── If description suggests personal portfolio/freelance → branch to personal branding flow
+        Otherwise → continue to standard brand interview
         │
         ▼
-[3] Wave 1 Generation (25–35 names across 7 archetypes, weighted by interview)
+[3] Brand Interview (6 questions, one at a time)
+    Load references/brand-interview.md before Q1
         │
         ▼
-[4] API Check (check-domains.sh → CF → Porkbun → whois/MCP fallback)
-    + get-prices.sh (Porkbun no-auth pricing, always runs)
+[4] Wave 1 Generation (25–35 names across 7 archetypes, weighted by interview)
+    Load references/generation-archetypes.md before generation
+    Load references/tld-catalog.md when archetype = Domain Hacks / Thematic TLD Play, or Mode=A
         │
         ▼
-[5] Output — available names with price + "Why" rationale, top 3 recommendation
-    → writes names.md in CWD
+[5] API Check (scripts/check-domains.sh → CF → Porkbun → whois+MCP fallback)
+    + scripts/get-prices.sh (Porkbun no-auth pricing, always runs)
+    Load references/api-setup.md if no API env vars are detected
         │
         ▼
-[6] Feedback loop
+[6] Output — available names with TLD summary, price, "Why" rationale, top picks
+    Load references/registrar-routing.md to attach registration links
+    → Write names.md in CWD
+        │
+        ▼
+[7] Feedback loop
     └── "Anything catching your eye, or should I run Wave 2?"
-    └── Wave 2 refines based on feedback (more like X, avoid Y)
-    └── Track B if all top picks taken
+    └── Wave 2 — refine based on feedback
+    └── Wave 3 (on request) — deep TLD scan + exhaustive technique pass
+    └── Track B — when top picks taken
+    └── Load references/post-shortlist.md after user confirms shortlist
 ```
 
 ---
@@ -65,35 +77,88 @@ namesmith/
 │   └── plugin.json
 ├── skills/
 │   └── site-naming/
-│       ├── SKILL.md
+│       ├── SKILL.md                          ← lean orchestration (~1,800 words)
 │       ├── references/
-│       │   ├── brand-interview.md
-│       │   ├── generation-archetypes.md
-│       │   ├── tld-catalog.md
-│       │   ├── api-setup.md
-│       │   └── post-shortlist.md
+│       │   ├── brand-interview.md            ← 6 questions, weighting rules, personal brand branch
+│       │   ├── generation-archetypes.md      ← 7 archetypes, 10 techniques, Track B, Wave 3
+│       │   ├── tld-catalog.md                ← cheap/trendy/thematic/domain-hack catalogs
+│       │   ├── registrar-routing.md          ← per-TLD registrar links + pricing context  ← NEW
+│       │   ├── api-setup.md                  ← env var setup, API key instructions, fallback logic
+│       │   └── post-shortlist.md             ← checklist: social handles, trademark, act fast
+│       ├── examples/
+│       │   └── example-session.md            ← complete run: interview → Wave 1 → names.md  ← NEW
 │       └── scripts/
-│           ├── check-domains.sh
-│           └── get-prices.sh
+│           ├── check-domains.sh              ← 3-tier availability check, outputs available|taken|redemption|unknown
+│           └── get-prices.sh                 ← Porkbun no-auth pricing, always runs
 └── README.md
 ```
 
-**No agents, hooks, or MCP server.** The skill calls REST APIs directly via shell scripts. This keeps the plugin dependency-free for users who only have a Cloudflare or Porkbun account, and degrades gracefully to whois for users with no API keys.
+**No agents, hooks, or MCP server.** The skill calls REST APIs directly via shell scripts. Dependency-free for users with a Cloudflare or Porkbun account, degrades gracefully to whois for users with no API keys.
 
 ---
 
-## Section 1: Skill Trigger
+## SKILL.md Design Contract
 
-**File:** `skills/site-naming/SKILL.md`
+### Word budget
 
-**Trigger description (frontmatter):**
-> Invoke when the user asks for help naming a site, product, project, or startup — or needs to find an available domain. Trigger phrases: "find me a domain", "name my project", "site name for", "what should I call", "available domains for", "I have an idea about X find me a name", "domain for [concept]", "naming [project]". Also triggers when user describes a project idea and mentions needing a web presence.
+SKILL.md body: **target 1,700 words, hard cap 2,000 words.** All detailed content belongs in references/. The body contains only orchestration logic, step sequence, and "load X when Y" pointers.
+
+### Writing style
+
+- Frontmatter description: **third-person** ("This skill should be used when the user asks...")
+- Body: **imperative/verb-first** throughout. No "you should", "users can", passive constructions.
+- Correct: "Run the brand interview.", "Generate Wave 1 candidates.", "Execute check-domains.sh."
+- Incorrect: "You should run the brand interview.", "The user can generate names."
+
+### Frontmatter (exact)
+
+```yaml
+---
+name: site-naming
+description: >
+  This skill should be used when the user asks for help naming a site, product,
+  project, startup, or personal brand — or needs to find an available domain.
+  Trigger phrases: "find me a domain", "name my project", "site name for",
+  "what should I call", "available domains for", "I have an idea about X find me a name",
+  "domain for [concept]", "naming [project]", "domain for my portfolio",
+  "find me a site name", "help me name this". Also triggers when the user describes
+  a project idea and mentions needing a web presence.
+version: 0.1.0
+---
+```
+
+### Progressive disclosure — load gates
+
+All reference files are loaded conditionally, never eagerly:
+
+| File | Load condition |
+|------|---------------|
+| `references/brand-interview.md` | Before Q1 of the brand interview |
+| `references/generation-archetypes.md` | Before Wave 1 generation begins |
+| `references/tld-catalog.md` | When archetype = Domain Hacks or Thematic TLD Play, OR when Mode=A (budget) |
+| `references/registrar-routing.md` | When formatting the Wave 1 output (to attach registration links) |
+| `references/api-setup.md` | When neither CF_API_TOKEN nor PORKBUN_API_KEY is set |
+| `references/post-shortlist.md` | After user confirms final shortlist names |
 
 ---
 
-## Section 2: Brand Interview
+## Section 1: Brand Interview
 
-Six questions, one per message. Multiple-choice where possible to reduce friction.
+**Lives in: `references/brand-interview.md`**
+
+### Personal Brand Detection (before Q1)
+
+If Q1 answer or project description contains signals of a personal brand (freelancer, portfolio, consultant, "my name", "personal site", first/last name mentioned), branch to personal branding flow:
+
+Generate these patterns first, then offer to continue to main archetype generation:
+- `{firstname}.com` / `{firstname}.dev` / `{firstname}.io`
+- `{firstnamelastname}.com` / `{firstnamelastname}.dev`
+- `{initiallastname}.dev` / `{initiallastname}.com`
+- `{firstname}.studio` / `{firstname}.design` / `{firstname}.work`
+
+### Standard Interview — 6 Questions
+
+One question per message. Multiple-choice where possible.
 
 | # | Question | Format |
 |---|----------|--------|
@@ -104,26 +169,28 @@ Six questions, one per message. Multiple-choice where possible to reduce frictio
 | Q5 | Name length: **a)** Short & punchy (≤6 chars: Figma, Driv) **b)** Expressive (7+: Letterboxd, Cloudflare) | A/B |
 | Q6 | Hard constraints? (must include word, avoid hyphens, specific TLD required, etc.) | Open or "none" |
 
-Interview answers directly weight the generation archetypes:
-- Tone=A + Direction=B → heavy Abstract/Brandable + Domain Hack weighting
-- Tone=B + Direction=A → heavy Descriptive + Compound weighting
-- Mode=A → TLD catalog skews to cheap extensions (.icu, .xyz, .top, .online)
-- Mode=C → TLD catalog skews to .com, with .io/.dev as secondaries
-- Length=A → Short & Punchy archetype weighted 2×
+### Interview → Weighting Rules
 
-**Project file detection:** Before Q1, if `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod` exists in CWD, offer:
-> "I can read your project files to better understand what you're building — want me to?"
-If accepted, extract project name, description, and keywords to pre-fill Q1 context.
+| Answer combination | Generation weighting |
+|-------------------|---------------------|
+| Tone=A + Direction=B | Abstract/Brandable 2×, Domain Hacks 1.5× |
+| Tone=B + Direction=A | Descriptive 2×, Compound/Mashup 2× |
+| Tone=C | Playful/Clever 2×, Short & Punchy 1.5× |
+| Mode=A | TLD catalog skews cheap (.icu, .xyz, .top, .online, .site) |
+| Mode=C | TLD catalog skews .com primary, .io/.dev secondary only |
+| Length=A | Short & Punchy archetype weighted 2× |
 
 ---
 
-## Section 3: Name Generation
+## Section 2: Name Generation
+
+**Lives in: `references/generation-archetypes.md`**
 
 ### Wave System
 
-- **Wave 1 (default):** 25–35 candidates across all 7 archetypes
-- **Wave 2 (after feedback):** 20+ new candidates, refined toward user preferences
-- **Wave 3 (on request):** Deep dive, unlimited
+- **Wave 1 (default):** 25–35 candidates across all 7 archetypes, weighted by interview answers
+- **Wave 2 (after feedback):** 20+ new candidates refined toward stated preferences ("more like X, avoid Y")
+- **Wave 3 (on request or after Wave 2):** 40+ candidates — relax all Q6 constraints, apply all 10 techniques exhaustively to every synonym of the core concept, run a deep TLD scan across 1,441+ IANA TLDs for top 5 base words
 
 ### 7 Generation Archetypes
 
@@ -133,11 +200,11 @@ If accepted, extract project name, description, and keywords to pre-fill Q1 cont
 | Descriptive | CodeShip, DeployFast, BuildStack | Compound, keyword-rich |
 | Abstract/Brandable | Lumora, Zentrik, Covalent | Portmanteau, metaphor mining, word reversal |
 | Playful/Clever | GitWhiz, ByteMe, NullPointerBeer | Wordplay, alliteration, internal rhyme |
-| Domain Hacks | bra.in, gath.er, cra.sh, plu.sh | ccTLD catalog (22 entries, see tld-catalog.md) |
+| Domain Hacks | bra.in, gath.er, cra.sh, plu.sh | ccTLD catalog (22 entries — load tld-catalog.md) |
 | Compound/Mashup | CloudForge, PixelNest, DataMint | Two-word merge, prefix/suffix patterns |
-| Thematic TLD Play | build.studio, launch.ai, code.run | Project-type TLD matrix (12 categories, see tld-catalog.md) |
+| Thematic TLD Play | build.studio, launch.ai, code.run | Project-type TLD matrix (12 categories — load tld-catalog.md) |
 
-### 10 Generation Techniques (encoded in generation-archetypes.md)
+### 10 Generation Techniques
 
 1. **Portmanteau** — blend two words (Cloud + Forge = CloudForge)
 2. **Truncation** — shorten a word (Technology → Tekno)
@@ -155,63 +222,70 @@ If accepted, extract project name, description, and keywords to pre-fill Q1 cont
 When top picks are taken, run 4 strategies in order:
 1. **Close variations** — prefix/suffix modifiers (`get{base}`, `{base}hq`, `{base}labs`) on .com + .io
 2. **Synonym exploration** — replace key words with synonyms, 5–8 candidates
-3. **Creative reconstruction** — step back entirely, generate concept-based names from scratch
-4. **Domain hacks** — use ccTLD to complete the word (see catalog)
+3. **Creative reconstruction** — generate concept-based names from scratch
+4. **Domain hacks** — use ccTLD to complete the word (load tld-catalog.md)
 
 ---
 
-## Section 4: API Check Stack
+## Section 3: API Check Stack
+
+**Scripts live in: `skills/site-naming/scripts/`**
 
 ### check-domains.sh
 
-Accepts a list of domains as arguments. Batches up to 20 per call (Cloudflare limit).
+**Header comment required:**
+```bash
+#!/usr/bin/env bash
+# Usage: check-domains.sh <domain1> <domain2> ... <domainN>
+# Output: one line per domain — available|taken|redemption|unknown <domain> <price_usd_or_na>
+# Env vars: CF_API_TOKEN + CF_ACCOUNT_ID (tier 1), PORKBUN_API_KEY + PORKBUN_SECRET (tier 2)
+# Exit codes: 0=success, 1=all unknown (API error), 2=no domains provided
+```
+
+**Priority order (batches up to 20 per Cloudflare call):**
 
 ```
-Priority order:
-1. CF_API_TOKEN + CF_ACCOUNT_ID set
-   → POST /accounts/{id}/registrar/domain-check
-   → Returns: availability + Cloudflare at-cost price per domain
+Tier 1: CF_API_TOKEN + CF_ACCOUNT_ID set
+  → POST /accounts/{id}/registrar/domain-check
+  → Returns: availability + Cloudflare at-cost price
 
-2. PORKBUN_API_KEY + PORKBUN_SECRET set
-   → POST https://api.porkbun.com/api/json/v3/domain/checkDomain/{domain}
-   → Returns: availability (avail: yes/no) + price per year
+Tier 2: PORKBUN_API_KEY + PORKBUN_SECRET set
+  → POST https://api.porkbun.com/api/json/v3/domain/checkDomain/{domain}
+  → Returns: avail:yes/no + price per year
 
-3. Neither set
-   → whois {domain} (grep "No match|NOT FOUND|Status: free")
-   → If whois returns "unknown" AND mcp__domain_availability__check_domain is available, retry via MCP
-   → Availability only, no price from either
-
-Output format (one line per domain):
-  available|taken|unknown <domain> <price_usd_or_na>
+Tier 3: Neither set
+  → whois {domain} (grep "No match|NOT FOUND|Status: free")
+  → If whois returns unknown AND mcp__domain_availability__check_domain is available → retry via MCP
+  → DNS + WHOIS cross-reference:
+      DNS resolves + WHOIS no record → "redemption" (recently expired, elevated price)
+      DNS no record + WHOIS active → "taken" (registered, not yet live)
+      Both clean → "available"
+  → Availability only (no price from whois/MCP)
 ```
+
+**Output status values:** `available` · `taken` · `redemption` · `unknown`
 
 ### get-prices.sh
 
-Accepts TLD list as arguments. Always runs — requires no auth.
+**Header comment required:**
+```bash
+#!/usr/bin/env bash
+# Usage: get-prices.sh <tld1> <tld2> ... <tldN>
+# Output: one line per TLD — <tld> <registration_price_usd> <renewal_price_usd>
+# Auth: none required
+# Exit codes: 0=success, 1=network error
+```
 
 ```
 POST https://api.porkbun.com/api/json/v3/pricing/get
 → Returns registration/renewal/transfer prices per TLD in USD
-→ Output: one line per TLD — <tld> <registration_price> <renewal_price>
-```
-
-### Environment Variable Setup (documented in api-setup.md)
-
-```bash
-# Cloudflare (preferred — at-cost pricing, no markup)
-export CF_API_TOKEN="your_token"
-export CF_ACCOUNT_ID="your_account_id"   # from dash.cloudflare.com URL
-
-# Porkbun (alternative — competitive pricing)
-export PORKBUN_API_KEY="your_key"
-export PORKBUN_SECRET="your_secret"
-
-# Neither set → whois fallback (availability only, Porkbun reference prices always shown)
+→ Always runs regardless of which tier handles availability checking
+→ Provides price reference even when tier 3 (whois) is used
 ```
 
 ---
 
-## Section 5: Output Format
+## Section 4: Output Format
 
 ### In-conversation output
 
@@ -220,11 +294,13 @@ export PORKBUN_SECRET="your_secret"
 
 **Top Picks**
 ✅ namesmith.dev   $12/yr  — Functional + dev-audience TLD, says what you do, memorable
+   [Register at Cloudflare →] or [Porkbun →]
 ✅ nameforge.io    $35/yr  — Strong compound, .io signals tech startup credibility
 
 **Short & Punchy**
 ✅ navo.co          $25/yr  — Two syllables, clean, no meaning baggage
-❌ navo.com         taken   → check aftermarket or try navo.io
+❌ navo.com         taken   → check aftermarket
+⚠️ navo.net         redemption  → recently expired, may cost $80+ to recover
 
 **Abstract/Brandable**
 ✅ lumora.app       $14/yr  — Invented word, soft sound, modern feel
@@ -233,9 +309,11 @@ export PORKBUN_SECRET="your_secret"
 ✅ na.me             $8/yr  — Minimal, clever, instantly memorable
 
 ---
-12 of 34 checked available.
-Anything catching your eye, or should I run Wave 2?
+TLD summary: .com taken | .io 2 available | .dev 3 available | ccTLD hacks 4 available
+12 of 34 checked available. Anything catching your eye, or should I run Wave 2?
 ```
+
+**Registration links** (from registrar-routing.md): append a `[Register →]` link for each available domain pointing to the correct registrar URL for that TLD.
 
 ### names.md (written to CWD)
 
@@ -244,35 +322,87 @@ Anything catching your eye, or should I run Wave 2?
 _Generated: YYYY-MM-DD | Mode: balanced | Tone: cool/media-brand | Direction: abstract_
 
 ## Shortlisted
-| Name | Price/yr | Checked | Notes |
-|------|----------|---------|-------|
-| namesmith.dev | $12 | ✅ available | Top pick |
+| Name | Price/yr | Status | Rationale |
+|------|----------|--------|-----------|
+| namesmith.dev | $12 | ✅ available | Functional + dev-audience TLD, says what you do |
 
 ## Considered / Taken
 | Name | Status | Alternative |
 |------|--------|-------------|
 | navo.com | ❌ taken | navo.io available |
+| navo.net | ⚠️ redemption | recently expired — elevated price |
 
 ## Brand Interview
 - Building: ...
-- Tone: cool/media-brand
-- Direction: abstract/invented
-- Mode: balanced
-- Length: short & punchy
+- Tone: cool/media-brand (A)
+- Direction: abstract/invented (B)
+- Mode: balanced (B)
+- Length: short & punchy (A)
 - Constraints: none
 ```
 
+Note: `Rationale` column receives the archetype "Why" string from the in-conversation output verbatim.
+
 ---
 
-## Section 6: Reference Files
+## Section 5: Reference Files Specification
 
-| File | Contents |
-|------|----------|
-| `brand-interview.md` | 6 questions with answer→weighting mapping, guidance on how answers shape generation |
-| `generation-archetypes.md` | 7 archetypes with descriptions, 10 techniques with examples, weighting rules per interview answer |
-| `tld-catalog.md` | Cheap TLDs (≤$5/yr), trendy TLDs, 12 thematic categories by project type, full domain hack catalog (22 ccTLDs) |
-| `api-setup.md` | Env var setup for Cloudflare and Porkbun, how to get API keys, fallback behavior explanation |
-| `post-shortlist.md` | Checklist after shortlisting: say it out loud, check social handles, verify trademark, register .com + secondary TLD, act fast |
+### brand-interview.md
+- 6 questions with full wording and answer options
+- Interview → archetype weighting mapping table
+- Personal branding branch: detection signals + generation patterns
+
+### generation-archetypes.md
+- 7 archetypes with descriptions, examples, and primary techniques per archetype
+- 10 technique definitions with worked examples
+- Weighting rules keyed to interview answer combinations
+- Wave system: Wave 1/2/3 candidate counts and refinement rules
+- Track B: 4 fallback strategies with instructions
+
+### tld-catalog.md
+- Cheap TLDs (≤$5/yr): .icu, .xyz, .top, .online, .site, .fun, .space
+- Trendy (not cheap) TLDs: .io (~$35), .ai (~$60), .gg (~$25), .dev (~$12)
+- 12 thematic categories by project type: dev tools, creative, AI, gaming, business, community, commerce, education, health, music, finance, food
+- Full domain hack catalog (22 ccTLDs): word fragment + TLD = complete word
+
+### registrar-routing.md ← NEW
+- Per-TLD-category registrar recommendation table
+- URL patterns for direct registration links:
+  - Cloudflare: `https://dash.cloudflare.com/{account_id}/domains/registrations/purchase?domain={domain}`
+  - Porkbun: `https://porkbun.com/checkout/search?q={domain}`
+  - Namecheap (fallback for TLDs CF/Porkbun don't support): `https://www.namecheap.com/domains/registration/results/?domain={domain}`
+- Redemption domain guidance (Sedo aftermarket link pattern)
+- Notes: which registrars carry which ccTLDs (Dynadot for .gg/.st/.pt, Porkbun for most)
+
+### api-setup.md
+- Environment variable setup instructions (Cloudflare + Porkbun)
+- How to get Cloudflare API token and account ID
+- How to get Porkbun API key + secret
+- Fallback chain explanation (what works with zero config)
+- `chmod +x scripts/check-domains.sh scripts/get-prices.sh` instruction
+- DNS + WHOIS cross-reference explanation (redemption status)
+
+### post-shortlist.md
+- Checklist: say it out loud, check social handles (@name on X/GitHub/npm/Instagram)
+- Trademark check: USPTO TESS, TMView (EU)
+- Register both .com and one secondary TLD if budget allows
+- Act fast: good domains get taken quickly
+- Variations worth registering (typosquatting protection)
+
+---
+
+## Section 6: Examples
+
+### examples/example-session.md
+
+A complete worked example covering:
+1. User prompt: "I have an idea for a developer productivity SaaS that helps teams track code review bottlenecks — find me a site name"
+2. Project file detection offer
+3. All 6 interview Q&As with sample answers
+4. Wave 1 output block (full, with TLD summary and registration links)
+5. User feedback ("I like nameforge, more like that")
+6. Wave 2 refinement output
+7. Resulting `names.md` content
 
 ---
 
@@ -297,11 +427,34 @@ _Generated: YYYY-MM-DD | Mode: balanced | Tone: cool/media-brand | Direction: ab
 
 ---
 
+## Audit Gap Resolutions
+
+All 14 gaps from the post-approval audit are addressed:
+
+| # | Gap | Resolution |
+|---|-----|------------|
+| 1 | SKILL.md word budget | SKILL.md design contract added: target 1,700 words, hard cap 2,000 |
+| 2 | No progressive disclosure gating | Load gates table added to SKILL.md design contract |
+| 3 | Second-person style in spec | Writing style contract added; body imperative-only |
+| 4 | Trigger description wrong person | Frontmatter rewritten in third-person |
+| 5 | post-shortlist.md + api-setup.md orphaned | Both now have explicit load conditions |
+| 6 | No examples/ directory | examples/example-session.md added to inventory |
+| 7 | Scripts not documented as executable | Header comment block spec added to Section 3 |
+| 8 | Registrar routing table missing | registrar-routing.md added as 6th reference file |
+| 9 | Personal branding flow missing | Personal brand detection + generation branch added to Section 1 |
+| 10 | Deep TLD scan not surfaced | Wave 3 now includes 1,441+ IANA TLD deep scan |
+| 11 | TLD category summary missing | TLD summary footer added to output format |
+| 12 | DNS+WHOIS dual verification unspecified | Cross-reference logic + redemption status added to Section 3 |
+| 13 | Wave 3 undefined | Wave 3 fully defined in Section 2 |
+| 14 | "Why" rationale not wired to names.md | Notes column renamed to Rationale, wired explicitly |
+
+---
+
 ## What This Is Not
 
-- Not a domain registrar — it helps you find and shortlist names, not purchase them
-- Not a trademark checker — post-shortlist checklist reminds users to verify
-- Not a brand identity tool — name generation only, no logo/color suggestions
+- Not a domain registrar — helps find and shortlist names, not purchase them
+- Not a trademark checker — post-shortlist.md reminds users to verify
+- Not a brand identity tool — naming only, no logo/color suggestions
 - Not an MCP server — uses direct REST API calls via shell scripts
 
 ---
@@ -317,9 +470,9 @@ _Generated: YYYY-MM-DD | Mode: balanced | Tone: cool/media-brand | Direction: ab
 
 ---
 
-## Open Questions / Future Work
+## Future Work (v0.2+)
 
-- v0.2: Social handle availability check (Twitter/X, GitHub, npm)
 - v0.2: Aftermarket price check (Sedo) for taken desirable domains
-- v0.3: Trademark conflict detection via USPTO/TMView API
+- v0.2: Social handle availability check (X, GitHub, npm, PyPI, Homebrew)
+- v0.3: Trademark conflict detection via USPTO TESS / TMView API
 - v0.3: Multi-session registry — global `~/.namesmith/registry.md` for serial builders
