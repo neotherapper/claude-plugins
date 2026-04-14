@@ -176,10 +176,12 @@ Summary of sub-phases:
 
 If neither Chrome DevTools MCP nor cmux is available: log `[PHASE-11-SKIPPED]`, proceed to Phase 12.
 
-After Phase 11 completes, set `OPENAPI_STATUS`:
-- Phase 11 ran + spec generated: `specs/{site-slug}.openapi.yaml`
-- Phase 11 ran + har-to-openapi missing: `Phase 11 ran; HAR at .beacon/capture.har`
-- Phase 11 skipped: `""` (empty — INDEX.md omits the OpenAPI row)
+After Phase 11 completes, set `OPENAPI_STATUS` to the full Markdown table row for INDEX.md:
+- Phase 11 ran + spec generated:
+  `| [specs/{site-slug}.openapi.yaml](specs/{site-slug}.openapi.yaml) | OpenAPI spec (observed traffic) |`
+- Phase 11 ran + har-to-openapi missing:
+  `| .beacon/capture.har | Raw HAR (har-to-openapi unavailable) |`
+- Phase 11 skipped: `""` (empty string — row omitted from INDEX.md)
 
 ## Graceful degradation signals
 
@@ -198,6 +200,7 @@ Log these in the session brief and repeat in the generated INDEX.md:
 | `[CHROME-MODE:new-instance]` | Chrome MCP launched fresh headless instance — no sessions |
 | `[PHASE-11-AUTH:manual]` | User logged in manually; auth state saved to `.beacon/auth-state.json` |
 | `[PHASE-11-UNAUTH]` | Phase 11 ran without authentication |
+| `[OPENAPI-SKIPPED:har-to-openapi-unavailable]` | har-to-openapi not found; HAR preserved at `.beacon/capture.har` |
 
 ## Reference files
 

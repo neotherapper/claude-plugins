@@ -46,7 +46,7 @@ which gau && echo "gau available"
 | 3 Fingerprint | Wappalyzer MCP | Header + HTML grep | Generic signals only |
 | 2/6 URL discovery | Firecrawl map | curl /sitemap.xml | Sitemap only |
 | 9 OSINT — URL history | GAU | Wayback + CommonCrawl CDX | CDX APIs always work |
-| 11 Active browse | cmux browser | Chrome DevTools MCP | [PHASE-11-SKIPPED] |
+| 11 Active browse | Chrome DevTools MCP | cmux browser | [PHASE-11-SKIPPED] |
 | Script download | GitHub raw URL | Local .beacon/ cache | [GENERATED-INLINE:path] |
 
 ---
@@ -181,7 +181,7 @@ See `references/phase-11-browser.md` Phase 11c for full instructions.
 Scripts live on GitHub and are downloaded on first use to `.beacon/scripts/`.
 
 ```bash
-VERSION="0.1.0"
+VERSION="0.2.0"
 SCRIPT="core/probe-passive.sh"
 LOCAL=".beacon/scripts/${SCRIPT}"
 REMOTE="https://raw.githubusercontent.com/neotherapper/claude-plugins/v${VERSION}/plugins/beacon/scripts/${SCRIPT}"
