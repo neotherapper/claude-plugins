@@ -1,12 +1,12 @@
 ---
 framework: GraphQL
 version: generic
-last_updated: 2026-04-14
-author: beacon
-status: active
+last_updated: "2026-04-14"
+author: "@neotherapper"
+status: official
 ---
 
-# GraphQL — Beacon Tech Pack
+# GraphQL (generic) — Tech Pack
 
 ## 1. Fingerprinting Signals
 

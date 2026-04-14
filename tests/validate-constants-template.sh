@@ -94,11 +94,46 @@ else
   check "Has '## Misc Constants' section" "fail"
 fi
 
-# Check 11: Has at least one _ROWS}} token
-if [ -f "$FILE" ] && grep -q "_ROWS}}" "$FILE"; then
-  check "Has at least one _ROWS}} token" "ok"
+# Check 11: Has {{NONCES_ROWS}} token
+if [ -f "$FILE" ] && grep -q "{{NONCES_ROWS}}" "$FILE"; then
+  check "Has {{NONCES_ROWS}} token" "ok"
 else
-  check "Has at least one _ROWS}} token" "fail"
+  check "Has {{NONCES_ROWS}} token" "fail"
+fi
+
+# Check 12: Has {{TAXONOMY_ROWS}} token
+if [ -f "$FILE" ] && grep -q "{{TAXONOMY_ROWS}}" "$FILE"; then
+  check "Has {{TAXONOMY_ROWS}} token" "ok"
+else
+  check "Has {{TAXONOMY_ROWS}} token" "fail"
+fi
+
+# Check 13: Has {{ENUM_ROWS}} token
+if [ -f "$FILE" ] && grep -q "{{ENUM_ROWS}}" "$FILE"; then
+  check "Has {{ENUM_ROWS}} token" "ok"
+else
+  check "Has {{ENUM_ROWS}} token" "fail"
+fi
+
+# Check 14: Has {{FEATURE_FLAGS_ROWS}} token
+if [ -f "$FILE" ] && grep -q "{{FEATURE_FLAGS_ROWS}}" "$FILE"; then
+  check "Has {{FEATURE_FLAGS_ROWS}} token" "ok"
+else
+  check "Has {{FEATURE_FLAGS_ROWS}} token" "fail"
+fi
+
+# Check 15: Has {{LOCALE_ROWS}} token
+if [ -f "$FILE" ] && grep -q "{{LOCALE_ROWS}}" "$FILE"; then
+  check "Has {{LOCALE_ROWS}} token" "ok"
+else
+  check "Has {{LOCALE_ROWS}} token" "fail"
+fi
+
+# Check 16: Has {{MISC_ROWS}} token
+if [ -f "$FILE" ] && grep -q "{{MISC_ROWS}}" "$FILE"; then
+  check "Has {{MISC_ROWS}} token" "ok"
+else
+  check "Has {{MISC_ROWS}} token" "fail"
 fi
 
 echo "========================================"

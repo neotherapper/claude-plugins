@@ -94,6 +94,13 @@ else
   check "Has --max-time flag in curl call" "fail"
 fi
 
+# Check 11: Has {{PLUGIN_VERSION}} token
+if [ -f "$FILE" ] && grep -q "{{PLUGIN_VERSION}}" "$FILE"; then
+  check "Has {{PLUGIN_VERSION}} token" "ok"
+else
+  check "Has {{PLUGIN_VERSION}} token" "fail"
+fi
+
 echo "========================================"
 echo "Results: $PASS passed, $FAIL failed"
 

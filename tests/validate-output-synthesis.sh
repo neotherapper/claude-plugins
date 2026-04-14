@@ -94,6 +94,13 @@ else
   check "[PHASE-11-SKIPPED] resolution documented" "fail"
 fi
 
+# Check 11: INDEX.md.template reference present
+if [ -f "$FILE" ] && grep -q "INDEX.md.template" "$FILE"; then
+  check "INDEX.md.template reference present" "ok"
+else
+  check "INDEX.md.template reference present" "fail"
+fi
+
 echo "========================================"
 echo "Results: $PASS passed, $FAIL failed"
 
