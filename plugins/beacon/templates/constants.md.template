@@ -1,0 +1,42 @@
+# {{SITE_NAME}} — Constants
+
+**Source:** Beacon recon {{DATE}}
+**Plugin version:** {{PLUGIN_VERSION}}
+
+## Nonces & CSRF Tokens
+
+> Session-specific values. Re-capture before use.
+
+| Key | Value | Source |
+|-----|-------|--------|
+{{NONCES_ROWS}}
+
+## Taxonomy IDs
+
+| Key | Value | Source |
+|-----|-------|--------|
+{{TAXONOMY_ROWS}}
+
+## Enum Values
+
+| Key | Value | Source |
+|-----|-------|--------|
+{{ENUM_ROWS}}
+
+## Feature Flags
+
+| Key | Value | Source |
+|-----|-------|--------|
+{{FEATURE_FLAGS_ROWS}}
+
+## Locale & i18n
+
+| Key | Value | Source |
+|-----|-------|--------|
+{{LOCALE_ROWS}}
+
+## Misc Constants
+
+| Key | Value | Source |
+|-----|-------|--------|
+{{MISC_ROWS}}
