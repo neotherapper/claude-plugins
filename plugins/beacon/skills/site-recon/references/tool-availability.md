@@ -126,11 +126,11 @@ mcp__chrome-devtools__press_key("Enter")
 
 ### Phase 11 execution pattern (Chrome DevTools MCP)
 
-For full auth setup and per-URL execution loop, see `references/phase-11-browser.md`.
+For full auth setup and per-URL execution loop, see `references/browser-recon.md`.
 
 ```
 1. Detect mode: list_pages → real URLs? auto-connect : new-instance
-2. Auth setup if new-instance (see phase-11-browser.md Phase 11a)
+2. Auth setup if new-instance (see browser-recon.md Phase 11a)
 3. new_page → page_id
 4. For each URL in browse plan:
    a. select_page(page_id)
@@ -144,7 +144,7 @@ For full auth setup and per-URL execution loop, see `references/phase-11-browser
    i. take_snapshot for documentation
 5. Write collected requests to .beacon/chrome-requests.json
 6. Run har-reconstruct.py → .beacon/capture.har
-7. Run npx har-to-openapi (see phase-11-browser.md Phase 11d)
+7. Run npx har-to-openapi (see browser-recon.md Phase 11d)
 ```
 
 ---
@@ -172,7 +172,7 @@ python3 scripts/core/har-reconstruct.py \
   --domain {target-domain}
 ```
 
-See `references/phase-11-browser.md` Phase 11c for full instructions.
+See `references/browser-recon.md` Phase 11c for full instructions.
 
 ---
 

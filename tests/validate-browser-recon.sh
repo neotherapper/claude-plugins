@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# validate-phase-11-browser.sh — validates phase-11-browser.md has all 15 required content checks
-# Usage: ./tests/validate-phase-11-browser.sh
+# validate-browser-recon.sh — validates browser-recon.md has all 15 required content checks
+# Usage: ./tests/validate-browser-recon.sh
 # Exit code: 0 = all checks passed, 1 = one or more checks failed
 
 set -euo pipefail
