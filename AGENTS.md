@@ -56,7 +56,7 @@ Never write site-specific data into the plugin directories.
 
 ## Plugin Development
 
-This repo is also a plugin-building workspace. The following plugins are active for this purpose (see `.claude/settings.json`):
+This repo is also a plugin-building workspace. The following plugins are active here — project-level plugins are configured in `.claude/settings.json`; the last two are globally active:
 
 - **`plugin-dev@claude-plugins-official`** — scaffolding, skill/command development, validation agents
 - **`agent-skills@addy-agent-skills`** — spec, planning, browser testing, API design, incremental implementation
@@ -80,7 +80,7 @@ When the user's request matches any of these patterns, use the corresponding too
 | "test this in the browser" / "check browser output" | `agent-skills:browser-testing-with-devtools` skill + chrome-devtools MCP |
 | "design the API / interface for this plugin" | `agent-skills:api-and-interface-design` skill |
 | "implement this incrementally" | `agent-skills:incremental-implementation` skill |
-| "create a skill" / "write a new skill" | `skill-creator@claude-plugins-official` skill |
+| "create a skill" / "write a new skill" | `skill-creator:skill-creator` skill |
 
 ### Execution Rules (Plugin Development)
 
