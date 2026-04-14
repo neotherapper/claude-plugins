@@ -1,7 +1,7 @@
 ---
 name: site-recon
 description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 12-phase systematic investigation of a website and produces a complete persistent docs/research/{site-name}/ folder.
-version: 0.2.0
+version: 0.4.0
 ---
 
 # site-recon — Research Mode
@@ -201,6 +201,17 @@ Log these in the session brief and repeat in the generated INDEX.md:
 | `[PHASE-11-AUTH:manual]` | User logged in manually; auth state saved to `.beacon/auth-state.json` |
 | `[PHASE-11-UNAUTH]` | Phase 11 ran without authentication |
 | `[OPENAPI-SKIPPED:har-to-openapi-unavailable]` | har-to-openapi not found; HAR preserved at `.beacon/capture.har` |
+
+## Phase 12 — Output synthesis
+
+**Load `references/output-synthesis.md` before executing this phase** — it contains
+the full instructions for reading the session brief and writing all output files.
+
+Summary:
+- Read the completed session brief once
+- Write `tech-stack.md`, `site-map.md`, `constants.md`, `scripts/test-{slug}.sh`
+- Resolve all tokens in `templates/INDEX.md.template` → write `INDEX.md`
+- Resolve `{{OPENAPI_STATUS}}` based on Phase 11 signals in the session brief
 
 ## Reference files
 
