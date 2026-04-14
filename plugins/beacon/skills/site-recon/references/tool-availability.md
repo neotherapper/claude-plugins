@@ -163,37 +163,16 @@ har-to-openapi .beacon/capture.har \
   > docs/research/example-com/specs/example-com.openapi.yaml
 ```
 
-If Chrome DevTools MCP captured requests (not a real HAR file), reconstruct minimal HAR:
-```python
-import json
+If Chrome DevTools MCP captured requests, reconstruct a valid HAR 1.2 using `har-reconstruct.py`:
 
-requests = [...]  # from mcp__chrome-devtools__list_network_requests
-
-har = {
-    "log": {
-        "version": "1.2",
-        "creator": {"name": "beacon-plugin", "version": "0.1.0"},
-        "entries": [
-            {
-                "request": {
-                    "method": r["method"],
-                    "url": r["url"],
-                    "headers": [{"name": k, "value": v} for k, v in (r.get("request_headers") or {}).items()],
-                },
-                "response": {
-                    "status": r.get("status", 0),
-                    "headers": [{"name": k, "value": v} for k, v in (r.get("response_headers") or {}).items()],
-                    "content": {"text": r.get("response_body", "")}
-                }
-            }
-            for r in requests
-        ]
-    }
-}
-
-with open(".beacon/capture.har", "w") as f:
-    json.dump(har, f)
+```bash
+python3 scripts/core/har-reconstruct.py \
+  --input .beacon/chrome-requests.json \
+  --output .beacon/capture.har \
+  --domain {target-domain}
 ```
+
+See `references/phase-11-browser.md` Phase 11c for full instructions.
 
 ---
 

@@ -175,7 +175,7 @@ def should_keep(url, domain):
 
     # Domain filter
     if domain:
-        if domain not in url:
+        if not (host == domain or host.endswith("." + domain)):
             return False
 
     # Analytics blocklist: check if host matches or ends with a blocklist entry
