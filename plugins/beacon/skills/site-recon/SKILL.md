@@ -82,7 +82,7 @@ See `references/session-brief-format.md` for the complete schema.
 ## Phase 1 — Scaffold and tool check
 
 ```bash
-SLUG=$(echo "{url}" | sed 's|https\?://||;s|/.*||;s|\.|-|g')
+SLUG=$(echo "{url}" | sed -E 's|https?://||;s|/.*||;s|\.|-|g')
 mkdir -p docs/research/${SLUG}/{api-surfaces,specs,scripts}
 touch docs/research/${SLUG}/{INDEX,tech-stack,site-map,constants}.md
 ```

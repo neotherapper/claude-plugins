@@ -50,6 +50,14 @@ else
   check "Single-dash slug pattern present (s|.|-|g present)" "fail"
 fi
 
+# Check 3b: Slug sed command actually produces correct output for a full URL (portability check)
+ACTUAL_SLUG=$(echo "https://example.com/path" | sed -E 's|https?://||;s|/.*||;s|\.|-|g')
+if [ "$ACTUAL_SLUG" = "example-com" ]; then
+  check "Slug sed command produces 'example-com' from 'https://example.com/path'" "ok"
+else
+  check "Slug sed command produces 'example-com' from 'https://example.com/path' (got: $ACTUAL_SLUG)" "fail"
+fi
+
 # --- Per-tech-pack signal checks (4-9) ---
 
 # Check 4: Astro signals present
