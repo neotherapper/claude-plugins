@@ -1,7 +1,7 @@
 ---
 name: site-recon
 description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 12-phase systematic investigation of a website and produces a complete persistent docs/research/{site-name}/ folder.
-version: 0.4.0
+version: 0.5.0
 ---
 
 # site-recon — Research Mode
@@ -82,7 +82,7 @@ See `references/session-brief-format.md` for the complete schema.
 ## Phase 1 — Scaffold and tool check
 
 ```bash
-SLUG=$(echo "{url}" | sed 's|https\?://||;s|/.*||;s|\.|--|g')
+SLUG=$(echo "{url}" | sed 's|https\?://||;s|/.*||;s|\.|-|g')
 mkdir -p docs/research/${SLUG}/{api-surfaces,specs,scripts}
 touch docs/research/${SLUG}/{INDEX,tech-stack,site-map,constants}.md
 ```
@@ -93,17 +93,60 @@ See `references/tool-availability.md` for exact detection commands.
 ## Phase 3 — Fingerprinting (first match wins)
 
 1. **Wappalyzer MCP** (if available): `lookup_site(url)` → framework + version
-2. **HTTP headers**: `curl -sI {url}` → grep `X-Powered-By`, `Ghost-Version`, `x-nuxt`, `X-Inertia`
-3. **HTML signals**: `curl -s {url}` → grep `wp-content/`, `/_next/`, `/_nuxt/`, `laravel_session`
-4. **JS globals**: grep inline scripts for `__NEXT_DATA__`, `window.__nuxt`
-5. **No match**: log `[FRAMEWORK-UNKNOWN]`, continue with generic probes
+
+2. **HTTP headers**: `curl -sI {url}` → grep for:
+   - `Ghost-Version` → Ghost
+   - `x-nuxt` → Nuxt
+   - `X-Inertia` → Laravel/Inertia
+   - `x-shopify-stage: production` → Shopify (Definitive)
+   - `X-Powered-By: Strapi` or `X-Strapi-Version` → Strapi (Definitive)
+   - `server: uvicorn` → FastAPI (combined signal)
+   - `X-Runtime` → Rails (combined signal)
+
+3. **HTML signals**: `curl -s {url}` → grep for:
+   - `wp-content/` → WordPress
+   - `/_next/` → Next.js
+   - `/_nuxt/` → Nuxt
+   - `laravel_session` → Laravel
+   - `/_astro/` or `astro-island` → Astro
+   - `content="Astro v` → Astro + version (Definitive)
+   - `csrfmiddlewaretoken` → Django (Definitive)
+   - `<meta name="csrf-token"` → Rails (Definitive)
+   - `cdn.shopify.com` or `window.Shopify` → Shopify (Definitive)
+
+4. **JS globals / cookies**: inspect inline scripts and `Set-Cookie` headers:
+   - `__NEXT_DATA__` → Next.js
+   - `window.__nuxt` → Nuxt
+   - `_shopify_y` or `_shopify_s` cookies → Shopify
+   - `_[a-z0-9_]+_session` cookie pattern → Rails
+
+5. **Endpoint probes** (for API-only and CMS sites):
+   ```bash
+   # Strapi — check /admin/init for hasAdmin field (Definitive)
+   curl -s {url}/admin/init | python3 -c "import sys,json; d=json.load(sys.stdin); print('strapi' if 'hasAdmin' in d.get('data',{}) else '')"
+   # FastAPI — Swagger UI at /docs (High; may be disabled)
+   curl -s {url}/docs | grep -i 'swagger-ui'
+   # FastAPI — OpenAPI JSON (High; may be disabled)
+   curl -s {url}/openapi.json | python3 -c "import sys,json; d=json.load(sys.stdin); print('fastapi' if 'openapi' in d else '')" 2>/dev/null
+   # Django admin (Definitive)
+   curl -s {url}/admin/ | grep -i 'django site administration'
+   # Django REST Framework browsable API (Definitive)
+   curl -s {url}/api/?format=api | grep -i 'django rest framework'
+   ```
+
+6. **No match**: log `[FRAMEWORK-UNKNOWN]`, continue with generic probes
 
 Log the result: `Framework: WordPress 6.5 (source: wp-content/ in HTML + generator meta, confidence: high)`
 
-Version extraction after identification:
+**Version extraction after identification:**
 - WordPress: `grep -oP 'content="WordPress \K[\d.]+'` from generator meta
 - Next.js: `grep -oP '"next":"\K[^"]+'` from `__NEXT_DATA__` inline JSON
 - Ghost: read `Ghost-Version` header directly
+- Astro: `grep -o 'content="Astro v[^"]*"'` from HTML — version in meta tag
+- Strapi v5+: `X-Strapi-Version` header
+- Rails: `grep -oP '@hotwired/turbo@\K[^"]*'` from importmap block
+- Shopify: `window.Shopify.theme.name` via JS eval in Phase 11
+- Django / FastAPI: version not exposed in production headers
 
 ## Phase 4 — Tech pack lookup
 

@@ -106,7 +106,7 @@ for dir in "$TECH_DIR"/*/; do
   fi
   search="$framework"
   case "$framework" in
-    nextjs) search="Next\.js\|__NEXT_DATA__" ;;
+    nextjs) search="Next\.js|__NEXT_DATA__" ;;
   esac
   if [ -f "$SKILL_FILE" ] && grep -qiE "$search" "$SKILL_FILE"; then
     check "Phase 3 has detection signal for '$framework'" "ok"
