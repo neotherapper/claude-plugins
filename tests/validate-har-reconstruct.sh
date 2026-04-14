@@ -48,7 +48,7 @@ fi
 
 # Check 4: --output flag present in --help output
 if [ -f "$SCRIPT" ] && python3 "$SCRIPT" --help 2>/dev/null | grep -q "\-\-output"; then
-  check "--output flag present in --help output" "fail"
+  check "--output flag present in --help output" "ok"
 else
   check "--output flag present in --help output" "fail"
 fi
@@ -116,26 +116,6 @@ EOF
 
   # Check 11: Entry has all required HAR 1.2 fields
   if [ -f "$FIXTURE_OUTPUT" ]; then
-    REQUIRED_FIELDS=$(python3 << 'PYEOF'
-import json
-try:
-    har = json.load(open('FIXTURE_OUTPUT'))
-    entries = har.get('log', {}).get('entries', [])
-    if not entries:
-        print("no_entries")
-    else:
-        entry = entries[0]
-        required = ['startedDateTime', 'time', 'cache', 'timings', 'request', 'response']
-        missing = [f for f in required if f not in entry]
-        if missing:
-            print("missing:" + ",".join(missing))
-        else:
-            print("ok")
-except Exception as e:
-    print("error:" + str(e))
-PYEOF
-    )
-    # Replace placeholder
     REQUIRED_FIELDS=$(python3 -c "
 import json
 try:
