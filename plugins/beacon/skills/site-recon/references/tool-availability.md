@@ -73,6 +73,10 @@ cmux browser screenshot --out docs/research/example-com/browse-snapshots/api-doc
 cmux browser evaluate "JSON.stringify(window.__NEXT_DATA__?.props, null, 2)"
 cmux browser evaluate "Object.keys(window).filter(k => k.startsWith('__'))"
 
+# Network request capture
+cmux browser surface:N network requests        ← list all captured requests since page load
+cmux browser surface:N network route "*/api/*" --body '{"mock":true}'  ← intercept/mock
+
 # Interact
 cmux browser click "button[data-id=login]"
 cmux browser fill "input[name=email]" "test@example.com"
@@ -86,26 +90,33 @@ Full reference: `docs/guides/cmux-browser.md` (in nikai project)
 
 Use when `mcp__chrome-devtools__new_page` is in the tool list.
 
+**Corrected v0.21.0 signatures:**
+- `navigate_page(url, type="url", timeout=10000)` — no `page_id` parameter; call `select_page(page_id)` first
+- `wait_for` checks text presence only — use `evaluate_script(() => document.readyState)` polling instead of networkidle
+- `list_network_requests({resourceTypes: ["xhr","fetch"]})` — no `url_filter` param; filter URLs client-side
+
 ```
 # Open page
-mcp__chrome-devtools__new_page → returns page_id
+mcp__chrome-devtools__new_page → returns {page_id: "..."}
+mcp__chrome-devtools__select_page(page_id)
 
-# Navigate
-mcp__chrome-devtools__navigate_page(url, page_id)
-mcp__chrome-devtools__wait_for("networkidle", 5000)
+# Navigate + wait for load
+mcp__chrome-devtools__navigate_page(url, type="url", timeout=10000)
+# Poll until complete (retry 3× with 2s delay):
+mcp__chrome-devtools__evaluate_script(() => document.readyState)
 
 # Capture page content
 mcp__chrome-devtools__take_snapshot          → DOM/a11y tree (best for AI)
 mcp__chrome-devtools__take_screenshot        → visual PNG
 
 # JavaScript evaluation
-mcp__chrome-devtools__evaluate_script("window.__NEXT_DATA__")
-mcp__chrome-devtools__evaluate_script("performance.getEntriesByType('resource').map(r=>r.name)")
-mcp__chrome-devtools__evaluate_script("Array.from(document.querySelectorAll('script[src]')).map(s=>s.src)")
+mcp__chrome-devtools__evaluate_script(() => JSON.stringify(window.__NEXT_DATA__))
+mcp__chrome-devtools__evaluate_script(() => Object.keys(window).filter(k => k.startsWith('__')))
 
-# Network capture
-mcp__chrome-devtools__list_network_requests({ url_filter: "/api/" })
-mcp__chrome-devtools__get_network_request(request_id)
+# Network capture (filter client-side — no url_filter param)
+mcp__chrome-devtools__list_network_requests({resourceTypes: ["xhr", "fetch"]})
+  → keep entries where url contains target domain
+mcp__chrome-devtools__get_network_request(reqid)   ← response body
 
 # Interact
 mcp__chrome-devtools__click(css_selector)
@@ -115,18 +126,25 @@ mcp__chrome-devtools__press_key("Enter")
 
 ### Phase 11 execution pattern (Chrome DevTools MCP)
 
+For full auth setup and per-URL execution loop, see `references/phase-11-browser.md`.
+
 ```
-1. new_page → page_id
-2. For each URL in browse plan:
-   a. navigate_page(url, page_id)
-   b. wait_for("networkidle", 5000)
-   c. evaluate_script(window.__NEXT_DATA__ or similar globals)
-   d. list_network_requests({ url_filter: "/api/" })  ← API calls
-   e. execute browse plan action (click, fill, etc.)
-   f. list_network_requests() again after interaction
-   g. take_snapshot for documentation
-3. Collect all network requests → reconstruct as HAR entries
-4. Run har-to-openapi
+1. Detect mode: list_pages → real URLs? auto-connect : new-instance
+2. Auth setup if new-instance (see phase-11-browser.md Phase 11a)
+3. new_page → page_id
+4. For each URL in browse plan:
+   a. select_page(page_id)
+   b. navigate_page(url, type="url", timeout=10000)
+   c. Poll: evaluate_script(() => document.readyState) until "complete"
+   d. evaluate_script for JS globals
+   e. list_network_requests({resourceTypes: ["xhr","fetch"]}) — filter client-side
+   f. get_network_request(reqid) per matching request
+   g. Execute browse plan actions (click, fill, etc.)
+   h. list_network_requests again after interactions
+   i. take_snapshot for documentation
+5. Write collected requests to .beacon/chrome-requests.json
+6. Run har-reconstruct.py → .beacon/capture.har
+7. Run npx har-to-openapi (see phase-11-browser.md Phase 11d)
 ```
 
 ---
