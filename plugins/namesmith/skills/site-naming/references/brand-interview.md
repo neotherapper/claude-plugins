@@ -9,10 +9,14 @@ Trigger when the user's description contains any of these signals:
 ### Personal Brand Name Patterns
 
 Generate availability checks for these patterns (substitute actual name):
-- `{firstname}.com` / `{firstname}.dev` / `{firstname}.io`
-- `{firstnamelastname}.com` / `{firstnamelastname}.dev`
-- `{f}{lastname}.dev` / `{f}{lastname}.com` (initial + last name)
-- `{firstname}.studio` / `{firstname}.design` / `{firstname}.work` / `{firstname}.co`
+- `{firstname}.com`
+- `{firstname}.dev`
+- `{firstnamelastname}.com`
+- `{firstnamelastname}.dev`
+- `{f}{lastname}.com` (initial + last name, e.g., jpilitsoglou.com)
+- `{f}{lastname}.dev`
+- `{firstname}.studio` / `{firstname}.design` / `{firstname}.work`
+- `{firstname}.io` / `{firstname}.co` / `{firstname}.me`
 
 Present results, then offer: "Want me to also generate creative branded alternatives beyond your name?"
 

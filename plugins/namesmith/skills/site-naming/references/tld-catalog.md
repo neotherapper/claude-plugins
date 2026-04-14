@@ -94,4 +94,4 @@ Use these to build domain hacks — the TLD completes the word.
 | `.id` | bra.id, sa.id | Namecheap | Indonesia ccTLD — check policy |
 | `.ms` | ter.ms, for.ms, alar.ms | Namecheap | Montserrat |
 | `.pt` | scri.pt, ada.pt | Dynadot | Portugal ccTLD |
-| `.to` | in.to, in.to, pho.to | Dynadot | Tonga ccTLD |
+| `.to` | in.to, pho.to, memen.to | Dynadot | Tonga ccTLD |
