@@ -1,6 +1,6 @@
 {
   "name": "beacon",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Map any site's API surface — systematically.",
   "author": {
     "name": "Georgios Pilitsoglou",
