@@ -61,6 +61,7 @@ if [ -f "$INDEX_TPL" ]; then
   check "INDEX contains {{FRAMEWORK}}"              "$(contains_token "$INDEX_TPL" '{{FRAMEWORK}}')"
   check "INDEX contains {{TOOL_AVAILABILITY_BLOCK}}" "$(contains_token "$INDEX_TPL" '{{TOOL_AVAILABILITY_BLOCK}}')"
   check "INDEX contains {{API_SURFACE_ROWS}}"       "$(contains_token "$INDEX_TPL" '{{API_SURFACE_ROWS}}')"
+  check "INDEX contains {{OPENAPI_STATUS}}"        "$(contains_token "$INDEX_TPL" '{{OPENAPI_STATUS}}')"
 else
   check "INDEX contains {{SITE_NAME}}"              "fail"
   check "INDEX contains {{DATE}}"                   "fail"
@@ -68,6 +69,7 @@ else
   check "INDEX contains {{FRAMEWORK}}"              "fail"
   check "INDEX contains {{TOOL_AVAILABILITY_BLOCK}}" "fail"
   check "INDEX contains {{API_SURFACE_ROWS}}"       "fail"
+  check "INDEX contains {{OPENAPI_STATUS}}"        "fail"
 fi
 
 # ── Check 11-14: tech-stack.md.template tokens ───────────────────────────────

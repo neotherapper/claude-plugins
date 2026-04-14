@@ -36,5 +36,6 @@
 | [site-map.md](site-map.md) | All discovered URLs |
 | [constants.md](constants.md) | Taxonomy IDs, nonces, enums |
 {{API_SURFACE_FILE_ROWS}}
-| [specs/{{SITE_SLUG}}.openapi.yaml](specs/{{SITE_SLUG}}.openapi.yaml) | OpenAPI spec |
+<!-- OPENAPI_STATUS: Phase 12 resolves to one of: link row, HAR row, or "" (omit when Phase 11 skipped) -->
+{{OPENAPI_STATUS}}
 | [scripts/test-{{SITE_SLUG}}.sh](scripts/test-{{SITE_SLUG}}.sh) | Smoke tests |

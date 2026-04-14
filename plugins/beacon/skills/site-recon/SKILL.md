@@ -1,7 +1,7 @@
 ---
 name: site-recon
 description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 12-phase systematic investigation of a website and produces a complete persistent docs/research/{site-name}/ folder.
-version: 0.1.0
+version: 0.2.0
 ---
 
 # site-recon — Research Mode
@@ -164,20 +164,24 @@ exactly where to go and what to capture.
 
 ## Phase 11 — Active browse
 
-Detect which browser tool is available (logged in Phase 1):
+**Load `references/phase-11-browser.md` before executing this phase** — it contains
+corrected tool signatures, auth setup logic, per-URL loop instructions, HAR reconstruction,
+and OpenAPI generation commands.
 
-- `$CMUX_SURFACE_ID` non-empty → use `cmux browser` commands
-- `mcp__chrome-devtools__new_page` in tool list → use Chrome DevTools MCP
-- Neither available → log `[PHASE-11-SKIPPED]`, proceed to Phase 12
+Summary of sub-phases:
+- **11a** — Detect Chrome MCP mode (`auto-connect` vs `new-instance`) or cmux; handle auth
+- **11b** — Execute browse plan: JS globals + network capture per URL (up to 10)
+- **11c** — Save raw captures to `.beacon/`; run `har-reconstruct.py` → `.beacon/capture.har`
+- **11d** — Run `npx har-to-openapi`; merge with passive spec if Phase 8 found one
 
-After executing the browse plan, convert captured network traffic to OpenAPI:
-```bash
-bunx har-to-openapi .beacon/capture.har \
-  --include-domains {domain} \
-  --format yaml > docs/research/{slug}/specs/{slug}.openapi.yaml
-```
+If neither Chrome DevTools MCP nor cmux is available: log `[PHASE-11-SKIPPED]`, proceed to Phase 12.
 
-See `references/tool-availability.md` for full browser command reference.
+After Phase 11 completes, set `OPENAPI_STATUS` to the full Markdown table row for INDEX.md:
+- Phase 11 ran + spec generated:
+  `| [specs/{site-slug}.openapi.yaml](specs/{site-slug}.openapi.yaml) | OpenAPI spec (observed traffic) |`
+- Phase 11 ran + har-to-openapi missing:
+  `| .beacon/capture.har | Raw HAR (har-to-openapi unavailable) |`
+- Phase 11 skipped: `""` (empty string — row omitted from INDEX.md)
 
 ## Graceful degradation signals
 
@@ -192,6 +196,11 @@ Log these in the session brief and repeat in the generated INDEX.md:
 | `[TECH-PACK-UNAVAILABLE:name:ver]` | No pack found; used web search |
 | `[TECH-PACK-VERSION-MISMATCH:name:found→used]` | Nearest major version used |
 | `[GENERATED-INLINE:path]` | Script generated inline, not downloaded |
+| `[CHROME-MODE:auto-connect]` | Chrome MCP connected to user's Chrome — sessions inherited |
+| `[CHROME-MODE:new-instance]` | Chrome MCP launched fresh headless instance — no sessions |
+| `[PHASE-11-AUTH:manual]` | User logged in manually; auth state saved to `.beacon/auth-state.json` |
+| `[PHASE-11-UNAUTH]` | Phase 11 ran without authentication |
+| `[OPENAPI-SKIPPED:har-to-openapi-unavailable]` | har-to-openapi not found; HAR preserved at `.beacon/capture.har` |
 
 ## Reference files
 
