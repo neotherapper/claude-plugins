@@ -6,11 +6,11 @@ Route each discovered domain to the best registrar for purchase. Use the primary
 
 | TLD(s) | Primary Registrar | Registration URL Pattern |
 |--------|------------------|--------------------------|
-| .com, .net, .org, .info, .biz | Cloudflare Registrar | `https://dash.cloudflare.com/{account_id}/domains/registrations/purchase?domain={domain}` |
+| .com, .net, .org, .info, .biz | Cloudflare Registrar | `https://dash.cloudflare.com/{CF_ACCOUNT_ID}/domains/registrations/purchase?domain={domain}` |
 | .io, .co, .ai, .app, .dev, .me, .xyz, .online, .site, .fun, .space, .icu, .top | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
 | .ly, .is, .it, .in, .at, .am, .as, .be, .by, .es, .ms | Namecheap | `https://www.namecheap.com/domains/registration/results/?domain={domain}` |
 | .gg, .st, .pt, .to, .my | Dynadot | `https://www.dynadot.com/domain/search.html?domain={domain}` |
-| .sh, .fm, .fm | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
+| .sh, .fm | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
 
 ## Cloudflare Registrar
 
