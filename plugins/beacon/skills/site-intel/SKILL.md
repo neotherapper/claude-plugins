@@ -1,7 +1,7 @@
 ---
 name: site-intel
 description: This skill should be used when the user asks questions about a site that has already been analysed with site-recon — "what endpoints does X have?", "how do I query Y?", "what did we find on Z?", "load research for...", "tell me about [site]", "what auth does X use?", "give me the API for...". If a docs/research/ folder exists for the site, use this skill rather than re-analysing. Routes to the right pre-built file without re-running the full analysis.
-version: 0.1.0
+version: 0.6.0
 ---
 
 # site-intel — Router Mode
@@ -32,8 +32,8 @@ Which site are you asking about?
 ## Step 2: Open INDEX.md first
 
 Always read `docs/research/{site}/INDEX.md` first — it has the infrastructure summary,
-quick API reference, and links to every other file. This gives you context before
-diving into a specific file.
+quick API reference, and links to every other file. This gives you the framework name
+and version before routing.
 
 ## Step 3: Route to the specific file
 
@@ -49,16 +49,48 @@ diving into a specific file.
 
 If the question spans multiple surfaces, open all relevant files before answering.
 
+## Step 3a: Cross-reference the tech pack for framework-specific questions
+
+After opening the research file, check whether the question is **framework-specific**:
+
+**Load the tech pack when the question involves:**
+- Query patterns, pagination, filtering ("how do I get all posts?", "how do I paginate?")
+- Endpoint conventions specific to the framework ("what are the REST routes?")
+- Authentication flows tied to the framework ("how does Laravel handle CSRF?")
+- Framework-specific admin, dashboard, or config paths
+- Anything phrased as "how do I" or "what's the endpoint pattern for" where the framework matters
+
+**Do not load the tech pack for factual questions:**
+- "What endpoints did we find?" → research file is the source of truth
+- "What CDN does this site use?" → tech-stack.md only
+- "Show me the site map" → site-map.md only
+
+**How to load:**
+1. Read the framework name and major version from INDEX.md infrastructure table (e.g., `WordPress 6.5` → `wordpress`, `6.x`)
+2. Load: `technologies/{framework}/{major}.x.md`
+   - If version is missing or partial, use the nearest available major (log the mismatch)
+   - If no tech pack exists for the framework, proceed with research files only
+3. Use the tech pack's probe checklist and known endpoint patterns to **supplement** what the research files contain — never contradict confirmed research findings with tech pack assumptions
+
+**Example:**
+> User: "How do I query products in WooCommerce?"
+>
+> Load: `docs/research/example-com/api-surfaces/woocommerce.md` (from Step 3)
+> Also load: `technologies/wordpress/6.x.md` (from Step 3a — framework-specific query question)
+> Answer: combine what was discovered in the API surface file with the WooCommerce REST API conventions from the tech pack
+
 ## Step 4: Answer directly
 
 After reading the relevant file(s):
 
 1. Answer the question — quote specific endpoints, field names, status codes, constraints
-2. Include auth requirements for any endpoint mentioned  
-3. Cite the source file
+2. Include auth requirements for any endpoint mentioned
+3. Cite the source file(s) — distinguish between "found in research (Phase 5)" and "from WordPress tech pack (not confirmed in this site's research)"
 4. Keep it concrete: "The endpoint is `GET /wp-json/wp/v2/posts?per_page=10`, returns
    a JSON array of post objects. No auth required. Found in Phase 5 via the WordPress
    tech pack probe checklist."
+
+**When combining research + tech pack:** clearly label which facts are confirmed (from research) and which are conventional (from tech pack). Do not present tech pack conventions as confirmed discoveries.
 
 ## When research is incomplete
 
@@ -72,3 +104,6 @@ or manually visit {url} and share what you see.
 ```
 
 Do not guess or fabricate endpoint details. Only report what the research files contain.
+If the tech pack suggests an endpoint conventionally exists but the research didn't confirm it,
+say so explicitly: "The WordPress tech pack suggests `GET /wp-json/wc/v3/products` exists,
+but this was not confirmed in the Phase 5 probes for this site."
