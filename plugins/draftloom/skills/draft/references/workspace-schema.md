@@ -98,7 +98,7 @@ Weights are cosmetic — pass criteria is always per-dimension threshold (75). C
 
 ### state.json
 **Owner:** orchestrator (writes after each state change)
-**Readers:** all agents, draft skill (recovery)
+**Readers:** all agents (iteration and brief-lock state), draft skill (recovery)
 **Schema:**
 ```json
 {
@@ -107,6 +107,7 @@ Weights are cosmetic — pass criteria is always per-dimension threshold (75). C
   "last_updated": "2026-04-15T10:45:00Z"
 }
 ```
+**Notes:** Loop status (`drafting`, `iterating`, `passing`, etc.) lives in `meta.json → draft_status`, not here. `state.json` is for iteration counter and brief-lock only.
 
 ---
 
