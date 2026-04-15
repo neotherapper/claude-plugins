@@ -1,7 +1,7 @@
 Feature: site-intel skill — route questions about a known site to pre-built research docs
 
   Background:
-    Given Beacon v0.1.0 is installed in Claude Code
+    Given Beacon v0.5.2 is installed in Claude Code
     And docs/research/example-com/ exists from a prior site-recon run
 
   Scenario: Question about endpoints routes to api-surfaces file

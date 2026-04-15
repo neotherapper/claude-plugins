@@ -1,7 +1,7 @@
 Feature: site-recon skill — analyse a new site and produce docs/research/{site}/
 
   Background:
-    Given Beacon v0.1.0 is installed in Claude Code
+    Given Beacon v0.5.2 is installed in Claude Code
     And the user's project has a docs/research/ directory
 
   # ── Zero-MCP baseline ────────────────────────────────────────────────────
@@ -44,15 +44,15 @@ Feature: site-recon skill — analyse a new site and produce docs/research/{site
     And the checklist items are worked through in order
 
   Scenario: Missing tech pack triggers web search and PR offer
-    Given technologies/astro/5.x.md does not exist in the plugin repo
-    When an Astro 5 site is detected in Phase 3
-    Then Phase 4 falls back to web search for "astro 5 API routes file structure"
+    Given technologies/vue/3.x.md does not exist in the plugin repo
+    When a Vue 3 site is detected in Phase 3
+    Then Phase 4 falls back to web search for "vue 3 API routes file structure"
     And a temporary in-memory tech pack is created for this session
     And at the end of Phase 12 the user is offered the option to open a PR
     When the user accepts
-    Then technologies/astro/5.x.md is drafted using the tech pack schema
-    And a branch tech-pack/astro-5 is created on the plugin repo
-    And a PR is opened with title "feat(tech-packs): add astro 5.x"
+    Then technologies/vue/3.x.md is drafted using the tech pack schema
+    And a branch tech-pack/vue-3 is created on the plugin repo
+    And a PR is opened with title "feat(tech-packs): add vue 3.x"
 
   Scenario: Tech pack version mismatch — nearest major version used with warning
     Given technologies/nextjs/14.x.md exists but technologies/nextjs/15.x.md does not
@@ -73,7 +73,7 @@ Feature: site-recon skill — analyse a new site and produce docs/research/{site
   Scenario: No OpenAPI found — spec scaffolded from discovered endpoints
     Given no standard OpenAPI path returns a valid spec
     When Phase 12 runs
-    Then a scaffolded OpenAPI spec is written to specs/example-com.openapi.yaml
+    Then a scaffolded OpenAPI spec is written to docs/research/example-com/specs/example-com.openapi.yaml
     And it contains x-beacon-source: "scaffolded"
     And each discovered endpoint from api-surfaces/ appears as a path in the spec
 
