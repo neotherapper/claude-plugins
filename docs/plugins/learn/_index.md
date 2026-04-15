@@ -55,7 +55,7 @@ Lesson data flows through a single write — never through conversation history.
 | 1. JSON generation | `learn:micro` | Generates full `Lesson` JSON in one shot, strict schema |
 | 2. File write | `learn:micro` | Writes lesson to `screen_dir/lesson-{slug}.json` |
 | 3. File watch | visual server | Detects new file, reads and renders `lesson.html` template |
-| 4. Browser open | visual server | Serves at `localhost:{port}/lesson`, opens browser automatically |
+| 4. Browser refresh | visual server | SSE pushes `refresh` event; browser reloads to `localhost:{port}/` |
 | 5. Quiz interaction | browser UI | Answer selection and explanation rendering handled client-side |
 
 The visual server uses the same file-watcher and `screen_dir` / `state_dir` pattern as the superpowers visual companion. A lesson write always replaces the previous — no accumulation.

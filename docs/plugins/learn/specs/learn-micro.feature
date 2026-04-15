@@ -246,8 +246,9 @@ Feature: learn + learn:micro skills — routing, lesson delivery, quiz, and know
     Then the router dispatches to learn:debate without any change to the router's own code
     And existing routing for learn:micro continues to work correctly
 
-  # ── R-MEM-001 / R-MEM-002 / R-MEM-003 / R-MEM-006 — progress storage ────
+  # ── R-MEM-001 / R-MEM-002 / R-MEM-003 / R-MEM-006 — progress storage (v2) ──
 
+  @v2
   Scenario: Lesson completion recorded to file-based progress store
     Given learn:micro has delivered and completed a lesson for "CSS flexbox"
     When the lesson session ends (quiz complete or skipped)
@@ -255,12 +256,14 @@ Feature: learn + learn:micro skills — routing, lesson delivery, quiz, and know
     And the record is a human-readable markdown or YAML file
     And the record contains: topic, completion_status, quiz_score, last_accessed timestamp
 
+  @v2
   Scenario: Progress file is readable and editable by the user directly
     Given a progress record exists for "CSS flexbox"
     When I open the progress file in a text editor
     Then the file is valid markdown or YAML (not binary or encoded)
     And I can edit the completion_status manually and the plugin reads the updated value on next run
 
+  @v2
   Scenario: Progress persists across Claude Code sessions
     Given a lesson for "CSS flexbox" was completed in a previous Claude Code session
     And the progress file still exists on disk

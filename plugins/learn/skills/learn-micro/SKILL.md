@@ -11,13 +11,13 @@ version: "0.1.0"
 
 # learn:micro Skill
 
-Orchestrates the full micro-lesson pipeline: pre-flight checks → reference reads → vault lookup → Lesson JSON generation → HTML write → user response.
+Orchestrates the full micro-lesson pipeline: pre-flight checks → reference reads → vault lookup → Lesson JSON generation → JSON write → user response.
 
 ## Role
 
-`learn:micro` is the lesson generator for the `learn` plugin. Given a topic and an optional expertise level, it produces a single self-contained HTML lesson file served by the visual server. The lesson follows a fixed seven-section structure grounded in learning science and outputs a valid `Lesson` JSON object that the server renders into an interactive page.
+`learn:micro` is the lesson generator for the `learn` plugin. Given a topic and an optional expertise level, it produces a validated `Lesson` JSON file that the visual server injects into its rendering template and serves as an interactive browser page. The lesson follows a fixed seven-section structure grounded in learning science.
 
-This skill never skips the pre-flight checks. It never writes partial HTML. It never presents lesson content as prose in the chat window — all lesson content goes to the HTML file. The chat response is a short confirmation only.
+The visual server owns all HTML rendering — the skill's only output is a `.json` data file. This skill never skips the pre-flight checks. It never writes partial data. It never presents lesson content as prose in the chat window. The chat response is a short confirmation only.
 
 ---
 
@@ -94,41 +94,33 @@ If any validation rule fails, halt. Do not write HTML. See error handling table:
 
 ---
 
-## Step 4: Write HTML
+## Step 4: Write lesson JSON to screen_dir
+
+The visual server owns all HTML rendering. It reads `server/templates/lesson.html` and injects the lesson data into the `#lesson-data` script tag automatically. Your job is to write the data file — nothing more.
 
 Construct the lesson timestamp: `{timestamp}` = Unix epoch seconds at time of generation (integer).
 
 Determine the output path:
 
 ```
-{screenDir}/lesson-{timestamp}.html
+{screenDir}/lesson-{timestamp}.json
 ```
 
 `screenDir` comes from `.learn/server/state/server-info` (read in pre-flight Check 1).
 
-Construct the HTML file with this structure:
+Write the file containing the validated Lesson JSON from Step 3, pretty-printed with 2-space indentation. The file must be valid JSON — no prose, no wrappers, no HTML.
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{topic} — learn:micro</title>
-</head>
-<body>
-  <script id="lesson-data" type="application/json">
-{LESSON_JSON}
-  </script>
-</body>
-</html>
+```json
+{
+  "topic": "…",
+  "level": "…",
+  … (full Lesson JSON)
+}
 ```
 
-`{LESSON_JSON}` is the validated Lesson JSON from Step 3, pretty-printed with 2-space indentation.
+The visual server detects the new `.json` file via its file-watcher, injects it into `lesson.html`, and the browser auto-reloads via SSE.
 
-The visual server's template (`server/templates/lesson.html`) detects the `#lesson-data` script tag and renders all lesson sections, the quiz, and the footer caveat. Do not add any other HTML content to this file — the server owns the rendering.
-
-Write the file to `{screenDir}/lesson-{timestamp}.html`. If the write fails, see error handling table: **screenDir write fails**.
+If the write fails, see error handling table: **screenDir write fails**.
 
 ---
 
@@ -161,7 +153,7 @@ Do not include quiz answers, lesson content, or resource links in the chat respo
 | Error condition | User message | Action |
 |---|---|---|
 | Server not running (`.learn/server/state/server-info` missing or `status` ≠ `"running"`) | `"The learn server is not running. Start it with /learn serve, then try again."` | Halt immediately. Do not generate content. |
-| Lesson JSON fails schema validation (any rule from lesson-schema.md violated) | `"Lesson generation failed. Try a more specific topic."` | Halt. Do NOT write partial HTML. |
+| Lesson JSON fails schema validation (any rule from lesson-schema.md violated) | `"Lesson generation failed. Try a more specific topic."` | Halt. Do NOT write the JSON file. |
 | `screenDir` write fails (file write error, permission denied, path not found) | `"Could not write lesson file. Check the server is running."` | Halt. Do not present lesson content in chat. |
 | Vault lookup fails (vault not in session, index unreadable, read error) | *(no user message)* | Continue silently. Use ai-suggested resources for `resources[]`. Do not block lesson generation. |
 

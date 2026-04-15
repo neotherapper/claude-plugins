@@ -96,7 +96,9 @@ function selectOpt(el,qi,chosen,correct,explanation){
 function checkFill(qi,correct,explanation){
   const input=document.getElementById('fill-'+qi);
   const val=input.value.trim().toLowerCase();
-  const ok=val===correct.toLowerCase()||correct.toLowerCase().includes(val)&&val.length>2;
+  const norm=correct.toLowerCase();
+  // Accept exact match, or val that covers ≥75% of the answer (prevents 3-char prefix passing).
+  const ok=val===norm||(val.length>=Math.ceil(norm.length*0.75)&&norm.includes(val));
   input.style.borderColor=ok?'var(--success)':'var(--warning)';
   const exp=document.getElementById('exp-'+qi);
   if(exp){exp.style.display='block';}
