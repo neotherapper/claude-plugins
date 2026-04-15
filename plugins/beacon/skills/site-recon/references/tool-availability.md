@@ -46,7 +46,7 @@ which gau && echo "gau available"
 | 3 Fingerprint | Wappalyzer MCP | Header + HTML grep | Generic signals only |
 | 2/6 URL discovery | Firecrawl map | curl /sitemap.xml | Sitemap only |
 | 9 OSINT — URL history | GAU | Wayback + CommonCrawl CDX | CDX APIs always work |
-| 11 Active browse | cmux browser | Chrome DevTools MCP | [PHASE-11-SKIPPED] |
+| 11 Active browse | Chrome DevTools MCP | cmux browser | [PHASE-11-SKIPPED] |
 | Script download | GitHub raw URL | Local .beacon/ cache | [GENERATED-INLINE:path] |
 
 ---
@@ -73,6 +73,10 @@ cmux browser screenshot --out docs/research/example-com/browse-snapshots/api-doc
 cmux browser evaluate "JSON.stringify(window.__NEXT_DATA__?.props, null, 2)"
 cmux browser evaluate "Object.keys(window).filter(k => k.startsWith('__'))"
 
+# Network request capture
+cmux browser surface:N network requests        ← list all captured requests since page load
+cmux browser surface:N network route "*/api/*" --body '{"mock":true}'  ← intercept/mock
+
 # Interact
 cmux browser click "button[data-id=login]"
 cmux browser fill "input[name=email]" "test@example.com"
@@ -86,26 +90,33 @@ Full reference: `docs/guides/cmux-browser.md` (in nikai project)
 
 Use when `mcp__chrome-devtools__new_page` is in the tool list.
 
+**Corrected v0.21.0 signatures:**
+- `navigate_page(url, type="url", timeout=10000)` — no `page_id` parameter; call `select_page(page_id)` first
+- `wait_for` checks text presence only — use `evaluate_script(() => document.readyState)` polling instead of networkidle
+- `list_network_requests({resourceTypes: ["xhr","fetch"]})` — no `url_filter` param; filter URLs client-side
+
 ```
 # Open page
-mcp__chrome-devtools__new_page → returns page_id
+mcp__chrome-devtools__new_page → returns {page_id: "..."}
+mcp__chrome-devtools__select_page(page_id)
 
-# Navigate
-mcp__chrome-devtools__navigate_page(url, page_id)
-mcp__chrome-devtools__wait_for("networkidle", 5000)
+# Navigate + wait for load
+mcp__chrome-devtools__navigate_page(url, type="url", timeout=10000)
+# Poll until complete (retry 3× with 2s delay):
+mcp__chrome-devtools__evaluate_script(() => document.readyState)
 
 # Capture page content
 mcp__chrome-devtools__take_snapshot          → DOM/a11y tree (best for AI)
 mcp__chrome-devtools__take_screenshot        → visual PNG
 
 # JavaScript evaluation
-mcp__chrome-devtools__evaluate_script("window.__NEXT_DATA__")
-mcp__chrome-devtools__evaluate_script("performance.getEntriesByType('resource').map(r=>r.name)")
-mcp__chrome-devtools__evaluate_script("Array.from(document.querySelectorAll('script[src]')).map(s=>s.src)")
+mcp__chrome-devtools__evaluate_script(() => JSON.stringify(window.__NEXT_DATA__))
+mcp__chrome-devtools__evaluate_script(() => Object.keys(window).filter(k => k.startsWith('__')))
 
-# Network capture
-mcp__chrome-devtools__list_network_requests({ url_filter: "/api/" })
-mcp__chrome-devtools__get_network_request(request_id)
+# Network capture (filter client-side — no url_filter param)
+mcp__chrome-devtools__list_network_requests({resourceTypes: ["xhr", "fetch"]})
+  → keep entries where url contains target domain
+mcp__chrome-devtools__get_network_request(reqid)   ← response body
 
 # Interact
 mcp__chrome-devtools__click(css_selector)
@@ -115,18 +126,25 @@ mcp__chrome-devtools__press_key("Enter")
 
 ### Phase 11 execution pattern (Chrome DevTools MCP)
 
+For full auth setup and per-URL execution loop, see `references/browser-recon.md`.
+
 ```
-1. new_page → page_id
-2. For each URL in browse plan:
-   a. navigate_page(url, page_id)
-   b. wait_for("networkidle", 5000)
-   c. evaluate_script(window.__NEXT_DATA__ or similar globals)
-   d. list_network_requests({ url_filter: "/api/" })  ← API calls
-   e. execute browse plan action (click, fill, etc.)
-   f. list_network_requests() again after interaction
-   g. take_snapshot for documentation
-3. Collect all network requests → reconstruct as HAR entries
-4. Run har-to-openapi
+1. Detect mode: list_pages → real URLs? auto-connect : new-instance
+2. Auth setup if new-instance (see browser-recon.md Phase 11a)
+3. new_page → page_id
+4. For each URL in browse plan:
+   a. select_page(page_id)
+   b. navigate_page(url, type="url", timeout=10000)
+   c. Poll: evaluate_script(() => document.readyState) until "complete"
+   d. evaluate_script for JS globals
+   e. list_network_requests({resourceTypes: ["xhr","fetch"]}) — filter client-side
+   f. get_network_request(reqid) per matching request
+   g. Execute browse plan actions (click, fill, etc.)
+   h. list_network_requests again after interactions
+   i. take_snapshot for documentation
+5. Write collected requests to .beacon/chrome-requests.json
+6. Run har-reconstruct.py → .beacon/capture.har
+7. Run npx har-to-openapi (see browser-recon.md Phase 11d)
 ```
 
 ---
@@ -145,37 +163,16 @@ har-to-openapi .beacon/capture.har \
   > docs/research/example-com/specs/example-com.openapi.yaml
 ```
 
-If Chrome DevTools MCP captured requests (not a real HAR file), reconstruct minimal HAR:
-```python
-import json
+If Chrome DevTools MCP captured requests, reconstruct a valid HAR 1.2 using `har-reconstruct.py`:
 
-requests = [...]  # from mcp__chrome-devtools__list_network_requests
-
-har = {
-    "log": {
-        "version": "1.2",
-        "creator": {"name": "beacon-plugin", "version": "0.1.0"},
-        "entries": [
-            {
-                "request": {
-                    "method": r["method"],
-                    "url": r["url"],
-                    "headers": [{"name": k, "value": v} for k, v in (r.get("request_headers") or {}).items()],
-                },
-                "response": {
-                    "status": r.get("status", 0),
-                    "headers": [{"name": k, "value": v} for k, v in (r.get("response_headers") or {}).items()],
-                    "content": {"text": r.get("response_body", "")}
-                }
-            }
-            for r in requests
-        ]
-    }
-}
-
-with open(".beacon/capture.har", "w") as f:
-    json.dump(har, f)
+```bash
+python3 scripts/core/har-reconstruct.py \
+  --input .beacon/chrome-requests.json \
+  --output .beacon/capture.har \
+  --domain {target-domain}
 ```
+
+See `references/browser-recon.md` Phase 11c for full instructions.
 
 ---
 
@@ -184,7 +181,7 @@ with open(".beacon/capture.har", "w") as f:
 Scripts live on GitHub and are downloaded on first use to `.beacon/scripts/`.
 
 ```bash
-VERSION="0.1.0"
+VERSION="0.2.0"
 SCRIPT="core/probe-passive.sh"
 LOCAL=".beacon/scripts/${SCRIPT}"
 REMOTE="https://raw.githubusercontent.com/neotherapper/claude-plugins/v${VERSION}/plugins/beacon/scripts/${SCRIPT}"

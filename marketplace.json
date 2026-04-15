@@ -19,6 +19,15 @@
         "path": "plugins/beacon"
       },
       "description": "Map any site's API surface — systematically. Detects tech stack, loads framework-specific guides, probes endpoints, runs OSINT, and produces structured persistent documentation."
+    },
+    {
+      "name": "namesmith",
+      "source": {
+        "source": "github",
+        "repo": "neotherapper/claude-plugins",
+        "path": "plugins/namesmith"
+      },
+      "description": "Find the right name for your project. Brand interview, AI generation across 7 archetypes, live availability + pricing via Cloudflare or Porkbun, and per-project names.md persistence."
     }
   ]
 }
