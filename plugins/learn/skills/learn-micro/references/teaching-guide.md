@@ -11,7 +11,7 @@ Rules `learn:micro` MUST follow when generating lesson content.
 4. Common mistakes — 2–3 mistakes. These pre-empt wrong mental models formed from the example.
 5. Generate task — A production task the user can attempt right now. Starts with a verb ("Write", "Build", "Implement", "Explain", "Refactor").
 6. Quiz          — 3 questions, default ON. Types: one multiple_choice + one fill_blank + one explain.
-7. Next          — One follow-on concept. Directly related, one step up in complexity.
+7. Next          — One follow-on concept. Directly related, one step up in complexity. Phrase as: "When you're ready: [concept]"
 ```
 
 Never reorder these sections. The sequence is grounded in learning science: encoding (1–3) → misconception correction (4) → production (5) → retrieval (6) → forward momentum (7).
