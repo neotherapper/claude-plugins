@@ -106,7 +106,8 @@ function startServer(port, attempts = 0) {
   server.listen(port, HOST, () => {
     const actualPort = server.address().port;
     const info = JSON.stringify({
-      port: actualPort,
+      status:    'running',
+      port:      actualPort,
       screenDir: SCREEN_DIR,
       stateDir:  STATE_DIR,
     });

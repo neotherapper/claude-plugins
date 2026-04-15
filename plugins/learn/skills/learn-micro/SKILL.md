@@ -30,7 +30,7 @@ Run both checks before any content generation. Do not proceed past a failing che
 Read `.learn/server/state/server-info` from the project root.
 
 - If the file does not exist, or the `status` field is not `"running"`, halt immediately. See error handling table: **Server not running**.
-- If the file is readable and `status` is `"running"`, extract `screen_dir`, `state_dir`, and `port` and carry all three forward.
+- If the file is readable and `status` is `"running"`, extract `screenDir`, `stateDir`, and `port` and carry all three forward.
 
 ### Check 2: Expertise level
 
@@ -101,10 +101,10 @@ Construct the lesson timestamp: `{timestamp}` = Unix epoch seconds at time of ge
 Determine the output path:
 
 ```
-{screen_dir}/lesson-{timestamp}.html
+{screenDir}/lesson-{timestamp}.html
 ```
 
-`screen_dir` comes from `.learn/server/state/server-info` (read in pre-flight Check 1).
+`screenDir` comes from `.learn/server/state/server-info` (read in pre-flight Check 1).
 
 Construct the HTML file with this structure:
 
@@ -128,7 +128,7 @@ Construct the HTML file with this structure:
 
 The visual server's template (`server/templates/lesson.html`) detects the `#lesson-data` script tag and renders all lesson sections, the quiz, and the footer caveat. Do not add any other HTML content to this file — the server owns the rendering.
 
-Write the file to `{screen_dir}/lesson-{timestamp}.html`. If the write fails, see error handling table: **screen_dir write fails**.
+Write the file to `{screenDir}/lesson-{timestamp}.html`. If the write fails, see error handling table: **screenDir write fails**.
 
 ---
 
@@ -162,7 +162,7 @@ Do not include quiz answers, lesson content, or resource links in the chat respo
 |---|---|---|
 | Server not running (`.learn/server/state/server-info` missing or `status` ≠ `"running"`) | `"The learn server is not running. Start it with /learn serve, then try again."` | Halt immediately. Do not generate content. |
 | Lesson JSON fails schema validation (any rule from lesson-schema.md violated) | `"Lesson generation failed. Try a more specific topic."` | Halt. Do NOT write partial HTML. |
-| `screen_dir` write fails (file write error, permission denied, path not found) | `"Could not write lesson file. Check the server is running."` | Halt. Do not present lesson content in chat. |
+| `screenDir` write fails (file write error, permission denied, path not found) | `"Could not write lesson file. Check the server is running."` | Halt. Do not present lesson content in chat. |
 | Vault lookup fails (vault not in session, index unreadable, read error) | *(no user message)* | Continue silently. Use ai-suggested resources for `resources[]`. Do not block lesson generation. |
 
 Error messages are shown verbatim as a single line. Do not add apologies, suggestions beyond what is specified, or additional context.

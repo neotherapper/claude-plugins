@@ -23,8 +23,7 @@ if [[ -z "$PROJECT_DIR" ]]; then
   exit 1
 fi
 
-SESSION_ID="$$-$(date +%s)"
-BASE_DIR="$PROJECT_DIR/.learn/server/$SESSION_ID"
+BASE_DIR="$PROJECT_DIR/.learn/server"
 SCREEN_DIR="$BASE_DIR/content"
 STATE_DIR="$BASE_DIR/state"
 
@@ -49,6 +48,7 @@ else
   # Wait up to 5 seconds for server-info
   for i in $(seq 1 50); do
     if [[ -f "$STATE_DIR/server-info" ]]; then
+      echo "$SERVER_PID" > "$STATE_DIR/server.pid"
       # Read server-info written by server.js, append pid
       SERVER_INFO=$(cat "$STATE_DIR/server-info")
       # Inject pid: strip trailing } and append ,"pid":<SERVER_PID>}

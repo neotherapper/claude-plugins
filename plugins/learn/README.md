@@ -10,13 +10,17 @@ claude plugin install learn
 
 ## Usage
 
-Start the visual server first by passing `serve` to the `/learn` router:
+### Starting the visual server
 
-```
-/learn serve
+Before running lessons, start the visual server:
+
+```bash
+bash plugins/learn/server/start-server.sh --project-dir .
 ```
 
-*(Runs the visual server — handled by the `/learn` router)*
+This starts the server on port 7337 (configurable via `--port`). You can then use `/learn [topic]` and lessons will appear in your browser at the URL shown in the output.
+
+Alternatively, `/learn serve` will display the start command for you to run.
 
 Open **http://localhost:7337** in your browser, then teach yourself anything:
 
