@@ -4,9 +4,7 @@ Rules the orchestrator uses to route after each eval. Load this file in orchestr
 
 ## aggregate_score calculation
 
-```
 aggregate_score = min(seo_score, hook_score, voice_score, readability_score)
-```
 
 The minimum score across all dimensions. Never the average. No dimension can compensate for another.
 
@@ -38,14 +36,13 @@ Each dimension must score **≥ 75** to pass. This threshold is fixed — it is 
 Default: 3. When `current_iteration` reaches max:
 
 Show:
-```
+
 Reached {max} iterations. Aggregate score: {score}/100.
 
 What would you like to do?
 1. Publish anyway (dispatch distribution with current draft)
 2. Continue for N more iterations (specify N)
 3. Discard this draft (draft_status: abandoned)
-```
 
 Wait for user choice. Execute accordingly.
 

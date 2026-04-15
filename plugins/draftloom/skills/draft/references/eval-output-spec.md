@@ -48,7 +48,7 @@ Contract for all eval agent output files. Every eval agent must write a file mat
   "meta_description_length": 95,
   "heading_issues": ["no H2 found after intro"],
   "flesch_score": 62,
-  "recommend": "Rewrite meta_description to include primary keyword 'react state management' and value proposition"
+  "recommend": "Rewrite meta_description to include primary keyword and value proposition"
 }
 ```
 
