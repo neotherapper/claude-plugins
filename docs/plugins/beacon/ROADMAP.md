@@ -74,9 +74,9 @@ Each new pack triggers a failing check in `validate-fingerprinting.sh` automatic
 - **Government portal**: MantisIMS detection, DataTables jQuery API patterns, WordPress nonce auth, public dataset API discovery
 
 **Research sources used for pack design:**
-- tRPC patterns → `knowledge/developer-tools/frontend/trpc.md` (nikai)
-- Nuxt 2 real-world example → `docs/research/spitogatos/tech-stack.md` (nikai)
-- GraphQL vs REST directory API patterns → `research/guides/graphql-vs-rest-directory-apis.md` (nikai)
+- tRPC patterns → `knowledge/developer-tools/frontend/trpc.md` (nikai-internal, not available in this repo)
+- Nuxt 2 real-world example → `docs/research/spitogatos/tech-stack.md` (nikai-internal, not available in this repo)
+- GraphQL vs REST directory API patterns → `research/guides/graphql-vs-rest-directory-apis.md` (nikai-internal, not available in this repo)
 
 ---
 
@@ -172,17 +172,17 @@ Consider adding explicit Think/Act/Observe structure to phase instructions:
 - **Act:** What commands/probes to run
 - **Observe:** How to interpret results and log them in the session brief
 
-Reference: `knowledge/prompt-techniques/_index.md` (nikai) for examples.
+Reference: `knowledge/prompt-techniques/_index.md` (nikai-internal, not available in this repo) for examples.
 
 ---
 
 ## Research Sources
 
-Knowledge from the nikai project used in planning this roadmap. Useful references
+Knowledge from the nikai project (internal, not available in this repo) used in planning this roadmap. Useful references
 for contributors designing new phases or packs:
 
-| Topic | nikai location |
-|-------|---------------|
+| Topic | nikai location (internal) |
+|-------|--------------------------|
 | OSINT tool guides (Shodan, crt.sh, theHarvester, SpiderFoot) | `knowledge/security/osint/` |
 | Web scraping tools comparison (Firecrawl, Crawl4AI, ScrapeGraphAI) | `research/guides/web-scraping-for-ai-agents.md` |
 | HTTP header tech detection patterns | `knowledge/methodologies/http-header-tech-detection.md` |
