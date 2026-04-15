@@ -67,4 +67,5 @@ Step 9: Post-shortlist checklist (pronunciation, handles, trademark)
 | Architectural decisions | `docs/plugins/namesmith/DECISIONS.md` |
 | Testing guide | `docs/plugins/namesmith/TESTING.md` |
 | User-facing README | `plugins/namesmith/README.md` |
-| Feature specs (.feature) | `docs/plugins/namesmith/specs/` ← to be written |
+| Feature specs (.feature) | `docs/plugins/namesmith/specs/` — 6 scenarios covering interview, personal brand, waves, availability, output, Track B, post-shortlist |
+| Contributor knowledge base | `docs/plugins/namesmith/CONTRIBUTOR-KNOWLEDGE.md` — research-backed context: archetype origins, registrar data, AI prompting patterns, known gaps |
