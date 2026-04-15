@@ -45,10 +45,9 @@ Use global mode when:
 
 ## First-run behaviour
 
-On first setup run, if `.draftloom/config.json` does not exist:
-- Create `.draftloom/config.json` with `storage_mode: "project"`
-- Do NOT ask the user about storage during setup (deferred)
-- If user asks about storage, load this guide and explain the options
+On first setup run, if `.draftloom/config.json` does not exist, the setup skill asks the user: "Store profiles in this project only, or globally? (project/global)" and creates `config.json` with the chosen `storage_mode`.
+
+If the user asks for more detail about the difference between modes, load this guide and explain the options above.
 
 ## Switching modes
 
@@ -56,3 +55,5 @@ To switch from project to global after setup:
 1. Copy profiles from `.draftloom/profiles/` to `~/.draftloom/profiles/`
 2. Update `.draftloom/config.json` → `storage_mode: "global"`
 3. Optionally delete `.draftloom/profiles/` from the project
+
+Claude performs these steps automatically if the user asks to switch storage mode via `/draftloom:setup`.

@@ -64,9 +64,11 @@ Full JSON schema for a voice profile. Load this file when constructing or valida
 | `created_at` | string | yes | ISO-8601 |
 | `updated_at` | string | yes | ISO-8601 |
 
-## Null fields
+## Optional fields
 
-All deferred fields not collected during setup must be written as `null` (not omitted). This ensures the schema is always complete and agents can check field presence reliably.
+All optional fields not collected during setup must be **omitted** from the profile JSON (not written as `null`). Agents check for field presence using `if "blog_url" in profile` — a missing key and a null value behave differently.
+
+The minimal profile written at creation time contains only: `id`, `audience`, `tone`, `storage`, `created_at`, `updated_at`.
 
 ## brand_voice_examples loading
 
