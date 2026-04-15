@@ -1,27 +1,23 @@
 {
   "name": "learn",
   "version": "0.1.0",
+  "description": "Structured AI-powered lessons for any topic, rendered in a local visual browser UI.",
   "author": {
     "name": "George Pilitsoglou",
     "url": "https://pilitsoglou.com",
     "github": "neotherapper"
   },
-  "description": "Structured AI-powered lessons for any topic, rendered in a local visual browser UI.",
-  "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/learn",
-  "repository": "https://github.com/neotherapper/claude-plugins",
-  "license": "MIT",
-  "keywords": ["learning", "teaching", "lessons", "education", "visual", "quiz"],
   "skills": [
     {
       "name": "learn",
-      "command": "/learn",
-      "description": "This skill should be used when the user asks to learn a topic, teach me something, explain a concept, or run /learn."
+      "path": "skills/learn/SKILL.md",
+      "commands": ["/learn"]
     },
     {
       "name": "learn:micro",
-      "command": "/learn:micro",
-      "description": "This skill should be used when the user asks for a micro lesson, a quick explanation, or runs /learn:micro."
+      "path": "skills/learn-micro/SKILL.md",
+      "commands": ["/learn:micro"]
     }
   ],
-  "hooks": "./hooks/hooks.json"
+  "hooks": "hooks/hooks.json"
 }
