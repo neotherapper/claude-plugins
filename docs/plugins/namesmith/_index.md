@@ -20,7 +20,7 @@ plugins/namesmith/
 │
 └── skills/
     └── site-naming/
-        ├── SKILL.md                       ← 9-step orchestration (lean, ~1,160 words)
+        ├── SKILL.md                       ← 10-step orchestration (v0.2.0, ~1,700 words)
         │
         ├── references/                    ← loaded on demand via $CLAUDE_PLUGIN_ROOT
         │   ├── brand-interview.md         ← 6 questions, weighting rules, personal brand flow
@@ -45,6 +45,7 @@ plugins/namesmith/
 ```
 User describes project
         ↓
+Step 0: Session orientation — resume or start fresh (reads existing names.md)
 Step 1: Detect project files (README, package.json, etc.)
 Step 2: Detect personal brand signals (portfolio, freelance, name)
 Step 3: Brand interview — 6 questions, one per message
@@ -67,5 +68,5 @@ Step 9: Post-shortlist checklist (pronunciation, handles, trademark)
 | Architectural decisions | `docs/plugins/namesmith/DECISIONS.md` |
 | Testing guide | `docs/plugins/namesmith/TESTING.md` |
 | User-facing README | `plugins/namesmith/README.md` |
-| Feature specs (.feature) | `docs/plugins/namesmith/specs/` — 6 scenarios covering interview, personal brand, waves, availability, output, Track B, post-shortlist |
+| Feature specs (.feature) | `docs/plugins/namesmith/specs/` — 7 feature files covering brand-interview, personal-brand-flow, wave-generation, availability-check, output-and-names-md, track-b-fallback, post-shortlist |
 | Contributor knowledge base | `docs/plugins/namesmith/CONTRIBUTOR-KNOWLEDGE.md` — research-backed context: archetype origins, registrar data, AI prompting patterns, known gaps |

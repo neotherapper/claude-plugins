@@ -50,7 +50,9 @@ Feature: Personal brand flow
     Then the skill starts the standard interview at Q2
     And it does not re-ask Q1
 
+  @wip
   Scenario: Personal brand signal with product name in same message
+    # Future enhancement — hybrid personal brand + product name detection not yet specified in SKILL.md
     Given the user says "I need a domain for my freelance studio — it's called Salt & Stone"
     Then the skill detects the personal brand signal ("freelance")
     And it also records "Salt & Stone" as a product/studio name candidate

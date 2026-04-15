@@ -248,7 +248,7 @@ You MUST create a TodoWrite task for each item and complete them in order:
 ...
 ```
 
-This pattern was missing from namesmith v0.1.0. It was added in v0.2.0. The result is that when namesmith activates, the user sees a task list with visible progress — exactly what the brainstorming skill does when it creates 9 tasks for its 9 steps. Without this, the skill's progress is invisible.
+This pattern was missing from namesmith v0.1.0. It was added in v0.2.0. The result is that when namesmith activates, the user sees a task list with visible progress — exactly what the brainstorming skill does when it creates a task for each of its workflow steps. Without this, the skill's progress is invisible.
 
 **Why it matters for namesmith specifically**: The site-naming workflow has 10 discrete steps. Without task tracking, a session that stalls at Step 5 (availability check) looks identical to one that completed successfully. With TodoWrite items, the user can see exactly where the workflow stopped.
 

@@ -34,9 +34,19 @@ Feature: Wave generation
     Then Wave 2 has more Abstract/Brandable candidates than Wave 1
     And Wave 2 has fewer Compound/Mashup candidates than Wave 1
 
-  Scenario: Wave 3 deep scan attempts multiple TLDs for top base words
-    Given Wave 1 and Wave 2 have completed
-    When the user says "deep scan" or "check more TLDs"
+  Scenario: Wave 3 requires explicit confirmation before scanning
+    Given at least Wave 1 has completed
+    And Wave 2 may or may not have run
+    When the user says "deep scan" or "check more TLDs" or "Wave 3"
+    Then the skill outputs a scope warning before loading anything:
+      """
+      Wave 3 will scan 1,441+ TLDs for your top 5 base words — this may take several minutes. Proceed?
+      """
+    And the scan does not start until the user confirms
+
+  Scenario: Wave 3 deep scan runs after confirmation
+    Given at least Wave 1 has completed
+    And the user has confirmed the Wave 3 scope warning
     Then the skill loads generation-archetypes.md Wave 3 section
     And it attempts to scan multiple TLDs for the top base words identified in earlier waves
 

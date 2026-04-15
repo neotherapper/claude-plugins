@@ -66,9 +66,9 @@ Options:
 
 Wait for the user's choice before continuing.
 
-- If they choose (1) **Continue**: load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/brand-interview.md` and `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` now — both are needed for Wave 2/3 weighting. Then skip to Step 8.
+- If they choose (1) **Continue**: load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/brand-interview.md` and `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/generation-archetypes.md` now — both are needed for Wave 2/3 weighting. Then skip to Step 8.
 - If they choose (2) **Start fresh**: proceed from Step 1 as normal.
-- If they choose (3) **Track B**: load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` now, then follow the Track B section. Skip to Step 8.
+- If they choose (3) **Track B**: load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/generation-archetypes.md` now, then follow the Track B section. Skip to Step 8.
 
 **If names.md does not exist**, proceed immediately to Step 1.
 
@@ -84,10 +84,10 @@ If accepted, read the file(s). Extract: project name, description, key features,
 ## Step 2: Personal Brand Detection
 
 Before running the standard interview, scan the user's description for personal brand signals:
-- Keywords: "portfolio", "freelance", "my name", "personal site", "consulting"
+- Keywords: "portfolio", "freelance", "my name", "personal site", "personal website", "my website", "consulting"
 - Pattern: a human first/last name as the primary subject
 
-If signals are detected, load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/brand-interview.md` and follow the **Personal Branding Flow** section in that file. Generate and check name patterns from that section, present results, then offer to continue to the standard interview for additional options.
+If signals are detected, load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/brand-interview.md` and follow the **Personal Branding Flow** section in that file. Generate and check name patterns from that section, present results, then offer to continue to the standard interview for additional options.
 
 - If user accepts → proceed to Step 3 (skip Q1 re-entry; use the detected name as Q1 answer)
 - If user declines → proceed to Step 5 to check availability of the personal brand names generated above, then Step 6 (format output), then Step 7 (write names.md)
@@ -96,7 +96,7 @@ If no signals, proceed to Step 3.
 
 ## Step 3: Brand Interview
 
-Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/brand-interview.md` now.
+Load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/brand-interview.md` now.
 
 Ask the 6 questions from that file **one per message**. Wait for each answer before asking the next. Never ask multiple questions in a single message.
 
@@ -114,11 +114,11 @@ Brand profile locked:
 
 ## Step 4: Wave 1 Generation
 
-Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` now.
+Load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/generation-archetypes.md` now.
 
-Apply the weighting rules from `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/brand-interview.md` against the brand profile. Generate 25–35 name candidates across all 7 archetypes weighted accordingly.
+Apply the weighting rules from `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/brand-interview.md` against the brand profile. Generate 25–35 name candidates across all 7 archetypes weighted accordingly.
 
-Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/tld-catalog.md` now. (Archetypes 5 and 7 require it regardless of Mode; loading it unconditionally at this step avoids mid-generation gaps.)
+Load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/tld-catalog.md` now. (Archetypes 5 and 7 require it regardless of Mode; loading it unconditionally at this step avoids mid-generation gaps.)
 
 Target distribution (adjust per weighting rules):
 - Short & Punchy: 4–5
@@ -144,18 +144,18 @@ Check environment variables before running scripts:
 
 - Both `CF_API_TOKEN` and `CF_ACCOUNT_ID` set → Tier 1 (Cloudflare)
 - Both `PORKBUN_API_KEY` and `PORKBUN_SECRET` set → Tier 2 (Porkbun)
-- Neither set → load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/api-setup.md`, show setup instructions, then proceed with Tier 3 (whois fallback)
+- Neither set → load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/api-setup.md`, show setup instructions, then proceed with Tier 3 (whois fallback)
 
 Execute availability check (batch into groups of ≤20 if more than 20 candidates):
 
 ```bash
-$CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/check-domains.sh domain1.com domain2.io ... domainN.dev
+\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/scripts/check-domains.sh domain1.com domain2.io ... domainN.dev
 ```
 
 Execute pricing lookup (always runs, no auth needed):
 
 ```bash
-$CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/get-prices.sh com io dev app co xyz icu
+\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/scripts/get-prices.sh com io dev app co xyz icu
 ```
 
 Parse check-domains.sh output (one line per domain):
@@ -166,7 +166,7 @@ Parse check-domains.sh output (one line per domain):
 
 ## Step 6: Format Output
 
-Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/registrar-routing.md` now.
+Load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/registrar-routing.md` now.
 
 Format Wave output using this exact structure:
 
@@ -224,7 +224,7 @@ Present wave output. Wait for the user's response.
 
 **User selects specific names:** Add them to the Shortlisted table in names.md.
 
-**User requests Wave 2:** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md`. Generate 20+ new candidates refined toward preferences stated ("more like X", "avoid Y"). Repeat Steps 4–7. No candidate from Wave 2 may repeat a Wave 1 name.
+**User requests Wave 2:** Load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/generation-archetypes.md` and `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/brand-interview.md` (needed for weighting rules after context compaction). Generate 20+ new candidates refined toward preferences stated ("more like X", "avoid Y"). Repeat Steps 4–7. No candidate from Wave 2 may repeat a Wave 1 name.
 
 **User requests Wave 3 / "check more TLDs" / "deep scan":** Output a scope warning first:
 
@@ -232,13 +232,13 @@ Present wave output. Wait for the user's response.
 Wave 3 will scan 1,441+ TLDs for your top 5 base words — this may take several minutes. Proceed?
 ```
 
-Wait for confirmation. Then load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` and follow the **Wave 3** section. Apply all 10 techniques exhaustively to every synonym of the core concept.
+Wait for confirmation. Then load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/generation-archetypes.md` and follow the **Wave 3** section. Apply all 10 techniques exhaustively to every synonym of the core concept.
 
-**All top picks are taken:** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` and follow the **Track B** section. Run the 4 fallback strategies in order: close variations → synonym exploration → creative reconstruction → domain hacks. Stop as soon as 5+ available options are found. If all 4 strategies complete with fewer than 5 available, show what was found and offer: "Want to broaden constraints, or start fresh with a different direction?"
+**All top picks are taken:** Load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/generation-archetypes.md` and follow the **Track B** section. Run the 4 fallback strategies in order: close variations → synonym exploration → creative reconstruction → domain hacks. Stop as soon as 5+ available options are found. If all 4 strategies complete with fewer than 5 available, show what was found and offer: "Want to broaden constraints, or start fresh with a different direction?"
 
 ## Step 9: Post-Shortlist Checklist
 
-After the user confirms their final shortlist, load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/post-shortlist.md`. Work through each section in order: pronunciation test, social handle check, trademark check, registration strategy, names.md update. Report findings after each section before proceeding to the next.
+After the user confirms their final shortlist, load `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/post-shortlist.md`. Work through each section in order: pronunciation test, social handle check, trademark check, registration strategy, names.md update. Report findings after each section before proceeding to the next.
 
 ---
 
@@ -246,21 +246,21 @@ After the user confirms their final shortlist, load `$CLAUDE_PLUGIN_ROOT/skills/
 
 | File | Load when |
 |------|-----------|
-| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/brand-interview.md` | Before Q1 (Step 3) or personal brand flow (Step 2) |
-| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` | Before Wave 1 generation (Step 4), Wave 3, or Track B |
-| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/tld-catalog.md` | Before Wave 1 generation (Step 4) — always; archetypes 5 and 7 require it regardless of Mode |
-| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/registrar-routing.md` | When formatting Wave output (Step 6) |
-| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/api-setup.md` | When no API env vars detected (Step 5) |
-| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/post-shortlist.md` | After user confirms final shortlist (Step 9) |
+| `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/brand-interview.md` | Before Q1 (Step 3) or personal brand flow (Step 2) |
+| `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/generation-archetypes.md` | Before Wave 1 generation (Step 4), Wave 3, or Track B |
+| `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/tld-catalog.md` | Before Wave 1 generation (Step 4) — always; archetypes 5 and 7 require it regardless of Mode |
+| `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/registrar-routing.md` | When formatting Wave output (Step 6) |
+| `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/api-setup.md` | When no API env vars detected (Step 5) |
+| `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/post-shortlist.md` | After user confirms final shortlist (Step 9) |
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/check-domains.sh` | 3-tier checker: CF → Porkbun → whois |
-| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/get-prices.sh` | Porkbun no-auth TLD pricing, always runs |
+| `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/scripts/check-domains.sh` | 3-tier checker: CF → Porkbun → whois |
+| `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/scripts/get-prices.sh` | Porkbun no-auth TLD pricing, always runs |
 
-Both scripts must be executable: `chmod +x $CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/*.sh`
+Both scripts must be executable: `chmod +x \${CLAUDE_PLUGIN_ROOT}/skills/site-naming/scripts/*.sh`
 
 ## Example
 
