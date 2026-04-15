@@ -45,7 +45,7 @@ check_cloudflare() {
     json_array=$(printf '%s\n' "${batch[@]}" | jq -R . | jq -s .)
 
     local response
-    response=$(curl -s -X POST \
+    response=$(curl -s --max-time 15 -X POST \
       "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/registrar/domain-check" \
       -H "Authorization: Bearer ${CF_API_TOKEN}" \
       -H "Content-Type: application/json" \
@@ -72,10 +72,10 @@ check_cloudflare() {
 check_porkbun() {
   local domain="$1"
   local response
-  response=$(curl -s -X POST \
+  response=$(curl -s --max-time 15 -X POST \
     "https://api.porkbun.com/api/json/v3/domain/checkDomain/${domain}" \
     -H "Content-Type: application/json" \
-    -d "{\"apikey\":\"${PORKBUN_API_KEY}\",\"secretapikey\":\"${PORKBUN_SECRET}\"}" 2>/dev/null) || true
+    -d "$(jq -n --arg k "${PORKBUN_API_KEY}" --arg s "${PORKBUN_SECRET}" '{apikey: $k, secretapikey: $s}')" 2>/dev/null) || true
 
   local status
   status=$(echo "$response" | jq -r '.status // "ERROR"' 2>/dev/null)
@@ -111,7 +111,7 @@ check_whois() {
   whois_output=$(whois "$domain" 2>/dev/null) || true
 
   # Redemption detection: domain expired but in grace period
-  if echo "$whois_output" | grep -qi "redemption period\|pendingDelete\|pending delete"; then
+  if echo "$whois_output" | grep -qiE "redemption period|pendingDelete|pending delete"; then
     echo "redemption $domain na"
     return
   fi
@@ -129,8 +129,8 @@ check_whois() {
       local dns_result
       dns_result=$(dig +short "$domain" 2>/dev/null | head -1)
       if [[ -z "$dns_result" ]]; then
-        # Registered but no DNS — could be parked or in redemption
-        echo "taken $domain na"
+        # Registered but no DNS — likely expired/parked/redemption candidate
+        echo "redemption $domain na"
       else
         echo "taken $domain na"
       fi

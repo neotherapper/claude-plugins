@@ -26,7 +26,7 @@ if [[ $# -eq 0 ]]; then
 fi
 
 # Fetch the full pricing table once (no auth required)
-PRICING_JSON=$(curl -s -X POST \
+PRICING_JSON=$(curl -s --max-time 15 -X POST \
   "https://api.porkbun.com/api/json/v3/pricing/get" \
   -H "Content-Type: application/json" \
   -d '{}' 2>/dev/null) || true
