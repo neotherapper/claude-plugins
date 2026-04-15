@@ -58,7 +58,7 @@ After opening the research file, check whether the question is **framework-speci
 - Endpoint conventions specific to the framework ("what are the REST routes?")
 - Authentication flows tied to the framework ("how does Laravel handle CSRF?")
 - Framework-specific admin, dashboard, or config paths
-- Anything phrased as "how do I" or "what's the endpoint pattern for" where the framework matters
+- Anything phrased as "how do I" or "what's the pattern for" a specific framework feature — where the framework name or a framework-specific term (e.g., "WooCommerce", "Blade", "Eloquent") appears in the question
 
 **Do not load the tech pack for factual questions:**
 - "What endpoints did we find?" → research file is the source of truth
