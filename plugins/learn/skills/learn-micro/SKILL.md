@@ -30,7 +30,7 @@ Run both checks before any content generation. Do not proceed past a failing che
 Read `.learn/server/state/server-info` from the project root.
 
 - If the file does not exist, or the `status` field is not `"running"`, halt immediately. See error handling table: **Server not running**.
-- If the file is readable and `status` is `"running"`, extract `screen_dir` and `port` and carry both forward.
+- If the file is readable and `status` is `"running"`, extract `screen_dir`, `state_dir`, and `port` and carry all three forward.
 
 ### Check 2: Expertise level
 
@@ -57,12 +57,7 @@ Hold all three in context for the duration of this skill invocation. Do not rely
 
 ## Step 2: Vault lookup
 
-Before generating the Lesson JSON, attempt to source the `resources[]` array from the nikai Knowledge Vault. Follow the four-step lookup contract defined in `vault-integration.md` exactly:
-
-1. Map the lesson topic to a vault category (`knowledge/ai-tools/`, `knowledge/methodologies/`, `knowledge/prompt-techniques/`, `knowledge/edtech/`, `knowledge/sales-tools/`). If the topic does not map to any category, skip to Step 4 of the vault contract.
-2. Read `knowledge/{category}/_index.md` and find the entry whose slug or name matches the topic (case-insensitive substring match; prefer exact slug match).
-3. If a match exists and `status: detailed`, read the entry file and extract `url` and the first paragraph of `## One-Paragraph Summary`. Set `source: "vault"`.
-4. If no match, vault is unreachable, or matched entry has `status: stub`, fall back to 2–3 ai-suggested resources with at least one official documentation link. Set `source: "ai-suggested"` on all fallback resources.
+Before generating the Lesson JSON, attempt to source the `resources[]` array from the nikai Knowledge Vault. Follow the lookup contract defined in `skills/learn-micro/references/vault-integration.md` exactly. Do not re-implement the steps here.
 
 If the vault lookup fails for any reason (file not found, read error, vault not in session), continue silently. Do not block lesson generation. See error handling table: **Vault lookup fails**.
 
@@ -83,14 +78,14 @@ Generate a single JSON object that strictly conforms to the `Lesson` interface d
 - `generate_task` — starts with an action verb; completable in 5–10 minutes; directly exercises the concept
 - `quiz` — exactly 3 questions: one `multiple_choice` (4 options, exactly 1 correct), one `fill_blank`, one `explain`; every `explanation` field states why the answer is correct
 - `resources` — at least 1 item with `type: "docs"`; sourced via vault lookup (Step 2)
-- `next` — one concept directly related to the topic, one step up in complexity; phrased as "When you're ready: [concept]"
+- `next` — one concept directly related to the topic, one step up in complexity; must be the concept name only (e.g. "CSS Grid") — the Step 5 response template adds the "When you're ready:" prefix
 - `estimated_minutes` — realistic read + generate task time; typically 8–15 minutes
 
 ### Validation before proceeding
 
 After generating the JSON, validate against all rules in `lesson-schema.md`:
 
-- `common_mistakes` has exactly 2, or 3 items (never 0, never 4+)
+- `common_mistakes` has 2 or 3 items (never 0, never 4+)
 - `quiz` has exactly 3 items, one of each required type
 - `resources` has at least 1 item with `type: "docs"`
 - `estimated_minutes` is a number between 1 and 60
