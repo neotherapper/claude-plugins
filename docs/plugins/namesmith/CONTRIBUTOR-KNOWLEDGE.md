@@ -105,7 +105,7 @@ Each archetype represents a distinct market positioning strategy, validated by s
 
 ## 4 — Domain registrar knowledge
 
-### Registrar comparison (2026 Q2 pricing)
+### Registrar comparison (last verified: 2026-Q2 — verify before use, renewal prices matter more than first-year promotions)
 
 | Registrar | .com/yr | TLDs | Bulk batch API | Pricing API | Auth needed |
 |-----------|---------|------|----------------|-------------|-------------|

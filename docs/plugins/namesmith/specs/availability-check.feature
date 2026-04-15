@@ -73,3 +73,28 @@ Feature: Availability check
     When a domain is in redemption period
     Then the output shows ⚠️ redemption with a note about elevated recovery cost
     And the domain is not listed as simply ❌ taken
+
+  # --- Batching boundary conditions ---
+
+  Scenario: Exactly 20 candidates — single invocation, no split
+    Given CF_API_TOKEN and CF_ACCOUNT_ID are set
+    And Wave 1 produced exactly 20 candidates
+    When check-domains.sh is invoked
+    Then the script is called exactly once with all 20 domains
+    And no second invocation occurs
+
+  Scenario: Exactly 21 candidates — splits into 20 + 1
+    Given CF_API_TOKEN and CF_ACCOUNT_ID are set
+    And Wave 1 produced exactly 21 candidates
+    When check-domains.sh is invoked
+    Then the first call contains exactly 20 domains
+    And the second call contains the remaining 1 domain
+
+  # --- Fallback when both CF and Porkbun keys are absent ---
+
+  Scenario: api-setup.md is loaded before whois runs
+    Given CF_API_TOKEN, CF_ACCOUNT_ID, PORKBUN_API_KEY, and PORKBUN_SECRET are all unset
+    When availability check is about to run
+    Then api-setup.md is loaded first
+    And setup instructions are displayed to the user
+    And only after showing instructions does the whois fallback proceed

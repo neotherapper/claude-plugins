@@ -246,7 +246,7 @@ After the user confirms their final shortlist, load `\${CLAUDE_PLUGIN_ROOT}/skil
 
 | File | Load when |
 |------|-----------|
-| `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/brand-interview.md` | Before Q1 (Step 3) or personal brand flow (Step 2) |
+| `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/brand-interview.md` | Before Q1 (Step 3), personal brand flow (Step 2), or Wave 2 (Step 8 — context compaction safeguard) |
 | `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/generation-archetypes.md` | Before Wave 1 generation (Step 4), Wave 3, or Track B |
 | `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/tld-catalog.md` | Before Wave 1 generation (Step 4) — always; archetypes 5 and 7 require it regardless of Mode |
 | `\${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/registrar-routing.md` | When formatting Wave output (Step 6) |

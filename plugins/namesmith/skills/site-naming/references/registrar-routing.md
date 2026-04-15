@@ -12,7 +12,7 @@ Route each discovered domain to the best registrar for purchase. Use the primary
 | .io, .co, .ai, .app, .dev, .me, .xyz, .online, .site, .fun, .space | Cloudflare | `https://dash.cloudflare.com/{CF_ACCOUNT_ID}/domains/registrations/purchase?domain={domain}` |
 | .gg, .sh, .fm, .icu, .top (CF unsupported) | Porkbun fallback | `https://porkbun.com/checkout/search?q={domain}` |
 | .ly, .is, .it, .in, .at, .am, .as, .be, .by, .es, .ms | Namecheap | `https://www.namecheap.com/domains/registration/results/?domain={domain}` |
-| .gg, .st, .pt, .to, .my | Dynadot | `https://www.dynadot.com/domain/search.html?domain={domain}` |
+| .st, .pt, .to, .my | Dynadot | `https://www.dynadot.com/domain/search.html?domain={domain}` |
 
 **When CF is not configured (Porkbun path):**
 
@@ -22,7 +22,7 @@ Route each discovered domain to the best registrar for purchase. Use the primary
 | .com, .net, .org, .info, .biz | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
 | .sh, .fm, .gg | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
 | .ly, .is, .it, .in, .at, .am, .as, .be, .by, .es, .ms | Namecheap | `https://www.namecheap.com/domains/registration/results/?domain={domain}` |
-| .gg, .st, .pt, .to, .my | Dynadot | `https://www.dynadot.com/domain/search.html?domain={domain}` |
+| .st, .pt, .to, .my | Dynadot | `https://www.dynadot.com/domain/search.html?domain={domain}` |
 
 ## Cloudflare Registrar
 
@@ -70,7 +70,7 @@ Specialises in ccTLDs that other registrars do not carry.
 https://www.dynadot.com/domain/search.html?domain={domain}
 ```
 
-**When to use:** .gg, .st, .pt, .to, .my and other less common ccTLDs.
+**When to use:** .st, .pt, .to, .my and other less common ccTLDs not carried by Porkbun. (.gg routes to Porkbun — it is in Porkbun's catalog.)
 
 ## Sedo (Aftermarket)
 

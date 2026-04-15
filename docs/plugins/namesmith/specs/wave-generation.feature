@@ -67,3 +67,24 @@ Feature: Wave generation
     When any wave result is displayed
     Then the last line asks either "Anything catching your eye, or should I run Wave 2?"
     Or (for Wave 2+) "Anything catching your eye, or should I run Wave 3?"
+
+  # --- Wave 2 context compaction safeguard ---
+
+  Scenario: Wave 2 reloads brand-interview.md before generating candidates
+    # brand-interview.md holds weighting rules; without it Wave 2 can't apply the correct archetype weights
+    Given Wave 1 has completed and names.md has been written
+    When the user requests Wave 2
+    Then the skill loads brand-interview.md before generating any Wave 2 candidates
+    And the skill loads generation-archetypes.md before generating any Wave 2 candidates
+    And Wave 2 applies the same brand profile weights derived from the original interview
+
+  # --- Archetype distribution boundaries ---
+
+  Scenario: Wave 1 never produces zero candidates for any required archetype
+    When Wave 1 generation runs
+    Then no archetype in the following list has zero candidates:
+      | Archetype          |
+      | Short & Punchy     |
+      | Descriptive        |
+      | Abstract/Brandable |
+      | Compound/Mashup    |

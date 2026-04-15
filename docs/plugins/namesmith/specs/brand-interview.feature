@@ -59,3 +59,15 @@ Feature: Brand interview
     When the user has not yet answered Q6
     Then no name candidates are generated or displayed
     And the skill only asks Q6
+
+  Scenario: Q6 with multiple constraints applies all of them
+    When the user answers Q6 with "no hyphens and no numbers"
+    Then the brand profile summary shows both constraints
+    And Wave 1 candidates contain no hyphens
+    And Wave 1 candidates contain no numeric characters
+
+  Scenario: Brand profile summary is shown before generation starts
+    Given the user has answered Q1 through Q6
+    When Q6 is answered
+    Then the skill outputs the "Brand profile locked:" summary
+    And it proceeds to Wave 1 generation only after the summary is shown

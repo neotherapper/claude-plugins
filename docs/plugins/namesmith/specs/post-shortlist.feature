@@ -22,9 +22,10 @@ Feature: Post-shortlist checklist
 
   Scenario: Pronunciation test includes the phone and Starbucks rule
     When the pronunciation section runs
-    Then it instructs the user to:
-      - Say the name out loud as if on a phone call
-      - Use the Starbucks rule: can a barista spell it after hearing it once?
+    Then it instructs the user to test pronunciation with these rules:
+      | Rule                                                             |
+      | Say the name out loud as if on a phone call                     |
+      | Starbucks rule: can a barista spell it after hearing it once?    |
 
   Scenario: Trademark section names all three search registries
     When the trademark section runs

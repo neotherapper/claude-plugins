@@ -38,8 +38,14 @@ Feature: Output format and names.md
     When wave results include an available .ly domain
     Then the registration link uses the Namecheap URL pattern
 
-  Scenario: Registration links use Dynadot for .gg
+  Scenario: Registration links use Porkbun for .gg regardless of CF configuration
+    # .gg is CF-unsupported — Porkbun is the fallback in both the CF-configured and no-CF paths
     When wave results include an available .gg domain
+    Then the registration link uses the Porkbun URL pattern
+
+  Scenario: Registration links use Dynadot for .st
+    # .st is a Dynadot-specific ccTLD not carried by Cloudflare or Porkbun
+    When wave results include an available .st domain
     Then the registration link uses the Dynadot URL pattern
 
   # --- names.md schema ---

@@ -56,3 +56,20 @@ Feature: Track B fallback
   Scenario: Track B results do not duplicate Wave N candidates
     When Track B runs any strategy
     Then no candidate generated is identical to a candidate shown in any previous wave
+
+  # --- Boundary: exactly 5 available ---
+
+  Scenario: Track B stops when exactly 5 available options are found
+    Given Strategy 1 generates exactly 5 available close variations
+    When Track B evaluates results
+    Then Strategies 2, 3, and 4 do not run
+    And exactly 5 options are displayed as results
+
+  # --- Cumulative count across strategies ---
+
+  Scenario: Track B counts available options cumulatively across strategies
+    Given Strategy 1 finds 2 available options
+    And Strategy 2 finds 2 available options
+    When Track B evaluates cumulative results after Strategy 2
+    Then Strategy 3 runs because the cumulative total (4) is still under 5
+    And the 4 previously found options are preserved, not discarded
