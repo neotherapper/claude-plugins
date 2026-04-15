@@ -20,7 +20,10 @@ Entry point for the `learn` plugin. Classify the user's learning intent, determi
 | "explain [thing]" | Scope check → route to learn:micro |
 | "how does [thing] work" | Scope check → route to learn:micro |
 | "what is [thing]" (learning context) | Scope check → route to learn:micro |
-| "/learn serve" or "start the server" | Respond: "Run `bash plugins/learn/server/start-server.sh --project-dir .` to start the visual server." |
+| "I don't understand [thing]" | Scope check → route to learn:micro |
+| "walk me through [thing]" | Scope check → route to learn:micro |
+| "/learn [topic]" (bare invocation) | Scope check → route to learn:micro |
+| "/learn serve" or "start the server" | Respond: "Start the visual server by running: `bash plugins/learn/server/start-server.sh --project-dir .` from your project root. Then open http://localhost:7337 in your browser." |
 | "quiz me on [thing]" | Respond: "`learn:quiz` is coming in v0.2.0. Use `/learn [topic]` to get a lesson with a built-in quiz." |
 | "what have I learned" / "show progress" | Respond: "Progress tracking is coming in v0.2.0." |
 | "continue my lesson on X" | Respond: "Session recall is coming in v0.2.0." |
@@ -37,6 +40,8 @@ Before routing to learn:micro, classify whether the topic is a single concept or
 **Broad topic (ask before routing):**
 - Maps to >3 distinct sub-concepts or is a technology/field name
 - Examples: "React", "machine learning", "system design", "become a full-stack engineer", "Python"
+
+When genuinely uncertain whether a topic is single or broad, ask rather than guess — default to the broad topic flow.
 
 When the topic is broad, respond:
 
