@@ -1,0 +1,8 @@
+{
+  "SessionStart": {
+    "action": "check-profiles",
+    "check_path": ".draftloom/profiles/",
+    "hint_when_empty": "No Draftloom profiles found. Run `/draftloom:setup` to create your first writing profile.",
+    "silent_when_found": true
+  }
+}
