@@ -62,7 +62,7 @@ When all 4 dimensions ≥ 75:
 
 Read the escalation questions from `scoring-rubric.md`. Ask them one at a time.
 
-If this is the first escalation in this run: write `escalation_triggered: true` to `meta.json`. Max one escalation per run — if escalation was already triggered, skip to patch routing instead.
+If this is the first escalation in this run: write `escalation_triggered: true` to `meta.json`. Max one escalation per run — if escalation was already triggered, print: `"Escalation already used this run — switching to patch mode on the weakest dimension."` then skip to patch routing instead.
 
 On restart: unlock `locked_brief` in `state.json`, update `brief.md`, reset `current_iteration` to 0 in `state.json`.
 
