@@ -40,7 +40,11 @@ Write minimal `meta.json`:
   "title": "{filename}",
   "slug": "{slug}",
   "profile_id": "{selected or null}",
-  "draft_status": "eval_only"
+  "keywords": [],
+  "meta_description": null,
+  "draft_status": "eval_only",
+  "created_at": "{ISO-8601 UTC timestamp}",
+  "updated_at": "{ISO-8601 UTC timestamp}"
 }
 ```
 
@@ -55,7 +59,7 @@ Load `skills/eval/references/eval-guide.md` for eval-only mode specifics.
 
 ## Step 5: Show scored report
 
-When orchestrator signals eval complete, display:
+When orchestrator signals eval complete, display (✓ = score ≥ 75, ⚠ = score < 75):
 
 ```
 Score report: {filename}

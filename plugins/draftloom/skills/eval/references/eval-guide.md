@@ -25,9 +25,10 @@ If `profile_id` is null:
 ## Patch mode after eval
 
 If the user answers "yes" to the patch offer:
+- Read and store iteration-1 scores from `scores.json` before dispatching writer
 - Dispatch writer with `mode: "patch_only"` — reads all failing eval JSONs, patches sections_affected
-- Run a second eval pass (eval-only mode again)
-- Show iteration-2 scores alongside iteration-1 scores for comparison:
+- Run a second eval pass (eval-only mode again) — orchestrator overwrites `scores.json` with iteration-2 scores
+- Show iteration-2 scores alongside the stored iteration-1 scores for comparison:
   ```
   Before → After
   SEO    78 → 84  ✓

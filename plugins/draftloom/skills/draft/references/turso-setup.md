@@ -25,7 +25,7 @@ turso db tokens create draftloom-analytics
 ```
 
 ### 2. Enable in config.json
-Add to `.draftloom/config.json`:
+Add to `.draftloom/config.json` (add this file to `.gitignore` — it contains your auth token):
 ```json
 {
   "turso_enabled": true,

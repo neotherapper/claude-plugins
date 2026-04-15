@@ -58,7 +58,7 @@ posts/{slug}/
   "updated_at": "2026-04-15T10:30:00Z"
 }
 ```
-`draft_status` values: `drafting` · `iterating` · `passing` · `paused` · `abandoned` · `published`
+`draft_status` values: `drafting` · `iterating` · `passing` · `paused` · `abandoned` · `published` · `eval_only` (eval skill only — skip writer and brief)
 
 ---
 

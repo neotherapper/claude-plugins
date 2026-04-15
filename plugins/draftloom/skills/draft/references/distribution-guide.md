@@ -1,6 +1,6 @@
 # Distribution Guide
 
-Templates and character limits for platform copy. Load this file in distribution.md.
+Templates and character limits for platform copy. Load this file in the distribution agent.
 
 ## Platform constraints
 
