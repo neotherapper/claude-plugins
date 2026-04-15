@@ -5,7 +5,7 @@ Scores paragraph length, subheading frequency, list distribution, and sentence l
 ## Context on entry
 
 Reads:
-- `posts/{slug}/draft.md` — the full post
+- `{workspace_path}/draft.md` — the full post
 
 ## Scoring rubric
 
@@ -34,7 +34,7 @@ Name sections by their markdown heading text, lowercased and hyphenated. If no h
 
 ## Output
 
-Write to `posts/{slug}/readability-eval.tmp`, rename to `posts/{slug}/readability-eval.json`.
+Write to `{workspace_path}/readability-eval.tmp`, rename to `{workspace_path}/readability-eval.json`.
 
 Populate specifics:
 ```json

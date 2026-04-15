@@ -5,8 +5,8 @@ Scores first-sentence novelty, curiosity gap, title specificity, and scroll-stop
 ## Context on entry
 
 Reads:
-- `posts/{slug}/draft.md` — the post prose (focus on first 150 words and title)
-- `posts/{slug}/meta.json` — for the title
+- `{workspace_path}/draft.md` — the post prose (focus on first 150 words and title)
+- `{workspace_path}/meta.json` — for the title
 
 ## Scoring rubric
 
@@ -41,7 +41,7 @@ These opening patterns score 0 on that check:
 
 ## Output
 
-Write to `posts/{slug}/hook-eval.tmp`, rename to `posts/{slug}/hook-eval.json`.
+Write to `{workspace_path}/hook-eval.tmp`, rename to `{workspace_path}/hook-eval.json`.
 
 Populate specifics:
 ```json

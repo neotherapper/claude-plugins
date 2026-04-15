@@ -8,8 +8,8 @@ Required:
 - `workspace_path`: path to `posts/{slug}/`
 
 Reads:
-- `posts/{slug}/draft.md` — final post prose
-- `posts/{slug}/meta.json` — title, keywords, draft_status
+- `{workspace_path}/draft.md` — final post prose
+- `{workspace_path}/meta.json` — title, keywords, draft_status
 - Profile JSON — tone[], cta_goal, blog_url, channels
 
 Load `skills/draft/references/distribution-guide.md` for platform templates and character limits.
@@ -51,11 +51,11 @@ Generate. Count characters. If > 60, regenerate.
 
 2–3 sentences on the core argument. 1 sentence on who benefits. End with `Read it here → {CTA_LINK}`.
 
-Generate. Count words. If > 150, regenerate.
+Generate. Count words. If > 150, regenerate. Substitute `{CTA_LINK}` with `profile.blog_url` if available; otherwise use the literal placeholder `[INSERT_URL]`.
 
 ## Output
 
-Write to `posts/{slug}/distribution.tmp`:
+Write to `{workspace_path}/distribution.tmp`:
 
 ```json
 {
@@ -68,7 +68,7 @@ Write to `posts/{slug}/distribution.tmp`:
 }
 ```
 
-Rename `distribution.tmp` → `distribution.json`.
+Rename `{workspace_path}/distribution.tmp` → `{workspace_path}/distribution.json`.
 
 ## Display
 

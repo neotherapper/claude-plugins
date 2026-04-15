@@ -5,7 +5,7 @@ Scores tone adjective match, sentence rhythm, vocabulary range, and brand voice 
 ## Context on entry
 
 Reads:
-- `posts/{slug}/draft.md` — the full post
+- `{workspace_path}/draft.md` — the full post
 - Profile JSON — for tone[], audience_expertise, brand_voice_examples
 - Profile is null in eval-only mode with "none" selection → use generic rubric
 
@@ -42,7 +42,7 @@ When profile is null:
 - No filler phrases: "very", "really", "basically", "just" used ≤ 3× per 500w
 - Consistent register: formal throughout or conversational throughout (no mixing)
 - Skip: tone adjective check (no profile), brand voice examples (no profile)
-- Max score without a profile: 75 (voice adjective check worth 40 points → set to 30/40 as neutral)
+- Max score without a profile: 75. Cap total at 75 regardless of table arithmetic — do not award points for the tone adjective check (set to 30/40 as neutral baseline).
 
 ## sections_affected mapping
 
@@ -54,7 +54,7 @@ When profile is null:
 
 ## Output
 
-Write to `posts/{slug}/voice-eval.tmp`, rename to `posts/{slug}/voice-eval.json`.
+Write to `{workspace_path}/voice-eval.tmp`, rename to `{workspace_path}/voice-eval.json`.
 
 Populate specifics:
 ```json

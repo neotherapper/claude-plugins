@@ -82,8 +82,9 @@ Contract for all eval agent output files. Every eval agent must write a file mat
   "subheadings_per_300w": 0.5,
   "has_lists": false,
   "avg_sentence_words": 22,
+  "sentence_length_variance": "low",
   "offending_sections": ["body_para_1", "body_para_3"],
-  "recommend": "Break body_para_1 into two shorter paragraphs. Add a subheading before body_para_3."
+  "recommend": "Break body_para_1 into two shorter paragraphs. Add a subheading before body_para_3. Add a bullet list to the Evidence section."
 }
 ```
 

@@ -5,9 +5,9 @@ Scores keyword density, meta description, heading hierarchy, Flesch readability,
 ## Context on entry
 
 Reads:
-- `posts/{slug}/draft.md` — the post prose
-- `posts/{slug}/meta.json` — for existing meta_description and keywords
-- `posts/{slug}/brief.md` — for primary keyword (Q5) if set
+- `{workspace_path}/draft.md` — the post prose
+- `{workspace_path}/meta.json` — for existing meta_description and keywords
+- `{workspace_path}/brief.md` — for primary keyword (Q5) if set
 
 ## Scoring rubric
 
@@ -20,7 +20,7 @@ Load `skills/draft/references/scoring-rubric.md` → SEO dimension section.
 | Primary keyword density 1–3% | 25 | < 0.5% or > 4% |
 | Meta description present and 120–160 chars | 20 | Missing or wrong length |
 | Meta description includes primary keyword | 10 | Keyword absent |
-| Heading hierarchy (one H1, logical H2/H3) | 20 | No H1, or H3 before H2 |
+| Heading hierarchy (no H1 in prose — CMS renders title as H1; logical H2/H3 sequence) | 20 | H3 appears before any H2, or H2 is missing entirely |
 | Flesch Reading Ease ≥ 60 | 15 | < 50 = heavy penalty |
 | Internal link opportunities identified (≥ 2) | 10 | 0 identified |
 
@@ -30,12 +30,12 @@ Load `skills/draft/references/scoring-rubric.md` → SEO dimension section.
 |---------------|------------------------|
 | Meta description | `["meta_description"]` |
 | Keyword density | `["intro"]` or the section with lowest keyword density |
-| Heading hierarchy | `["structure"]` |
+| Heading hierarchy (H3 before H2, or missing H2) | `["structure"]` |
 | Flesch score | `["body_para_1"]` or densest paragraph |
 
 ## Output
 
-Write to `posts/{slug}/seo-eval.tmp`, then rename to `posts/{slug}/seo-eval.json`.
+Write to `{workspace_path}/seo-eval.tmp`, then rename to `{workspace_path}/seo-eval.json`.
 
 Follow the eval-output-spec.md schema exactly. Populate `specifics` with:
 ```json
