@@ -52,14 +52,31 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 **Goal:** expand framework coverage beyond the current 12 packs.
 
 **Candidates (in priority order):**
-1. Remix / React Router v7 (file-based routing, loader/action pattern)
-2. SvelteKit (file routes, `+page.server.ts` endpoints, form actions)
-3. Express (no conventions, OSINT-heavy; generic probe checklist)
-4. Spring Boot (Actuator endpoints, Spring Data REST, OpenAPI auto-generation)
-5. Payload CMS (REST + GraphQL, version-specific admin paths)
-6. Directus (REST + GraphQL, `/items/{collection}` pattern, system collections)
+
+| Framework | Version | Key signals | Notes |
+|-----------|---------|-------------|-------|
+| SvelteKit | 2.x | `__sveltekit_` globals, `_app/` static dir, `+page.svelte` routes | Compiled output — bundle analysis needed |
+| Remix / React Router v7 | 2.x | `__remixContext` global, `window.__remixManifest`, `data-remix-*` | No API routes — loaders/actions only |
+| tRPC | 10.x | `@trpc/client` in bundles, `.trpc.` procedure calls | No URL patterns — bundle analysis + DevTools capture |
+| Nuxt 2.x | 2.x | `window.__NUXT__` (not `__NUXT_DATA__`), Vuex state | EOL but widely deployed; differs from Nuxt 3 |
+| Hono | 4.x | `X-Powered-By: Hono`, `@hono/zod-openapi` → auto OpenAPI | Edge-first; Cloudflare Workers / Deno |
+| Hasura | 3.x | `/v1/graphql`, `x-hasura-*` headers, introspection auto-generates full schema | Managed GraphQL on Postgres |
+| Express | 4.x / 5.x | No conventions — OSINT-heavy; `X-Powered-By: Express` | Generic probe checklist; route discovery via bundle analysis |
+| Spring Boot | 3.x | `/actuator/` endpoints, `springdoc-openapi` auto-generates `/v3/api-docs` | Actuator exposes health, metrics, mappings |
+| Payload CMS | 3.x | `/api/{collection}`, `/api/globals/{slug}`, REST + GraphQL dual surface | Version-specific admin paths |
+| Directus | 11.x | `/items/{collection}`, `/system/` prefix, `/server/info` | REST + GraphQL; system collections enumerable |
 
 Each new pack triggers a failing check in `validate-fingerprinting.sh` automatically (self-healing coverage loop).
+
+**Domain-specific packs** (no framework fingerprint — grouped by site type):
+
+- **Real estate directory**: GeoJSON search endpoints, Leaflet/Mapbox map APIs, faceted search parameter structures, `RealEstateProperty` JSON-LD schema extraction
+- **Government portal**: MantisIMS detection, DataTables jQuery API patterns, WordPress nonce auth, public dataset API discovery
+
+**Research sources used for pack design:**
+- tRPC patterns → `knowledge/developer-tools/frontend/trpc.md` (nikai)
+- Nuxt 2 real-world example → `docs/research/spitogatos/tech-stack.md` (nikai)
+- GraphQL vs REST directory API patterns → `research/guides/graphql-vs-rest-directory-apis.md` (nikai)
 
 ---
 
@@ -83,3 +100,95 @@ Each new pack triggers a failing check in `validate-fingerprinting.sh` automatic
 - Formats: Postman collection (via `openapi-to-postman`), Bruno collection, Insomnia workspace
 - Falls back to manual scaffolding if spec is partial
 - Output: `docs/research/{site}/exports/{format}/`
+
+---
+
+## Phase Enhancement Backlog
+
+Improvements to existing phases that don't require a version bump — suitable for patch releases.
+
+### Phase 2 — Passive Recon
+
+**Structured data extraction (JSON-LD)**
+Add `<script type="application/ld+json">` extraction to Phase 2. Key schema types:
+- `SearchAction` → reveals search endpoint URL and query parameter name directly
+- `Organization.sameAs` → social profiles and associated domains
+- `Product` / `LocalBusiness` → data shape hints for API responses
+
+See `references/osint-sources.md` — JSON-LD section.
+
+**Robots.txt structural analysis**
+Parse Disallow paths as infrastructure signals:
+- `/api/*` → confirms API surface and root path
+- `/admin/*` → admin panel location (often different auth surface)
+- `/internal/*` → internal/external endpoint split
+- `/partner/*` / `/enterprise/*` → tiered access surfaces
+
+### Phase 3 — Fingerprinting
+
+**Bot protection detection**
+Add to infrastructure table:
+- `CF-Ray` / `cf-cache-status` → Cloudflare (with CDN)
+- `X-AWS-WAF-Action` → AWS WAF
+- `X-Sucuri-ID` → Sucuri WAF
+- `_abck` cookie → Akamai Bot Manager
+- reCAPTCHA / hCaptcha `<script>` tags → CAPTCHA provider
+
+Log as: `Bot protection: Cloudflare (source: CF-Ray header)`
+
+### Phase 7 — JS & Source Maps
+
+**Webhook URL discovery**
+Bundle grep patterns to add:
+- Path patterns: `/webhook`, `/webhooks`, `/hook`, `/callback`, `/notify`
+- Standard probe paths: `/api/webhooks`, `/{version}/webhooks`, `/hooks`
+- Tech pack sections should document known webhook paths (Stripe, GitHub, Shopify)
+
+### Phase 9 — OSINT
+
+**Expand Google dorking patterns** (add to phase-detail.md):
+```
+site:github.com "{domain}" "endpoint" "api"
+site:{domain} inurl:"/api/v" OR inurl:"/graphql"
+inurl:"github.com" "{domain}" "NEXT_PUBLIC_API_URL" OR "API_BASE_URL"
+site:{domain} "swagger" OR "openapi" OR "/api/docs"
+```
+
+**Add optional Shodan + SecurityTrails integration**
+Both require API keys — detect via env var, log `[TOOL-UNAVAILABLE:shodan]` if absent.
+See `references/osint-sources.md` for query patterns.
+
+### Phase 11 + api-surfaces — Rate Limit Discovery
+
+Capture rate limit headers from Phase 11 XHR responses:
+- `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+- `Retry-After`
+- Populate `{{RATE_LIMIT_NOTES}}` token in api-surface.md.template
+
+### All Phases — ReAct Prompt Pattern
+
+Consider adding explicit Think/Act/Observe structure to phase instructions:
+- **Think:** What signals am I looking for and why?
+- **Act:** What commands/probes to run
+- **Observe:** How to interpret results and log them in the session brief
+
+Reference: `knowledge/prompt-techniques/_index.md` (nikai) for examples.
+
+---
+
+## Research Sources
+
+Knowledge from the nikai project used in planning this roadmap. Useful references
+for contributors designing new phases or packs:
+
+| Topic | nikai location |
+|-------|---------------|
+| OSINT tool guides (Shodan, crt.sh, theHarvester, SpiderFoot) | `knowledge/security/osint/` |
+| Web scraping tools comparison (Firecrawl, Crawl4AI, ScrapeGraphAI) | `research/guides/web-scraping-for-ai-agents.md` |
+| HTTP header tech detection patterns | `knowledge/methodologies/http-header-tech-detection.md` |
+| robots.txt and sitemap analysis techniques | `knowledge/methodologies/robots-txt-analysis.md` |
+| JSON-LD / Schema.org extraction | `knowledge/methodologies/schema-org-json-ld-extraction.md` |
+| Real-world Nuxt 2 + real estate tech stack | `docs/research/spitogatos/tech-stack.md` |
+| tRPC patterns and bundle signatures | `knowledge/developer-tools/frontend/trpc.md` |
+| GraphQL vs REST for directory/aggregator APIs | `research/guides/graphql-vs-rest-directory-apis.md` |
+| Prompt engineering techniques (ReAct, CoT, etc.) | `knowledge/prompt-techniques/_index.md` |

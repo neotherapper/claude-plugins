@@ -31,6 +31,13 @@ Fallback: check for cmux; if neither, skip Phase 11
 which cmux && echo "cmux available"
 ```
 
+### context7 MCP
+```
+Available if: 'resolve-library-docs' appears in the current session's MCP tool list
+Fallback: Web search for "{framework} {major}.x API routes endpoints file structure"
+Log: [AVAILABLE] context7  OR  [TOOL-UNAVAILABLE:context7]
+```
+
 ### GAU (GetAllURLs)
 ```bash
 which gau && echo "gau available"
@@ -45,6 +52,7 @@ which gau && echo "gau available"
 |-------|---------|---------|----------------|
 | 3 Fingerprint | Wappalyzer MCP | Header + HTML grep | Generic signals only |
 | 2/6 URL discovery | Firecrawl map | curl /sitemap.xml | Sitemap only |
+| 4 Tech pack | GitHub raw URL | context7 MCP → web search | [TECH-PACK-UNAVAILABLE:name:ver] |
 | 9 OSINT — URL history | GAU | Wayback + CommonCrawl CDX | CDX APIs always work |
 | 11 Active browse | Chrome DevTools MCP | cmux browser | [PHASE-11-SKIPPED] |
 | Script download | GitHub raw URL | Local .beacon/ cache | [GENERATED-INLINE:path] |

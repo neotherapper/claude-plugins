@@ -173,4 +173,6 @@ After writing all files, confirm:
 - [ ] `docs/research/{site-slug}/tech-stack.md` — infrastructure table present
 - [ ] `docs/research/{site-slug}/site-map.md` — URLs grouped by phase
 - [ ] `docs/research/{site-slug}/constants.md` — populated sections only (no empty tables)
+- [ ] `docs/research/{site-slug}/api-surfaces/` — at least one surface file (or `no-public-surfaces.md`)
+- [ ] `docs/research/{site-slug}/specs/{site-slug}.openapi.yaml` — present if Phase 8 or 11 produced one, absent otherwise
 - [ ] `docs/research/{site-slug}/scripts/test-{site-slug}.sh` — one `check()` call per endpoint
