@@ -27,10 +27,14 @@ Map the lesson topic to a vault category:
 
 Read `knowledge/{category}/_index.md` and search for the lesson topic (case-insensitive substring match against slug and name fields).
 
+If the file cannot be read (vault not in session, missing file), treat as a vault miss and go to Step 4.
+
+If multiple entries match, prefer the entry whose slug is an exact match for the topic. If no exact match, use the first substring match.
+
 ### Step 3: Check entry status
 
 If a match is found, read the entry file:
-- `status: detailed` → Use its `url` frontmatter field and the first paragraph of `## One-Paragraph Summary` as resource metadata. Set `source: "vault"`.
+- `status: detailed` → Use its `url` frontmatter field and the first paragraph of `## One-Paragraph Summary` as resource metadata. Set `source: "vault"`. If the `url` field is absent or empty, treat this entry as a miss and go to Step 4.
 - `status: stub` → Skip. Stubs contain only frontmatter — no content worth linking.
 
 ### Step 4: Fallback
@@ -43,6 +47,18 @@ If no vault match exists (or topic is outside vault categories), generate 2–3 
 |---|---|---|
 | `"vault"` | Entry found in vault with `status: detailed` | No badge |
 | `"ai-suggested"` | LLM-generated fallback, or stub entry skipped | `(AI-suggested, verify link)` badge |
+
+## Resource type mapping
+
+When building the `type` field for a resource:
+
+| Resource kind | type value |
+|---|---|
+| Official documentation, API reference, spec | `"docs"` |
+| Step-by-step tutorial or guide | `"tutorial"` |
+| YouTube video, course video | `"video"` |
+| Playground, browser-based tool, game | `"interactive"` |
+| GitHub repo, library page | `"docs"` (treat as reference) |
 
 ## What NOT to do
 
