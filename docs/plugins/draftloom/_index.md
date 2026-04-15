@@ -119,8 +119,11 @@ Eval agents write atomically (tmp → rename) — file presence signals completi
 
 ## Related docs
 
-- Design spec: `docs/superpowers/specs/2026-04-15-draftloom-design.md`
-- Feature specs: `docs/plugins/draftloom/specs/`
-- Personas: `plugins/draftloom/personas.md`
-- Features: `plugins/draftloom/features.md`
-- Architecture: `plugins/draftloom/architecture.md`
+| Doc | Location |
+|-----|----------|
+| Design spec | `docs/superpowers/specs/2026-04-15-draftloom-design.md` |
+| Feature specs (.feature) | `docs/plugins/draftloom/specs/` |
+| Personas | `docs/plugins/draftloom/personas.md` |
+| Features & roadmap | `docs/plugins/draftloom/features.md` |
+| Architecture detail | `docs/plugins/draftloom/architecture.md` |
+| User-facing README | `plugins/draftloom/README.md` |
