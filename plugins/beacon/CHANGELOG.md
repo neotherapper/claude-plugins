@@ -7,6 +7,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.0] — 2026-04-15
+
+### Added
+
+- `site-intel` Step 3a: tech pack cross-referencing — when a question involves framework-specific query patterns, endpoint conventions, or "how do I" phrasing, the relevant `technologies/{framework}/{major}.x.md` is loaded alongside the research file
+- Trigger heuristics: explicit list of question types that load the tech pack vs. factual questions that use research files only
+- Source labelling guidance: confirmed research findings vs. conventional tech pack knowledge are explicitly distinguished in answers
+- Version mismatch handling: if exact version pack is unavailable, uses nearest major and notes it in the response
+- Missing pack fallback: if no tech pack exists for a framework, proceeds with research files only without surfacing the gap to the user
+- `tests/validate-site-intel.sh` — 12 checks on site-intel skill structure and tech pack logic
+
+---
+
 ## [0.1.0] — 2026-04-15
 
 ### Added
