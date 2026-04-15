@@ -33,7 +33,7 @@ Before running the standard interview, scan the user's description for personal 
 If signals are detected, load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/brand-interview.md` and follow the **Personal Branding Flow** section in that file. Generate and check name patterns from that section, present results, then offer to continue to the standard interview for additional options.
 
 - If user accepts → proceed to Step 3 (skip Q1 re-entry; use the detected name as Q1 answer)
-- If user declines → proceed directly to Step 6 using the personal brand results, then write names.md (Step 7)
+- If user declines → proceed to Step 5 to check availability of the personal brand names generated above, then Step 6 (format output), then Step 7 (write names.md)
 
 If no signals, proceed to Step 3.
 
@@ -79,10 +79,10 @@ Generate the full candidate list before any availability check.
 Check environment variables before running scripts:
 
 ```bash
-echo $CF_API_TOKEN
-echo $CF_ACCOUNT_ID
-echo $PORKBUN_API_KEY
-echo $PORKBUN_SECRET
+[[ -n "$CF_API_TOKEN" ]] && echo "CF_API_TOKEN: set" || echo "CF_API_TOKEN: not set"
+[[ -n "$CF_ACCOUNT_ID" ]] && echo "CF_ACCOUNT_ID: set" || echo "CF_ACCOUNT_ID: not set"
+[[ -n "$PORKBUN_API_KEY" ]] && echo "PORKBUN_API_KEY: set" || echo "PORKBUN_API_KEY: not set"
+[[ -n "$PORKBUN_SECRET" ]] && echo "PORKBUN_SECRET: set" || echo "PORKBUN_SECRET: not set"
 ```
 
 - Both `CF_API_TOKEN` and `CF_ACCOUNT_ID` set → Tier 1 (Cloudflare)
@@ -114,7 +114,7 @@ Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/registrar-routing.md` no
 Format Wave 1 output using this exact structure:
 
 ```
-## Wave 1 Results — [one-line project description]
+## Wave [N] Results — [one-line project description]
 
 **Top Picks**
 ✅ [name].[tld]   $[price]/yr  — [one-sentence rationale]
@@ -192,7 +192,7 @@ After the user confirms their final shortlist, load `$CLAUDE_PLUGIN_ROOT/skills/
 
 | Script | Purpose |
 |--------|---------|
-| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/check-domains.sh` | 3-tier checker: CF → Porkbun → whois/MCP |
+| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/check-domains.sh` | 3-tier checker: CF → Porkbun → whois |
 | `$CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/get-prices.sh` | Porkbun no-auth TLD pricing, always runs |
 
 Both scripts must be executable: `chmod +x $CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/*.sh`

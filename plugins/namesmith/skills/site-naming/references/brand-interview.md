@@ -3,7 +3,7 @@
 ## Personal Branding Flow
 
 Trigger when the user's description contains any of these signals:
-- Keywords: "portfolio", "freelance", "personal site", "my website", "consulting", "my work"
+- Keywords: "portfolio", "freelance", "personal site", "my name", "my website", "consulting", "my work"
 - Pattern: a human first/last name as the primary subject (e.g., "I need a domain for John Smith")
 
 ### Personal Brand Name Patterns

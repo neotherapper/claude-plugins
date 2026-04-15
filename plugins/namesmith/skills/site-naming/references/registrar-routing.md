@@ -12,6 +12,8 @@ Route each discovered domain to the best registrar for purchase. Use the primary
 | .gg, .st, .pt, .to, .my | Dynadot | `https://www.dynadot.com/domain/search.html?domain={domain}` |
 | .sh, .fm | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
 
+> **Note:** When `CF_ACCOUNT_ID` is configured and the TLD is supported by Cloudflare (including `.io`, `.co`, `.me`, `.dev`, `.app`, `.xyz`), prefer the Cloudflare URL for at-cost pricing. Use Porkbun as the fallback when CF is not configured or the TLD is not in CF's catalog.
+
 ## Cloudflare Registrar
 
 Cloudflare sells domains at cost (no markup). Best choice for .com and common TLDs when the user already has a Cloudflare account.
@@ -91,9 +93,9 @@ For `codeforge.io` → Porkbun:
 https://porkbun.com/checkout/search?q=codeforge.io
 ```
 
-For `codeforge.com` with CF_ACCOUNT_ID=3b3bb751b739ac06fad21c224fc02da3:
+For `codeforge.com` with CF_ACCOUNT_ID=YOUR_CF_ACCOUNT_ID:
 ```
-https://dash.cloudflare.com/3b3bb751b739ac06fad21c224fc02da3/domains/registrations/purchase?domain=codeforge.com
+https://dash.cloudflare.com/YOUR_CF_ACCOUNT_ID/domains/registrations/purchase?domain=codeforge.com
 ```
 
 For `code.ly` → Namecheap:

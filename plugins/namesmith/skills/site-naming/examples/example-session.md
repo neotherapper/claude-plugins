@@ -137,7 +137,7 @@ review.dev, code.review (⚠️ premium)
    [Porkbun →](https://porkbun.com/checkout/search?q=codeforge.io)
 
 ✅ **codeforge.com** — $9.06/yr — .com variant available — register both
-   [Cloudflare →](https://dash.cloudflare.com/3b3bb751b739ac06fad21c224fc02da3/domains/registrations/purchase?domain=codeforge.com)
+   [Cloudflare →](https://dash.cloudflare.com/YOUR_CF_ACCOUNT_ID/domains/registrations/purchase?domain=codeforge.com)
 
 ✅ **reviewkit.io** — $35.98/yr — Functional, communicates what it is instantly
    [Porkbun →](https://porkbun.com/checkout/search?q=reviewkit.io)

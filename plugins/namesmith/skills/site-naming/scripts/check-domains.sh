@@ -32,6 +32,8 @@ DOMAINS=("$@")
 # Tier 1: Cloudflare Registrar API
 # POST /accounts/{id}/registrar/domain-check (up to 20 per call)
 # Returns: availability + at-cost price
+# Note: CF API has no redemption status field. Domains in redemption grace period
+# are reported as 'taken'. Use Tier 3 (whois) for redemption detection.
 # ─────────────────────────────────────────────────────────
 check_cloudflare() {
   local domains=("$@")
@@ -68,6 +70,7 @@ check_cloudflare() {
 # Tier 2: Porkbun API
 # POST /api/json/v3/domain/checkDomain/{domain}
 # Returns: availability + price
+# Note: Porkbun API has no redemption status field. Use Tier 3 for redemption detection.
 # ─────────────────────────────────────────────────────────
 check_porkbun() {
   local domain="$1"
@@ -153,7 +156,7 @@ if [[ -n "${CF_API_TOKEN:-}" && -n "${CF_ACCOUNT_ID:-}" ]]; then
   # Tier 1: Cloudflare (batch)
   results=$(check_cloudflare "${DOMAINS[@]}")
   echo "$results"
-  if echo "$results" | grep -qv "^unknown"; then
+  if [[ -n "$results" ]] && echo "$results" | grep -qv "^unknown"; then
     all_unknown=false
   fi
 
