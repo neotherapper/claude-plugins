@@ -4,15 +4,25 @@ Route each discovered domain to the best registrar for purchase. Use the primary
 
 ## Primary Registrar by TLD
 
-| TLD(s) | Primary Registrar | Registration URL Pattern |
-|--------|------------------|--------------------------|
-| .com, .net, .org, .info, .biz | Cloudflare Registrar | `https://dash.cloudflare.com/{CF_ACCOUNT_ID}/domains/registrations/purchase?domain={domain}` |
-| .io, .co, .ai, .app, .dev, .me, .xyz, .online, .site, .fun, .space, .icu, .top | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
-| .ly, .is, .it, .in, .at, .am, .as, .be, .by, .es, .ms | Namecheap | `https://www.namecheap.com/domains/registration/results/?domain={domain}` |
-| .gg, .st, .pt, .to, .my | Dynadot | `https://www.dynadot.com/domain/search.html?domain={domain}` |
-| .sh, .fm | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
+**When `CF_API_TOKEN` + `CF_ACCOUNT_ID` are set (preferred path — at-cost pricing):**
 
-> **Note:** When `CF_ACCOUNT_ID` is configured and the TLD is supported by Cloudflare (including `.io`, `.co`, `.me`, `.dev`, `.app`, `.xyz`), prefer the Cloudflare URL for at-cost pricing. Use Porkbun as the fallback when CF is not configured or the TLD is not in CF's catalog.
+| TLD(s) | Registrar | Registration URL Pattern |
+|--------|-----------|--------------------------|
+| .com, .net, .org, .info, .biz | Cloudflare | `https://dash.cloudflare.com/{CF_ACCOUNT_ID}/domains/registrations/purchase?domain={domain}` |
+| .io, .co, .ai, .app, .dev, .me, .xyz, .online, .site, .fun, .space | Cloudflare | `https://dash.cloudflare.com/{CF_ACCOUNT_ID}/domains/registrations/purchase?domain={domain}` |
+| .gg, .sh, .fm, .icu, .top (CF unsupported) | Porkbun fallback | `https://porkbun.com/checkout/search?q={domain}` |
+| .ly, .is, .it, .in, .at, .am, .as, .be, .by, .es, .ms | Namecheap | `https://www.namecheap.com/domains/registration/results/?domain={domain}` |
+| .st, .pt, .to, .my | Dynadot | `https://www.dynadot.com/domain/search.html?domain={domain}` |
+
+**When CF is not configured (Porkbun path):**
+
+| TLD(s) | Registrar | Registration URL Pattern |
+|--------|-----------|--------------------------|
+| .io, .co, .ai, .app, .dev, .me, .xyz, .online, .site, .fun, .space, .icu, .top | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
+| .com, .net, .org, .info, .biz | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
+| .sh, .fm, .gg | Porkbun | `https://porkbun.com/checkout/search?q={domain}` |
+| .ly, .is, .it, .in, .at, .am, .as, .be, .by, .es, .ms | Namecheap | `https://www.namecheap.com/domains/registration/results/?domain={domain}` |
+| .st, .pt, .to, .my | Dynadot | `https://www.dynadot.com/domain/search.html?domain={domain}` |
 
 ## Cloudflare Registrar
 
@@ -60,7 +70,7 @@ Specialises in ccTLDs that other registrars do not carry.
 https://www.dynadot.com/domain/search.html?domain={domain}
 ```
 
-**When to use:** .gg, .st, .pt, .to, .my and other less common ccTLDs.
+**When to use:** .st, .pt, .to, .my and other less common ccTLDs not carried by Porkbun. (.gg routes to Porkbun — it is in Porkbun's catalog.)
 
 ## Sedo (Aftermarket)
 

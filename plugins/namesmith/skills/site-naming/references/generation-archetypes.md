@@ -115,7 +115,7 @@ A generic or descriptive base name paired with a TLD that adds meaning (load `$C
 ## Wave System
 
 ### Wave 1 (default)
-Generate 25–35 candidates across all 7 archetypes. Apply weighting from brand-interview.md. Do not check availability during generation — generate the full list first, then batch-check.
+Generate 25–35 candidates across all 7 archetypes. Apply weighting from brand-interview.md. Use the per-archetype base distribution targets from the distribution table in SKILL.md (the Wave 1 Generation step). Do not check availability during generation — generate the full list first, then batch-check.
 
 ### Wave 2 (after feedback)
 Generate 20+ new candidates. Refine toward stated preferences:

@@ -18,7 +18,7 @@ Generate availability checks for these patterns (substitute actual name):
 - `{firstname}.studio` / `{firstname}.design` / `{firstname}.work`
 - `{firstname}.io` / `{firstname}.co` / `{firstname}.me`
 
-Present results, then offer: "Want me to also generate creative branded alternatives beyond your name?"
+Run these patterns through `check-domains.sh` following the availability check process in SKILL.md Step 5. Present results, then offer: "Want me to also generate creative branded alternatives beyond your name?"
 
 ---
 
