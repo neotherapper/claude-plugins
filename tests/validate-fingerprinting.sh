@@ -107,6 +107,12 @@ fi
 # Dynamic: one check per non-graphql tech pack directory
 # Note: some directory names differ from how the framework appears in docs
 # (e.g. directory "nextjs" but SKILL.md says "Next.js") — handle with aliases
+# Scoped to Phase 3 section only (stops at the next ## heading)
+PHASE3_CONTENT=""
+if [ -f "$SKILL_FILE" ]; then
+  PHASE3_CONTENT=$(awk '/^## Phase 3/{found=1; next} found && /^## Phase [0-9]/{exit} found{print}' "$SKILL_FILE")
+fi
+
 for dir in "$TECH_DIR"/*/; do
   framework=$(basename "$dir")
   if [ "$framework" = "$EXCLUDED_PACK" ]; then
@@ -116,7 +122,7 @@ for dir in "$TECH_DIR"/*/; do
   case "$framework" in
     nextjs) search="Next\.js|__NEXT_DATA__" ;;
   esac
-  if [ -f "$SKILL_FILE" ] && grep -qiE "$search" "$SKILL_FILE"; then
+  if echo "$PHASE3_CONTENT" | grep -qiE "$search"; then
     check "Phase 3 has detection signal for '$framework'" "ok"
   else
     check "Phase 3 has detection signal for '$framework'" "fail"
@@ -128,7 +134,7 @@ ACTUAL_COUNT=$(ls -d "$TECH_DIR"/*/ 2>/dev/null | wc -l | tr -d ' ')
 if [ "$ACTUAL_COUNT" -eq "$EXPECTED_PACK_COUNT" ]; then
   check "Tech pack directory count is $EXPECTED_PACK_COUNT (found: $ACTUAL_COUNT)" "ok"
 else
-  check "Tech pack directory count is $EXPECTED_PACK_COUNT (found: $ACTUAL_COUNT) — update EXPECTED_PACK_COUNT if intentional" "fail"
+  check "Tech pack directory count is $EXPECTED_PACK_COUNT (found: $ACTUAL_COUNT) — add fingerprint signals to SKILL.md Phase 3 first, then update EXPECTED_PACK_COUNT" "fail"
 fi
 
 echo "========================================"
