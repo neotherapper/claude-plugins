@@ -14,7 +14,7 @@ Contract for all eval agent output files. Every eval agent must write a file mat
   "feedback": "Keyword density improved. Meta description still too generic.",
   "sections_affected": ["meta_description"],
   "suggestion_type": "enhance",
-  "specifics": {}
+  "specifics": { "...": "see per-dimension examples below" }
 }
 ```
 
@@ -24,7 +24,7 @@ Contract for all eval agent output files. Every eval agent must write a file mat
 |-------|------|-------|
 | `schema_version` | string | Always `"1.0"` in v1 |
 | `agent` | string | Exact agent name: `seo-eval`, `hook-eval`, `voice-eval`, `readability-eval` |
-| `iteration` | number | Current iteration number (1, 2, 3) |
+| `iteration` | number | Current iteration number, 1-indexed. Iteration 1 = first eval run. On restart, state.json resets `current_iteration` to 0; the next eval writes `iteration: 1`. |
 | `timestamp` | string | ISO-8601 UTC |
 | `score` | number | Integer 0–100 |
 | `feedback` | string | Human-readable summary, 1–3 sentences |
@@ -93,7 +93,7 @@ Contract for all eval agent output files. Every eval agent must write a file mat
 2. Write to `{slug}/{agent-name}.tmp`
 3. Rename `{slug}/{agent-name}.tmp` → `{slug}/{agent-name}.json`
 
-Never write directly to the `.json` file. The orchestrator polls for file presence — a file that exists is a complete file.
+Never write directly to the `.json` file. The orchestrator polls for file presence — a file that exists is a complete file. If rename fails (permissions, disk full), log the error and mark the dimension as "unavailable" — do not leave a stranded `.tmp` file.
 
 ## Validation
 

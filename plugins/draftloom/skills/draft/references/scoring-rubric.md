@@ -12,14 +12,15 @@ The minimum score across all dimensions. Never the average. No dimension can com
 
 | Condition | Action |
 |-----------|--------|
-| any dimension < 50 | **Escalate.** Pause loop. Ask user 4 structured questions (see below). Max 1 escalation per run. |
+| halt phrase detected | **Halt.** Dispatch distribution immediately with current `draft.md`. Do not evaluate. (See halt detection section.) |
+| any dimension < 50 | **Escalate.** Pause loop. Ask user escalation questions (see below). Max 1 escalation per run — tracked via `escalation_triggered: true` in `meta.json`. |
 | any dimension 50–74 | **Patch.** Dispatch writer with failing eval JSONs. Writer patches `sections_affected` only. |
 | all dimensions ≥ 75 | **Pass.** Dispatch distribution agent. |
 | max iterations reached | **Offer choice.** See max-iterations section. |
 
 ## Escalation questions (when any dimension < 50)
 
-Ask these 4 questions one at a time:
+Ask up to 4 questions — Q2 is only asked if user answers yes to Q1; Q4 is an action, not a question:
 1. "The {dimension} score is {score}/100 — this usually means the {specific_issue}. Want to revise the brief? (y/n)"
 2. If yes: "What should change? (topic angle / core insight / examples / length)"
 3. "Should I restart with the revised brief, or patch what's there?"
