@@ -45,8 +45,9 @@ Load from workspace:
 5. Rename old eval JSONs to `{name}-eval.prev.json` (backup for delta display).
 6. Dispatch 4 eval agents in parallel (same as iteration 1).
 7. Poll, validate, aggregate.
-8. Show delta vs previous: `"Voice: 68 → 79 ✓  (+11)"`
-9. Route again.
+8. Update `state.json` → current_iteration: N.
+9. Show delta vs previous: `"Voice: 68 → 79 ✓  (+11)"`
+10. Route again.
 
 ### All-pass routing
 
@@ -56,6 +57,16 @@ When all 4 dimensions ≥ 75:
 3. Dispatch `distribution.md` with context: `draft.md`, `meta.json`, profile JSON.
 4. Wait for `distribution.json` to be written.
 5. Signal to the draft skill: `loop_end`.
+
+### Escalation routing (any dimension < 50)
+
+Read the escalation questions from `scoring-rubric.md`. Ask them one at a time.
+
+If this is the first escalation in this run: write `escalation_triggered: true` to `meta.json`. Max one escalation per run — if escalation was already triggered, skip to patch routing instead.
+
+On restart: unlock `locked_brief` in `state.json`, update `brief.md`, reset `current_iteration` to 0 in `state.json`.
+
+If user declines: write `draft_status: "paused"` to `meta.json`. Exit loop.
 
 ### Halt detection
 
@@ -111,7 +122,7 @@ Do not crash. Do not block the other dimensions.
 
 ## Turso sync (if enabled)
 
-After each iteration where `turso_enabled: true` in config.json:
+After each iteration where `turso_enabled: true` in `.draftloom/config.json`:
 1. Write post record to `posts` table (upsert by slug)
 2. Write scores record to `scores` table
 3. Write each eval event to `eval_events` table

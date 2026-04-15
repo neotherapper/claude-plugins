@@ -119,4 +119,4 @@ If Turso is enabled in `.draftloom/config.json`, load `skills/draft/references/t
 
 ## Halt detection
 
-If the user types "finalize", "publish now", "skip iterations", or "ship it" at any point after the wireframe is approved, relay the halt signal to the orchestrator immediately. The orchestrator will dispatch the distribution agent with the current draft.
+If the user types "finalize", "publish now", "skip iterations", "good enough", or "ship it" at any point after the wireframe is approved, relay the halt signal to the orchestrator immediately. The orchestrator will dispatch the distribution agent with the current draft.
