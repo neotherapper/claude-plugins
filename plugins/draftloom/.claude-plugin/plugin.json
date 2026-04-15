@@ -1,8 +1,16 @@
 {
   "name": "draftloom",
   "version": "0.1.0",
-  "author": "neotherapper",
+  "author": {
+    "name": "Georgios Pilitsoglou",
+    "url": "https://pilitsoglou.com",
+    "github": "neotherapper"
+  },
   "description": "AI-powered blog post drafting. Write in your voice, optimised for virality.",
+  "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/draftloom",
+  "repository": "https://github.com/neotherapper/claude-plugins",
+  "license": "MIT",
+  "keywords": ["blog", "writing", "seo", "viral", "voice-profile", "content"],
   "skills": [
     {
       "name": "setup",
@@ -29,7 +37,5 @@
     { "name": "readability-eval", "description": "Scores paragraph length, subheading frequency, bullet distribution, and sentence length variance." },
     { "name": "distribution", "description": "Generates X hook, LinkedIn opener, email subject, and newsletter blurb from the final draft." }
   ],
-  "hooks": {
-    "SessionStart": "hooks/hooks.json"
-  }
+  "hooks": "./hooks/hooks.json"
 }
