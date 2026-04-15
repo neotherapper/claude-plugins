@@ -9,7 +9,7 @@ No network calls. No new tools. Pure synthesis from what Phases 1–11 captured.
 |----------------------|----------|
 | Infrastructure table | `tech-stack.md` rows + INDEX.md tokens |
 | Discovered URLs list | `site-map.md` grouped by phase |
-| Discovered Endpoints table (Method, Path, Auth, Phase, Notes) | `smoke-test.sh` `check()` calls |
+| Discovered Endpoints table (Method, Path, Auth, Phase, Notes) | `api-surfaces/{surface}.md` files + `smoke-test.sh` `check()` calls |
 | JS globals + API response constants | `constants.md` rows |
 | Phase 11 results block | `constants.md` rows (enums, flags from JS globals) |
 | `[PHASE-11-SKIPPED]` / `[OPENAPI-SKIPPED:...]` signals | `OPENAPI_STATUS` token |
@@ -99,6 +99,35 @@ check "POST /api/v1/auth/login" "$BASE_URL/api/v1/auth/login" "200" "true"
 check "GET /api/v1/users" "$BASE_URL/api/v1/users" "200" "true"
 ```
 
+### api-surfaces/{surface}.md
+
+Load `templates/api-surface.md.template` once per distinct API surface discovered.
+
+**What counts as a distinct surface:** A logically-related group of endpoints sharing a base path and auth mechanism (e.g., `/wp-json/wp/v2/*` = one surface, `/wp-json/wc/v3/*` = a separate surface). Single-endpoint discoveries can be grouped into a surface named for their type (e.g., `rest-api`, `graphql`, `ajax`).
+
+**Surface naming:** lowercase, hyphenated. Examples: `wordpress-rest-api`, `woocommerce-api`, `graphql`, `ajax-endpoints`.
+
+**Token replacement:**
+
+| Token | Value |
+|-------|-------|
+| `{{SURFACE_NAME}}` | Human-readable surface name (e.g. `WordPress REST API`) |
+| `{{SITE_NAME}}` | Site name from session brief header |
+| `{{BASE_URL}}` | Base URL of the surface (e.g. `https://example.com/wp-json/wp/v2`) |
+| `{{AUTH_REQUIRED}}` | `Yes`, `No`, or `Partial (some endpoints require auth)` |
+| `{{DISCOVERY_PHASE}}` | Phase number that first discovered this surface (e.g. `5`) |
+| `{{DATE}}` | Session date |
+| `{{ENDPOINT_ROWS}}` | One row per endpoint: `\| METHOD \| /path \| Yes/No \| {shape} \| {notes} \|` |
+| `{{AUTH_DETAIL}}` | Auth mechanism description (token type, header name, acquisition method) |
+| `{{RATE_LIMIT_NOTES}}` | Rate limit headers observed (e.g. `X-RateLimit-Limit: 100/hr`) or `Not detected` |
+| `{{SURFACE_NOTES}}` | Additional observations (versioning, pagination, CORS, etc.) |
+| `{{EXAMPLE_REQUEST}}` | One representative `curl` command for an unauthenticated or low-risk endpoint |
+| `{{EXAMPLE_RESPONSE}}` | Truncated JSON response shape (keys only, no real data) |
+
+Write each surface file to: `docs/research/{site-slug}/api-surfaces/{surface-name}.md`
+
+If no distinct API surfaces were found (static site, all endpoints behind auth with no observable shape), write a single `api-surfaces/no-public-surfaces.md` noting that observation.
+
 ## Token Resolution
 
 Load `templates/INDEX.md.template` and resolve all tokens:
@@ -116,7 +145,7 @@ Load `templates/INDEX.md.template` and resolve all tokens:
 | `{{HOSTING}}` | From infrastructure table |
 | `{{TOOL_AVAILABILITY_BLOCK}}` | All `[AVAILABLE]` / `[TOOL-UNAVAILABLE:...]` signals from Phase 1 |
 | `{{API_SURFACE_ROWS}}` | One table row per API surface from Discovered Endpoints, grouped by surface name |
-| `{{API_SURFACE_FILE_ROWS}}` | File link rows for any `{surface}.endpoints.md` files written in Phase 8 (omit row if none) |
+| `{{API_SURFACE_FILE_ROWS}}` | One `\| [api-surfaces/{name}.md](...) \| {description} \|` row per surface file written in Phase 12 (omit row if none) |
 | `{{KEY_FINDINGS}}` | 3–5 bullet points summarising the most important discoveries |
 | `{{OPENAPI_STATUS}}` | See OPENAPI_STATUS Resolution below |
 | `{{SITE_SLUG}}` | Slug form of site name |
