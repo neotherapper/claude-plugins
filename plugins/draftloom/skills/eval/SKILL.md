@@ -15,6 +15,10 @@ version: "0.1.0"
 
 Standalone scorer for an existing markdown file. Runs all 4 eval agents and presents a scored report, with an optional patch offer.
 
+Use this skill to score any existing Markdown file — not just posts created by Draftloom. It creates a minimal workspace, runs all 4 eval agents (SEO, hook, voice, readability) in parallel via the orchestrator in eval-only mode, and presents a scored report. If any dimension fails, a single patch round is offered.
+
+The 4 eval dimensions and their pass thresholds are defined in `skills/draft/references/scoring-rubric.md`. Voice scoring works with or without a profile — without a profile, it evaluates generic clarity and consistency rather than tone-matching.
+
 ## Step 1: Get the file path
 
 Ask: "Path to the markdown file you'd like to score?"
@@ -55,7 +59,7 @@ Dispatch `agents/orchestrator.md` with:
 - Profile JSON path (or null)
 - Mode: "eval_only" (skip writer, skip brief, run 4 evals directly)
 
-Load `skills/eval/references/eval-guide.md` for eval-only mode specifics.
+Load `references/eval-guide.md` for eval-only mode specifics.
 
 ## Step 5: Show scored report
 
@@ -85,3 +89,10 @@ If any dimension scored below 75:
 
 If all dimensions ≥ 75:
 - Show: "All dimensions passing." No patch offer.
+
+---
+
+## Reference files
+
+- **`references/eval-guide.md`** — eval-only mode orchestrator behaviour, voice-eval fallback rubric when no profile is selected, patch mode flow with before/after delta display (load at Step 4)
+- **`skills/draft/references/scoring-rubric.md`** — pass threshold (≥ 75), per-dimension rubrics (SEO, Hook, Voice, Readability), routing rules (load if surfacing routing decisions to the user)

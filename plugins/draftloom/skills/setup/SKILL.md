@@ -129,3 +129,13 @@ Profile created. Optional extras you can add later with `/draftloom:setup edit {
 ## Delete mode (user chooses option 3)
 
 List profiles. Ask which to delete. Ask for confirmation: "Delete '{name}'? This cannot be undone. (y/n)". On confirmation, remove the file. Confirm deletion.
+
+---
+
+## Reference files
+
+Load these files as needed — do not load all at once:
+
+- **`references/interview-questions.md`** — exact wording for all 9 interview questions (3 essential + 6 deferred), validation rules, and accepted input formats
+- **`references/profile-schema.md`** — full JSON schema for profile files, field definitions, validation rules, and the distinction between required and optional fields
+- **`references/storage-guide.md`** — project vs global storage modes, config.json structure, path resolution, and mode-switching instructions
