@@ -10,13 +10,15 @@ claude plugin install learn
 
 ## Usage
 
-Start the visual server first:
+Start the visual server first by passing `serve` to the `/learn` router:
 
 ```
 /learn serve
 ```
 
-Then teach yourself anything:
+*(Runs the visual server — handled by the `/learn` router)*
+
+Open **http://localhost:7337** in your browser, then teach yourself anything:
 
 ```
 /learn CSS flexbox
