@@ -1,12 +1,14 @@
 ---
 name: setup
-command: /draftloom:setup
-description: "This skill should be used when the user asks to create a writing profile, set up their blog voice, create a new blog profile, or run draftloom setup."
+description: >
+  This skill should be used when the user asks to create a writing profile,
+  set up their blog voice, create a new blog profile, or edit an existing
+  profile. Trigger phrases: "draftloom setup", "create a blog profile",
+  "new writing profile", "set up my blog voice", "edit my writing profile",
+  "draftloom new profile", "/draftloom:setup". Use this skill whenever the
+  user wants to configure how Draftloom writes — even if they don't use the
+  exact command name.
 version: "0.1.0"
-references:
-  - references/interview-questions.md
-  - references/profile-schema.md
-  - references/storage-guide.md
 ---
 
 # Draftloom Setup Skill
