@@ -5,6 +5,15 @@ GitHub Copilot, Cursor, Windsurf, and OpenCode.
 
 ## Available Plugins
 
+### learn — Structured Lesson Teacher
+
+Skills in `plugins/learn/skills/`:
+
+| Skill | Path | When to activate |
+|-------|------|-----------------|
+| `learn` | `plugins/learn/skills/learn/SKILL.md` | User asks to learn a topic, wants an explanation, or says "teach me X" |
+| `learn:micro` | `plugins/learn/skills/learn-micro/SKILL.md` | User specifies `/learn:micro` directly, or router routes a single-concept request here |
+
 ### beacon — Site API Surface Mapper
 
 Skills in `plugins/beacon/skills/`:
@@ -20,6 +29,13 @@ When the user's request matches any of these patterns, load and follow the corre
 
 | User intent | Skill to activate |
 |-------------|------------------|
+| "teach me [topic]" | `learn` |
+| "explain [topic]" | `learn` |
+| "how does [topic] work" | `learn` |
+| "I want to learn [topic]" | `learn` |
+| "what is [topic]" (learning context) | `learn` |
+| "quiz me on [topic]" | `learn` |
+| "/learn serve" | `learn` (start visual server) |
 | "analyse https://..." | `site-recon` |
 | "research this site" | `site-recon` |
 | "map the API surface of..." | `site-recon` |

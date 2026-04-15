@@ -1,0 +1,23 @@
+{
+  "name": "learn",
+  "version": "0.1.0",
+  "description": "Structured AI-powered lessons for any topic, rendered in a local visual browser UI.",
+  "author": {
+    "name": "George Pilitsoglou",
+    "url": "https://pilitsoglou.com",
+    "github": "neotherapper"
+  },
+  "skills": [
+    {
+      "name": "learn",
+      "path": "skills/learn/SKILL.md",
+      "commands": ["/learn"]
+    },
+    {
+      "name": "learn:micro",
+      "path": "skills/learn-micro/SKILL.md",
+      "commands": ["/learn:micro"]
+    }
+  ],
+  "hooks": "hooks/hooks.json"
+}
