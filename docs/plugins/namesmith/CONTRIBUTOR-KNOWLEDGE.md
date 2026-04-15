@@ -233,7 +233,98 @@ These are documented gaps from the v0.1.0 research pass. Create a GitHub issue o
 
 ---
 
-## 8 — Seven essential information categories (apply to all briefs)
+## 8 — Superpowers workflow patterns applied to namesmith
+
+Research source: `superpowers` Claude Code plugin v5.0.7 skills directory.
+
+### The TodoWrite checklist pattern
+
+Every superpowers skill with a multi-step workflow begins with:
+```markdown
+## Checklist
+You MUST create a TodoWrite task for each item and complete them in order:
+1. Step one
+2. Step two
+...
+```
+
+This pattern was missing from namesmith v0.1.0. It was added in v0.2.0. The result is that when namesmith activates, the user sees a task list with visible progress — exactly what the brainstorming skill does when it creates 9 tasks for its 9 steps. Without this, the skill's progress is invisible.
+
+**Why it matters for namesmith specifically**: The site-naming workflow has 10 discrete steps. Without task tracking, a session that stalls at Step 5 (availability check) looks identical to one that completed successfully. With TodoWrite items, the user can see exactly where the workflow stopped.
+
+### The announce pattern
+
+Every superpowers skill starts with:
+```markdown
+**Announce at start:** "I'm using the [skill-name] skill to [purpose]."
+```
+
+This tells the user that a structured workflow has started, sets expectations for the conversation structure, and signals that the agent will not shortcut the process. Added to namesmith v0.2.0.
+
+### The hard gate pattern
+
+The brainstorming skill uses:
+```html
+<HARD-GATE>
+Do NOT [take action] until [prerequisite]. This applies regardless of [common shortcut].
+</HARD-GATE>
+```
+
+The HTML tag is not rendered — it is a signal to Claude that this rule is absolute and not subject to judgment. For namesmith, the hard gate prevents name generation before all 6 interview questions are answered. Without it, an agent might generate names after 3 questions "since the description was clear enough" — losing the archetype weighting data from Q4 and Q5.
+
+### The red flags table
+
+The TDD and verification-before-completion skills use `| Thought | Reality |` tables to name specific rationalizations an agent might make under pressure and provide direct counters. For namesmith, the common rationalizations are:
+- "The description is clear, I can skip some questions"
+- "Let me suggest a few names while the interview runs"
+- "The user seems impatient, I'll generate early"
+
+Each maps to the same correct action: complete the interview first.
+
+### Integration and skill chaining
+
+Superpowers skills document their dependencies explicitly:
+```markdown
+**Required sub-skills:** superpowers:X (called before), superpowers:Y (called after)
+```
+
+The namesmith skill doesn't chain to other skills (it's a terminal deliverable, not part of a development pipeline). But the pattern of documenting what calls it (brainstorming, writing-plans) and what it calls (nothing — it's terminal) is worth adding in a future iteration.
+
+---
+
+## 9 — Session orientation pattern (from yestay / lex-harness research)
+
+Research source: yestay project `docs/superpowers/` and `09_ai_research/specs/SPEC-01_skill_system.md`.
+
+The lex-harness plugin's DISCOVER phase documents a **session orientation** step: before doing any work, check for existing state (a `CURRENT_STATUS.md` file) and output a brief:
+```
+Phase: [current phase]
+Last action: [what was done]
+Critical deadlines: [upcoming deadlines]
+ONE next action: [top priority]
+```
+
+Applied to namesmith as Step 0 in v0.2.0: if `names.md` exists in the CWD, read it and offer to resume. This prevents:
+- Losing brand interview data (if user ran Wave 1 last session)
+- Running a duplicate wave (if names.md has 3 shortlisted names, user may just want Wave 2)
+- Starting fresh when the user only wanted to run Track B on taken domains
+
+**The session brief format for namesmith:**
+```
+Previous session: [project description]
+Brand profile: Tone=[X] | Direction=[Y] | Mode=[Z] | Length=[W]
+Shortlisted: [name1], [name2], [name3]
+Options:
+  1. Continue — run Wave 2 or refine shortlist
+  2. Start fresh — new interview, new wave
+  3. Track B — run fallback strategies on taken names
+```
+
+**Why three options**: Research showed that users return to namesmith in three states: (1) satisfied with Wave 1, wanting refinement, (2) abandoning and starting over, (3) all Wave 1 picks were taken and they need Track B. Having explicit options prevents the agent from guessing which state applies.
+
+---
+
+## 10 — Seven essential information categories (apply to all briefs)
 
 From nikai's Business Documentation Framework: when handing off naming work to an AI agent (or another human), these 7 categories must survive the handoff for the output to remain coherent:
 

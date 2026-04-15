@@ -8,12 +8,65 @@ description: >
   "domain for [concept]", "naming [project]", "domain for my portfolio",
   "find me a site name", "help me name this". Also triggers when the user describes
   a project idea and mentions needing a web presence.
-version: 0.1.0
+version: 0.2.0
 ---
 
 # Site Naming
 
 Help users discover, evaluate, and shortlist available domain names through a structured brand interview, multi-archetype generation, and live availability + pricing checks.
+
+**Announce at start:** "I'm using the site-naming skill to find the right domain name."
+
+## Checklist
+
+You MUST create a TodoWrite task for each item and complete them in order:
+
+1. Session orientation — resume or start fresh (Step 0)
+2. Project file detection (Step 1)
+3. Personal brand detection (Step 2)
+4. Brand interview — 6 questions, one per message (Step 3)
+5. Wave 1 generation — 25–35 names across 7 archetypes (Step 4)
+6. Availability + pricing check (Step 5)
+7. Format output with registration links (Step 6)
+8. Write names.md to project directory (Step 7)
+9. Feedback loop — Wave 2 / Wave 3 / Track B (Step 8)
+10. Post-shortlist checklist (Step 9)
+
+<HARD-GATE>
+Do NOT generate any name candidates until all 6 interview questions have been answered and the brand profile is locked. This applies regardless of how specific or obvious the project description seems.
+</HARD-GATE>
+
+## Red Flags — STOP
+
+| Thought | Correct action |
+|---------|----------------|
+| "The description is clear, I can skip some questions" | Ask all 6 questions, one per message |
+| "Let me suggest a few names while the interview runs" | Complete the interview first — then generate |
+| "I already know what they want" | Complete the interview first — answers affect archetype weights |
+| "This is a personal brand — skip the interview" | Run the personal brand flow, then offer the interview |
+| "The user seems impatient, I'll generate early" | Complete the interview first — the wave will be more accurate |
+
+---
+
+## Step 0: Session Orientation
+
+Check whether `names.md` exists in the current working directory.
+
+**If it exists**, read it and output a session brief before doing anything else:
+
+```
+Previous session: [project description from names.md header]
+Brand profile: Tone=[X] | Direction=[Y] | Mode=[Z] | Length=[W]
+Shortlisted: [name1], [name2], [name3]
+Options:
+  1. Continue — run Wave 2 or refine shortlist
+  2. Start fresh — new interview, new wave
+  3. Track B — all previous picks were taken; run fallback strategies
+```
+
+Wait for the user's choice before continuing. If they choose (2), proceed from Step 1 as normal.
+
+**If names.md does not exist**, proceed immediately to Step 1.
 
 ## Step 1: Project File Detection
 
@@ -111,7 +164,7 @@ Parse check-domains.sh output (one line per domain):
 
 Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/registrar-routing.md` now.
 
-Format Wave 1 output using this exact structure:
+Format Wave output using this exact structure:
 
 ```
 ## Wave [N] Results — [one-line project description]
@@ -163,19 +216,21 @@ Populate Shortlisted with the top 3–5 available names. Rationale column receiv
 
 ## Step 8: Feedback Loop
 
-After presenting Wave 1 output, wait for the user's response.
+After presenting wave output, wait for the user's response.
 
 **User selects specific names:** Add them to the Shortlisted table in names.md.
 
-**User requests Wave 2:** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md`. Generate 20+ new candidates refined toward preferences stated ("more like X", "avoid Y"). Repeat Steps 4–7.
+**User requests Wave 2:** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md`. Generate 20+ new candidates refined toward preferences stated ("more like X", "avoid Y"). Repeat Steps 4–7. No candidate from Wave 2 may repeat a Wave 1 name.
 
 **User requests Wave 3 / "check more TLDs" / "deep scan":** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` and follow the **Wave 3** section. Apply all 10 techniques exhaustively to every synonym of the core concept. Run a deep TLD scan across 1,441+ IANA TLDs for the top 5 base words identified in the session.
 
-**All top picks are taken:** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` and follow the **Track B** section. Run the 4 fallback strategies in order: close variations → synonym exploration → creative reconstruction → domain hacks.
+**All top picks are taken:** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` and follow the **Track B** section. Run the 4 fallback strategies in order: close variations → synonym exploration → creative reconstruction → domain hacks. Stop as soon as 5+ available options are found. If all 4 strategies complete with fewer than 5 available, show what was found and offer: "Want to broaden constraints, or start fresh with a different direction?"
 
 ## Step 9: Post-Shortlist Checklist
 
-After the user confirms their final shortlist, load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/post-shortlist.md`. Walk through the checklist: pronunciation test, social handle check, trademark check, registration strategy. Update names.md with any notes.
+After the user confirms their final shortlist, load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/post-shortlist.md`. Walk through the checklist: pronunciation test, social handle check, trademark check, registration strategy. Update names.md with any findings.
+
+---
 
 ## Reference Files
 
