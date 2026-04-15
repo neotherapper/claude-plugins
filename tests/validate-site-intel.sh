@@ -87,15 +87,15 @@ else
   check "Tech pack cross-reference: technologies/ directory referenced" "fail"
 fi
 
-# Check 10: tech pack trigger heuristics present ("how do I" or "query" or framework-specific trigger)
-if [ -f "$SKILL_FILE" ] && grep -qiE 'how do I|query|framework.specific|endpoint pattern' "$SKILL_FILE"; then
+# Check 10: tech pack trigger heuristics present (anchored to Step 3a unique phrase)
+if [ -f "$SKILL_FILE" ] && grep -q 'Load the tech pack when' "$SKILL_FILE"; then
   check "Tech pack trigger heuristics present" "ok"
 else
   check "Tech pack trigger heuristics present" "fail"
 fi
 
-# Check 11: tech-stack.md read for framework detection mentioned
-if [ -f "$SKILL_FILE" ] && grep -qiE 'framework|tech.stack' "$SKILL_FILE"; then
+# Check 11: framework detection from tech-stack/INDEX mentioned (anchored to Step 3a unique phrase)
+if [ -f "$SKILL_FILE" ] && grep -q 'Read the framework name and major version' "$SKILL_FILE"; then
   check "Framework detection from tech-stack/INDEX mentioned" "ok"
 else
   check "Framework detection from tech-stack/INDEX mentioned" "fail"

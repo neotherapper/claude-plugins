@@ -69,7 +69,7 @@ After opening the research file, check whether the question is **framework-speci
 1. Read the framework name and major version from INDEX.md infrastructure table (e.g., `WordPress 6.5` → `wordpress`, `6.x`)
 2. Load: `technologies/{framework}/{major}.x.md`
    - If version is missing or partial, use the nearest available major and note it in your response (e.g., "Using WordPress 6.x pack — site is on 6.5")
-   - If no tech pack exists for the detected framework, proceed with research files only — do not tell the user the tech pack is missing unless they ask why
+   - If no tech pack exists for the detected framework, proceed with research files only and note it once in your answer: "No tech pack available for {framework} — answer based on research files only"
 3. Use the tech pack's probe checklist and known endpoint patterns to **supplement** what the research files contain — never contradict confirmed research findings with tech pack assumptions
 
 **Example:**
