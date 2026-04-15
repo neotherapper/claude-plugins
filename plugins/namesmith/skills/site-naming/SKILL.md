@@ -4,7 +4,7 @@ description: >
   This skill should be used when the user asks for help naming a site, product,
   project, startup, or personal brand — or needs to find an available domain.
   Trigger phrases: "find me a domain", "name my project", "site name for",
-  "what should I call", "available domains for", "I have an idea about X find me a name",
+  "what should I call", "available domains for", "I have an idea, find me a name",
   "domain for [concept]", "naming [project]", "domain for my portfolio",
   "find me a site name", "help me name this". Also triggers when the user describes
   a project idea and mentions needing a web presence.
@@ -64,7 +64,11 @@ Options:
   3. Track B — all previous picks were taken; run fallback strategies
 ```
 
-Wait for the user's choice before continuing. If they choose (2), proceed from Step 1 as normal.
+Wait for the user's choice before continuing.
+
+- If they choose (1) **Continue**: load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/brand-interview.md` and `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` now — both are needed for Wave 2/3 weighting. Then skip to Step 8.
+- If they choose (2) **Start fresh**: proceed from Step 1 as normal.
+- If they choose (3) **Track B**: load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` now, then follow the Track B section. Skip to Step 8.
 
 **If names.md does not exist**, proceed immediately to Step 1.
 
@@ -114,7 +118,7 @@ Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md
 
 Apply the weighting rules from `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/brand-interview.md` against the brand profile. Generate 25–35 name candidates across all 7 archetypes weighted accordingly.
 
-If Mode=A (budget), or generating Domain Hacks or Thematic TLD Play candidates: load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/tld-catalog.md` now.
+Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/tld-catalog.md` now. (Archetypes 5 and 7 require it regardless of Mode; loading it unconditionally at this step avoids mid-generation gaps.)
 
 Target distribution (adjust per weighting rules):
 - Short & Punchy: 4–5
@@ -212,23 +216,29 @@ _Generated: [YYYY-MM-DD] | Mode: [mode] | Tone: [tone] | Direction: [direction]_
 - Constraints: [Q6 answer]
 ```
 
-Populate Shortlisted with the top 3–5 available names. Rationale column receives the same "Why" string from the conversation output, verbatim.
+Populate Shortlisted with the top 3–5 available names. Populate the Rationale column with the verbatim "Why" string from the conversation output.
 
 ## Step 8: Feedback Loop
 
-After presenting wave output, wait for the user's response.
+Present wave output. Wait for the user's response.
 
 **User selects specific names:** Add them to the Shortlisted table in names.md.
 
 **User requests Wave 2:** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md`. Generate 20+ new candidates refined toward preferences stated ("more like X", "avoid Y"). Repeat Steps 4–7. No candidate from Wave 2 may repeat a Wave 1 name.
 
-**User requests Wave 3 / "check more TLDs" / "deep scan":** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` and follow the **Wave 3** section. Apply all 10 techniques exhaustively to every synonym of the core concept. Run a deep TLD scan across 1,441+ IANA TLDs for the top 5 base words identified in the session.
+**User requests Wave 3 / "check more TLDs" / "deep scan":** Output a scope warning first:
+
+```
+Wave 3 will scan 1,441+ TLDs for your top 5 base words — this may take several minutes. Proceed?
+```
+
+Wait for confirmation. Then load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` and follow the **Wave 3** section. Apply all 10 techniques exhaustively to every synonym of the core concept.
 
 **All top picks are taken:** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` and follow the **Track B** section. Run the 4 fallback strategies in order: close variations → synonym exploration → creative reconstruction → domain hacks. Stop as soon as 5+ available options are found. If all 4 strategies complete with fewer than 5 available, show what was found and offer: "Want to broaden constraints, or start fresh with a different direction?"
 
 ## Step 9: Post-Shortlist Checklist
 
-After the user confirms their final shortlist, load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/post-shortlist.md`. Walk through the checklist: pronunciation test, social handle check, trademark check, registration strategy. Update names.md with any findings.
+After the user confirms their final shortlist, load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/post-shortlist.md`. Work through each section in order: pronunciation test, social handle check, trademark check, registration strategy, names.md update. Report findings after each section before proceeding to the next.
 
 ---
 
@@ -238,7 +248,7 @@ After the user confirms their final shortlist, load `$CLAUDE_PLUGIN_ROOT/skills/
 |------|-----------|
 | `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/brand-interview.md` | Before Q1 (Step 3) or personal brand flow (Step 2) |
 | `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/generation-archetypes.md` | Before Wave 1 generation (Step 4), Wave 3, or Track B |
-| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/tld-catalog.md` | When Mode=A, or generating Domain Hacks / Thematic TLD Play |
+| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/tld-catalog.md` | Before Wave 1 generation (Step 4) — always; archetypes 5 and 7 require it regardless of Mode |
 | `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/registrar-routing.md` | When formatting Wave output (Step 6) |
 | `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/api-setup.md` | When no API env vars detected (Step 5) |
 | `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/post-shortlist.md` | After user confirms final shortlist (Step 9) |

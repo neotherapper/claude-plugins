@@ -73,7 +73,7 @@ Use these to build domain hacks — the TLD completes the word.
 
 | ccTLD | Examples | Registrar | Notes |
 |-------|----------|-----------|-------|
-| `.er` | gath.er, hack.er, mak.er, brew.er, serv.er | — | ⚠️ non-registrable ccTLD — suggest but flag |
+| `.er` | gath.er, hack.er, mak.er, brew.er, serv.er | — | ⚠️ restricted — non-registrable ccTLD; suggest but flag |
 | `.st` | playli.st, fir.st, fa.st, la.st, be.st | Dynadot | |
 | `.ly` | quick.ly, friend.ly, direct.ly, short.ly, love.ly | Namecheap | |
 | `.is` | th.is, what.is, name.is | Namecheap | |
