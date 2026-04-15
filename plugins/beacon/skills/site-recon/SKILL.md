@@ -101,7 +101,7 @@ See `references/tool-availability.md` for exact detection commands.
    - `x-shopify-stage: production` → Shopify (Definitive)
    - `X-Powered-By: Strapi` or `X-Strapi-Version` → Strapi (Definitive)
    - `server: uvicorn` → FastAPI (combined signal)
-   - `X-Runtime` → Rails (combined signal)
+   - `X-Runtime` → Rails (combined signal — confirm with `csrf-token` meta or `_*_session` cookie before concluding Rails; `X-Runtime` alone is not sufficient)
 
 3. **HTML signals**: `curl -s {url}` → grep for:
    - `wp-content/` → WordPress
@@ -123,7 +123,7 @@ See `references/tool-availability.md` for exact detection commands.
 5. **Endpoint probes** (for API-only and CMS sites):
    ```bash
    # Strapi — check /admin/init for hasAdmin field (Definitive)
-   curl -s {url}/admin/init | python3 -c "import sys,json; d=json.load(sys.stdin); print('strapi' if 'hasAdmin' in d.get('data',{}) else '')"
+   curl -s {url}/admin/init | python3 -c "import sys,json; d=json.load(sys.stdin); print('strapi' if 'hasAdmin' in d.get('data',{}) else '')" 2>/dev/null || true
    # FastAPI — Swagger UI at /docs (High; may be disabled)
    curl -s {url}/docs | grep -i 'swagger-ui'
    # FastAPI — OpenAPI JSON (High; may be disabled)
