@@ -29,7 +29,7 @@ posts/{slug}/
 **Owner:** writer agent (writes and patches)
 **Readers:** all eval agents, distribution agent, orchestrator (hash check)
 **Format:** Markdown prose. No frontmatter. Section headings match wireframe section names.
-**Notes:** Writer patches only sections listed in `sections_affected` on iteration 2+. All other content preserved verbatim.
+**Notes:** Writer patches only sections listed in `sections_affected` on iteration 2+. All other content preserved verbatim. `sections_affected` is written by each eval agent to its own eval JSON — see eval-output-spec.md.
 
 ---
 
@@ -79,6 +79,7 @@ posts/{slug}/
 }
 ```
 `aggregate_score` = `min(seo, hook, voice, readability)`. Never the mean.
+`draft_status` transitions to `passing` when all four per-dimension scores are ≥ 75 in the same iteration.
 
 ---
 
@@ -93,6 +94,7 @@ posts/{slug}/
 }
 ```
 Weights are cosmetic — pass criteria is always per-dimension threshold (75). Changing weights does not change routing.
+**Notes:** Agents must not use these weights for routing or pass/fail decisions. Weights are cosmetic display values only. Changing them does not affect whether a draft passes.
 
 ---
 
@@ -107,7 +109,7 @@ Weights are cosmetic — pass criteria is always per-dimension threshold (75). C
   "last_updated": "2026-04-15T10:45:00Z"
 }
 ```
-**Notes:** Loop status (`drafting`, `iterating`, `passing`, etc.) lives in `meta.json → draft_status`, not here. `state.json` is for iteration counter and brief-lock only.
+**Notes:** Loop status (`drafting`, `iterating`, `passing`, etc.) lives in `meta.json → draft_status`, not here. `state.json` is for iteration counter and brief-lock only. `locked_brief` is set to `true` by the draft skill immediately after writing `brief.md`, coinciding with the `brief_complete` checkpoint.
 
 ---
 
@@ -168,4 +170,4 @@ Checkpoint values in order: `profile_selected` · `brief_complete` · `wireframe
 2026-04-15T10:05:01Z  ITERATION_1  orchestrator aggregate=68 routing=patch
 2026-04-15T10:10:00Z  ITERATION_2  writer    patched intro,body_para_2
 ```
-Entries older than the last 3 full iterations are summarised in-place by the orchestrator. Full entries preserved for last 3.
+The orchestrator may compact entries older than 3 full iterations by appending a `SUMMARY:` sentinel line and rewriting the file. This is the only permitted destructive write. Full entries for the last 3 iterations must always be preserved verbatim.

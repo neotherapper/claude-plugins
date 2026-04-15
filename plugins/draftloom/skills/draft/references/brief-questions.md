@@ -30,7 +30,7 @@ Validation: free text or empty. If the user provides URLs, treat them as referen
   medium — ~1000 words (how-to, explainer)
   long   — ~2000+ words (deep dive, case study)"
 
-Accept: "short", "medium", "long", or a word count like "800 words". Normalise to short/medium/long for the wireframe.
+Accept: "short", "medium", "long", or a word count like "800 words". Normalise to short/medium/long using the acceptable ranges from layout-templates.md: 300–700w → short, 700–1500w → medium, 1500–3000w → long. If a count falls on a boundary, prefer the shorter label.
 
 ---
 
