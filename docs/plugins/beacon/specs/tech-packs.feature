@@ -7,15 +7,24 @@ Feature: Tech pack schema validation and community contribution
     Then it loads without any [INVALID-TECH-PACK] warning
 
   Scenario: Tech pack missing required section is rejected
-    Given technologies/wordpress/6.x.md is missing the "## Gotchas" section
+    Given technologies/wordpress/6.x.md is missing the "## 10. Gotchas" section
     When the skill attempts to load the tech pack
-    Then it logs [INVALID-TECH-PACK:technologies/wordpress/6.x.md:missing-section:Gotchas]
+    Then it logs [INVALID-TECH-PACK:technologies/wordpress/6.x.md:missing-section:10. Gotchas]
     And proceeds with generic heuristics instead
 
   Scenario: Deprecated tech pack version loads with warning
-    Given technologies/nextjs/13.x.md has deprecated: true in frontmatter
-    When a Next.js 13 site is detected
-    Then the file loads with warning: [TECH-PACK-DEPRECATED:nextjs:13.x]
+    # Tests the deprecated: true frontmatter flag behaviour — not tied to a specific file on disk
+    Given a tech pack file exists with deprecated: true in its frontmatter
+    When the site-recon skill loads that tech pack
+    Then it logs [TECH-PACK-DEPRECATED:{framework}:{version}]
+    And the warning appears in INDEX.md
+
+  Scenario: Tech pack version mismatch — nearest available version used with warning
+    # Tests upward fallback: site runs Next.js 14 but only 15.x exists in the pack library
+    Given technologies/nextjs/15.x.md exists in the plugin repo
+    And technologies/nextjs/14.x.md does not exist
+    When a Next.js 14 site is detected in Phase 3
+    Then the skill loads nextjs/15.x.md with a warning: [TECH-PACK-VERSION-MISMATCH:nextjs:14.x→15.x]
     And the warning appears in INDEX.md
 
   Scenario: Tech pack staleness warning after 180 days

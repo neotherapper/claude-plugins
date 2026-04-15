@@ -253,6 +253,8 @@ the full instructions for reading the session brief and writing all output files
 Summary:
 - Read the completed session brief once
 - Write `tech-stack.md`, `site-map.md`, `constants.md`, `scripts/test-{slug}.sh`
+- Write one `api-surfaces/{surface}.md` per discovered API surface (see output-synthesis.md)
+- Write `specs/{slug}.openapi.yaml` if Phase 8 or Phase 11 produced a spec
 - Resolve all tokens in `templates/INDEX.md.template` → write `INDEX.md`
 - Resolve `{{OPENAPI_STATUS}}` based on Phase 11 signals in the session brief
 
@@ -261,5 +263,6 @@ Summary:
 Load these when you need detailed guidance — they are not always necessary:
 
 - **`references/phase-detail.md`** — Every probe URL, bash command, grep pattern, and CDX API parameter for phases 2, 5, 6, 7, and 9
+- **`references/osint-sources.md`** — Phase 9 data sources: CDX APIs, crt.sh, GitHub search, Google dorking, robots.txt/sitemap mining, JSON-LD extraction
 - **`references/session-brief-format.md`** — Complete session brief schema with all fields
 - **`references/tool-availability.md`** — Tool detection commands, full fallback matrix, browser command reference

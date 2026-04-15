@@ -110,8 +110,8 @@ Hooks are declared in `hooks/hooks.json` and run at specific Claude Code events.
 | Hook | When it fires |
 |------|--------------|
 | `SessionStart` | When a new Claude Code session opens in a project |
-| `FileCreate` | When a file matching a pattern is created |
-| `CommandRun` | Before a skill command executes |
+| `FileCreate` | When a file matching a pattern is created _(planned)_ |
+| `CommandRun` | Before a skill command executes _(planned)_ |
 
 Hooks must be fast (< 1s) and non-blocking. Never use hooks for long-running operations.
 
