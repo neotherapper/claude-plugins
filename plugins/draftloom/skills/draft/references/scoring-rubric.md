@@ -56,7 +56,7 @@ If the user types any of: "finalize", "publish now", "skip iterations", "good en
 ### SEO (pass ≥ 75)
 - Keyword density 1–3% for primary keyword
 - Meta description present, 120–160 chars, includes primary keyword and value prop
-- Heading hierarchy correct: exactly one H1, H2s for major sections, H3 for sub-points
+- Heading hierarchy correct: no H1 in prose body (title rendered by CMS as H1), H2s for major sections, H3 for sub-points — fail if H3 appears before any H2
 - Flesch Reading Ease ≥ 60 (accessible prose)
 - At least 2 internal link opportunities identified
 
