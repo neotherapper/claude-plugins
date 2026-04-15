@@ -45,6 +45,7 @@ if [[ "$FOREGROUND" == "true" ]] || [[ "${CODEX_CI:-}" == "1" ]]; then
 else
   run_server &
   SERVER_PID=$!
+  trap 'kill "$SERVER_PID" 2>/dev/null' EXIT
   # Wait up to 5 seconds for server-info
   for i in $(seq 1 50); do
     if [[ -f "$STATE_DIR/server-info" ]]; then
@@ -52,6 +53,7 @@ else
       SERVER_INFO=$(cat "$STATE_DIR/server-info")
       # Inject pid: strip trailing } and append ,"pid":<SERVER_PID>}
       echo "${SERVER_INFO%\}},\"pid\":$SERVER_PID}"
+      trap - EXIT
       exit 0
     fi
     sleep 0.1

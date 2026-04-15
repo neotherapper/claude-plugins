@@ -50,7 +50,11 @@ function resetInactivity() {
   }, INACTIVITY_TIMEOUT_MS);
 }
 
-function startServer(port) {
+function startServer(port, attempts = 0) {
+  if (attempts > 10) {
+    console.error('No available port found in range', port - attempts, '–', port);
+    process.exit(1);
+  }
   const server = http.createServer((req, res) => {
     resetInactivity();
 
@@ -95,7 +99,7 @@ function startServer(port) {
   });
 
   server.on('error', err => {
-    if (err.code === 'EADDRINUSE') { startServer(port + 1); }
+    if (err.code === 'EADDRINUSE') { startServer(port + 1, attempts + 1); }
     else { console.error(err); process.exit(1); }
   });
 

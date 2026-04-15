@@ -110,12 +110,19 @@ function revealExplain(qi){
 }
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
+function safeUrl(u) {
+  try {
+    const p = new URL(u);
+    return (p.protocol === 'https:' || p.protocol === 'http:') ? u : '#';
+  } catch { return '#'; }
+}
 
 function renderQuiz(quiz){
   return quiz.map((q,qi)=>{
     if(q.type==='multiple_choice'){
       const opts=(q.options||[]).map(o=>
-        `<div class="opt" data-qi="${qi}" data-val="${esc(o)}"
+        `<div class="opt" data-qi="${qi}" data-val="${escAttr(o)}"
           onclick="selectOpt(this,${qi},${JSON.stringify(o)},${JSON.stringify(q.answer)},${JSON.stringify(q.explanation)})">
           <span>${esc(o)}</span></div>`).join('');
       return `<div class="q"><div class="q-text">${qi+1}. ${esc(q.question)}</div>
@@ -147,7 +154,7 @@ else{
   const mistakes=(data.common_mistakes||[]).map(m=>`<li>${esc(m)}</li>`).join('');
 
   const resources=(data.resources||[]).map(r=>`
-    <a class="res-link" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">
+    <a class="res-link" href="${safeUrl(r.url)}" target="_blank" rel="noopener noreferrer">
       <span>${esc(r.title)}</span>
       <span class="res-meta">${esc(r.type)}${r.source==='ai-suggested'?' <span class="ai-badge">(AI-suggested, verify)</span>':''}</span>
     </a>`).join('');
