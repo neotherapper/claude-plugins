@@ -192,8 +192,8 @@ After the user confirms their final shortlist, load `$CLAUDE_PLUGIN_ROOT/skills/
 
 | Script | Purpose |
 |--------|---------|
-| `scripts/check-domains.sh` | 3-tier checker: CF → Porkbun → whois/MCP |
-| `scripts/get-prices.sh` | Porkbun no-auth TLD pricing, always runs |
+| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/check-domains.sh` | 3-tier checker: CF → Porkbun → whois/MCP |
+| `$CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/get-prices.sh` | Porkbun no-auth TLD pricing, always runs |
 
 Both scripts must be executable: `chmod +x $CLAUDE_PLUGIN_ROOT/skills/site-naming/scripts/*.sh`
 
