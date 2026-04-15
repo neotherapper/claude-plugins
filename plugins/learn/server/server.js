@@ -102,11 +102,9 @@ function startServer(port) {
   server.listen(port, HOST, () => {
     const actualPort = server.address().port;
     const info = JSON.stringify({
-      type: 'server-started',
       port: actualPort,
-      url: `http://localhost:${actualPort}`,
-      screen_dir: SCREEN_DIR,
-      state_dir:  STATE_DIR,
+      screenDir: SCREEN_DIR,
+      stateDir:  STATE_DIR,
     });
     fs.writeFileSync(path.join(STATE_DIR, 'server-info'), info);
     console.log(info);

@@ -44,10 +44,14 @@ if [[ "$FOREGROUND" == "true" ]] || [[ "${CODEX_CI:-}" == "1" ]]; then
   run_server
 else
   run_server &
+  SERVER_PID=$!
   # Wait up to 5 seconds for server-info
   for i in $(seq 1 50); do
     if [[ -f "$STATE_DIR/server-info" ]]; then
-      cat "$STATE_DIR/server-info"
+      # Read server-info written by server.js, append pid
+      SERVER_INFO=$(cat "$STATE_DIR/server-info")
+      # Inject pid: strip trailing } and append ,"pid":<SERVER_PID>}
+      echo "${SERVER_INFO%\}},\"pid\":$SERVER_PID}"
       exit 0
     fi
     sleep 0.1
