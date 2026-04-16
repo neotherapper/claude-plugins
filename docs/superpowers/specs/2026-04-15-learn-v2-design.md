@@ -153,7 +153,7 @@ lesson.html reads `renderers[]` on load and lazy-imports only the listed compone
 
 ### 3.4 Topic → Renderer Mapping
 
-`learn:micro` uses a `renderer-map.md` reference file (parallel to `vault-integration.md`) to determine the `renderers[]` array for a given topic:
+`paidagogos:micro` uses a `renderer-map.md` reference file (parallel to `vault-integration.md`) to determine the `renderers[]` array for a given topic:
 
 ```
 "CSS Flexbox"        → ["code"]
@@ -178,7 +178,7 @@ The skill selects renderers based on topic classification keywords + subject dom
 
 Reasons: negligible runtime cost, no build toolchain required (drop `<script type="module">` into lesson.html), class-based authoring, reactive properties, Shadow DOM optional (CSS custom properties from lesson.html flow through), Google-backed with YouTube/Chrome DevTools production usage.
 
-Lit components are defined in separate files under `plugins/learn/server/components/`:
+Lit components are defined in separate files under `plugins/paidagogos/server/components/`:
 
 ```
 components/
@@ -283,7 +283,7 @@ Reads `.learn/prefs.json` streak data. Updates `last_active` on any lesson compl
 ### Phase V2 — Core Renderer System
 
 Deliverables:
-- `renderers[]` field added to Lesson JSON schema and `learn:micro` skill
+- `renderers[]` field added to Lesson JSON schema and `paidagogos:micro` skill
 - `renderer-map.md` reference file for topic → renderer mapping
 - lesson.html dynamic import logic
 - Lit runtime added to lesson.html (Tier 0)
@@ -319,9 +319,9 @@ Deliverables:
 - `<learn-hint>` — three-tier Socratic hints
 - `<learn-progress>` — mastery indicator reading `.learn/prefs.json`
 - `<learn-streak>` — habit tracking + XP
-- `<learn-explain>` — Feynman explain-back (text input → `learn:explain` skill call)
+- `<learn-explain>` — Feynman explain-back (text input → `paidagogos:explain` skill call)
 - Extended `.learn/prefs.json` schema (streak, xp, quiz scores)
-- `learn:explain` skill — evaluates user's explanation against expected concepts
+- `paidagogos:explain` skill — evaluates user's explanation against expected concepts
 
 Acceptance criteria:
 - Completing 3 lessons in a row shows a streak badge
@@ -332,14 +332,14 @@ Acceptance criteria:
 
 Deliverables:
 - FSRS-inspired review scheduling in `.learn/prefs.json`
-- `learn:recall` skill — retrieves due review items and generates review lesson
-- `learn:path` skill — dependency-ordered topic suggestions
+- `paidagogos:recall` skill — retrieves due review items and generates review lesson
+- `paidagogos:path` skill — dependency-ordered topic suggestions
 - `<learn-quiz>` MathLive integration for mathematical answer input
 - Knowledge component graph — per-topic mastery tracking (BKT-inspired)
 
 Acceptance criteria:
-- After 5 lessons on related topics, `learn:recall` suggests a review session
-- `learn:path` recommends "learn X before Y" when knowledge gap detected
+- After 5 lessons on related topics, `paidagogos:recall` suggests a review session
+- `paidagogos:path` recommends "learn X before Y" when knowledge gap detected
 - Review scheduling intervals grow correctly over time
 
 ---
@@ -377,7 +377,7 @@ The following are deferred design decisions, not blockers for V2:
 
 3. **Desmos vs JSXGraph:** Desmos is CDN-only (no offline), JSXGraph is MIT and self-hostable. For offline use, JSXGraph is the safe default. Recommend: JSXGraph as default; offer Desmos as opt-in via renderer config `"library": "desmos"`.
 
-4. **`learn:explain` evaluation strategy:** The Feynman explain-back skill needs to evaluate semantic coverage, not exact wording. Options: (a) LLM eval inline in the skill, (b) structured rubric with expected concepts. Recommend: structured rubric for V2.2, upgrade to LLM eval when confidence is established.
+4. **`paidagogos:explain` evaluation strategy:** The Feynman explain-back skill needs to evaluate semantic coverage, not exact wording. Options: (a) LLM eval inline in the skill, (b) structured rubric with expected concepts. Recommend: structured rubric for V2.2, upgrade to LLM eval when confidence is established.
 
 ---
 
@@ -385,49 +385,49 @@ The following are deferred design decisions, not blockers for V2:
 
 ### New files (V2)
 ```
-plugins/learn/server/components/renderers/edu-math.js
-plugins/learn/server/components/renderers/edu-chart.js
-plugins/learn/server/components/renderers/edu-code.js
-plugins/learn/server/components/renderers/edu-geometry.js
-plugins/learn/server/components/renderers/edu-sim-2d.js
-plugins/learn/skills/learn-micro/references/renderer-map.md
+plugins/paidagogos/server/components/renderers/edu-math.js
+plugins/paidagogos/server/components/renderers/edu-chart.js
+plugins/paidagogos/server/components/renderers/edu-code.js
+plugins/paidagogos/server/components/renderers/edu-geometry.js
+plugins/paidagogos/server/components/renderers/edu-sim-2d.js
+plugins/paidagogos/skills/paidagogos-micro/references/renderer-map.md
 ```
 
 ### Modified files (V2)
 ```
-plugins/learn/server/templates/lesson.html    — dynamic renderer import + Web Awesome loader
-plugins/learn/skills/learn-micro/references/lesson-schema.md  — add renderers[] field
-plugins/learn/skills/learn-micro/SKILL.md     — renderer classification logic
+plugins/paidagogos/server/templates/lesson.html    — dynamic renderer import + Web Awesome loader
+plugins/paidagogos/skills/paidagogos-micro/references/lesson-schema.md  — add renderers[] field
+plugins/paidagogos/skills/paidagogos-micro/SKILL.md     — renderer classification logic
 ```
 
 ### New files (V2.1)
 ```
-plugins/learn/server/components/renderers/edu-python.js
-plugins/learn/server/components/renderers/edu-python-loader.js
-plugins/learn/server/components/renderers/edu-sandbox.js
-plugins/learn/server/components/renderers/edu-scene-3d.js
-plugins/learn/server/components/renderers/edu-canvas.js
+plugins/paidagogos/server/components/renderers/edu-python.js
+plugins/paidagogos/server/components/renderers/edu-python-loader.js
+plugins/paidagogos/server/components/renderers/edu-sandbox.js
+plugins/paidagogos/server/components/renderers/edu-scene-3d.js
+plugins/paidagogos/server/components/renderers/edu-canvas.js
 ```
 
 ### New files (V2.2)
 ```
-plugins/learn/server/components/pedagogy/learn-hint.js
-plugins/learn/server/components/pedagogy/learn-explain.js
-plugins/learn/server/components/pedagogy/learn-progress.js
-plugins/learn/server/components/pedagogy/learn-streak.js
-plugins/learn/skills/learn-explain/SKILL.md
+plugins/paidagogos/server/components/pedagogy/learn-hint.js
+plugins/paidagogos/server/components/pedagogy/learn-explain.js
+plugins/paidagogos/server/components/pedagogy/learn-progress.js
+plugins/paidagogos/server/components/pedagogy/learn-streak.js
+plugins/paidagogos/skills/paidagogos-explain/SKILL.md
 ```
 
 ### Modified files (V2.2)
 ```
-plugins/learn/server/components/pedagogy/learn-quiz.js   — refactored from lesson.html inline
-plugins/learn/.claude-plugin/plugin.json                  — add learn:explain skill
+plugins/paidagogos/server/components/pedagogy/learn-quiz.js   — refactored from lesson.html inline
+plugins/paidagogos/.claude-plugin/plugin.json                  — add paidagogos:explain skill
 ```
 
 ### New files (V3)
 ```
-plugins/learn/skills/learn-recall/SKILL.md
-plugins/learn/skills/learn-path/SKILL.md
+plugins/paidagogos/skills/paidagogos-recall/SKILL.md
+plugins/paidagogos/skills/paidagogos-path/SKILL.md
 ```
 
 ---
@@ -436,4 +436,4 @@ plugins/learn/skills/learn-path/SKILL.md
 
 Full renderer library research, WASM tier analysis, teaching styles taxonomy, and component pattern mappings are documented in:
 
-`docs/plugins/learn/research/rendering-and-pedagogy.md`
+`docs/plugins/paidagogos/research/rendering-and-pedagogy.md`
