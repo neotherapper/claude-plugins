@@ -5,14 +5,14 @@ GitHub Copilot, Cursor, Windsurf, and OpenCode.
 
 ## Available Plugins
 
-### learn — Structured Lesson Teacher
+### paidagogos — Structured Lesson Teacher
 
-Skills in `plugins/learn/skills/`:
+Skills in `plugins/paidagogos/skills/`:
 
 | Skill | Path | When to activate |
 |-------|------|-----------------|
-| `learn` | `plugins/learn/skills/learn/SKILL.md` | User asks to learn a topic, wants an explanation, or says "teach me X" |
-| `learn:micro` | `plugins/learn/skills/learn-micro/SKILL.md` | User specifies `/learn:micro` directly, or router routes a single-concept request here |
+| `paidagogos` | `plugins/paidagogos/skills/paidagogos/SKILL.md` | User asks to learn a topic, wants an explanation, or says "teach me X" |
+| `paidagogos:micro` | `plugins/paidagogos/skills/paidagogos-micro/SKILL.md` | User specifies `/paidagogos:micro` directly, or router routes a single-concept request here |
 
 ### beacon — Site API Surface Mapper
 
@@ -29,13 +29,13 @@ When the user's request matches any of these patterns, load and follow the corre
 
 | User intent | Skill to activate |
 |-------------|------------------|
-| "teach me [topic]" | `learn` |
-| "explain [topic]" | `learn` |
-| "how does [topic] work" | `learn` |
-| "I want to learn [topic]" | `learn` |
-| "what is [topic]" (learning context) | `learn` |
-| "quiz me on [topic]" | `learn` |
-| "/learn serve" | `learn` (start visual server) |
+| "teach me [topic]" | `paidagogos` |
+| "explain [topic]" | `paidagogos` |
+| "how does [topic] work" | `paidagogos` |
+| "I want to learn [topic]" | `paidagogos` |
+| "what is [topic]" (learning context) | `paidagogos` |
+| "quiz me on [topic]" | `paidagogos` |
+| "/paidagogos serve" | `paidagogos` (start visual server) |
 | "analyse https://..." | `site-recon` |
 | "research this site" | `site-recon` |
 | "map the API surface of..." | `site-recon` |

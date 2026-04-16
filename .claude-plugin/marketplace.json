@@ -24,8 +24,8 @@
       "description": "AI-powered blog post drafting. Write in your voice, optimised for virality."
     },
     {
-      "name": "learn",
-      "source": "./plugins/learn",
+      "name": "paidagogos",
+      "source": "./plugins/paidagogos",
       "description": "Structured AI-powered lessons for any topic, rendered in a local visual browser UI."
     }
   ]

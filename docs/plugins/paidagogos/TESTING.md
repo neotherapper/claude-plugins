@@ -30,7 +30,7 @@ Learn has no runtime application code — it is an AI skill system with a compan
 Given  PAIDAGOGOS_DEBUG is not set
 When   user types: "teach me CSS flexbox"
 Then   Claude outputs which skill it is routing to before generating the lesson
-       Claude does not silently invoke learn:micro without informing the user
+       Claude does not silently invoke paidagogos:micro without informing the user
 ```
 
 **Example — "Scope classifier fires on broad topic":**
@@ -40,7 +40,7 @@ Given  user types: "teach me JavaScript"
 When   router evaluates topic scope (> 3 sub-concepts detected)
 Then   Claude asks: "Do you want a full roadmap or one focused concept?"
        Claude waits for the user's answer before proceeding
-       Claude does not silently route to learn:micro
+       Claude does not silently route to paidagogos:micro
 ```
 
 ---
@@ -114,7 +114,7 @@ Missing any required field = validation failure. Do not write HTML if Lesson JSO
 
 | Input | Expected behaviour |
 |-------|-------------------|
-| `"teach me async/await"` (narrow concept) | Routes directly to learn:micro, announces routing |
+| `"teach me async/await"` (narrow concept) | Routes directly to paidagogos:micro, announces routing |
 | `"teach me JavaScript"` (broad, > 3 sub-concepts) | Scope classifier fires, asks user to choose |
 | `"teach me async/await, I'm a beginner"` | Expertise level set to beginner for this lesson |
 | `"build me an app"` | Explains V1 scope, offers to start with a specific concept |
@@ -191,7 +191,7 @@ Missing any required field = validation failure. Do not write HTML if Lesson JSO
 
 ## Regression checklist before any PR
 
-- [ ] `/paidagogos teach me X` (narrow concept) routes to learn:micro and announces routing
+- [ ] `/paidagogos teach me X` (narrow concept) routes to paidagogos:micro and announces routing
 - [ ] `/paidagogos teach me X` (broad topic) fires scope classifier and asks the user before proceeding
 - [ ] Router never silently reroutes — routing decision always surfaced in output
 - [ ] `PAIDAGOGOS_DEBUG=1 /paidagogos teach me X` prints routing decision log

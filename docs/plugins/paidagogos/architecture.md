@@ -15,14 +15,14 @@ User
      Reads: PAIDAGOGOS_DEBUG env var, .paidagogos/prefs.json (V2)
      Scope check: topic has > 3 sub-concepts?
          ├── yes  → ask: "Full roadmap or one focused concept?"
-         └── no   → route to learn:micro
+         └── no   → route to paidagogos:micro
      Never silently reroutes. Routing decision always surfaced to user.
          │
-         └─ learn:micro ──────────────────────────────────────────────────────
+         └─ paidagogos:micro ──────────────────────────────────────────────────────
              Reads: knowledge/{category}/_index.md (resource lookup)
              Generates: Lesson JSON (one-shot, full schema)
              Writes: screen_dir/lesson-{id}.html
-             No agents dispatched. learn:micro is the only actor.
+             No agents dispatched. paidagogos:micro is the only actor.
                  │
                  └─ visual server (separate process) ─────────────────────────
                      Watches: screen_dir/ for newest .html file
@@ -40,7 +40,7 @@ Every file has a single owner. No two components write to the same file.
 
 | File | Owner | Notes |
 |------|-------|-------|
-| `screen_dir/lesson-{id}.html` | learn:micro | Written per lesson. Visual server auto-serves newest file. |
+| `screen_dir/lesson-{id}.html` | paidagogos:micro | Written per lesson. Visual server auto-serves newest file. |
 | `screen_dir/waiting.html` | paidagogos router | Shown between lessons while a new lesson is being generated. |
 | `state_dir/events` | visual server | Quiz interactions written as JSON lines. Append-only. |
 | `.paidagogos/prefs.json` | paidagogos router | Expertise level + user preferences. V2 only — not read in V1. |

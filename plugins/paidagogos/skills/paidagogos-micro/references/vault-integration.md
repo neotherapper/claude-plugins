@@ -1,10 +1,10 @@
 # Knowledge Vault Integration
 
-`learn:micro` uses the nikai Knowledge Vault (`knowledge/`) for resource links. This is a **file-read-only** integration in V1 — no API, no prompt stuffing.
+`paidagogos:micro` uses the nikai Knowledge Vault (`knowledge/`) for resource links. This is a **file-read-only** integration in V1 — no API, no prompt stuffing.
 
 ## Vault location
 
-The Knowledge Vault lives at `/knowledge/` in the nikai repo. It is a separate repository from claude-plugins. When the `learn` plugin is in use, Claude Code has access to both repos in the same session.
+The Knowledge Vault lives at `/knowledge/` in the nikai repo. It is a separate repository from claude-plugins. When the `paidagogos` plugin is in use, Claude Code has access to both repos in the same session.
 
 ## Lookup contract
 
