@@ -1,7 +1,7 @@
 // <edu-math config="{...}"> — renders LaTeX via KaTeX.
 // Config: { latex: string, display: boolean }
 
-import { LitElement, html, css } from 'https://esm.sh/lit@3.2.1';
+import { LitElement, html } from 'https://esm.sh/lit@3.2.1';
 
 // Inject KaTeX stylesheet once.
 if (!document.querySelector('link[data-katex]')) {

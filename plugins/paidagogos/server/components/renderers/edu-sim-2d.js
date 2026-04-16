@@ -5,7 +5,7 @@
 //   canvas: { width, height }
 // }
 
-import { LitElement, html, css } from 'https://esm.sh/lit@3.2.1';
+import { LitElement, html } from 'https://esm.sh/lit@3.2.1';
 const MATTER_URL = 'https://esm.sh/matter-js@0.20.0';
 
 const EDU_SIM2D_STYLE = `

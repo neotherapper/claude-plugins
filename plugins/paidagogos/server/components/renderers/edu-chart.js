@@ -1,7 +1,7 @@
 // <edu-chart config="{...}"> — renders Chart.js charts from a JSON config.
 // Config: { library: "chartjs", type: string, data: object, options?: object }
 
-import { LitElement, html, css } from 'https://esm.sh/lit@3.2.1';
+import { LitElement, html } from 'https://esm.sh/lit@3.2.1';
 const CHARTJS_URL = 'https://esm.sh/chart.js@4.4.1/auto';
 
 const EDU_CHART_STYLE = `

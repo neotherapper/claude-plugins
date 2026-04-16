@@ -168,7 +168,7 @@ function hydrateRenderers(root) {
 }
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
+function escAttr(s) { return esc(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 function safeUrl(u) {
   try {
     const p = new URL(u);
@@ -204,7 +204,11 @@ const data=JSON.parse(document.getElementById('lesson-data').textContent);
 if(!data){document.getElementById('root').innerHTML='<div class="waiting">Waiting for a lesson… Run <code>/paidagogos [topic]</code> in Claude Code.</div>'; }
 else{
   (async()=>{
-    await loadRenderers(data.renderers||[]);
+    // Also load the example's renderer if the author declared example.renderer
+    // but forgot to include it in renderers[]. Prevents silent blank-example failures.
+    const needed = [...(data.renderers||[])];
+    if (data.example?.renderer && !needed.includes(data.example.renderer)) needed.push(data.example.renderer);
+    await loadRenderers(needed);
 
     const ex=data.example||{};
     const mistakes=(data.common_mistakes||[]).map(m=>`<li>${esc(m)}</li>`).join('');

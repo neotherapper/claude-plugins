@@ -1327,11 +1327,27 @@ Report: "V2 complete. All 5 renderers verified. V1 backwards compat confirmed. R
 
 ---
 
+## Verification-phase pivots (what actually shipped vs. the original plan)
+
+The plan above reflects the original design. During Task 11 browser verification, five bugs were uncovered and the following decisions were revised in-flight. The plan text is left as-is for historical reference; what actually shipped on `feat/paidagogos-v2-renderers` is:
+
+1. **Lit bootstrap — per-component ESM imports, not `window.__lit`.** jsdelivr's `/npm/lit@3/index.js` contains unresolved bare module specifiers (`@lit/reactive-element`); the inline `window.__lit = ...` script also raced against renderer imports. Each renderer now imports Lit directly via `https://esm.sh/lit@3.2.1`; `lesson.html` preloads the module with `<link rel="modulepreload">`. See DECISIONS D-09 (rewritten).
+
+2. **All renderers use light DOM.** Shadow DOM isolated KaTeX's CSS from KaTeX's rendered `<span class="mord">` tree, blocked `document.getElementById` (JSXGraph's board host lookup), and hid highlight.js's `<code>` tree from the hljs stylesheet. Every renderer overrides `createRenderRoot() { return this }` and injects a tag-selector stylesheet into `<head>` once on first import.
+
+3. **`<edu-code>` uses highlight.js, not CodeMirror 6.** CodeMirror's esm.sh bundles (with or without `?bundle`) each embed their own `@codemirror/state`, so combining `basicSetup` with `lang-javascript()` fails: "Unrecognized extension value in extension set ... multiple instances of @codemirror/state are loaded, breaking instanceof checks." V2 fixtures only need `editable: false` display, so highlight.js is the pragmatic choice. Interactive editing (`editable: true`) returns in V2.1 with a proper import-map that pins `@codemirror/state` to a single URL.
+
+4. **`<edu-sim-2d>` resolves matter-js via `mod.default || mod`.** The esm.sh build of matter-js exports everything under `.default`, not as named exports.
+
+5. **Geometry fixture's polygon args are flat.** `board.create("polygon", parents, attrs)` expects `parents` as a flat array of points (`["A", "B", "C"]`), not a nested array (`[["A", "B", "C"]]`).
+
+The CHANGELOG reflects items 1 and 3. The remaining items are implementation detail captured in the `fix(paidagogos): V2 renderer runtime fixes from browser verification` commit and the per-component code comments.
+
 ## Deferred to later plans
 
 The following from the spec are NOT in this V2 plan — each will get its own plan:
 
-- **V2.1** (`2026-04-XX-paidagogos-v2.1-heavy-renderers.md`): `<edu-python>` (Pyodide), `<edu-sandbox>` (Sandpack), `<edu-scene-3d>` (Three.js), `<edu-canvas>` (p5.js)
+- **V2.1** (`2026-04-XX-paidagogos-v2.1-heavy-renderers.md`): `<edu-python>` (Pyodide), `<edu-sandbox>` (Sandpack), `<edu-scene-3d>` (Three.js), `<edu-canvas>` (p5.js), interactive `<edu-code editable>` via CodeMirror 6 with an import map pinning `@codemirror/state`
 - **V2.2** (`2026-04-XX-paidagogos-v2.2-pedagogy.md`): `<learn-hint>`, `<learn-progress>`, `<learn-streak>`, `<learn-explain>` + `paidagogos:explain` skill + `.paidagogos/prefs.json` schema extension
 - **V3** (`2026-04-XX-paidagogos-v3-adaptive.md`): FSRS scheduling, `paidagogos:recall`, `paidagogos:path`, BKT mastery tracking
 

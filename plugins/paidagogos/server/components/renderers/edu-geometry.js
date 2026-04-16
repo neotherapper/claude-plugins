@@ -1,7 +1,7 @@
 // <edu-geometry config="{...}"> — interactive 2D geometry via JSXGraph.
 // Config: { board: JSXGraphBoardAttrs, elements: Array<{type, id?, args, attrs}> }
 
-import { LitElement, html, css } from 'https://esm.sh/lit@3.2.1';
+import { LitElement, html } from 'https://esm.sh/lit@3.2.1';
 const JSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.11.1/jsxgraphcore.min.js';
 const JSX_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.11.1/jsxgraph.min.css';
 
