@@ -6,26 +6,26 @@ This is the canonical data shape output by `paidagogos:micro`. The visual server
 
 ```typescript
 interface Lesson {
-  topic: string;
+  topic: string;                  // e.g. "CSS Flexbox"
   level: "beginner" | "intermediate" | "advanced";
-  concept: string;
-  why: string;
+  concept: string;                // 2–3 sentence explanation, no jargon for beginner
+  why: string;                    // Real-world motivation ("You'll use this when...")
 
   renderers: RendererKey[];      // V2: required. [] if plain code/text only.
 
   example: {
-    code?: string;
-    prose?: string;
-    language?: string;
+    code?: string;                // Syntax-highlighted code (omit for non-code topics)
+    prose?: string;               // Prose example (for non-code topics)
+    language?: string;            // "css" | "javascript" | "python" | "typescript" | etc.
     renderer?: RendererKey;      // V2: if set, use this edu-[name] for the example
     config?: Record<string, unknown>;  // V2: renderer-specific config object
   };
-  common_mistakes: string[];
-  generate_task: string;
-  quiz: QuizQuestion[];
-  resources: Resource[];
-  next: string;
-  estimated_minutes: number;
+  common_mistakes: string[];      // Exactly 2–3 mistakes. Concrete, not generic.
+  generate_task: string;          // A production challenge: "Write a flex container that..."
+  quiz: QuizQuestion[];           // Exactly 3 questions, mix of types
+  resources: Resource[];          // 2–3 links. At least 1 must be official docs.
+  next: string;                   // One follow-on concept suggestion
+  estimated_minutes: number;      // Realistic read + practice time
 }
 
 type RendererKey =
@@ -34,16 +34,16 @@ type RendererKey =
 interface QuizQuestion {
   type: "multiple_choice" | "fill_blank" | "explain";
   question: string;
-  options?: string[];
-  answer: string;
-  explanation: string;
+  options?: string[];             // Required for multiple_choice (4 options)
+  answer: string;                 // Correct answer text
+  explanation: string;            // Why correct — 1–2 sentences shown after answer
 }
 
 interface Resource {
   title: string;
   url: string;
   type: "docs" | "tutorial" | "video" | "interactive";
-  source: "vault" | "ai-suggested";
+  source: "vault" | "ai-suggested"; // "vault" = from knowledge vault; "ai-suggested" = LLM-generated
 }
 ```
 
