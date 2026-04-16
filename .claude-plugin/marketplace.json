@@ -1,0 +1,32 @@
+{
+  "name": "neotherapper-plugins",
+  "version": "1.0.0",
+  "description": "Claude Code plugins by Georgios Pilitsoglou — naming, API mapping, blog drafting, and interactive learning.",
+  "repository": "https://github.com/neotherapper/claude-plugins",
+  "owner": {
+    "name": "Georgios Pilitsoglou",
+    "url": "https://pilitsoglou.com"
+  },
+  "plugins": [
+    {
+      "name": "namesmith",
+      "source": "./plugins/namesmith",
+      "description": "Find the right name for your project — brand interview, AI generation across 7 archetypes, live domain availability + pricing via Cloudflare or Porkbun."
+    },
+    {
+      "name": "beacon",
+      "source": "./plugins/beacon",
+      "description": "Map any site's API surface — systematically."
+    },
+    {
+      "name": "draftloom",
+      "source": "./plugins/draftloom",
+      "description": "AI-powered blog post drafting. Write in your voice, optimised for virality."
+    },
+    {
+      "name": "learn",
+      "source": "./plugins/learn",
+      "description": "Structured AI-powered lessons for any topic, rendered in a local visual browser UI."
+    }
+  ]
+}
