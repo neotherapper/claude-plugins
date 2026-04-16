@@ -45,13 +45,14 @@ Store the resolved level as `{level}`. The value must be one of `"beginner"`, `"
 
 ## Step 1: Read reference files
 
-Before generating any content, read all three reference files in this order:
+Before generating any content, read all four reference files in this order:
 
 1. `plugins/paidagogos/skills/paidagogos-micro/references/lesson-schema.md` — the canonical `Lesson` interface, field rules, and a valid example
 2. `plugins/paidagogos/skills/paidagogos-micro/references/teaching-guide.md` — content rules for each lesson section, expertise level guidelines, and quiz rules
 3. `plugins/paidagogos/skills/paidagogos-micro/references/vault-integration.md` — the vault lookup contract for the `resources[]` array
+4. `plugins/paidagogos/skills/paidagogos-micro/references/renderer-map.md` — the keyword → renderer classification table for `renderers[]`
 
-Hold all three in context for the duration of this skill invocation. Do not rely on memory of these files from prior sessions.
+Hold all four in context for the duration of this skill invocation. Do not rely on memory of these files from prior sessions.
 
 ---
 
@@ -63,7 +64,18 @@ If the vault lookup fails for any reason (file not found, read error, vault not 
 
 ---
 
-## Step 3: Generate Lesson JSON
+## Step 3: Classify renderers
+
+1. Read `references/renderer-map.md`.
+2. Apply the keyword → renderer table to the topic.
+3. Collect all matching renderer keys into `renderers[]`.
+4. If the lesson has a visual example, pick the single most appropriate renderer from `renderers[]` and set `example.renderer`. Also populate `example.config` with the renderer-specific structure (see component documentation for each renderer).
+5. If no keywords match and the topic is not a programming language, set `renderers: []` and omit `example.renderer`.
+6. Do NOT invent renderer keys. Only the V2 set is available: `math`, `code`, `chart`, `geometry`, `sim-2d`. If the topic would benefit from a renderer not in this set, check `renderer-map.md` "Out of scope for V2" and fall back to `renderers: []` or `["code"]` as appropriate.
+
+---
+
+## Step 4: Generate Lesson JSON
 
 Generate a single JSON object that strictly conforms to the `Lesson` interface defined in `lesson-schema.md`. Apply all content rules from `teaching-guide.md`.
 
@@ -73,12 +85,13 @@ Generate a single JSON object that strictly conforms to the `Lesson` interface d
 - `level` — the resolved level from pre-flight Check 2
 - `concept` — 2–3 sentences; no jargon for `beginner`; full technical precision for `advanced`
 - `why` — one concrete real-world situation; starts with "You'll use this when..."
-- `example` — working code (with `language`) for code topics; prose for non-code topics
+- `example` — working code (with `language`) for code topics; prose for non-code topics; if a renderer was selected in Step 3, also set `example.renderer` (the chosen renderer key) and `example.config` (renderer-specific configuration object)
+- `renderers` — array of renderer keys classified in Step 3 (e.g. `["code"]`, `["math", "code"]`, or `[]`); always present, never omitted
 - `common_mistakes` — exactly 2–3 items; concrete, not generic; framed as "Forgetting that..." not "Always remember to..."
 - `generate_task` — starts with an action verb; completable in 5–10 minutes; directly exercises the concept
 - `quiz` — exactly 3 questions: one `multiple_choice` (4 options, exactly 1 correct), one `fill_blank`, one `explain`; every `explanation` field states why the answer is correct
 - `resources` — at least 1 item with `type: "docs"`; sourced via vault lookup (Step 2)
-- `next` — one concept directly related to the topic, one step up in complexity; must be the concept name only (e.g. "CSS Grid") — the Step 5 response template adds the "When you're ready:" prefix
+- `next` — one concept directly related to the topic, one step up in complexity; must be the concept name only (e.g. "CSS Grid") — the Step 6 response template adds the "When you're ready:" prefix
 - `estimated_minutes` — realistic read + generate task time; typically 8–15 minutes
 
 ### Validation before proceeding
@@ -94,7 +107,7 @@ If any validation rule fails, halt. Do not write HTML. See error handling table:
 
 ---
 
-## Step 4: Write lesson JSON to screen_dir
+## Step 5: Write lesson JSON to screen_dir
 
 The visual server owns all HTML rendering. It reads `server/templates/lesson.html` and injects the lesson data into the `#lesson-data` script tag automatically. Your job is to write the data file — nothing more.
 
@@ -108,7 +121,7 @@ Determine the output path:
 
 `screenDir` comes from `.paidagogos/server/state/server-info` (read in pre-flight Check 1).
 
-Write the file containing the validated Lesson JSON from Step 3, pretty-printed with 2-space indentation. The file must be valid JSON — no prose, no wrappers, no HTML.
+Write the file containing the validated Lesson JSON from Step 4, pretty-printed with 2-space indentation. The file must be valid JSON — no prose, no wrappers, no HTML.
 
 ```json
 {
@@ -124,7 +137,7 @@ If the write fails, see error handling table: **screenDir write fails**.
 
 ---
 
-## Step 5: Respond to user
+## Step 6: Respond to user
 
 After a successful file write, respond with exactly this format — no additional prose, no lesson content in chat:
 
