@@ -61,6 +61,16 @@
     .caveat{margin-top:2rem;padding:.75rem 1rem;background:var(--surface);border-radius:6px;font-size:.82rem;color:var(--muted);border:1px solid var(--border)}
     .waiting{display:flex;align-items:center;justify-content:center;min-height:60vh;color:var(--muted)}
   </style>
+
+  <!-- Lit 3 runtime — drives <edu-[name]> and <learn-[name]> components -->
+  <script type="module">
+    import { LitElement, html, css } from 'https://cdn.jsdelivr.net/npm/lit@3/index.js';
+    window.__lit = { LitElement, html, css };
+  </script>
+
+  <!-- Web Awesome — UI chrome autoloader -->
+  <script type="module"
+    src="https://ka-f.webawesome.com/webawesome@3.5.0/webawesome.loader.js"></script>
 </head>
 <body>
 <div class="layout" id="root"><div class="waiting">Waiting for a lesson… Run <code>/paidagogos [topic]</code> in Claude Code.</div></div>
@@ -111,6 +121,54 @@ function revealExplain(qi){
   post('quiz_reveal',{qi});
 }
 
+// Map of renderer key → URL of its component module.
+// Served from server.js /components/renderers/ route.
+const RENDERER_MODULES = {
+  'math':     '/components/renderers/edu-math.js',
+  'code':     '/components/renderers/edu-code.js',
+  'chart':    '/components/renderers/edu-chart.js',
+  'geometry': '/components/renderers/edu-geometry.js',
+  'sim-2d':   '/components/renderers/edu-sim-2d.js',
+};
+
+const loadedRenderers = new Set();
+
+async function loadRenderers(keys) {
+  const unique = [...new Set(keys || [])];
+  const toLoad = unique.filter(k => !loadedRenderers.has(k) && RENDERER_MODULES[k]);
+  await Promise.all(toLoad.map(k =>
+    import(RENDERER_MODULES[k])
+      .then(() => loadedRenderers.add(k))
+      .catch(err => console.error(`Failed to load renderer "${k}":`, err))
+  ));
+}
+
+function renderExample(ex) {
+  if (ex && ex.renderer && RENDERER_MODULES[ex.renderer] && ex.config) {
+    // V2 path: serialize config into data-config; hydrated after innerHTML is set
+    return `<edu-${ex.renderer} data-config='${escAttr(JSON.stringify(ex.config))}'></edu-${ex.renderer}>`;
+  }
+  // V1 fallbacks
+  if (ex && ex.code) {
+    return `<div class="code-wrap"><pre class="code-block">${esc(ex.code)}</pre>
+       <button class="copy-btn" onclick="copyCode(this,${JSON.stringify(ex.code)})">copy</button></div>`;
+  }
+  return `<p>${esc((ex && ex.prose) || '')}</p>`;
+}
+
+function hydrateRenderers(root) {
+  Object.keys(RENDERER_MODULES).forEach(k => {
+    root.querySelectorAll(`edu-${k}[data-config]`).forEach(el => {
+      try {
+        el.config = JSON.parse(el.getAttribute('data-config'));
+        el.removeAttribute('data-config');
+      } catch (e) {
+        console.error(`Failed to hydrate edu-${k} config:`, e);
+      }
+    });
+  });
+}
+
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
 function safeUrl(u) {
@@ -147,44 +205,45 @@ function renderQuiz(quiz){
 const data=JSON.parse(document.getElementById('lesson-data').textContent);
 if(!data){document.getElementById('root').innerHTML='<div class="waiting">Waiting for a lesson… Run <code>/paidagogos [topic]</code> in Claude Code.</div>'; }
 else{
-  const ex=data.example||{};
-  const codeHtml=ex.code
-    ?`<div class="code-wrap"><pre class="code-block">${esc(ex.code)}</pre>
-       <button class="copy-btn" onclick="copyCode(this,${JSON.stringify(ex.code)})">copy</button></div>`
-    :`<p>${esc(ex.prose||'')}</p>`;
+  (async()=>{
+    await loadRenderers(data.renderers||[]);
 
-  const mistakes=(data.common_mistakes||[]).map(m=>`<li>${esc(m)}</li>`).join('');
+    const ex=data.example||{};
+    const mistakes=(data.common_mistakes||[]).map(m=>`<li>${esc(m)}</li>`).join('');
 
-  const resources=(data.resources||[]).map(r=>`
-    <a class="res-link" href="${safeUrl(r.url)}" target="_blank" rel="noopener noreferrer">
-      <span>${esc(r.title)}</span>
-      <span class="res-meta">${esc(r.type)}${r.source==='ai-suggested'?' <span class="ai-badge">(AI-suggested, verify)</span>':''}</span>
-    </a>`).join('');
+    const resources=(data.resources||[]).map(r=>`
+      <a class="res-link" href="${safeUrl(r.url)}" target="_blank" rel="noopener noreferrer">
+        <span>${esc(r.title)}</span>
+        <span class="res-meta">${esc(r.type)}${r.source==='ai-suggested'?' <span class="ai-badge">(AI-suggested, verify)</span>':''}</span>
+      </a>`).join('');
 
-  document.getElementById('root').innerHTML=`
-    <div class="header">
-      <div class="topic">${esc(data.topic)}</div>
-      <div class="meta">
-        <span class="badge">${esc(data.level)}</span>
-        <span class="badge">~${esc(String(data.estimated_minutes))} min</span>
+    const root=document.getElementById('root');
+    root.innerHTML=`
+      <div class="header">
+        <div class="topic">${esc(data.topic)}</div>
+        <div class="meta">
+          <span class="badge">${esc(data.level)}</span>
+          <span class="badge">~${esc(String(data.estimated_minutes))} min</span>
+        </div>
       </div>
-    </div>
-    <div class="section"><div class="section-title">Concept</div><p>${esc(data.concept)}</p></div>
-    <div class="section"><div class="section-title">Why it matters</div><div class="why">${esc(data.why)}</div></div>
-    <div class="section">
-      <div class="section-title">Example${ex.language?' — '+esc(ex.language):''}</div>
-      ${codeHtml}
-    </div>
-    <div class="section"><div class="section-title">Common mistakes</div><div class="mistakes"><ul>${mistakes}</ul></div></div>
-    <div class="section"><div class="section-title">Generate</div><div class="generate">${esc(data.generate_task)}</div></div>
-    <div class="section"><div class="section-title">Quiz</div><div class="quiz">${renderQuiz(data.quiz||[])}</div></div>
-    <div class="section"><div class="section-title">Resources</div><div class="resources">${resources}</div></div>
-    <div class="next-section">
-      <div class="section-title">What to explore next</div>
-      <p>When you're ready: ${esc(data.next||'keep exploring!')}</p>
-    </div>
-    <div class="caveat">&#9888;&#65039; This explanation is AI-generated. Verify against official documentation before using in production.</div>
-  `;
+      <div class="section"><div class="section-title">Concept</div><p>${esc(data.concept)}</p></div>
+      <div class="section"><div class="section-title">Why it matters</div><div class="why">${esc(data.why)}</div></div>
+      <div class="section">
+        <div class="section-title">Example${ex.language?' — '+esc(ex.language):''}</div>
+        ${renderExample(ex)}
+      </div>
+      <div class="section"><div class="section-title">Common mistakes</div><div class="mistakes"><ul>${mistakes}</ul></div></div>
+      <div class="section"><div class="section-title">Generate</div><div class="generate">${esc(data.generate_task)}</div></div>
+      <div class="section"><div class="section-title">Quiz</div><div class="quiz">${renderQuiz(data.quiz||[])}</div></div>
+      <div class="section"><div class="section-title">Resources</div><div class="resources">${resources}</div></div>
+      <div class="next-section">
+        <div class="section-title">What to explore next</div>
+        <p>When you're ready: ${esc(data.next||'keep exploring!')}</p>
+      </div>
+      <div class="caveat">&#9888;&#65039; This explanation is AI-generated. Verify against official documentation before using in production.</div>
+    `;
+    hydrateRenderers(root);
+  })();
 }
 </script>
 </body>
