@@ -119,6 +119,32 @@ function startServer(port, attempts = 0) {
       return;
     }
 
+    // Serve static component modules — ES modules for <edu-*> web components.
+    if (req.url.startsWith('/components/')) {
+      const urlPath = req.url.split('?')[0];
+      const componentsRoot = path.join(__dirname, 'components');
+      const resolved = path.resolve(path.join(__dirname, urlPath));
+      if (!resolved.startsWith(componentsRoot + path.sep) && resolved !== componentsRoot) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+      }
+      fs.readFile(resolved, (err, data) => {
+        if (err) {
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('Not found');
+          return;
+        }
+        const ext = path.extname(resolved);
+        const contentType = ext === '.js'  ? 'text/javascript; charset=utf-8'
+                          : ext === '.css' ? 'text/css; charset=utf-8'
+                          : 'application/octet-stream';
+        res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'no-cache' });
+        res.end(data);
+      });
+      return;
+    }
+
     // Serve lesson page — template + injected lesson JSON.
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     try {
