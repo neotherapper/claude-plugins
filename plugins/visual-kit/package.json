@@ -1,0 +1,34 @@
+{
+  "name": "@neotherapper/visual-kit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "visual-kit": "bin/visual-kit"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "lint:pure": "node scripts/lint-pure-components.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "verify": "pnpm run lint:pure && pnpm run build && pnpm run test"
+  },
+  "engines": { "node": ">=20.0.0" },
+  "dependencies": {
+    "lit": "3.2.1",
+    "@lit-labs/ssr": "3.2.2",
+    "@lit-labs/ssr-client": "1.1.7",
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "dompurify": "3.1.7",
+    "jsdom": "25.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.7.4",
+    "@types/jsdom": "21.1.7",
+    "esbuild": "0.24.0",
+    "typescript": "5.6.2",
+    "vitest": "2.1.2"
+  }
+}
