@@ -25,9 +25,9 @@ plugins/paidagogos/
 │   └── plugin.json                    ← manifest: name, version, author, hooks, skills[]
 │
 ├── skills/
-│   ├── learn/
+│   ├── paidagogos/
 │   │   └── SKILL.md                   ← /paidagogos — intent detection + routing
-│   └── learn-micro/
+│   └── paidagogos-micro/
 │       ├── SKILL.md                   ← /paidagogos:micro — lesson orchestrator
 │       └── references/
 │           ├── lesson-schema.md       ← Lesson JSON schema (typed, versioned)
@@ -64,7 +64,7 @@ The visual server uses the same file-watcher and `screen_dir` / `state_dir` patt
 
 ## Key rules
 
-- **Router surfaces its decision.** `/learn` never silently reroutes. It always tells the user what it detected and where it is routing.
+- **Router surfaces its decision.** `/paidagogos` never silently reroutes. It always tells the user what it detected and where it is routing.
 - **One-shot JSON, strict schema.** `paidagogos:micro` generates the full `Lesson` JSON in a single prompt. No iterative assembly, no inter-step state.
 - **Quiz is default ON.** Users opt out, not in. The quiz is part of the lesson, not an add-on.
 - **No external CDN calls.** All assets are bundled in `server/templates/`. The lesson page makes zero external requests.

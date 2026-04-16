@@ -86,7 +86,7 @@
 
 **Status:** Accepted
 
-**Context:** The `/learn` router must decide when a topic is too broad for `paidagogos:micro` and should offer a learning path instead. Any threshold is a heuristic — the question is where to draw it.
+**Context:** The `/paidagogos` router must decide when a topic is too broad for `paidagogos:micro` and should offer a learning path instead. Any threshold is a heuristic — the question is where to draw it.
 
 **Decision:** If the topic contains more than 3 distinct sub-concepts, the router asks the user: "This is a broad topic. Do you want a full roadmap or one focused concept to start with?" It never silently routes to path (V2+). In V1, the only outcome of "full roadmap" is a clarifying message and a prompt to narrow the topic.
 

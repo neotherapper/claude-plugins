@@ -1,8 +1,8 @@
 # Paidagogos — Testing Guide
 
-> How to validate Learn behaviour against its acceptance criteria.
+> How to validate Paidagogos behaviour against its acceptance criteria.
 
-Learn has no runtime application code — it is an AI skill system with a companion visual server. "Testing" means running the plugin in Claude Code and verifying observable outputs match the Gherkin scenarios in `docs/plugins/paidagogos/specs/`, and verifying the visual server renders lessons correctly.
+Paidagogos has no runtime application code — it is an AI skill system with a companion visual server. "Testing" means running the plugin in Claude Code and verifying observable outputs match the Gherkin scenarios in `docs/plugins/paidagogos/specs/`, and verifying the visual server renders lessons correctly.
 
 ---
 
@@ -10,9 +10,8 @@ Learn has no runtime application code — it is an AI skill system with a compan
 
 | File | What it covers |
 |------|---------------|
-| `specs/learn.feature` | Router: intent detection, scope classifier, routing decisions surfaced to user |
-| `specs/learn-micro.feature` | Lesson generation: Lesson JSON shape, expertise level, quiz, resource links |
-| `specs/visual-server.feature` | Server startup, file-watcher, port conflict, auto-exit, browser rendering |
+| `specs/paidagogos-micro.feature` | Router + lesson generation: intent detection, scope classifier, Lesson JSON shape, expertise level, quiz, resource links |
+| `specs/paidagogos-server.feature` | Server startup, file-watcher, port conflict, auto-exit, browser rendering |
 
 ---
 
@@ -47,7 +46,7 @@ Then   Claude asks: "Do you want a full roadmap or one focused concept?"
 
 ## File-output assertions
 
-After a successful `/learn` run, verify:
+After a successful `/paidagogos` run, verify:
 
 ```
 screen_dir/
