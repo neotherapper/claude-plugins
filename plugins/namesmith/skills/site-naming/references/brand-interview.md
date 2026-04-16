@@ -77,6 +77,18 @@ Any hard constraints? For example:
 Or type "none" to skip.
 ```
 
+### Q7 — Vocabulary Mining
+
+```
+Any words from any domain — a brand, a place, a concept — that you love the sound or feel of? (e.g. 'massimo', 'Pokédex', 'notion', anything)
+```
+
+This answer is optional but high-value. If provided:
+- Extract the word class (Italian superlative, English single-word, portmanteau, etc.)
+- Mark it in the brand profile as `Vocabulary: [word] ([class])`
+- In Phase 2 Direction Round, include one sample from the suffix family of that word class
+- In Phase 3 Deep Generation, if that archetype is selected, generate the full suffix family exploration block
+
 ---
 
 ## Weighting Rules

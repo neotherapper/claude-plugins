@@ -1,6 +1,6 @@
 # Generation Archetypes
 
-## 7 Archetypes
+## 8 Archetypes
 
 ### 1. Short & Punchy
 Names of 6 characters or fewer. Single or double syllable. No meaning required — just memorable sound.
@@ -74,6 +74,29 @@ A generic or descriptive base name paired with a TLD that adds meaning (load `$C
 
 ---
 
+### 8. Suffix Family Exploration
+
+**When to use:** When the product has a strong category word (index, rank, code, build, dev) OR when the user's Q7 vocabulary hints at a suffix family (Italian, Pokédex → -dex, Bauhaus → -haus).
+
+**Sub-families to explore:**
+
+| Sub-family | Pattern | Examples |
+|-----------|---------|---------|
+| -dex | Pokédex model — catalog/index | `coderdex`, `devdex`, `makedex` |
+| -haus | Bauhaus — school of greats | `coderhaus`, `devhaus` |
+| -eum | museum — archive of the greats | `deveum`, `codereum` |
+| -issimo | Italian superlative | `devissimo`, `codeissimo`, `hackissimo` |
+| massi- | massimo root as prefix | `massidev`, `massicoder` |
+| primo | Italian "first/best" | `primo.dev`, `primodev` |
+| ccTLD hack | [base].er, [base].rs, [base].ng | `cod.er`, `build.rs`, `hack.er` |
+
+Generate 3–4 variants per relevant sub-family. Note: -dex and -ex families are especially productive for directory/ranking products (the compressed "index" metaphor). ccTLD hacks have high take rates — generate 8–10 to compensate.
+
+**Direction Round sample (2 names max):** one from -dex family, one from -issimo family.
+**Deep Generation full block:** generate all relevant sub-families for the selected seed concept.
+
+---
+
 ## 10 Generation Techniques
 
 1. **Portmanteau** — Blend two words by overlapping syllables or sounds
@@ -115,7 +138,7 @@ A generic or descriptive base name paired with a TLD that adds meaning (load `$C
 ## Wave System
 
 ### Wave 1 (default)
-Generate 25–35 candidates across all 7 archetypes. Apply weighting from brand-interview.md. Use the per-archetype base distribution targets from the distribution table in SKILL.md (the Wave 1 Generation step). Do not check availability during generation — generate the full list first, then batch-check.
+Generate 15–20 candidates across the archetypes selected in Phase 2 Direction Round (max 3) plus any seed vocabulary from Q7 or the forced pivot. Apply weighting from brand-interview.md. If Suffix Family is selected, generate the full suffix family exploration block (see Archetype 8). Do not check availability during generation — generate the full list first, then batch-check.
 
 ### Wave 2 (after feedback)
 Generate 20+ new candidates. Refine toward stated preferences:

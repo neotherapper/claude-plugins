@@ -54,7 +54,7 @@ check_cloudflare() {
       -d "{\"domains\": ${json_array}}" 2>/dev/null) || true
 
     if echo "$response" | jq -e '.success == true' > /dev/null 2>&1; then
-      echo "$response" | jq -r '.result[] | "\(.available | if . then "available" else "taken" end) \(.name) \(.price // "na")"'
+      echo "$response" | jq -r '.result.domains[] | "\(.registrable | if . then "available" else "taken" end) \(.name) \(.pricing.registration_cost // "na")"'
     else
       # CF call failed — fall through to Tier 2 for these domains
       for domain in "${batch[@]}"; do
@@ -148,17 +148,60 @@ check_whois() {
 
 # ─────────────────────────────────────────────────────────
 # Main routing logic
+# Split .io domains to Porkbun (CF doesn't support .io)
 # ─────────────────────────────────────────────────────────
 
 all_unknown=true
 
-if [[ -n "${CF_API_TOKEN:-}" && -n "${CF_ACCOUNT_ID:-}" ]]; then
-  # Tier 1: Cloudflare (batch)
-  results=$(check_cloudflare "${DOMAINS[@]}")
-  echo "$results"
-  if [[ -n "$results" ]] && echo "$results" | grep -qv "^unknown"; then
-    all_unknown=false
+# Helper: check a single domain through Porkbun → whois fallback
+check_single_fallback() {
+  local domain="$1"
+  if [[ -n "${PORKBUN_API_KEY:-}" && -n "${PORKBUN_SECRET:-}" ]]; then
+    check_porkbun "$domain"
+  else
+    check_whois "$domain"
   fi
+}
+
+if [[ -n "${CF_API_TOKEN:-}" && -n "${CF_ACCOUNT_ID:-}" ]]; then
+  # Tier 1: Cloudflare (batch) — but route .io to Porkbun
+  cf_domains=()
+  io_domains=()
+  for domain in "${DOMAINS[@]}"; do
+    if [[ "$domain" == *.io ]]; then
+      io_domains+=("$domain")
+    else
+      cf_domains+=("$domain")
+    fi
+  done
+
+  # Check non-.io domains via Cloudflare, retry unknowns through Porkbun → whois
+  if [[ ${#cf_domains[@]} -gt 0 ]]; then
+    results=$(check_cloudflare "${cf_domains[@]}")
+    while IFS= read -r line; do
+      if [[ -z "$line" ]]; then continue; fi
+      if [[ "$line" == unknown* ]]; then
+        retry_domain=$(echo "$line" | awk '{print $2}')
+        result=$(check_single_fallback "$retry_domain")
+        echo "$result"
+        if [[ "$result" != unknown* ]]; then
+          all_unknown=false
+        fi
+      else
+        echo "$line"
+        all_unknown=false
+      fi
+    done <<< "$results"
+  fi
+
+  # Check .io domains via Porkbun → whois
+  for domain in ${io_domains[@]+"${io_domains[@]}"}; do
+    result=$(check_single_fallback "$domain")
+    echo "$result"
+    if [[ "$result" != unknown* ]]; then
+      all_unknown=false
+    fi
+  done
 
 elif [[ -n "${PORKBUN_API_KEY:-}" && -n "${PORKBUN_SECRET:-}" ]]; then
   # Tier 2: Porkbun (per-domain)
