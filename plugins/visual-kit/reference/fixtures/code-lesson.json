@@ -1,0 +1,28 @@
+{
+  "topic": "JavaScript array.map",
+  "level": "beginner",
+  "renderers": ["code"],
+  "concept": "map() returns a new array with each element transformed by the callback.",
+  "why": "You'll use this whenever you need to convert a list of one kind of thing into another — e.g. user IDs into user objects.",
+  "example": {
+    "renderer": "code",
+    "config": {
+      "language": "javascript",
+      "code": "const doubled = [1, 2, 3].map(n => n * 2);\n// doubled: [2, 4, 6]",
+      "editable": false
+    }
+  },
+  "common_mistakes": [
+    "Confusing map with forEach — forEach returns undefined, map returns a new array.",
+    "Forgetting that map does NOT modify the original array."
+  ],
+  "generate_task": "Use map to turn ['alice', 'bob'] into ['Alice', 'Bob'].",
+  "quiz": [
+    {"type": "multiple_choice", "question": "What does [1,2,3].map(n => n+1) return?", "options": ["[2,3,4]", "[1,2,3]", "undefined", "6"], "answer": "[2,3,4]", "explanation": "map produces a new array with each element + 1."},
+    {"type": "fill_blank", "question": "Unlike forEach, map returns a new ___.", "answer": "array", "explanation": "forEach returns undefined; map returns a transformed array."},
+    {"type": "explain", "question": "Why prefer map over a for-loop when transforming an array?", "answer": "it's declarative and returns a new array without mutation", "explanation": "map expresses intent clearly and avoids mutating the original data."}
+  ],
+  "resources": [{"title": "Array.prototype.map — MDN", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map", "type": "docs", "source": "ai-suggested"}],
+  "next": "Array.prototype.filter — selecting elements by predicate",
+  "estimated_minutes": 10
+}
