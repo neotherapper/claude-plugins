@@ -5,21 +5,31 @@
 //   canvas: { width, height }
 // }
 
-const { LitElement, html, css } = window.__lit;
+import { LitElement, html, css } from 'https://esm.sh/lit@3.2.1';
 const MATTER_URL = 'https://esm.sh/matter-js@0.20.0';
+
+const EDU_SIM2D_STYLE = `
+  edu-sim-2d { display: block; margin: 1rem 0; }
+  edu-sim-2d .wrap { border: 1px solid var(--border, #e9ecef); border-radius: 8px; overflow: hidden; background: var(--surface, #f8f9fa); }
+  edu-sim-2d canvas { display: block; max-width: 100%; }
+`;
+if (!document.querySelector('style[data-edu-sim2d]')) {
+  const s = document.createElement('style');
+  s.dataset.eduSim2d = 'true';
+  s.textContent = EDU_SIM2D_STYLE;
+  document.head.appendChild(s);
+}
 
 class EduSim2d extends LitElement {
   static properties = { config: { type: Object } };
 
-  static styles = css`
-    :host { display: block; margin: 1rem 0; }
-    .wrap { border: 1px solid var(--border, #e9ecef); border-radius: 8px; overflow: hidden; background: var(--surface, #f8f9fa); }
-    canvas { display: block; max-width: 100%; }
-  `;
+  createRenderRoot() { return this; }
 
   async firstUpdated() {
     if (!this.config?.canvas) return;
-    const Matter = await import(MATTER_URL);
+    // matter-js esm.sh build exports everything under `.default`, not as named exports.
+    const mod = await import(MATTER_URL);
+    const Matter = mod.default || mod;
     const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint } = Matter;
 
     const engine = Engine.create({ gravity: this.config.world?.gravity || { x: 0, y: 1 } });

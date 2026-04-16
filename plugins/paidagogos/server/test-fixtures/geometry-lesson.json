@@ -12,7 +12,7 @@
         {"type": "point", "id": "A", "args": [0, 0], "attrs": {"name": "A"}},
         {"type": "point", "id": "B", "args": [5, 0], "attrs": {"name": "B"}},
         {"type": "point", "id": "C", "args": [2, 4], "attrs": {"name": "C"}},
-        {"type": "polygon", "args": [["A", "B", "C"]], "attrs": {"fillColor": "rgba(88, 166, 255, 0.2)"}}
+        {"type": "polygon", "args": ["A", "B", "C"], "attrs": {"fillColor": "rgba(88, 166, 255, 0.2)"}}
       ]
     }
   },

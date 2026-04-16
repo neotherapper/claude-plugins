@@ -1,62 +1,62 @@
-// <edu-code config="{...}"> — syntax-highlighted code, optionally editable.
+// <edu-code config="{...}"> — syntax-highlighted code display.
 // Config: { language: string, code: string, editable?: boolean }
-// CodeMirror 6 from esm.sh to keep ESM-native CDN imports working.
+//
+// V2 uses highlight.js for display-only rendering. V2.1 will add interactive
+// editing via CodeMirror 6 behind an `editable: true` flag, with proper
+// import-map deduplication of @codemirror/state.
 
-const { LitElement, html, css } = window.__lit;
+import { LitElement, html } from 'https://esm.sh/lit@3.2.1';
 
-const CM_URL = 'https://esm.sh/codemirror@6.0.1?bundle';
-const STATE_URL = 'https://esm.sh/@codemirror/state@6.4.1?bundle';
-const LANG_URLS = {
-  'javascript': 'https://esm.sh/@codemirror/lang-javascript@6.2.2?bundle',
-  'typescript': 'https://esm.sh/@codemirror/lang-javascript@6.2.2?bundle',
-  'python':     'https://esm.sh/@codemirror/lang-python@6.1.6?bundle',
-  'css':        'https://esm.sh/@codemirror/lang-css@6.3.0?bundle',
-  'html':       'https://esm.sh/@codemirror/lang-html@6.4.9?bundle',
-  'json':       'https://esm.sh/@codemirror/lang-json@6.0.1?bundle',
-};
+const HLJS_URL = 'https://esm.sh/highlight.js@11.11.1';
+const HLJS_CSS = 'https://esm.sh/highlight.js@11.11.1/styles/github-dark.css';
 
-async function loadLang(language) {
-  const url = LANG_URLS[language];
-  if (!url) return null;
-  const mod = await import(url);
-  const factoryName = Object.keys(mod).find(k => typeof mod[k] === 'function');
-  return factoryName ? mod[factoryName]() : null;
+// Inject highlight.js stylesheet once.
+if (!document.querySelector('link[data-hljs]')) {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = HLJS_CSS;
+  link.dataset.hljs = 'true';
+  document.head.appendChild(link);
+}
+
+const hljsReady = (async () => {
+  const mod = await import(HLJS_URL);
+  return mod.default;
+})();
+
+const EDU_CODE_STYLE = `
+  edu-code { display: block; margin: 1rem 0; }
+  edu-code .wrap { border: 1px solid var(--border, #e9ecef); border-radius: 8px; overflow: hidden; background: var(--code-bg, #1e2530); }
+  edu-code pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: "SF Mono", Consolas, monospace; font-size: 0.9rem; line-height: 1.5; }
+  edu-code code { font-family: inherit; }
+`;
+if (!document.querySelector('style[data-edu-code]')) {
+  const s = document.createElement('style');
+  s.dataset.eduCode = 'true';
+  s.textContent = EDU_CODE_STYLE;
+  document.head.appendChild(s);
 }
 
 class EduCode extends LitElement {
-  static properties = {
-    config: { type: Object },
-  };
+  static properties = { config: { type: Object } };
 
-  static styles = css`
-    :host { display: block; margin: 1rem 0; }
-    .wrap { border: 1px solid var(--border, #e9ecef); border-radius: 8px; overflow: hidden; }
-    .cm-editor { font-family: "SF Mono", Consolas, monospace; font-size: 0.9rem; }
-  `;
+  // Light DOM — highlight.js CSS is loaded in <head> and must apply to the <code> tree.
+  createRenderRoot() { return this; }
 
   async firstUpdated() {
     if (!this.config?.code) return;
-    const [{ EditorView, basicSetup }, { EditorState }] = await Promise.all([
-      import(CM_URL),
-      import(STATE_URL),
-    ]);
-    const langExt = await loadLang(this.config.language);
-    const container = this.renderRoot.querySelector('.wrap');
-    new EditorView({
-      state: EditorState.create({
-        doc: this.config.code,
-        extensions: [
-          basicSetup,
-          ...(langExt ? [langExt] : []),
-          ...(this.config.editable === false ? [EditorState.readOnly.of(true)] : []),
-        ],
-      }),
-      parent: container,
-    });
+    const hljs = await hljsReady;
+    const codeEl = this.querySelector('code');
+    if (!codeEl) return;
+    codeEl.textContent = this.config.code;
+    if (this.config.language && hljs.getLanguage(this.config.language)) {
+      codeEl.className = `language-${this.config.language}`;
+      hljs.highlightElement(codeEl);
+    }
   }
 
   render() {
-    return html`<div class="wrap"></div>`;
+    return html`<div class="wrap"><pre><code></code></pre></div>`;
   }
 }
 

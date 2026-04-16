@@ -1,7 +1,7 @@
 // <edu-math config="{...}"> — renders LaTeX via KaTeX.
 // Config: { latex: string, display: boolean }
 
-const { LitElement, html, css } = window.__lit;
+import { LitElement, html, css } from 'https://esm.sh/lit@3.2.1';
 
 // Inject KaTeX stylesheet once.
 if (!document.querySelector('link[data-katex]')) {
@@ -29,11 +29,9 @@ class EduMath extends LitElement {
     config: { type: Object },
   };
 
-  static styles = css`
-    :host { display: block; margin: 1rem 0; font-size: 1.1rem; }
-    .math-block { overflow-x: auto; padding: 0.5rem; }
-    .math-error { color: var(--warning, #d29922); font-family: monospace; font-size: 0.85rem; }
-  `;
+  // Render into light DOM so the page-level KaTeX stylesheet applies.
+  // Shadow DOM would isolate KaTeX's <span class="mord"> markup from its CSS.
+  createRenderRoot() { return this; }
 
   async firstUpdated() { await katexReady; this.requestUpdate(); }
   async updated() { await katexReady; }

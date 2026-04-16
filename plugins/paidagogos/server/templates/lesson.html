@@ -62,11 +62,9 @@
     .waiting{display:flex;align-items:center;justify-content:center;min-height:60vh;color:var(--muted)}
   </style>
 
-  <!-- Lit 3 runtime — drives <edu-[name]> and <learn-[name]> components -->
-  <script type="module">
-    import { LitElement, html, css } from 'https://cdn.jsdelivr.net/npm/lit@3/index.js';
-    window.__lit = { LitElement, html, css };
-  </script>
+  <!-- Lit 3 runtime — components import from esm.sh directly (browser-runnable ESM bundle).
+       We preload the module here so the first <edu-*> render doesn't wait on cold fetch. -->
+  <link rel="modulepreload" href="https://esm.sh/lit@3.2.1">
 
   <!-- Web Awesome — UI chrome autoloader -->
   <script type="module"

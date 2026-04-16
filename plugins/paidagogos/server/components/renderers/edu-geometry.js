@@ -1,7 +1,7 @@
 // <edu-geometry config="{...}"> — interactive 2D geometry via JSXGraph.
 // Config: { board: JSXGraphBoardAttrs, elements: Array<{type, id?, args, attrs}> }
 
-const { LitElement, html, css } = window.__lit;
+import { LitElement, html, css } from 'https://esm.sh/lit@3.2.1';
 const JSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.11.1/jsxgraphcore.min.js';
 const JSX_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.11.1/jsxgraph.min.css';
 
@@ -27,13 +27,23 @@ function ensureJSX() {
   return jsxReady;
 }
 
+const EDU_GEOMETRY_STYLE = `
+  edu-geometry { display: block; margin: 1rem 0; }
+  edu-geometry .board { width: 100%; max-width: 600px; height: 400px; border: 1px solid var(--border, #e9ecef); border-radius: 8px; }
+`;
+if (!document.querySelector('style[data-edu-geometry]')) {
+  const s = document.createElement('style');
+  s.dataset.eduGeometry = 'true';
+  s.textContent = EDU_GEOMETRY_STYLE;
+  document.head.appendChild(s);
+}
+
 class EduGeometry extends LitElement {
   static properties = { config: { type: Object } };
 
-  static styles = css`
-    :host { display: block; margin: 1rem 0; }
-    .board { width: 100%; max-width: 600px; height: 400px; border: 1px solid var(--border, #e9ecef); border-radius: 8px; }
-  `;
+  // Light DOM — JSXGraph does document.getElementById() to find the board host,
+  // which cannot reach into shadow roots.
+  createRenderRoot() { return this; }
 
   async firstUpdated() {
     if (!this.config?.board) return;

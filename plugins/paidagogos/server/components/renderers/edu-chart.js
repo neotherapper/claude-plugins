@@ -1,16 +1,24 @@
 // <edu-chart config="{...}"> — renders Chart.js charts from a JSON config.
 // Config: { library: "chartjs", type: string, data: object, options?: object }
 
-const { LitElement, html, css } = window.__lit;
+import { LitElement, html, css } from 'https://esm.sh/lit@3.2.1';
 const CHARTJS_URL = 'https://esm.sh/chart.js@4.4.1/auto';
+
+const EDU_CHART_STYLE = `
+  edu-chart { display: block; margin: 1rem 0; }
+  edu-chart .wrap { position: relative; width: 100%; max-width: 720px; }
+`;
+if (!document.querySelector('style[data-edu-chart]')) {
+  const s = document.createElement('style');
+  s.dataset.eduChart = 'true';
+  s.textContent = EDU_CHART_STYLE;
+  document.head.appendChild(s);
+}
 
 class EduChart extends LitElement {
   static properties = { config: { type: Object } };
 
-  static styles = css`
-    :host { display: block; margin: 1rem 0; }
-    .wrap { position: relative; width: 100%; max-width: 720px; }
-  `;
+  createRenderRoot() { return this; }
 
   async firstUpdated() {
     if (!this.config) return;
