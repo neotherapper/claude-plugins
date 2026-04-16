@@ -1,0 +1,32 @@
+{
+  "topic": "Triangle angle sum",
+  "level": "beginner",
+  "renderers": ["geometry", "math"],
+  "concept": "The interior angles of a triangle always sum to 180°, regardless of its shape.",
+  "why": "You'll use this in any proof involving triangles — it's the building block of Euclidean geometry.",
+  "example": {
+    "renderer": "geometry",
+    "config": {
+      "board": {"boundingbox": [-1, 6, 8, -1], "axis": true, "showCopyright": false},
+      "elements": [
+        {"type": "point", "id": "A", "args": [0, 0], "attrs": {"name": "A"}},
+        {"type": "point", "id": "B", "args": [5, 0], "attrs": {"name": "B"}},
+        {"type": "point", "id": "C", "args": [2, 4], "attrs": {"name": "C"}},
+        {"type": "polygon", "args": [["A", "B", "C"]], "attrs": {"fillColor": "rgba(88, 166, 255, 0.2)"}}
+      ]
+    }
+  },
+  "common_mistakes": [
+    "Forgetting that the 180° sum holds only in plane (Euclidean) geometry — on a sphere, angles sum to more than 180°.",
+    "Confusing interior and exterior angles — exterior angles sum to 360°."
+  ],
+  "generate_task": "If two angles of a triangle are 45° and 85°, what is the third?",
+  "quiz": [
+    {"type": "multiple_choice", "question": "The interior angles of any triangle sum to...", "options": ["90°", "180°", "270°", "360°"], "answer": "180°", "explanation": "This is the fundamental theorem of plane geometry for triangles."},
+    {"type": "fill_blank", "question": "Exterior angles of any triangle sum to ___°.", "answer": "360", "explanation": "Each exterior angle = 180° - its interior; 3×180 - 180 = 360."},
+    {"type": "explain", "question": "Does the 180° rule hold on a sphere?", "answer": "no, spherical triangles sum to more than 180°", "explanation": "On a sphere, geodesic triangles have an angle excess proportional to their area."}
+  ],
+  "resources": [{"title": "Sum of angles of a triangle — Wikipedia", "url": "https://en.wikipedia.org/wiki/Sum_of_angles_of_a_triangle", "type": "docs", "source": "ai-suggested"}],
+  "next": "Law of sines — relates sides to sines of opposite angles",
+  "estimated_minutes": 10
+}
