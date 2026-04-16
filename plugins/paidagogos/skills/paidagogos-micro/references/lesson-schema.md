@@ -6,36 +6,44 @@ This is the canonical data shape output by `paidagogos:micro`. The visual server
 
 ```typescript
 interface Lesson {
-  topic: string;                  // e.g. "CSS Flexbox"
+  topic: string;
   level: "beginner" | "intermediate" | "advanced";
-  concept: string;                // 2–3 sentence explanation, no jargon for beginner
-  why: string;                    // Real-world motivation ("You'll use this when...")
+  concept: string;
+  why: string;
+
+  renderers: RendererKey[];      // V2: required. [] if plain code/text only.
+
   example: {
-    code?: string;                // Syntax-highlighted code (omit for non-code topics)
-    prose?: string;               // Prose example (for non-code topics)
-    language?: string;            // "css" | "javascript" | "python" | "typescript" | etc.
+    code?: string;
+    prose?: string;
+    language?: string;
+    renderer?: RendererKey;      // V2: if set, use this edu-[name] for the example
+    config?: Record<string, unknown>;  // V2: renderer-specific config object
   };
-  common_mistakes: string[];      // Exactly 2–3 mistakes. Concrete, not generic.
-  generate_task: string;          // A production challenge: "Write a flex container that..."
-  quiz: QuizQuestion[];           // Exactly 3 questions, mix of types
-  resources: Resource[];          // 2–3 links. At least 1 must be official docs.
-  next: string;                   // One follow-on concept suggestion
-  estimated_minutes: number;      // Realistic read + practice time
+  common_mistakes: string[];
+  generate_task: string;
+  quiz: QuizQuestion[];
+  resources: Resource[];
+  next: string;
+  estimated_minutes: number;
 }
+
+type RendererKey =
+  | "math" | "code" | "chart" | "geometry" | "sim-2d";
 
 interface QuizQuestion {
   type: "multiple_choice" | "fill_blank" | "explain";
   question: string;
-  options?: string[];             // Required for multiple_choice (4 options)
-  answer: string;                 // Correct answer text
-  explanation: string;            // Why correct — 1–2 sentences shown after answer
+  options?: string[];
+  answer: string;
+  explanation: string;
 }
 
 interface Resource {
   title: string;
   url: string;
   type: "docs" | "tutorial" | "video" | "interactive";
-  source: "vault" | "ai-suggested"; // "vault" = from knowledge vault; "ai-suggested" = LLM-generated
+  source: "vault" | "ai-suggested";
 }
 ```
 
@@ -47,6 +55,9 @@ interface Resource {
 - Any resource with `source: "ai-suggested"` will be shown with a `(AI-suggested, verify link)` badge in the UI.
 - `estimated_minutes` should account for reading + generate task attempt. Typically 8–15 minutes.
 - `next` MUST be a single concept one step up in complexity from the lesson topic.
+- `renderers` MUST always be present. Empty array `[]` is valid for lessons with no subject-domain rendering (e.g., pure text concepts).
+- `renderers` values MUST come from the `RendererKey` union. `example.renderer` must also be listed in `renderers[]` (if set).
+- V2 renderer keys: `math`, `code`, `chart`, `geometry`, `sim-2d`.
 
 ## Example (valid Lesson JSON)
 
@@ -54,11 +65,13 @@ interface Resource {
 {
   "topic": "CSS Flexbox",
   "level": "beginner",
+  "renderers": ["code"],
   "concept": "Flexbox is a CSS layout model that arranges items in a row or column and distributes space between them automatically. You define a flex container with `display: flex`, and its direct children become flex items.",
   "why": "You'll use this whenever you need to centre something, build a navigation bar, or lay out a card grid without writing complex float or position hacks.",
   "example": {
     "code": ".container {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n\n.item {\n  flex: 1;\n}",
-    "language": "css"
+    "language": "css",
+    "renderer": "code"
   },
   "common_mistakes": [
     "Applying flex properties to the wrong element — `justify-content` goes on the container, not the items.",
