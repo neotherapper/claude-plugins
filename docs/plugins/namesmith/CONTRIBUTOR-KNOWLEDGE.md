@@ -2,6 +2,10 @@
 
 > Research-backed context for AI agents and human contributors. Read this before
 > proposing enhancements or writing new reference content.
+>
+> **See also:** [`SESSION-INSIGHTS.md`](./SESSION-INSIGHTS.md) — live naming session
+> analysis with verbatim technique examples, output format templates, and the
+> `level.dev` deep-dive model.
 
 ---
 
@@ -100,6 +104,19 @@ Each archetype represents a distinct market positioning strategy, validated by s
 | Internal Rhyme | Pattern-based sound matching | Playful/Clever, Short & Punchy |
 
 **Practical rule**: Apply all 10 techniques across all 7 archetypes in Wave 1 to maximise coverage. Then weight techniques based on Q2/Q3/Q4/Q5 answers for Wave 2.
+
+### Live session additions (from SESSION-INSIGHTS.md)
+
+Two high-yield technique families validated by real naming sessions but not yet in `generation-archetypes.md`:
+
+**Suffix Family Exploration** — When the product has a strong category word (index, rank, code, build), explore suffix families systematically:
+- `-dex` family (Pokédex model): makedex, hackdex, coderex — especially productive for directory/ranking products
+- `-haus` family (Bauhaus school): coderhaus, builderhaus — prestige + community
+- `-eum` family (museum, archive): deveum, codereum — gravitas
+- Italian superlative (`-issimo`): devissimo, massicoder, primo.dev — warmth without obscurity
+- ccTLD completions: `cod.er`, `build.rs` (double meaning: Rust build.rs file)
+
+**Mechanism-First Metaphor** — Find the operational verb/process at the product's core and name FROM that, not from the product category. "Draftloom" names the weaving loop, not "blog writer." This is the single highest-yield technique for memorable Abstract/Brandable names.
 
 ---
 

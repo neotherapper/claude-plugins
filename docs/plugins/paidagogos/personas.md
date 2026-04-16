@@ -1,4 +1,4 @@
-# Learn — User Personas
+# Paidagogos — User Personas
 
 ## Persona 1: The Junior Developer Filling Gaps
 

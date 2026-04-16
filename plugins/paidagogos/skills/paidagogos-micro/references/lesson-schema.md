@@ -1,6 +1,6 @@
 # Lesson JSON Schema
 
-This is the canonical data shape output by `learn:micro`. The visual server reads it; future MCP layers will too. Do not deviate from this shape.
+This is the canonical data shape output by `paidagogos:micro`. The visual server reads it; future MCP layers will too. Do not deviate from this shape.
 
 ## TypeScript Interface
 

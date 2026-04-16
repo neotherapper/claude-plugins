@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>learn</title>
+  <title>paidagogos</title>
   <style>
     :root {
       --bg:#ffffff;--surface:#f8f9fa;--border:#e9ecef;
@@ -63,7 +63,7 @@
   </style>
 </head>
 <body>
-<div class="layout" id="root"><div class="waiting">Waiting for a lesson… Run <code>/learn [topic]</code> in Claude Code.</div></div>
+<div class="layout" id="root"><div class="waiting">Waiting for a lesson… Run <code>/paidagogos [topic]</code> in Claude Code.</div></div>
 
 <script id="lesson-data" type="application/json">null</script>
 <script>
@@ -145,7 +145,7 @@ function renderQuiz(quiz){
 }
 
 const data=JSON.parse(document.getElementById('lesson-data').textContent);
-if(!data){document.getElementById('root').innerHTML='<div class="waiting">Waiting for a lesson… Run <code>/learn [topic]</code> in Claude Code.</div>'; }
+if(!data){document.getElementById('root').innerHTML='<div class="waiting">Waiting for a lesson… Run <code>/paidagogos [topic]</code> in Claude Code.</div>'; }
 else{
   const ex=data.example||{};
   const codeHtml=ex.code

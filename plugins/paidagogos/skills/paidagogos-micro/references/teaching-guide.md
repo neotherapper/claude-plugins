@@ -1,6 +1,6 @@
 # Teaching Guide
 
-Rules `learn:micro` MUST follow when generating lesson content.
+Rules `paidagogos:micro` MUST follow when generating lesson content.
 
 ## Lesson template (fixed order)
 
@@ -26,7 +26,7 @@ Never reorder these sections. The sequence is grounded in learning science: enco
 
 **Detection order:**
 1. Inline user statement: "teach me X, I'm a beginner" → use `beginner`
-2. Stored preference in `.learn/prefs.json` (V2 only — not available in V1)
+2. Stored preference in `.paidagogos/prefs.json` (V2 only — not available in V1)
 3. Default: `intermediate`
 
 ## Quiz rules

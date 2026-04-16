@@ -1,25 +1,25 @@
-Feature: learn visual server — start, serve lessons, UI interactions, and lifecycle
+Feature: paidagogos visual server — start, serve lessons, UI interactions, and lifecycle
 
   Background:
-    Given learn v0.1.0 is installed in Claude Code
+    Given paidagogos v0.1.0 is installed in Claude Code
 
   # ── Server start ──────────────────────────────────────────────────────────
 
-  Scenario: learn serve starts visual server at localhost:7337
-    When I run "learn serve"
+  Scenario: paidagogos serve starts visual server at localhost:7337
+    When I run "paidagogos serve"
     Then the server binds to 127.0.0.1 on port 7337
     And the server logs: "Visual server running at http://localhost:7337"
     And the server writes its port to state_dir/server-info
     And the server is accessible at http://localhost:7337
 
   Scenario: Server binds to localhost only — never 0.0.0.0
-    When I run "learn serve"
+    When I run "paidagogos serve"
     Then the server bind address is 127.0.0.1
     And the server is not reachable from any external network interface
 
   Scenario: Server starts with zero external dependencies at runtime
     Given no npm install has been run since plugin installation
-    When I run "learn serve"
+    When I run "paidagogos serve"
     Then the server starts successfully using only bundled dependencies
     And no package download or install step occurs
 
@@ -27,40 +27,40 @@ Feature: learn visual server — start, serve lessons, UI interactions, and life
 
   Scenario: Port 7337 occupied — server auto-increments to next free port
     Given port 7337 is already in use by another process
-    When I run "learn serve"
+    When I run "paidagogos serve"
     Then the server auto-increments to port 7338
     And the server logs the actual URL: "Visual server running at http://localhost:7338"
     And the server writes the actual port (7338) to state_dir/server-info
 
   Scenario: Port 7337 and 7338 both occupied — continues incrementing
     Given ports 7337 and 7338 are both occupied
-    When I run "learn serve"
+    When I run "paidagogos serve"
     Then the server finds the next free port (e.g. 7339)
     And logs the actual URL used
     And writes the actual port to state_dir/server-info
 
   # ── Server not running — lesson blocked ───────────────────────────────────
 
-  Scenario: User runs /learn but server is not running — blocked with clear error
+  Scenario: User runs /paidagogos but server is not running — blocked with clear error
     Given the visual server is not running
-    When I run /learn with prompt "teach me CSS flexbox"
+    When I run /paidagogos with prompt "teach me CSS flexbox"
     And the skill checks state_dir/server-info and finds the server is not running
     Then the skill does not generate a lesson
-    And the skill outputs: "Visual server is not running. Start it with `learn serve`."
+    And the skill outputs: "Visual server is not running. Start it with `paidagogos serve`."
     And no lesson HTML is written to screen_dir
 
   # ── Lesson renders in browser ─────────────────────────────────────────────
 
-  Scenario: Lesson HTML appears in browser after learn:micro runs
+  Scenario: Lesson HTML appears in browser after paidagogos:micro runs
     Given the visual server is running at localhost:7337
-    When learn:micro generates a lesson for "CSS flexbox" and writes lesson HTML to screen_dir
+    When paidagogos:micro generates a lesson for "CSS flexbox" and writes lesson HTML to screen_dir
     Then the visual server detects the new HTML file via file-watcher
     And the browser at localhost:7337/lesson reloads to show the new lesson
     And all lesson sections are visible: concept, why, example, common mistakes, generate task, quiz, what to explore next
 
   Scenario: Server falls back to terminal-rendered lesson when server fails to start
     Given the visual server fails to start (all ports in auto-increment range are occupied)
-    When learn:micro generates a lesson
+    When paidagogos:micro generates a lesson
     Then the skill renders the lesson content in the terminal
     And outputs a warning: "Visual server unavailable — showing lesson in terminal"
 
@@ -124,31 +124,31 @@ Feature: learn visual server — start, serve lessons, UI interactions, and life
 
   Scenario: Activity resets the inactivity timer
     Given the visual server has been inactive for 25 minutes
-    When learn:micro writes a new lesson HTML to screen_dir
+    When paidagogos:micro writes a new lesson HTML to screen_dir
     Then the inactivity timer resets to 0
     And the server does not exit at the 30-minute mark
 
   # ── Server restart detection ──────────────────────────────────────────────
 
-  Scenario: learn:micro checks state_dir/server-info before writing HTML — server stopped
+  Scenario: paidagogos:micro checks state_dir/server-info before writing HTML — server stopped
     Given the visual server was running but has since exited
     And state_dir/server-info reflects the stopped state
-    When learn:micro attempts to write the lesson HTML
-    Then learn:micro reads state_dir/server-info and detects the server is not running
-    And learn:micro does NOT write the lesson HTML to screen_dir
-    And learn:micro outputs: "Visual server is not running. Start it with `learn serve`."
+    When paidagogos:micro attempts to write the lesson HTML
+    Then paidagogos:micro reads state_dir/server-info and detects the server is not running
+    And paidagogos:micro does NOT write the lesson HTML to screen_dir
+    And paidagogos:micro outputs: "Visual server is not running. Start it with `paidagogos serve`."
 
-  Scenario: learn:micro proceeds normally when server-info confirms server is running
+  Scenario: paidagogos:micro proceeds normally when server-info confirms server is running
     Given the visual server is running at port 7337
     And state_dir/server-info contains the correct port and running status
-    When learn:micro generates a lesson
-    Then learn:micro writes the lesson HTML to screen_dir without error
+    When paidagogos:micro generates a lesson
+    Then paidagogos:micro writes the lesson HTML to screen_dir without error
     And the lesson is served at the port recorded in server-info
 
   # ── R-VIS-006 — diagram rendering ─────────────────────────────────────────
 
   Scenario: Architectural or conceptual topic renders a diagram in the lesson card
-    Given learn:micro generates a lesson for a topic with a structural component (e.g. "CSS box model")
+    Given paidagogos:micro generates a lesson for a topic with a structural component (e.g. "CSS box model")
     And the Lesson JSON includes a diagram definition in Mermaid syntax
     When the lesson HTML is rendered in the browser
     Then the diagram is rendered visually inside the lesson card
@@ -157,8 +157,8 @@ Feature: learn visual server — start, serve lessons, UI interactions, and life
   # ── R-ERR-001 — explicit error messages for all error states ──────────────
 
   Scenario: Bad lesson generation — explicit error message shown
-    Given learn:micro fails to generate a valid Lesson JSON (e.g. schema validation fails)
+    Given paidagogos:micro fails to generate a valid Lesson JSON (e.g. schema validation fails)
     When the generation error is detected
     Then the skill outputs an explicit user-facing error message describing what went wrong
-    And the skill suggests a corrective action (e.g. "Try rephrasing your topic or run /learn again")
+    And the skill suggests a corrective action (e.g. "Try rephrasing your topic or run /paidagogos again")
     And no partial lesson HTML is written to screen_dir

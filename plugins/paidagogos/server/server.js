@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// learn visual server — file-watcher HTTP server
+// paidagogos visual server — file-watcher HTTP server
 // Skills write Lesson JSON files to screen_dir; server injects them into the
 // lesson.html template and serves the combined page. Same pattern as the
 // superpowers visual companion (skills produce data, server owns rendering).

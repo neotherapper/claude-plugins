@@ -1,17 +1,17 @@
-# Learn — Features
+# Paidagogos — Features
 
 ## v1.0 — Ships now
 
 ### Routing
 
-- [x] `/learn {topic}` — entry point with intent detection and routing
+- [x] `/paidagogos {topic}` — entry point with intent detection and routing
 - [x] Scope classifier: broad topic (>3 sub-concepts) → ask user before routing
 - [x] Router surfaces routing decision to user — never silent reroute
-- [x] `LEARN_DEBUG=1` routing decision log
+- [x] `PAIDAGOGOS_DEBUG=1` routing decision log
 
 ### Lesson generation
 
-- [x] `/learn:micro {topic}` — single-concept structured lesson
+- [x] `/paidagogos:micro {topic}` — single-concept structured lesson
 - [x] One-shot `Lesson` JSON generation with strict typed schema
 - [x] Expertise level detection — beginner / intermediate / advanced via first-use prompt
 - [x] Expertise level override inline: "teach me X, I'm a beginner"
@@ -41,7 +41,7 @@
 - [x] Code block copy button on every code block
 - [x] Dark / light mode via OS preference (`prefers-color-scheme`)
 - [x] No external CDN calls — all assets bundled in `server/templates/`
-- [x] Default port 7337, configurable via `LEARN_PORT` env var
+- [x] Default port 7337, configurable via `PAIDAGOGOS_PORT` env var
 - [x] Port conflict → auto-increment to next free port, log actual URL
 
 ### Knowledge vault integration
@@ -63,19 +63,19 @@
 
 ### Progress & recall
 
-- [ ] `learn:recall` — resume a previous lesson or pick up where session left off
+- [ ] `paidagogos:recall` — resume a previous lesson or pick up where session left off
 - [ ] File-based progress store: lesson history, quiz scores, expertise level per topic
-- [ ] Single-command data purge (`learn:purge`) for all locally stored data
+- [ ] Single-command data purge (`paidagogos:purge`) for all locally stored data
 
 ### Deeper pedagogy
 
-- [ ] `learn:explain` — Feynman technique: user explains concept back, Claude evaluates
-- [ ] `learn:quiz` — standalone quiz mode against any previously learned concept
+- [ ] `paidagogos:explain` — Feynman technique: user explains concept back, Claude evaluates
+- [ ] `paidagogos:quiz` — standalone quiz mode against any previously learned concept
 - [ ] Standalone quiz scoring with pass threshold and retry
 
 ### Curriculum
 
-- [ ] `learn:path` — multi-concept curriculum with dependency ordering
+- [ ] `paidagogos:path` — multi-concept curriculum with dependency ordering
 - [ ] Spaced repetition scheduling for concept review prompts
 - [ ] "What to learn next" recommendations based on lesson history
 
@@ -83,7 +83,7 @@
 
 - [ ] Expertise level persisted to preferences file (not re-asked each session)
 - [ ] Optional MCP memory backend for cross-session analytics (V4)
-- [ ] `learn:path` and `learn:recall` registered in plugin manifest
+- [ ] `paidagogos:path` and `paidagogos:recall` registered in plugin manifest
 
 ---
 
@@ -91,10 +91,10 @@
 
 | User input | Scope check | Routes to |
 |------------|------------|-----------|
-| "teach me CSS flexbox" | Single concept | `learn:micro` |
+| "teach me CSS flexbox" | Single concept | `paidagogos:micro` |
 | "teach me CSS" | >3 sub-concepts | Ask: "Full roadmap or one focused concept?" |
-| "explain closures in JS" | Single concept | `learn:micro` |
-| "how does TCP/IP work" | Single concept | `learn:micro` |
+| "explain closures in JS" | Single concept | `paidagogos:micro` |
+| "how does TCP/IP work" | Single concept | `paidagogos:micro` |
 | "teach me machine learning" | >3 sub-concepts | Ask: "Full roadmap or one focused concept?" |
 | "I want to learn React" | >3 sub-concepts | Ask: "Full roadmap or one focused concept?" |
 | "create a quiz on promises" | Not a lesson intent | Explain V1 scope, suggest "teach me promises" |

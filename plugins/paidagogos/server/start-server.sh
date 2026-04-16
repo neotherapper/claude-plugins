@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# start-server.sh — start the learn visual server
+# start-server.sh — start the paidagogos visual server
 # Usage: ./start-server.sh --project-dir <path> [--port <n>] [--host <h>] [--foreground]
 set -euo pipefail
 
@@ -23,7 +23,7 @@ if [[ -z "$PROJECT_DIR" ]]; then
   exit 1
 fi
 
-BASE_DIR="$PROJECT_DIR/.learn/server"
+BASE_DIR="$PROJECT_DIR/.paidagogos/server"
 SCREEN_DIR="$BASE_DIR/content"
 STATE_DIR="$BASE_DIR/state"
 

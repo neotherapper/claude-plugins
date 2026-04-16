@@ -3,8 +3,8 @@
 ## [0.1.0] — 2026-04-15
 
 ### Added
-- `learn` router skill with scope classifier
-- `learn:micro` structured lesson skill
+- `paidagogos` router skill with scope classifier
+- `paidagogos:micro` structured lesson skill
 - Visual server (file-watcher, localhost:7337)
 - Lesson card: concept, why, example, common mistakes, generate task, quiz
 - Knowledge vault integration (file-read only)
