@@ -436,4 +436,4 @@ plugins/learn/skills/learn-path/SKILL.md
 
 Full renderer library research, WASM tier analysis, teaching styles taxonomy, and component pattern mappings are documented in:
 
-`docs/plugins/learn/research/rendering-and-pedagogy.md`
+`docs/plugins/paidagogos/research/rendering-and-pedagogy.md`

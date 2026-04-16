@@ -1340,4 +1340,4 @@ The following from the spec are NOT in this V2 plan — each will get its own pl
 ## Spec reference
 
 Full architectural context: `docs/superpowers/specs/2026-04-15-learn-v2-design.md` (sections 3.1–3.5 and Phase V2).
-Research and tool comparison: `docs/plugins/learn/research/rendering-and-pedagogy.md`.
+Research and tool comparison: `docs/plugins/paidagogos/research/rendering-and-pedagogy.md`.
