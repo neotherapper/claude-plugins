@@ -93,3 +93,59 @@
 **Consequences:** The threshold of 3 sub-concepts catches broad topics ("teach me machine learning", "teach me React") without catching reasonably scoped ones ("teach me CSS flexbox", "explain closures"). It keeps `paidagogos:micro` as the primary path for the vast majority of plausible inputs. False positives (a topic incorrectly flagged as broad) result in one extra user interaction, not a broken lesson. The trade-off is that the sub-concept count is Claude's judgment call — it is not a deterministic classifier. This is acceptable for V1; a formal scope taxonomy is a V2 consideration.
 
 **Trade-off rejected:** Always route single-word topics to `paidagogos:micro`. Too coarse — "teach me ML" is a single-word topic that would produce a useless lesson if forced into `paidagogos:micro` without scoping.
+
+---
+
+## D-08 — Two-layer component model: `<edu-[name]>` vs `<learn-[name]>`
+
+**Status:** Accepted (V2)
+
+**Context:** V2 introduces interactive renderers (math, charts, code, geometry, physics). We needed to decide whether to give them plugin-scoped names (`<paidagogos-math>`) or broader names, and how to separate subject-domain rendering from plugin-specific pedagogy.
+
+**Decision:** Two prefixes with a hard boundary. `<edu-[name]>` for subject-domain renderers (`edu-math`, `edu-chart`, `edu-code`, `edu-geometry`, `edu-sim-2d`) — pure display/interaction, no plugin state, no skill awareness, no `.paidagogos/prefs.json` access. `<learn-[name]>` for pedagogy components (quiz, hint, progress, streak in V2.2) — plugin-scoped, can read plugin state, tied to the learn lifecycle.
+
+**Consequences:** Component files live in two directories (`components/renderers/`, `components/pedagogy/`). The boundary is enforced by naming — any `<edu-[name]>` that reads plugin-specific state is a lint violation. Renderers are portable: a future tutoring plugin can reuse `<edu-math>` without dragging paidagogos state with it.
+
+**Trade-off rejected:** Single prefix (`<paidagogos-[name]>`). Would tie renderers to the plugin name, blocking reuse. A future rename of the plugin would cascade to every component.
+
+---
+
+## D-09 — Lit 3 for web components, CDN ESM only
+
+**Status:** Accepted (V2)
+
+**Context:** Need a web component framework. Candidates: Lit, Stencil.js, Svelte, Microsoft FAST, vanilla custom elements. The existing lesson.html uses string-based innerHTML with no build step.
+
+**Decision:** Lit 3.x, loaded via CDN as an ES module (`cdn.jsdelivr.net/npm/lit@3`). `lesson.html` exposes `window.__lit = { LitElement, html, css }` on page load. Components read Lit from there.
+
+**Consequences:** 5 KB gzipped runtime, no build pipeline. Components drop into `/components/renderers/` as plain `.js` ES modules served by the existing HTTP server. Class-based authoring matches existing JS patterns. Shadow DOM is optional — CSS custom properties from lesson.html flow through to components when Shadow DOM is enabled. No compile step means upgrades are drop-in CDN URL changes.
+
+**Trade-off rejected:** Stencil.js or Svelte with a build pipeline. Would add build tooling (npm, bundler, watch mode) with no clear payoff over Lit's drop-in CDN approach. Vanilla custom elements rejected because reactive properties + template DX would have been rebuilt by hand.
+
+---
+
+## D-10 — Web Awesome for UI chrome (Shoelace is sunset)
+
+**Status:** Accepted (V2)
+
+**Context:** Need prebuilt UI components for progress bars, tabs, dialogs, badges, tooltips. Shoelace was the obvious candidate historically.
+
+**Decision:** Web Awesome 3.x via CDN autoloader (`ka-f.webawesome.com/webawesome@3.5.0/webawesome.loader.js`). Web Awesome is the direct successor to Shoelace (same author, same API philosophy). Shoelace is officially sunset — no active development, issues, or features. Web Awesome has 50+ components with a free CDN core tier.
+
+**Consequences:** `lesson.html` loads the Web Awesome loader in `<head>`. Components load on first use only (autoloader pattern). Pro-tier components are opt-in and paid; we use free core only. No build step.
+
+**Trade-off rejected:** Fork Shoelace ourselves. Shoelace is MIT-licensed and forkable, but we gain nothing over Web Awesome except a maintenance burden. Web Awesome is the upstream continuation of the same codebase.
+
+---
+
+## D-11 — `renderers[]` in Lesson JSON drives lazy loading
+
+**Status:** Accepted (V2)
+
+**Context:** Different lessons need different renderers. Loading every renderer on every page blocks the page, wastes bandwidth (~500 KB gz total across the V2 set), and scales poorly as the renderer set grows in V2.1/V2.2.
+
+**Decision:** Lesson JSON includes a required `renderers: RendererKey[]` field. `lesson.html` reads it and dynamically imports only the listed modules via `await Promise.all(keys.map(k => import(RENDERER_MODULES[k])))`. `paidagogos:micro` populates the array using the keyword table in `renderer-map.md`.
+
+**Consequences:** A CSS lesson never loads Three.js. Base payload stays minimal (Lit 5 KB + Web Awesome loader + existing page). Adding a new renderer requires a four-step extension: (a) component file under `components/renderers/`, (b) entry in `RENDERER_MODULES` in lesson.html, (c) keyword row in `renderer-map.md`, (d) V2 set expanded in `lesson-schema.md`. Missing an entry fails loudly — the component won't load and the console shows the missing module URL.
+
+**Trade-off rejected:** Infer renderers at runtime from lesson content (e.g., detect LaTeX patterns in the concept text). Fragile, ambiguous, and couples rendering to content heuristics instead of explicit declarations.
