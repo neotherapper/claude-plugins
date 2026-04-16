@@ -5,12 +5,12 @@
 ### Added
 - `renderers[]` field in Lesson JSON — declares which renderer modules the lesson needs; drives lazy component loading in `lesson.html`
 - `<edu-math>` renderer — KaTeX-rendered mathematics (inline + display mode)
-- `<edu-code>` renderer — CodeMirror 6 code blocks with language syntax (javascript, typescript, python, css, html, json)
+- `<edu-code>` renderer — highlight.js syntax-highlighted code blocks (javascript, typescript, python, css, html, json). Interactive editing via `editable: true` deferred to V2.1 (pending CodeMirror 6 import-map deduplication of `@codemirror/state`).
 - `<edu-chart>` renderer — Chart.js charts via JSON config (bar, line, scatter, etc.)
 - `<edu-geometry>` renderer — JSXGraph interactive 2D geometry
 - `<edu-sim-2d>` renderer — Matter.js 2D physics simulations with built-in mouse interaction
 - `renderer-map.md` reference — keyword → renderer classification table used by `paidagogos:micro`
-- Lit 3 runtime bootstrapped in `lesson.html` (exposed as `window.__lit`)
+- Lit 3 runtime loaded per-component via ESM imports from `esm.sh`; `lesson.html` issues a `<link rel="modulepreload">` for warm cache
 - Web Awesome 3 UI chrome autoloader in `lesson.html`
 - `/components/**` static route in the HTTP server with path-traversal protection
 - Test fixtures under `server/test-fixtures/` covering each V2 renderer
