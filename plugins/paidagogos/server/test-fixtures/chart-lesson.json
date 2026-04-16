@@ -1,0 +1,40 @@
+{
+  "topic": "Histograms",
+  "level": "beginner",
+  "renderers": ["chart"],
+  "concept": "A histogram groups continuous values into bins and shows the count in each bin.",
+  "why": "You'll use a histogram whenever you need to see the shape of a distribution — is it normal, skewed, or bimodal?",
+  "example": {
+    "renderer": "chart",
+    "config": {
+      "library": "chartjs",
+      "type": "bar",
+      "data": {
+        "labels": ["0-10", "10-20", "20-30", "30-40", "40-50", "50-60"],
+        "datasets": [{
+          "label": "Frequency",
+          "data": [4, 12, 28, 22, 8, 2],
+          "backgroundColor": "rgba(88, 166, 255, 0.6)"
+        }]
+      },
+      "options": {
+        "responsive": true,
+        "plugins": { "legend": { "display": false } },
+        "scales": { "y": { "beginAtZero": true } }
+      }
+    }
+  },
+  "common_mistakes": [
+    "Choosing too few or too many bins — 5–20 is usually right; outside that range you lose signal or amplify noise.",
+    "Treating the x-axis as ordinal — histogram x-axis is continuous, bars touch each other."
+  ],
+  "generate_task": "Describe the distribution shown in the histogram — is it symmetric, skewed left, or skewed right?",
+  "quiz": [
+    {"type": "multiple_choice", "question": "The x-axis of a histogram represents...", "options": ["categories", "value bins", "time", "counts"], "answer": "value bins", "explanation": "Each bar covers a range of continuous values."},
+    {"type": "fill_blank", "question": "The height of each bar represents the ___ of values in that bin.", "answer": "count", "explanation": "More formally, the frequency or count."},
+    {"type": "explain", "question": "How do you choose a good bin width?", "answer": "enough bins to show shape, few enough to smooth noise", "explanation": "Rules of thumb: Sturges' formula, or √n bins."}
+  ],
+  "resources": [{"title": "Histogram — Wikipedia", "url": "https://en.wikipedia.org/wiki/Histogram", "type": "docs", "source": "ai-suggested"}],
+  "next": "Box plots — another way to summarise a distribution",
+  "estimated_minutes": 10
+}
