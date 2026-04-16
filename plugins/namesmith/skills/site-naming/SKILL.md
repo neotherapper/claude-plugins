@@ -227,7 +227,7 @@ Parse check-domains.sh output (one line per domain):
 
 Load `${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/registrar-routing.md` now.
 
-Format results using this structure — note the **Source column** (new):
+Format results using this structure — note the **Source column** (new). Emit the Top Picks block first, then one table per selected archetype (every candidate appears in its archetype's table, with taken shown as ❌):
 
 ```
 ## Wave [N] Results — [one-line project description]
@@ -236,11 +236,15 @@ Format results using this structure — note the **Source column** (new):
 ✅ [name].[tld]   $[price]/yr  — [one-sentence rationale]
    [[Registrar] →]([registration_url])
 
-[Per-archetype sections with all names, taken shown as ❌]
-
+### [Archetype Name]
 | Name | Domain | Status | Price | Source |
 |------|--------|--------|-------|--------|
 | [name] | [domain.tld] | ✅/❌/⚠️/❓ | $[price]/yr | CF/Porkbun/whois/DNS |
+
+### [Next Archetype Name]
+| Name | Domain | Status | Price | Source |
+|------|--------|--------|-------|--------|
+| ... |
 ```
 
 Source values: `CF` / `Porkbun` / `whois` / `DNS`

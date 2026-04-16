@@ -138,7 +138,7 @@ Generate 3–4 variants per relevant sub-family. Note: -dex and -ex families are
 ## Wave System
 
 ### Wave 1 (default)
-Generate 25–35 candidates across all 8 archetypes. Apply weighting from brand-interview.md. Use the per-archetype base distribution targets from the distribution table in SKILL.md (the Wave 1 Generation step). Do not check availability during generation — generate the full list first, then batch-check.
+Generate 15–20 candidates across the archetypes selected in Phase 2 Direction Round (max 3) plus any seed vocabulary from Q7 or the forced pivot. Apply weighting from brand-interview.md. If Suffix Family is selected, generate the full suffix family exploration block (see Archetype 8). Do not check availability during generation — generate the full list first, then batch-check.
 
 ### Wave 2 (after feedback)
 Generate 20+ new candidates. Refine toward stated preferences:

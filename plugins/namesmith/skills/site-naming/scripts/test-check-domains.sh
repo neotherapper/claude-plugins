@@ -99,7 +99,6 @@ fi
 # ─────────────────────────────────────────────────────────
 echo "Test 5: .io domain does not error (routes to Porkbun)"
 result=$(bash "$CHECK_SCRIPT" xzq9k7m2v4p1.io 2>&1)
-exit_code=$?
 # Should not contain "unbound variable" or other bash errors
 if echo "$result" | grep -qi "error\|unbound"; then
   fail ".io routing" "no errors" "$result"
