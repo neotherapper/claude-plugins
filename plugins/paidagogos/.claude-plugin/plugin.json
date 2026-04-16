@@ -1,0 +1,23 @@
+{
+  "name": "paidagogos",
+  "version": "0.1.0",
+  "description": "Structured AI-powered lessons for any topic, rendered in a local visual browser UI.",
+  "author": {
+    "name": "George Pilitsoglou",
+    "url": "https://pilitsoglou.com",
+    "github": "neotherapper"
+  },
+  "skills": [
+    {
+      "name": "paidagogos",
+      "path": "skills/paidagogos/SKILL.md",
+      "commands": ["/paidagogos"]
+    },
+    {
+      "name": "paidagogos:micro",
+      "path": "skills/paidagogos-micro/SKILL.md",
+      "commands": ["/paidagogos:micro"]
+    }
+  ],
+  "hooks": "hooks/hooks.json"
+}
