@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vk://schemas/free.v1.json",
+  "title": "FreeSurfaceV1",
+  "type": "object",
+  "required": ["surface", "version", "html"],
+  "properties": {
+    "surface": { "const": "free" },
+    "version": { "const": 1 },
+    "html": { "type": "string", "maxLength": 100000 }
+  }
+}

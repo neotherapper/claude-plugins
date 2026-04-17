@@ -15,9 +15,9 @@ Orchestrates the full micro-lesson pipeline: pre-flight checks → reference rea
 
 ## Role
 
-`paidagogos:micro` is the lesson generator for the `paidagogos` plugin. Given a topic and an optional expertise level, it produces a validated `Lesson` JSON file that the visual server injects into its rendering template and serves as an interactive browser page. The lesson follows a fixed seven-section structure grounded in learning science.
+`paidagogos:micro` is the lesson generator for the `paidagogos` plugin. Given a topic and an optional expertise level, it produces a validated lesson `SurfaceSpec` JSON file that visual-kit picks up, renders into a browser page, and auto-reloads via SSE. The lesson follows a fixed section structure grounded in learning science.
 
-The visual server owns all HTML rendering — the skill's only output is a `.json` data file. This skill never skips the pre-flight checks. It never writes partial data. It never presents lesson content as prose in the chat window. The chat response is a short confirmation only.
+Visual-kit owns all HTML rendering — the skill's only output is a `.json` SurfaceSpec file written to `<workspace>/.paidagogos/content/<slug>.json`. This skill never skips the pre-flight checks. It never writes partial data. It never presents lesson content as prose in the chat window. The chat response is a short confirmation only.
 
 ---
 
@@ -27,10 +27,10 @@ Run both checks before any content generation. Do not proceed past a failing che
 
 ### Check 1: Server running
 
-Read `.paidagogos/server/state/server-info` from the project root.
+Read `<workspace>/.visual-kit/server/state/server-info` from the project root.
 
 - If the file does not exist, or the `status` field is not `"running"`, halt immediately. See error handling table: **Server not running**.
-- If the file is readable and `status` is `"running"`, extract `screenDir`, `stateDir`, and `port` and carry all three forward.
+- If the file is readable and `status` is `"running"`, extract `port` and carry it forward.
 
 ### Check 2: Expertise level
 
@@ -63,64 +63,71 @@ If the vault lookup fails for any reason (file not found, read error, vault not 
 
 ---
 
-## Step 3: Generate Lesson JSON
+## Step 3: Generate lesson SurfaceSpec
 
-Generate a single JSON object that strictly conforms to the `Lesson` interface defined in `lesson-schema.md`. Apply all content rules from `teaching-guide.md`.
+Generate a single JSON object that strictly conforms to the `lesson` SurfaceSpec v1 defined in `lesson-schema.md` (canonical schema: `vk://schemas/lesson.v1.json`). Apply all content rules from `teaching-guide.md`.
 
-### Required field rules (from lesson-schema.md)
+### Required field guidance (from lesson-schema.md)
 
+- `surface` — always `"lesson"`
+- `version` — always `1`
 - `topic` — the user-supplied topic string
 - `level` — the resolved level from pre-flight Check 2
-- `concept` — 2–3 sentences; no jargon for `beginner`; full technical precision for `advanced`
-- `why` — one concrete real-world situation; starts with "You'll use this when..."
-- `example` — working code (with `language`) for code topics; prose for non-code topics
-- `common_mistakes` — exactly 2–3 items; concrete, not generic; framed as "Forgetting that..." not "Always remember to..."
-- `generate_task` — starts with an action verb; completable in 5–10 minutes; directly exercises the concept
-- `quiz` — exactly 3 questions: one `multiple_choice` (4 options, exactly 1 correct), one `fill_blank`, one `explain`; every `explanation` field states why the answer is correct
-- `resources` — at least 1 item with `type: "docs"`; sourced via vault lookup (Step 2)
-- `next` — one concept directly related to the topic, one step up in complexity; must be the concept name only (e.g. "CSS Grid") — the Step 5 response template adds the "When you're ready:" prefix
 - `estimated_minutes` — realistic read + generate task time; typically 8–15 minutes
+- `caveat` — always `"AI-generated — verify against official docs."`
+- `sections` — ordered array of typed sections; include at minimum: `concept`, `why`, `code` (or prose equivalent), `mistakes`, `generate`, `resources`, `next`
+  - `concept` text: 2–3 sentences; no jargon for `beginner`; full technical precision for `advanced`
+  - `why` text: one concrete real-world situation; starts with "You'll use this when..."
+  - `code` source: working code (with `language`) for code topics
+  - `mistakes` items: exactly 2–3; concrete, not generic; framed as "Forgetting that..."
+  - `generate` task: starts with an action verb; completable in 5–10 minutes
+  - `quiz` items: exactly 3 questions — one `multiple_choice`, one `fill_blank`, one `explain` (renders as placeholder in core bundle; full interaction in Plan B)
+  - `resources` items: at least 1 with `type: "docs"`; sourced via vault lookup (Step 2)
+  - `next` concept: one concept one step up in complexity; concept name only (e.g. "CSS Grid")
 
 ### Validation before proceeding
 
-After generating the JSON, validate against all rules in `lesson-schema.md`:
+After generating the SurfaceSpec, validate:
 
-- `common_mistakes` has 2 or 3 items (never 0, never 4+)
-- `quiz` has exactly 3 items, one of each required type
-- `resources` has at least 1 item with `type: "docs"`
+- `surface` is `"lesson"` and `version` is `1`
+- `mistakes` section `items` has 2 or 3 entries (never 0, never 4+)
+- `quiz` section `items` has exactly 3 entries, one of each required type
+- `resources` section `items` has at least 1 item with `type: "docs"`
 - `estimated_minutes` is a number between 1 and 60
 
-If any validation rule fails, halt. Do not write HTML. See error handling table: **Lesson JSON fails schema validation**.
+If any validation rule fails, halt. Do not write the file. See error handling table: **Lesson SurfaceSpec fails schema validation**.
 
 ---
 
-## Step 4: Write lesson JSON to screen_dir
+## Step 4: Write lesson SurfaceSpec to content dir
 
-The visual server owns all HTML rendering. It reads `server/templates/lesson.html` and injects the lesson data into the `#lesson-data` script tag automatically. Your job is to write the data file — nothing more.
+Visual-kit owns all HTML rendering. Your job is to write the SurfaceSpec data file — nothing more.
 
-Construct the lesson timestamp: `{timestamp}` = Unix epoch seconds at time of generation (integer).
+Construct the lesson slug from the topic: lowercase, spaces replaced by hyphens, non-alphanumeric characters stripped. Example: "CSS Flexbox" → `css-flexbox`.
 
 Determine the output path:
 
 ```
-{screenDir}/lesson-{timestamp}.json
+<workspace>/.paidagogos/content/<slug>.json
 ```
 
-`screenDir` comes from `.paidagogos/server/state/server-info` (read in pre-flight Check 1).
-
-Write the file containing the validated Lesson JSON from Step 3, pretty-printed with 2-space indentation. The file must be valid JSON — no prose, no wrappers, no HTML.
+Write the file containing the validated lesson SurfaceSpec from Step 3, pretty-printed with 2-space indentation. The file must be valid JSON conforming to `vk://schemas/lesson.v1.json`. No prose, no wrappers, no HTML.
 
 ```json
 {
+  "surface": "lesson",
+  "version": 1,
   "topic": "…",
   "level": "…",
-  … (full Lesson JSON)
+  "estimated_minutes": 12,
+  "caveat": "AI-generated — verify against official docs.",
+  "sections": [ /* typed sections */ ]
 }
 ```
 
-The visual server detects the new `.json` file via its file-watcher, injects it into `lesson.html`, and the browser auto-reloads via SSE.
+Visual-kit detects the new `.json` file via its file-watcher and the browser auto-reloads via SSE.
 
-If the write fails, see error handling table: **screenDir write fails**.
+If the write fails, see error handling table: **content write fails**.
 
 ---
 
@@ -138,11 +145,11 @@ When you're ready: {next}
 ```
 
 Substitute:
-- `{topic}` — the `topic` field from the Lesson JSON
-- `{level}` — the `level` field from the Lesson JSON
-- `{port}` — from `.paidagogos/server/state/server-info`
-- `{estimated_minutes}` — the `estimated_minutes` field from the Lesson JSON
-- `{next}` — the `next` field from the Lesson JSON (without the "When you're ready:" prefix — it is already in the template above)
+- `{topic}` — the `topic` field from the SurfaceSpec
+- `{level}` — the `level` field from the SurfaceSpec
+- `{port}` — from `<workspace>/.visual-kit/server/state/server-info`
+- `{estimated_minutes}` — the `estimated_minutes` field from the SurfaceSpec
+- `{next}` — the `concept` field of the `next` section (without the "When you're ready:" prefix — it is already in the template above)
 
 Do not include quiz answers, lesson content, or resource links in the chat response. All content is in the HTML file.
 
@@ -152,9 +159,9 @@ Do not include quiz answers, lesson content, or resource links in the chat respo
 
 | Error condition | User message | Action |
 |---|---|---|
-| Server not running (`.paidagogos/server/state/server-info` missing or `status` ≠ `"running"`) | `"The paidagogos server is not running. Start it with /paidagogos serve, then try again."` | Halt immediately. Do not generate content. |
-| Lesson JSON fails schema validation (any rule from lesson-schema.md violated) | `"Lesson generation failed. Try a more specific topic."` | Halt. Do NOT write the JSON file. |
-| `screenDir` write fails (file write error, permission denied, path not found) | `"Could not write lesson file. Check the server is running."` | Halt. Do not present lesson content in chat. |
-| Vault lookup fails (vault not in session, index unreadable, read error) | *(no user message)* | Continue silently. Use ai-suggested resources for `resources[]`. Do not block lesson generation. |
+| Server not running (`.visual-kit/server/state/server-info` missing or `status` ≠ `"running"`) | `"visual-kit is not running. Run `visual-kit serve --project-dir .` to start it."` | Halt immediately. Do not generate content. |
+| Lesson SurfaceSpec fails schema validation (any rule from lesson-schema.md violated) | `"Lesson generation failed. Try a more specific topic."` | Halt. Do NOT write the JSON file. |
+| Content write fails (file write error, permission denied, path not found) | `"Could not write lesson file. Check visual-kit is running."` | Halt. Do not present lesson content in chat. |
+| Vault lookup fails (vault not in session, index unreadable, read error) | *(no user message)* | Continue silently. Use ai-suggested resources for `resources[]` section. Do not block lesson generation. |
 
 Error messages are shown verbatim as a single line. Do not add apologies, suggestions beyond what is specified, or additional context.

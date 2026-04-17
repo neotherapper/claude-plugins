@@ -23,7 +23,7 @@ Entry point for the `paidagogos` plugin. Classify the user's learning intent, de
 | "I don't understand [thing]" | Scope check → route to paidagogos:micro |
 | "walk me through [thing]" | Scope check → route to paidagogos:micro |
 | "/paidagogos [topic]" (bare invocation) | Scope check → route to paidagogos:micro |
-| "/paidagogos serve" or "start the server" | Respond: "Start the visual server by running: `bash plugins/paidagogos/server/start-server.sh --project-dir .` from your project root. Then open http://localhost:7337 in your browser." |
+| "/paidagogos serve" or "start the server" | Respond: "Start visual-kit (per workspace): `visual-kit serve --project-dir .` — then open the URL shown in the output." |
 | "quiz me on [thing]" | Respond: "`paidagogos:quiz` is coming in v0.2.0. Use `/paidagogos [topic]` to get a lesson with a built-in quiz." |
 | "what have I learned" / "show progress" | Respond: "Progress tracking is coming in v0.2.0." |
 | "continue my lesson on X" | Respond: "Session recall is coming in v0.2.0." |
@@ -68,6 +68,6 @@ If `PAIDAGOGOS_DEBUG=1` is set in the environment, print the routing decision be
 ## What this skill does NOT handle
 
 - Lesson generation — delegated to paidagogos:micro
-- Visual server rendering — handled by the server process
+- Visual rendering — handled by visual-kit
 - Progress storage — V2
 - Curriculum planning — V3

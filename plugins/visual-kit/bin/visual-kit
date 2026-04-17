@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+import('../dist/cli.js').catch(err => {
+  process.stderr.write(`visual-kit failed to load: ${err?.message ?? err}\n`);
+  process.exit(1);
+});

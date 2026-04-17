@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vk://schemas/outline.v1.json",
+  "title": "OutlineSurfaceV1",
+  "type": "object",
+  "required": ["surface", "version", "nodes"],
+  "properties": {
+    "surface": { "const": "outline" },
+    "version": { "const": 1 },
+    "title": { "type": "string", "maxLength": 200 },
+    "nodes": { "type": "array", "items": { "$ref": "#/$defs/node" }, "minItems": 1, "maxItems": 100 }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["heading"],
+      "properties": {
+        "heading": { "type": "string", "maxLength": 200 },
+        "summary": { "type": "string", "maxLength": 600 },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/node" }, "maxItems": 50 }
+      }
+    }
+  }
+}

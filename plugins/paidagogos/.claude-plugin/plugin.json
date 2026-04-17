@@ -1,12 +1,15 @@
 {
   "name": "paidagogos",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Structured AI-powered lessons for any topic, rendered in a local visual browser UI.",
   "author": {
     "name": "George Pilitsoglou",
     "url": "https://pilitsoglou.com",
     "github": "neotherapper"
   },
+  "dependencies": [
+    { "name": "visual-kit", "version": "~1.0.0" }
+  ],
   "skills": [
     {
       "name": "paidagogos",

@@ -1,0 +1,27 @@
+{
+  "topic": "Pythagorean Theorem",
+  "level": "beginner",
+  "renderers": ["math"],
+  "concept": "In any right-angled triangle, the square of the hypotenuse equals the sum of the squares of the other two sides.",
+  "why": "You'll use this whenever you need to compute diagonal distance — from screen coordinates to physics to 3D graphics.",
+  "example": {
+    "renderer": "math",
+    "config": {
+      "latex": "a^2 + b^2 = c^2",
+      "display": true
+    }
+  },
+  "common_mistakes": [
+    "Applying the theorem to non-right triangles — it only works when one angle is exactly 90°.",
+    "Forgetting to square-root the sum when solving for c."
+  ],
+  "generate_task": "Compute the hypotenuse of a triangle with legs 3 and 4.",
+  "quiz": [
+    {"type": "multiple_choice", "question": "If a=6 and b=8, what is c?", "options": ["10", "14", "12", "7"], "answer": "10", "explanation": "6² + 8² = 100, √100 = 10."},
+    {"type": "fill_blank", "question": "The side opposite the right angle is called the ___.", "answer": "hypotenuse", "explanation": "The hypotenuse is always the longest side and opposite the 90° angle."},
+    {"type": "explain", "question": "Why does the theorem not apply to obtuse triangles?", "answer": "because it assumes a right angle", "explanation": "The derivation depends on the 90° angle — for other angles use the law of cosines."}
+  ],
+  "resources": [{"title": "Pythagorean Theorem — Wikipedia", "url": "https://en.wikipedia.org/wiki/Pythagorean_theorem", "type": "docs", "source": "ai-suggested"}],
+  "next": "Law of cosines — the generalisation to non-right triangles",
+  "estimated_minutes": 8
+}

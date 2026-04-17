@@ -1,0 +1,32 @@
+{
+  "topic": "Gravity and falling objects",
+  "level": "beginner",
+  "renderers": ["sim-2d"],
+  "concept": "Objects near Earth's surface accelerate downward at ~9.8 m/s² regardless of mass (neglecting air resistance).",
+  "why": "You'll use this to predict motion in games, physics problems, and real-world trajectories from ballistics to satellites.",
+  "example": {
+    "renderer": "sim-2d",
+    "config": {
+      "world": {"gravity": {"x": 0, "y": 1}},
+      "bodies": [
+        {"type": "rectangle", "x": 400, "y": 580, "width": 800, "height": 40, "options": {"isStatic": true, "label": "ground"}},
+        {"type": "circle", "x": 200, "y": 100, "radius": 30, "options": {"restitution": 0.7, "label": "small ball"}},
+        {"type": "circle", "x": 600, "y": 100, "radius": 60, "options": {"restitution": 0.7, "label": "big ball"}}
+      ],
+      "canvas": {"width": 800, "height": 600}
+    }
+  },
+  "common_mistakes": [
+    "Thinking heavier objects fall faster — in a vacuum they don't; on Earth air resistance makes the difference.",
+    "Forgetting that g depends on the planet — the moon has about 1/6 of Earth's gravity."
+  ],
+  "generate_task": "Predict which ball hits the ground first. Then observe and explain.",
+  "quiz": [
+    {"type": "multiple_choice", "question": "On Earth (no air resistance), a heavy ball and a light ball dropped together will...", "options": ["heavy lands first", "light lands first", "both land together", "depends on shape"], "answer": "both land together", "explanation": "Gravitational acceleration is mass-independent."},
+    {"type": "fill_blank", "question": "Earth's gravitational acceleration is approximately ___ m/s².", "answer": "9.8", "explanation": "9.81 m/s² is the standard value at sea level."},
+    {"type": "explain", "question": "Why do feathers fall slower than rocks in practice?", "answer": "air resistance affects low-mass, high-area objects more", "explanation": "In a vacuum (Apollo 15 hammer and feather experiment) they fall identically."}
+  ],
+  "resources": [{"title": "Gravitational acceleration — Wikipedia", "url": "https://en.wikipedia.org/wiki/Gravitational_acceleration", "type": "docs", "source": "ai-suggested"}],
+  "next": "Projectile motion — gravity + initial velocity",
+  "estimated_minutes": 12
+}
