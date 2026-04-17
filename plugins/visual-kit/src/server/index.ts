@@ -4,6 +4,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { ServeOptions } from '../cli/serve.js';
 import { acquireServerSlot, releaseServerSlot, type SlotResult } from './lifecycle.js';
+import { loadSchemas } from '../render/validate.js';
+import { registerAllSurfaces } from '../surfaces/index.js';
+import { buildCapabilities } from './capabilities.js';
+import { isHostAllowed, securityHeaders } from './security.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const pkgPath = join(here, '../../package.json');
@@ -14,6 +18,9 @@ let activeProjectDir: string | undefined;
 
 export async function startServer(opts: ServeOptions): Promise<void> {
   const pkg = JSON.parse(await readFile(pkgPath, 'utf8')) as { version: string };
+  await loadSchemas();
+  registerAllSurfaces();
+
   const slot = await acquireServerSlot(opts.projectDir, {
     pid: process.pid,
     version: pkg.version,
@@ -28,12 +35,23 @@ export async function startServer(opts: ServeOptions): Promise<void> {
   activeProjectDir = opts.projectDir;
   activeSlot = slot;
 
-  activeServer = createServer((req, res) => handleRequest(req, res, slot.info));
+  const hostPolicy = { port: slot.port, urlHost: opts.urlHost };
+
+  activeServer = createServer((req, res) => {
+    if (!isHostAllowed(req.headers.host, hostPolicy)) {
+      res.writeHead(421, { 'Content-Type': 'text/plain' });
+      res.end('Misdirected Request');
+      return;
+    }
+    handleRequest(req, res, pkg.version).catch(() => {
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.end('Internal Server Error');
+    });
+  });
 
   try {
     await listen(activeServer, slot.port, opts.host);
   } catch (err) {
-    // Port grabbed between probe and listen — release the slot and surface the error.
     const code = (err as NodeJS.ErrnoException).code;
     activeServer = undefined;
     await releaseServerSlot(opts.projectDir, slot);
@@ -41,8 +59,7 @@ export async function startServer(opts: ServeOptions): Promise<void> {
     activeProjectDir = undefined;
     if (code === 'EADDRINUSE') {
       throw new Error(
-        `port ${slot.port} became unavailable between probe and bind. ` +
-        `Another process grabbed it. Retry the command.`,
+        `port ${slot.port} became unavailable between probe and bind. Retry the command.`,
       );
     }
     throw err;
@@ -70,23 +87,15 @@ export async function stopServer(): Promise<void> {
 async function handleRequest(
   req: IncomingMessage,
   res: ServerResponse,
-  info: import('../shared/types.js').ServerInfo,
+  version: string,
 ): Promise<void> {
-  if (req.url === '/vk/capabilities') {
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(
-      JSON.stringify({
-        visual_kit_version: info.visual_kit_version,
-        schema_version: 1,
-        surfaces: {},
-        components: [],
-        bundles: [],
-      }),
-    );
+  if (req.method === 'GET' && req.url === '/vk/capabilities') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', ...securityHeaders() });
+    res.end(JSON.stringify(buildCapabilities(version)));
     return;
   }
-  res.writeHead(404);
-  res.end('not found');
+  res.writeHead(404, { 'Content-Type': 'text/plain', ...securityHeaders() });
+  res.end('Not Found');
 }
 
 function listen(server: Server, port: number, host: string): Promise<void> {

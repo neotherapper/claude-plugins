@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { startServer, stopServer } from '../../src/server/index.js';
 import { tmpWorkspace, type TmpWorkspace } from '../helpers/tmp-workspace.js';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 
 describe('startServer (integration)', () => {
   let ws: TmpWorkspace;
@@ -16,21 +14,56 @@ describe('startServer (integration)', () => {
     await ws.cleanup();
   });
 
-  it('binds and writes server-info', async () => {
+  it('serves capabilities with the registered surfaces', async () => {
     await startServer({
       projectDir: ws.dir,
       host: '127.0.0.1',
       urlHost: 'localhost',
       foreground: true,
     });
-    const info = JSON.parse(
-      await readFile(join(ws.dir, '.visual-kit/server/state/server-info'), 'utf8'),
-    );
-    expect(info.status).toBe('running');
-    expect(info.host).toBe('127.0.0.1');
+
+    const { readFile } = await import('node:fs/promises');
+    const info = JSON.parse(await readFile(`${ws.dir}/.visual-kit/server/state/server-info`, 'utf8'));
+
     const res = await fetch(`${info.url}/vk/capabilities`);
     expect(res.status).toBe(200);
-    const json = await res.json();
-    expect(json.visual_kit_version).toBeDefined();
+    const caps = await res.json();
+    expect(caps.visual_kit_version).toBeDefined();
+    expect(caps.schema_version).toBe(1);
+    expect(Object.keys(caps.surfaces)).toEqual(
+      expect.arrayContaining(['lesson','gallery','outline','comparison','feedback','free']),
+    );
+  });
+
+  it('rejects requests with disallowed Host header', async () => {
+    await startServer({
+      projectDir: ws.dir,
+      host: '127.0.0.1',
+      urlHost: 'localhost',
+      foreground: true,
+    });
+    const { readFile } = await import('node:fs/promises');
+    const info = JSON.parse(await readFile(`${ws.dir}/.visual-kit/server/state/server-info`, 'utf8'));
+
+    // Use http.request directly so we can set an arbitrary Host header.
+    // fetch() rewrites or rejects mismatched Host headers before sending,
+    // making it unsuitable for testing the server-side 421 response.
+    const { request } = await import('node:http');
+    const url = new URL('/vk/capabilities', info.url);
+    const statusCode = await new Promise<number>((resolve, reject) => {
+      const req = request(
+        {
+          hostname: url.hostname,
+          port: Number(url.port),
+          path: url.pathname,
+          method: 'GET',
+          headers: { Host: 'attacker.example:9999' },
+        },
+        res => resolve(res.statusCode ?? 0),
+      );
+      req.once('error', reject);
+      req.end();
+    });
+    expect(statusCode).toBe(421);
   });
 });
