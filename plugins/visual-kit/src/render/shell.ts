@@ -19,7 +19,7 @@ export function buildShell(input: ShellInput): { html: string; headers: Record<s
     .map(b => `<link rel="modulepreload" href="${b.url}" integrity="${b.sri}" crossorigin="anonymous">`)
     .join('\n    ');
   const scripts = input.bundles
-    .map(b => `<script type="module" src="${b.url}" integrity="${b.sri}" crossorigin="anonymous" nonce="${input.nonce}"></script>`)
+    .map(b => `<script type="module" src="${b.url}" integrity="${b.sri}" crossorigin="anonymous" nonce="${escapeHtml(input.nonce)}"></script>`)
     .join('\n    ');
 
   const html = `<!DOCTYPE html>
@@ -27,17 +27,17 @@ export function buildShell(input: ShellInput): { html: string; headers: Record<s
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="vk-csrf" content="${input.csrfToken}">
+    <meta name="vk-csrf" content="${escapeHtml(input.csrfToken)}">
     <title>${escapeHtml(input.title)}</title>
     ${preload}
-    <link rel="stylesheet" href="/vk/theme.css" nonce="${input.nonce}">
+    <link rel="stylesheet" href="/vk/theme.css" nonce="${escapeHtml(input.nonce)}">
     ${scripts}
   </head>
   <body>
     <main class="vk-surface">
       ${input.fragment}
     </main>
-    <script type="module" nonce="${input.nonce}">
+    <script type="module" nonce="${escapeHtml(input.nonce)}">
       const es = new EventSource('/events/stream');
       es.onmessage = (e) => { if (e.data === 'refresh') location.reload(); };
       window.addEventListener('vk-event', async (ev) => {

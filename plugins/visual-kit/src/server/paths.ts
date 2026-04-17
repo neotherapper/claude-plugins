@@ -1,5 +1,5 @@
 import { lstat, realpath } from 'node:fs/promises';
-import { join, resolve, sep } from 'node:path';
+import { resolve, sep } from 'node:path';
 
 const SAFE = /^[a-zA-Z0-9_-]+$/;
 
@@ -7,6 +7,10 @@ export function isSafeSegment(s: string): boolean {
   return SAFE.test(s);
 }
 
+/**
+ * Assumes `relative` is a single path segment validated by `isSafeSegment`; intermediate-directory symlinks are NOT checked.
+ * Do not pass multi-segment relative paths.
+ */
 export async function resolveContained(root: string, relative: string): Promise<string> {
   const rootReal = await realpath(root);
   // Resolve target using the canonical root, but also compute it from the original
@@ -26,6 +30,3 @@ export async function resolveContained(root: string, relative: string): Promise<
   return target;
 }
 
-export function join2(...parts: string[]): string {
-  return join(...parts);
-}

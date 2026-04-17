@@ -117,15 +117,33 @@ async function acquireLock(lockPath: string): Promise<FileHandle> {
   let lastErr: unknown;
   for (let attempt = 0; attempt < LOCK_RECLAIM_ATTEMPTS; attempt++) {
     try {
-      return await open(lockPath, 'wx');
+      const handle = await open(lockPath, 'wx');
+      // Write our PID so future acquirers can check if we're alive.
+      await handle.writeFile(String(process.pid), 'utf8');
+      return handle;
     } catch (err) {
       lastErr = err;
       const code = (err as NodeJS.ErrnoException).code;
       if (code !== 'EEXIST') throw err;
-      // Stale lock from a crashed process. Remove and retry.
-      // (We can't tell from the lock file alone whose process owned it;
-      //  a more sophisticated impl would write the pid into the lock.
-      //  For now: forcibly reclaim, but bounded so a perpetual race fails loudly.)
+
+      // Lock exists — read the PID to decide whether to reclaim.
+      let ownerPid: number | null = null;
+      try {
+        const { readFile } = await import('node:fs/promises');
+        const raw = (await readFile(lockPath, 'utf8')).trim();
+        const parsed = Number(raw);
+        if (raw.length > 0 && Number.isInteger(parsed) && parsed > 0) {
+          ownerPid = parsed;
+        }
+      } catch {
+        // Unreadable or already gone — treat as unknown owner, retry.
+      }
+
+      if (ownerPid !== null && isAlive(ownerPid)) {
+        throw new Error(`lock held by live process ${ownerPid}`);
+      }
+
+      // Owner is dead, PID missing, or file is empty/unreadable — reclaim.
       await rm(lockPath, { force: true });
     }
   }

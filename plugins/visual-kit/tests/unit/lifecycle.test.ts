@@ -3,6 +3,7 @@ import { mkdtemp, rm, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { acquireServerSlot, releaseServerSlot } from '../../src/server/lifecycle.js';
+import { open } from 'node:fs/promises';
 
 describe('acquireServerSlot', () => {
   let projectDir: string;
@@ -46,6 +47,24 @@ describe('acquireServerSlot', () => {
 
     const slot = await acquireServerSlot(projectDir, { pid: process.pid, version: '1.0.0' });
     expect(slot.action).toBe('attach');
+  });
+
+  it('refuses to acquire lock held by a live process', async () => {
+    const stateDir = join(projectDir, '.visual-kit/server/state');
+    await mkdir(stateDir, { recursive: true });
+    const lockPath = join(stateDir, 'server.lock');
+
+    // Simulate a live peer holding the lock with the current PID.
+    const handle = await open(lockPath, 'wx');
+    await handle.writeFile(String(process.pid), 'utf8');
+    await handle.close();
+
+    await expect(
+      acquireServerSlot(projectDir, { pid: process.pid, version: '1.0.0' })
+    ).rejects.toThrow(`lock held by live process ${process.pid}`);
+
+    // Clean up the lock file we created.
+    await rm(lockPath, { force: true });
   });
 
   it('removes stale server-info when pid is dead', async () => {
