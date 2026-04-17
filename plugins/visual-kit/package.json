@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "verify": "pnpm run lint:pure && pnpm run build && pnpm run test"
+    "gate:security": "node scripts/test-security-headers.mjs",
+    "gate:size": "node scripts/bundle-size-gate.mjs",
+    "verify": "pnpm run lint:pure && pnpm run build && pnpm run test && pnpm run gate:security && pnpm run gate:size"
   },
   "engines": {
     "node": ">=20.0.0"
