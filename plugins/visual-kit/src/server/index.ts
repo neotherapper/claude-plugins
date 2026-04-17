@@ -1,7 +1,6 @@
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import type { ServeOptions } from '../cli/serve.js';
 import { acquireServerSlot, releaseServerSlot, type SlotResult } from './lifecycle.js';
@@ -17,8 +16,11 @@ import { renderFragment } from '../render/ssr.js';
 import { buildShell, type BundleRef } from '../render/shell.js';
 import { serveVkPath } from './bundles.js';
 
-const here = dirname(fileURLToPath(import.meta.url));
-const pkgPath = join(here, '../../package.json');
+// Injected at build time by scripts/build.mjs via esbuild define.
+// Falls back to a dev sentinel when running from source via ts-node / vitest.
+declare const __VK_VERSION__: string;
+const VK_VERSION: string =
+  typeof __VK_VERSION__ !== 'undefined' ? __VK_VERSION__ : '0.0.0-dev';
 
 let activeServer: Server | undefined;
 let activeSlot: SlotResult | undefined;
@@ -28,13 +30,12 @@ let activeSse: SseHub | undefined;
 let activeWatcher: ContentWatcher | undefined;
 
 export async function startServer(opts: ServeOptions): Promise<void> {
-  const pkg = JSON.parse(await readFile(pkgPath, 'utf8')) as { version: string };
   await loadSchemas();
   registerAllSurfaces();
 
   const slot = await acquireServerSlot(opts.projectDir, {
     pid: process.pid,
-    version: pkg.version,
+    version: VK_VERSION,
     host: opts.host,
     urlHost: opts.urlHost,
   });
@@ -64,7 +65,8 @@ export async function startServer(opts: ServeOptions): Promise<void> {
       res.end('Misdirected Request');
       return;
     }
-    handleRequest(req, res, pkg.version, ctx).catch(() => {
+    handleRequest(req, res, VK_VERSION, ctx).catch((err) => {
+      process.stderr.write(`[visual-kit] handleRequest error: ${err instanceof Error ? err.stack : String(err)}\n`);
       try {
         res.writeHead(500, { 'Content-Type': 'text/plain' });
         res.end('Internal Server Error');

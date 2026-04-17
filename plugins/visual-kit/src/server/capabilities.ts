@@ -1,12 +1,10 @@
-import { readFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { listSurfaces } from '../render/validate.js';
 
-const here = dirname(fileURLToPath(import.meta.url));
-const sriPath = join(here, '../../dist/core.js.sri.txt');
-
-let cachedSri: string | undefined;
+// Injected at build time by scripts/build.mjs via esbuild define.
+// Falls back to a dev sentinel when running from source via ts-node / vitest.
+declare const __VK_CORE_SRI__: string;
+const CORE_SRI: string =
+  typeof __VK_CORE_SRI__ !== 'undefined' ? __VK_CORE_SRI__ : 'sha384-dev';
 
 const COMPONENTS = [
   'vk-section','vk-card','vk-gallery','vk-outline','vk-comparison','vk-feedback',
@@ -14,10 +12,6 @@ const COMPONENTS = [
 ];
 
 export async function buildCapabilities(version: string): Promise<object> {
-  if (!cachedSri) {
-    try { cachedSri = (await readFile(sriPath, 'utf8')).trim(); }
-    catch { cachedSri = 'sha384-dev'; }
-  }
   return {
     visual_kit_version: version,
     schema_version: 1,
@@ -26,7 +20,7 @@ export async function buildCapabilities(version: string): Promise<object> {
     ),
     components: COMPONENTS,
     bundles: [
-      { name: 'core', url: '/vk/core.js', sri: cachedSri },
+      { name: 'core', url: '/vk/core.js', sri: CORE_SRI },
     ],
   };
 }

@@ -4,10 +4,27 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isSafeSegment } from './paths.js';
 
+// __VK_ASSET_OFFSET__ is injected at build time by scripts/build.mjs.
+// It encodes the relative hop from this bundle file's directory to dist/:
+//   dist/cli.js (here=dist/)         → offset = ''
+//   dist/server/index.js (here=dist/server/) → offset = '../'
+// In source runs (vitest / ts-node), here = src/server/ so we go '../../dist/'.
+declare const __VK_ASSET_OFFSET__: string;
+const IS_BUILT = typeof __VK_ASSET_OFFSET__ !== 'undefined';
+const ASSET_OFFSET: string = IS_BUILT ? __VK_ASSET_OFFSET__ : '../../dist/';
+
 const here = dirname(fileURLToPath(import.meta.url));
-const distDir = join(here, '../../dist');
-const schemaDir = join(here, '../../schemas');
-const themePath = join(here, '../components/theme.css');
+// Resolves to dist/ in all contexts:
+//   src/server + ../../dist/ = dist/
+//   dist/server + ../        = dist/
+//   dist/       + ''         = dist/
+const distDir = join(here, ASSET_OFFSET);
+const schemaDir = join(here, ASSET_OFFSET, 'schemas');
+// theme.css is copied to dist/theme.css during build.
+// In source-only runs (vitest), fall back to original src location.
+const themePath = IS_BUILT
+  ? join(here, ASSET_OFFSET, 'theme.css')
+  : join(here, '../components/theme.css');
 
 const MIME: Record<string, string> = {
   '.js':  'application/javascript; charset=utf-8',

@@ -4,8 +4,21 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { SurfaceKind } from '../shared/types.js';
 
+// __VK_ASSET_OFFSET__ is injected at build time by scripts/build.mjs.
+// It encodes the hop from the bundle's directory to the dist/ root where
+// schemas/ was copied:
+//   cli.js (dist/)             → offset = ''
+//   server/index.js (dist/server/) → offset = '../'
+// Falls back to '../../' for source-level runs (vitest reads from schemas/).
+declare const __VK_ASSET_OFFSET__: string;
+const ASSET_OFFSET: string =
+  typeof __VK_ASSET_OFFSET__ !== 'undefined' ? __VK_ASSET_OFFSET__ : '../../';
+
 const here = dirname(fileURLToPath(import.meta.url));
-const schemaDir = join(here, '../../schemas/surfaces');
+// In source context: here = src/render/, offset = '../../' → schemas/surfaces ✓
+// In dist/server bundle: here = dist/server/, offset = '../' → dist/schemas/surfaces ✓
+// In dist/cli bundle: here = dist/, offset = '' → dist/schemas/surfaces ✓
+const schemaDir = join(here, ASSET_OFFSET, 'schemas/surfaces');
 
 // strict: false because some schemas use enum values inside oneOf branches
 // that Ajv strict mode flags as unknown keywords (e.g. bare "enum" alongside
