@@ -154,6 +154,12 @@ async function handleRequest(
     return;
   }
 
+  if (method === 'POST' && url.pathname === '/events') {
+    const { handleEventPost } = await import('./events.js');
+    await handleEventPost(req, res, { projectDir: ctx.projectDir, secret: ctx.secret });
+    return;
+  }
+
   const m = url.pathname.match(/^\/p\/([^/]+)\/([^/]+)$/);
   if (method === 'GET' && m) {
     const [, plugin, surfaceId] = m as unknown as [string, string, string];
