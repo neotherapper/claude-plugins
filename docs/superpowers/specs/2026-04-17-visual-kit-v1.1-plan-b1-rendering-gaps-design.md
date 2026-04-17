@@ -10,15 +10,21 @@
 
 Visual-kit `1.0.0` (Plan A) shipped the server, six SurfaceSpec types, and the core component bundle covering layout primitives (`<vk-section>`, `<vk-card>`, `<vk-gallery>`, `<vk-outline>`, `<vk-comparison>`, `<vk-feedback>`, `<vk-loader>`, `<vk-error>`, minimal `<vk-code>`). Paidagogos migrated away from its in-house server and now depends on visual-kit for all rendering.
 
-Four section types that `paidagogos:micro` emits today — `code` (present but no syntax highlighting), `chart`, `math`, `quiz` — currently hit this branch in `src/surfaces/lesson.ts`:
+Plan B1 mixes two kinds of work, both required to complete visual-kit's lesson surface.
 
-```ts
-default: return html`<vk-section data-variant="${s.type}">
-  <p>Section type "${s.type}" not yet supported in the core bundle. Install Plan B for code, math, chart, quiz renderers.</p>
-</vk-section>`;
-```
+**Regression fixes** — sections `paidagogos:micro` emits today that render incompletely:
 
-This is a visible regression from paidagogos's pre-migration V1 behavior. Plan B1 closes the gap.
+- `code` — renders as plain `<pre>` + copy button; no syntax highlighting. Pre-visual-kit paidagogos had Prism output.
+- `quiz` — fully emitted by `paidagogos:micro` (3 items: one each of `multiple_choice`, `fill_blank`, `explain`) but hits the surface renderer's `default` fallback: *"Section type 'quiz' not yet supported in the core bundle. Install Plan B for code, math, chart, quiz renderers."* Pre-visual-kit paidagogos had a working quiz UI.
+
+**Capability enablement** — section types the schema marks "Future work — Plan B" in `paidagogos-micro/references/lesson-schema.md` that the skill does NOT emit today:
+
+- `math` — LaTeX rendering
+- `chart` — Chart.js rendering
+
+These components ship in B1 so a subsequent skill update (not in B1 scope) can start generating them with confidence. Shipping the components alone produces no user-visible change; it sets the foundation that lets `paidagogos:micro` (and future consumers) emit these section types without a second visual-kit release.
+
+**Infrastructure** — the fragment-scanning autoloader that the V1 design spec describes (§5.5) but Plan A deferred. Without it, `[coreBundle]` is hardcoded at `src/server/index.ts:200`, and no non-core bundle can load. Blocking for both the regression fixes (`<vk-quiz>` needs `quiz.js`) and the capability enablement (`<vk-math>` needs `math.js`, `<vk-chart>` needs `chart.js`).
 
 **Roadmap position.** Plan B total (per ADR D-06) has three phases:
 - **B1 (this spec):** rendering gaps — code, chart, math, quiz
@@ -31,12 +37,13 @@ Plan C (heavy bundles: Three.js, Pyodide, Sandpack) remains deferred to concrete
 
 ## 2. Goals
 
-- **G-1** After B1, every `sections[].type` that `paidagogos:micro` generates renders fully. No `vk-error` fallback, no "not yet supported" placeholder.
-- **G-2** Ship three new component bundles — `math.js`, `chart.js`, `quiz.js` — served at `/vk/<bundle>.js` with SRI.
-- **G-3** Upgrade `<vk-code>` to display syntax-highlighted source via server-side Prism. The component itself stays in `core.js` with no added runtime JS; only Prism theme CSS ships in the bundle.
-- **G-4** Implement the fragment-scanning autoloader that visual-kit §5.5 describes but Plan A deferred. Lessons that use only some section types load only the bundles they need.
-- **G-5** Maintain additive schema compatibility. No breaking changes. `GET /vk/capabilities` gains three bundle entries.
-- **G-6** Paidagogos continues to work without a single skill change. Bumping the `visual-kit` dependency from `~1.0.0` to `~1.1.0` is the only consumer-side edit.
+- **G-1** After B1, every section type `paidagogos:micro` emits today (`code`, `quiz`) renders fully. No `vk-error` fallback visible in generated lessons.
+- **G-2** Ship `<vk-math>` and `<vk-chart>` components + `math.js` / `chart.js` bundles so `paidagogos:micro` (in a future skill update) and other consumers can emit math/chart section types without a second visual-kit release.
+- **G-3** Ship three new component bundles — `math.js`, `chart.js`, `quiz.js` — served at `/vk/<bundle>.js` with SRI.
+- **G-4** Upgrade `<vk-code>` to display syntax-highlighted source via server-side Prism. The component itself stays in `core.js` with no added runtime JS; only Prism theme CSS ships in the bundle.
+- **G-5** Implement the fragment-scanning autoloader the visual-kit design spec (§5.5) describes but Plan A deferred. Lessons that use only some section types load only the bundles they need.
+- **G-6** Maintain additive schema compatibility. No breaking changes. `GET /vk/capabilities` gains three bundle entries.
+- **G-7** Paidagogos continues to work without a skill change. Bumping the `visual-kit` dependency from `~1.0.0` to `~1.1.0` is the only consumer-side edit.
 
 ### Non-goals
 
@@ -85,12 +92,27 @@ const TAG_TO_BUNDLE: Record<string, string> = {
   // core-bundle tags are NOT listed — core is always loaded
 };
 
+// Scan rendered HTML for <vk-*> opening tags in tag-name position only.
+// Lookahead requires whitespace, '>', or '/' after the tag name —
+// prevents false matches on attribute values or similar contexts.
+const TAG_PATTERN = /<(vk-[a-z0-9-]+)(?=[\s/>])/g;
+
 export function discoverRequiredBundles(fragmentHtml: string): string[] {
-  // Scan the rendered HTML for <vk-*> opening tags.
-  // Deduplicate. Look up non-core mappings. Return bundle names (without 'core').
   const tags = new Set<string>();
-  for (const match of fragmentHtml.matchAll(/<(vk-[a-z0-9-]+)\b/g)) {
+  for (const match of fragmentHtml.matchAll(TAG_PATTERN)) {
     tags.add(match[1]!);
+  }
+  // Subset assertion: every discovered tag not in a known bundle registry
+  // (neither TAG_TO_BUNDLE nor the core tag set) is a bug — fail loudly.
+  const knownBundleTags = new Set(Object.keys(TAG_TO_BUNDLE));
+  const knownCoreTags = new Set([
+    'vk-section','vk-card','vk-gallery','vk-outline','vk-comparison',
+    'vk-feedback','vk-loader','vk-error','vk-code',
+  ]);
+  for (const tag of tags) {
+    if (!knownBundleTags.has(tag) && !knownCoreTags.has(tag)) {
+      throw new Error(`Unknown <vk-*> tag in rendered fragment: ${tag}`);
+    }
   }
   const bundles = new Set<string>();
   for (const tag of tags) {
@@ -126,9 +148,82 @@ const bundles = await resolveBundleRefs(needed, await buildCapabilities(version)
 const { html, headers } = buildShell({ ..., bundles, fragment });
 ```
 
-**Regex rationale.** Rendered fragments are lit-html SSR output — well-formed HTML with known escape semantics. A regex over `<vk-[a-z0-9-]+\b` is sufficient. We do not match closing tags or text content. A tag that appears only inside a comment or text string would not reach this point (lit-html escapes text); but if it did, the worst outcome is a bundle loads unnecessarily — no correctness or security impact.
+**Regex rationale.** Rendered fragments come from lit-html SSR, which escapes `<` in text and attribute-value contexts. The tag-position lookahead `(?=[\s/>])` further constrains matches to actual tag positions. The subset assertion ensures an unknown `<vk-*>` tag — which in a correct system is impossible — fails the render with a clear error rather than silently loading the wrong set of bundles.
 
-**Tag map grows additively.** Adding a future component (`<vk-geometry>` in B3) = one line in `TAG_TO_BUNDLE`.
+**Tag map grows additively.** Adding a future component (`<vk-geometry>` in B3) = one line in `TAG_TO_BUNDLE` + one line in the `knownCoreTags` set if applicable.
+
+### 3.2a Per-bundle SRI — build plumbing
+
+Plan A's `scripts/build.mjs` hashes `dist/core.js` and writes the SRI into `dist/core.js.sri.txt`. The built core bundle is then produced with an `esbuild define` that inlines `__VK_CORE_SRI__` into `capabilities.ts`, which in turn returns the SRI to the server at runtime.
+
+B1 generalizes this from a single bundle to a loop over every bundle:
+
+```js
+// scripts/build.mjs (sketch — ports the existing core.js flow to a per-entry loop)
+const bundles = [
+  { name: 'core',  entry: 'src/components/index.ts', outfile: 'dist/core.js'  },
+  { name: 'math',  entry: 'src/components/math.ts',  outfile: 'dist/math.js'  },
+  { name: 'chart', entry: 'src/components/chart.ts', outfile: 'dist/chart.js' },
+  { name: 'quiz',  entry: 'src/components/quiz.ts',  outfile: 'dist/quiz.js'  },
+];
+
+const sriByName = {};
+for (const b of bundles) {
+  await build({ entryPoints: [b.entry], outfile: b.outfile, bundle: true, minify: true,
+                format: 'esm', target: ['es2022'], platform: 'browser',
+                loader: { '.css': 'text' } });
+  const bytes = await readFile(b.outfile);
+  sriByName[b.name] = 'sha384-' + createHash('sha384').update(bytes).digest('base64');
+  await writeFile(`${b.outfile}.sri.txt`, sriByName[b.name]);
+}
+
+// Re-build capabilities with per-bundle defines inlined.
+await build({
+  entryPoints: ['src/server/capabilities.ts'],
+  outfile: 'dist/capabilities.js',
+  bundle: true, platform: 'node', format: 'esm',
+  define: Object.fromEntries(
+    Object.entries(sriByName).map(([n, sri]) => [`__VK_${n.toUpperCase()}_SRI__`, JSON.stringify(sri)]),
+  ),
+});
+```
+
+`src/server/capabilities.ts` reads the defines:
+
+```ts
+declare const __VK_CORE_SRI__: string;
+declare const __VK_MATH_SRI__: string;
+declare const __VK_CHART_SRI__: string;
+declare const __VK_QUIZ_SRI__: string;
+
+export async function buildCapabilities(version: string) {
+  return {
+    visual_kit_version: version,
+    schema_version: 1,
+    surfaces: { /* unchanged */ },
+    components: [ /* unchanged + 'vk-math', 'vk-chart', 'vk-quiz' */ ],
+    bundles: [
+      { name: 'core',  url: '/vk/core.js',  sri: __VK_CORE_SRI__  },
+      { name: 'math',  url: '/vk/math.js',  sri: __VK_MATH_SRI__  },
+      { name: 'chart', url: '/vk/chart.js', sri: __VK_CHART_SRI__ },
+      { name: 'quiz',  url: '/vk/quiz.js',  sri: __VK_QUIZ_SRI__  },
+    ],
+  };
+}
+```
+
+No change to `src/server/index.ts`'s `/vk/*` handler — it already serves any file from `dist/` matching the path.
+
+### 3.2b Scoped AR-8 exceptions
+
+The visual-kit design spec AR-8 forbids string-concatenated HTML. B1 introduces exactly two scoped escape hatches, each tracked here with its invariant:
+
+| Helper | Used in | Input provenance | Invariant |
+|---|---|---|---|
+| `unsafeHTML(highlightToHtml(lang, source))` | `lesson.ts` `code` case | `source` is author-supplied LLM output | Prism's `Prism.util.encode` HTML-escapes `&<>"` before tokenization; grammar emits only known-safe `<span class="token ...">` markup. Input size is capped at 100 KB (ReDoS guard). Unknown languages take the escape-only fallback. Tested via `escape.test.ts` with adversarial payloads including `</script>`, `<!--`, `<img onerror>`. |
+| `unsafeJSON(config)` | `lesson.ts` `chart` / `quiz` cases | `config` is author-supplied structured JSON | Emitted inside `<script type="application/json">` — parsed as JSON at runtime, never executed as JS. Helper escapes `<`, `>`, `&`, `\u2028`, `\u2029` to `\u00XX` form (prevents `</script>` tag-break, HTML comment state transitions, and line-terminator JS parse hazards). Tested via `escape.test.ts` against all the same payloads plus the Unicode line terminators. |
+
+No other `unsafeHTML` / `unsafeJSON` / string-concat HTML is permitted in B1. The `scripts/lint-pure-components.mjs` gate is extended to grep-ban `unsafeHTML(` outside `lesson.ts` and grep-ban `new Function(` / `eval(` anywhere under `plugins/visual-kit/src/`.
 
 ### 3.3 `<vk-code>` upgrade
 
@@ -174,7 +269,7 @@ export class VkCode extends LitElement {
 }
 ```
 
-**Prism theme.** Two themes are bundled — a dark variant (`prism-tomorrow`) and a light variant (`prism-solarized-light`), each ~1 KB gz. They key off `@media (prefers-color-scheme)`. Alternative (pick during implementation): single theme that uses CSS variables from `theme.css`.
+**Prism theme.** Single CSS-variables theme authored against `theme.css`'s existing token palette (`--vk-text`, `--vk-accent`, `--vk-muted`, etc.). Rather than ship two Prism themes keyed off `prefers-color-scheme`, one theme with variable-driven colors inherits dark/light automatically from the page theme. This is consistent with QR-6 / RR-1 (single source of truth for color) and avoids ~1 KB of duplicated CSS. ~1 KB gz total.
 
 **Helper** `src/render/highlight.ts`:
 
@@ -192,13 +287,18 @@ import 'prismjs/components/prism-markdown.js';
 import 'prismjs/components/prism-sql.js';
 
 const KNOWN = new Set(['javascript','typescript','python','css','html','json','bash','markdown','sql']);
+const MAX_INPUT_BYTES = 100_000;  // ReDoS guard against pathological Prism grammar input
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' })[c]!);
+}
 
 export function highlightToHtml(language: string, source: string): string {
+  // Input cap — some Prism grammars (notably Markdown, Markup) have historically
+  // exhibited ReDoS with crafted input. Any source over the cap is escape-only.
+  if (source.length > MAX_INPUT_BYTES) return escapeHtml(source);
   const lang = KNOWN.has(language) ? language : null;
-  if (lang === null) {
-    // Graceful fallback: HTML-escape and wrap plain
-    return source.replace(/[&<>]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' })[c]!);
-  }
+  if (lang === null) return escapeHtml(source);
   const grammar = Prism.languages[lang === 'html' ? 'markup' : lang]!;
   return Prism.highlight(source, grammar, lang);
 }
@@ -230,10 +330,16 @@ export class VkMath extends LitElement {
     const latex = this.textContent?.trim() ?? '';
     if (!latex) return html``;
     try {
+      // Security-critical options — see notes below. Every flag here is
+      // load-bearing: changing any of them without review expands attack surface.
       const rendered = katex.renderToString(latex, {
         displayMode: this.display,
         throwOnError: false,
         output: 'html',
+        trust: false,           // blocks \href, \url, \htmlClass, \htmlId, \htmlData
+        strict: 'warn',         // warn on non-standard commands; don't silently permit
+        maxSize: 10,            // cap rendered-element size multiplier
+        maxExpand: 1000,        // cap macro-expansion depth (DoS guard)
       });
       return html`<div .innerHTML=${rendered}></div>`;
     } catch (err) {
@@ -250,6 +356,8 @@ export class VkMath extends LitElement {
 2. Copy `katex/dist/fonts/*.woff2` into `dist/static/fonts/` and serve at `/vk/static/fonts/*.woff2` — smaller bundle, new server route, needs CSS URL rewrite to absolute `/vk/static/fonts/...`
 
 **Decision:** Option 1 (data URL embed). Keeps `math.js` self-contained; no static route work. Simple build step: `scripts/build.mjs` reads `katex.css`, walks `url(./fonts/*.woff2)` patterns, replaces with data URLs from the sibling font files, passes the result as the CSS string to the esbuild text loader.
+
+**KaTeX version pinning.** `katex` is pinned to an exact version in `package.json` (not `^`), and added to the `npm audit --audit-level=high` CI gate. The version bump workflow requires running the `tests/security/katex-xss.test.ts` fixture before merging.
 
 Schema for `math` section (additive):
 
@@ -282,25 +390,50 @@ export class VkChart extends LitElement {
   static styles = css`
     :host { display: block; margin: 0.5rem 0; }
     .wrap { position: relative; width: 100%; max-width: 720px; }
+    .error { color: var(--vk-warning, #d29922); font-family: monospace; font-size: 0.85rem; padding: 0.5rem; }
   `;
+  @state() private error?: string;
   private chart?: Chart;
   firstUpdated() {
     const configScript = this.querySelector('script[type="application/json"]');
-    if (!configScript?.textContent) return;
+    if (!configScript?.textContent) {
+      this.error = 'edu-chart: missing config script';
+      return;
+    }
     let config: ChartConfiguration;
-    try { config = JSON.parse(configScript.textContent); } catch { return; }
+    try {
+      config = JSON.parse(configScript.textContent);
+    } catch (err) {
+      console.warn('vk-chart: config JSON parse failed', err);
+      this.error = 'vk-chart: invalid config JSON';
+      return;
+    }
+    // Reject function-coerced fields (defense in depth — schema also denies these).
+    if (chartConfigContainsCallbackFields(config)) {
+      this.error = 'vk-chart: config contains disallowed callback fields';
+      return;
+    }
     const canvas = this.renderRoot.querySelector('canvas');
-    if (canvas) this.chart = new Chart(canvas, config);
+    if (!canvas) return;
+    try {
+      this.chart = new Chart(canvas, config);
+    } catch (err) {
+      console.warn('vk-chart: Chart.js init failed', err);
+      this.error = 'vk-chart: render failed';
+    }
   }
   disconnectedCallback() {
     super.disconnectedCallback();
     this.chart?.destroy();
   }
   render() {
+    if (this.error) return html`<div class="error">${this.error}</div>`;
     return html`<div class="wrap"><canvas></canvas></div><slot></slot>`;
   }
 }
 ```
+
+**Callback-field denylist.** Chart.js `options` accepts functions for several keys (`callback`, `onComplete`, `onClick`, `onHover`, `filter`, `sort`, `generateLabels`, `label`, etc.). JSON cannot carry functions, but the helper `chartConfigContainsCallbackFields` walks the config and rejects any of these keys whose value is a string (guards against a future feature accidentally `new Function`-coercing them). The schema also denies these via `not` clauses — two-layer defense.
 
 Schema for `chart` section (tightened from the current `config: object`):
 
@@ -325,16 +458,28 @@ case 'chart':
   </vk-section>`;
 ```
 
-Where `unsafeJSON` is a small helper: `JSON.stringify(v).replace(/</g, '\\u003c')` — the replacement prevents any `</script>` sequence in serialized chart config from terminating the script tag early. The content is interpreted as JSON at runtime, not as JS, so XSS via this path is already prevented by the `type="application/json"` attribute and the CSP.
-
-**Dark-mode color defaults.** Chart.js defaults text/grid to near-black. The `chart.js` bundle runs this once on import:
+Where `unsafeJSON` is defined in `src/render/escape.ts`:
 
 ```ts
-if (matchMedia('(prefers-color-scheme: dark)').matches) {
-  Chart.defaults.color = '#c9d1d9';
-  Chart.defaults.borderColor = 'rgba(201, 209, 217, 0.15)';
+// Escape JSON for safe embedding inside <script type="application/json">.
+// Neutralizes HTML parser state transitions (</script, <!--, -->) and JS
+// parser hazards (line-terminator bytes) in case the content is ever
+// inadvertently routed through JSON.parse-after-read or eval-like paths.
+const ESCAPES: Record<string, string> = {
+  '<':      '\\u003c',
+  '>':      '\\u003e',
+  '&':      '\\u0026',
+  '\u2028': '\\u2028',
+  '\u2029': '\\u2029',
+};
+export function unsafeJSON(value: unknown): string {
+  return JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, c => ESCAPES[c]!);
 }
 ```
+
+Primary XSS guard is the `type="application/json"` attribute + page-level CSP. `unsafeJSON` is defense in depth.
+
+**Chart.js theming.** Chart.js canvas defaults follow its built-in palette. Dark/light adaptation is out of scope for B1 — future work if demand surfaces. No `Chart.defaults` mutation in `chart.js` bundle; keeps the bundle side-effect-free on import.
 
 ### 3.6 `<vk-quiz>` (new)
 
@@ -353,36 +498,54 @@ interface QuizItem {
 export class VkQuiz extends LitElement {
   @state() private items: QuizItem[] = [];
   @state() private answered: Record<number, { chosen: string; correct: boolean }> = {};
+  @state() private parseError = false;
 
   firstUpdated() {
     const json = this.querySelector('script[type="application/json"]')?.textContent;
-    if (!json) return;
+    if (!json) { this.parseError = true; return; }
     try {
       const parsed = JSON.parse(json) as { items: QuizItem[] };
-      this.items = Array.isArray(parsed.items) ? parsed.items : [];
-    } catch { this.items = []; }
+      if (!Array.isArray(parsed.items) || parsed.items.length === 0) {
+        this.parseError = true; return;
+      }
+      this.items = parsed.items;
+    } catch (err) {
+      console.warn('vk-quiz: config JSON parse failed', err);
+      this.parseError = true;
+    }
   }
 
   private emit(index: number, item: QuizItem, chosen: string, correct: boolean) {
-    this.answered = { ...this.answered, [index]: { chosen, correct } };
+    // Cap chosen length at 1 KB — bounds event-log growth and matches server-side event-schema rule.
+    const cappedChosen = chosen.length > 1024 ? chosen.slice(0, 1024) : chosen;
+    this.answered = { ...this.answered, [index]: { chosen: cappedChosen, correct } };
     this.dispatchEvent(new CustomEvent('vk-event', {
       bubbles: true, composed: true,
       detail: {
         type: 'quiz_answer',
         index,
         item_type: item.type,
-        chosen,
+        chosen: cappedChosen,
         correct,
         ts: new Date().toISOString(),
       },
     }));
   }
 
-  // Per-item render methods: renderMultipleChoice, renderFillBlank, renderExplain
-  // Each calls emit() on user interaction; explain always marks correct=true (self-grading)
-  // ...
+  render() {
+    if (this.parseError) {
+      return html`<vk-error><p slot="detail">vk-quiz: no valid items in config.</p></vk-error>`;
+    }
+    // Per-item render: type-discriminated switch → renderMultipleChoice / renderFillBlank / renderExplain.
+    // Each per-item handler calls this.emit() on user interaction. The `explain` type is self-grading
+    // (the user submits free text; the component reveals the reference answer and marks correct=true
+    // to record participation; no automated comparison in B1).
+    // Implementation detail lives in the plan, not the spec.
+  }
 }
 ```
+
+**Failure mode.** Malformed `<script type="application/json">` content (parse error, non-array items, empty array) renders as `<vk-error>` in the quiz slot with a diagnostic message. This mirrors how `<vk-chart>` handles bad config — **silent failure is explicitly rejected**; a visible `<vk-error>` is the contract. Paidagogos's V2 verification uncovered that silent renderer failures are the single largest class of bugs to catch at the component boundary.
 
 **Schema formalization** — `lesson.v1.json` `quiz` section gains a `oneOf` over item types:
 
@@ -441,48 +604,118 @@ Schema version stays at 1.
 
 No changes to CSP. All three new bundles are `'self'`-served and SRI-pinned. KaTeX fonts via data URLs pass `font-src 'self' data:` (already set in Plan A).
 
-**AR-8 compliance.** All three new components pass complex props via sibling `<script type="application/json">`, not attributes. No string-concatenated HTML anywhere. `unsafeHTML` is used only for server-side Prism output, whose escape semantics are known and tested.
+**AR-8 compliance.** Complex props pass via sibling `<script type="application/json">`, not attributes. The two scoped escape hatches (`unsafeHTML`, `unsafeJSON`) are inventoried in §3.2b with invariants; no other string-concat HTML anywhere.
 
-**Pure components (RR-1/AR-7).** The new components make zero `fetch`, read no `localStorage`, and access no document-level state outside their own DOM subtree. `scripts/lint-pure-components.mjs` passes.
+**Pure components (RR-1/AR-7).** New components make zero `fetch`, read no `localStorage`, and access no document-level state outside their own DOM subtree. `scripts/lint-pure-components.mjs` passes.
+
+**`free` surface allowlist (sanitize.ts).** The new components `<vk-math>`, `<vk-chart>`, `<vk-quiz>` are **intentionally NOT added** to `ALLOWED_TAGS` in `src/render/sanitize.ts`. Consequence: a `free` surface cannot embed any of them. Rationale: the three components rely on sibling `<script type="application/json">` for config; `free` surface content is HTML-only (script tags are stripped by DOMPurify). Without the config-script, the components render as `<vk-error>` anyway, so allowing the tags would be misleading. Consumers that need interactive charts/math/quiz must use the `lesson` surface's typed section types.
+
+**Event schema extension.** `POST /events` in Plan A validates an event schema. B1 extends that schema with a `quiz_answer` event:
+
+```json
+{
+  "oneOf": [
+    /* existing event types */,
+    {
+      "type": "object",
+      "properties": {
+        "type":      { "const": "quiz_answer" },
+        "index":     { "type": "integer", "minimum": 0, "maximum": 99 },
+        "item_type": { "enum": ["multiple_choice", "fill_blank", "explain"] },
+        "chosen":    { "type": "string", "maxLength": 1024 },
+        "correct":   { "type": "boolean" },
+        "ts":        { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "index", "item_type", "chosen", "correct", "ts"]
+    }
+  ]
+}
+```
+
+`chosen` is capped at 1 KB server-side (matches the client-side cap in `<vk-quiz>.emit`). Events that exceed the cap are rejected with `413 Payload Too Large` (already part of Plan A's `SR-8` behavior).
+
+**Supply-chain.** `prismjs`, `katex`, `chart.js` pinned to exact versions in `package.json` (no `^`, no `~`). CI runs `npm audit --audit-level=high` against these three. A grammar-level XSS fuzz suite (`tests/security/prism-xss.test.ts`, `tests/security/katex-xss.test.ts`, `tests/security/chart-callbacks.test.ts`) runs the adversarial payload matrix from §3.2b.
 
 ---
 
 ## 4. Testing
 
-### 4.1 Unit (vitest)
+V2 regression work exposed a class of bugs — shadow-DOM CSS isolation, default-export assumptions, silent renderer failures — that can only surface in a real browser. The spec's test plan promotes those to automated coverage rather than leaving them to manual verification.
 
-One test file per new component plus the code upgrade, under `tests/unit/`:
+### 4.1 Unit (vitest, node / happy-dom)
 
-- `code.test.ts` — cover `highlightToHtml` (known languages tokenize; unknown language escapes; unicode preserved). Cover `<vk-code>` DOM (language prop propagates to `<code class>`, slot content appears, copy button present).
-- `math.test.ts` — `<vk-math>` renders KaTeX span tree for valid LaTeX; `display` attribute flips `displayMode`; invalid LaTeX triggers `.math-error`.
-- `chart.test.ts` — `<vk-chart>` creates a Chart instance with parsed config; absent script tag is a no-op; malformed JSON is a no-op; dark-mode color default runs once.
-- `quiz.test.ts` — renders per-item UI for all three types; click/submit emits `vk-event` with correct detail shape; renders empty on malformed JSON.
-- `autoload.test.ts` — `discoverRequiredBundles` finds tags, dedupes, ignores core tags; `resolveBundleRefs` prepends core and appends in order.
+Unit tests run under node + happy-dom. They are sufficient for pure logic and DOM-structure assertions but **cannot verify** shadow-DOM CSS cascade, real font loading, or canvas pixel output. Coverage:
 
-### 4.2 Integration
+- `escape.test.ts` — `unsafeJSON` neutralizes `</script>`, `<!--`, `-->`, `&`, `\u2028`, `\u2029`; round-trips arbitrary JSON; unicode content preserved; no double-escaping.
+- `highlight.test.ts` — `highlightToHtml` tokenizes each registered language; unknown language escape-only; source over 100 KB escape-only; input `</script><img src=x onerror=alert(1)>` produces output with no raw `<`/`>`.
+- `math.test.ts` — `<vk-math>` emits KaTeX span tree in light DOM (via `renderRoot`); `display` attribute flips `displayMode`; invalid LaTeX triggers `.math-error`; `\href{javascript:alert(1)}{x}` does NOT produce a `javascript:` href (KaTeX `trust: false`).
+- `chart.test.ts` — `<vk-chart>` creates a `Chart` instance in happy-dom (jsdom canvas 2D is stubbed but instance construction is verifiable); absent script tag renders `<vk-error>`; malformed JSON renders `<vk-error>`; config containing `options.plugins.tooltip.callbacks.label: "..."` (string callback) renders `<vk-error>`.
+- `quiz.test.ts` — renders per-item UI for all three types; click/submit emits `vk-event` with correct detail shape and 1 KB `chosen` cap enforced; empty items and malformed JSON render `<vk-error>`.
+- `autoload.test.ts` — tag-position regex matches `<vk-math>` and `<vk-math />` (self-closing) but NOT `<vk-math-like="bad">` or text content `"<vk-math>"` (escaped as `&lt;vk-math&gt;`); dedupe across multiple occurrences; core-tag filtering; unknown tag throws.
 
-Under `tests/integration/`, new fixtures and tests:
+### 4.2 Integration (vitest, real HTTP roundtrip)
 
-- `lesson-code.test.ts` — write a code-section SurfaceSpec, GET the rendered page, assert `<vk-code>` element present, `<span class="token ...">` in the slotted HTML, core bundle preload only (no math/chart/quiz).
-- `lesson-math.test.ts` — math section → rendered page includes `<vk-math>`, bundle preload includes `math.js` (with SRI attr).
-- `lesson-chart.test.ts` — chart section → rendered page includes `<vk-chart>`, the sibling `<script type="application/json">` parses to the original config, bundle preload includes `chart.js`.
-- `lesson-quiz.test.ts` — quiz section → rendered page includes `<vk-quiz>`, sibling script JSON round-trips, bundle preload includes `quiz.js`.
-- `lesson-multi.test.ts` — SurfaceSpec containing code+math+chart+quiz sections → rendered page preloads all four bundles (core, math, chart, quiz — no duplicates), each with its SRI hash.
+New fixtures at `tests/integration/fixtures/*.json` and tests:
 
-### 4.3 Schema validation
+- `lesson-code.test.ts` — code-section SurfaceSpec → GET rendered page → assert `<vk-code>` with tokenized slot content, core bundle preload only, CSP header intact.
+- `lesson-math.test.ts` — math section → `<vk-math>` present, `math.js` in preload with SRI.
+- `lesson-chart.test.ts` — chart section → `<vk-chart>` present, sibling JSON parses, `chart.js` preloaded.
+- `lesson-quiz.test.ts` — quiz section → `<vk-quiz>` present, JSON round-trips with `unsafeJSON` applied, `quiz.js` preloaded.
+- `lesson-multi.test.ts` — dedup integration: lesson with two `math` sections AND one `chart` AND one `quiz` preloads each bundle exactly once.
+- `malformed-chart.test.ts` — chart section with garbled JSON → page renders, fragment contains `<vk-error>` under the chart's section slot.
+- `schema-regression.test.ts` — a Plan A lesson fixture (no math/chart/quiz sections, loose schema) validates cleanly against the 1.1 schema.
+- `event-quiz.test.ts` — end-to-end: simulate a quiz answer POST with CSRF token, assert `.test-workspace/.test-plugin/state/events` contains a valid `quiz_answer` entry with all fields.
 
-Existing `tests/unit/validate.test.ts` (if present; else new) — cover the tightened schemas:
-- Chart config missing `type` fails validation
-- Quiz item with unknown `type` fails validation
-- Quiz item with missing `answer` fails validation
-- Math without `latex` fails validation
-- Pre-B1 chart config (minimal `type`, `data`) still passes
+### 4.3 Browser regression (Playwright, real Chromium)
 
-### 4.4 CI gates
+New directory `tests/browser/regression.test.ts` runs in a real Chromium under Playwright (or the project's Chrome DevTools MCP harness if preferred — same assertion shape). These are the V2-regression-class bugs promoted from manual checklist to automated gates:
 
-- Bundle size gate extended: `chart.js ≤ 90 KB gz`, `math.js ≤ 150 KB gz`, `quiz.js ≤ 10 KB gz`, `core.js` gate unchanged at `≤ 40 KB gz`
-- Pure-component lint passes for all new component files
-- Capabilities endpoint integration test asserts all four bundles listed with SRI
+- `katex-renders-styled.spec` — load a math-only lesson, wait for `<vk-math>` to render, assert `.katex .base` computed `font-family` starts with `KaTeX_Main` (proves shadow-DOM CSS cascade reaches KaTeX output).
+- `katex-fonts-load.spec` — after `document.fonts.ready`, assert at least one KaTeX font family is in `document.fonts` (proves data-URL `@font-face` actually loaded).
+- `chart-renders-pixels.spec` — load a chart lesson, wait for `firstUpdated` → assert canvas has non-empty pixel samples at expected bar positions (proves Chart.js actually drew, not just instantiated).
+- `prism-tokens-visible.spec` — load a code lesson, assert `<span class="token keyword">` inside `<vk-code>` and computed color differs from the surrounding text color (proves Prism theme CSS is in effect).
+- `sri-modulepreload.spec` — assert `<link rel="modulepreload" integrity="sha384-...">` tags resolve (no `net::ERR_BLOCKED_BY_CSP`, `integrity` attribute matches).
+- `quiz-a11y.spec` — assert `<vk-quiz>` multiple-choice options are keyboard-navigable (Tab / arrow-key focus), options have `role="radio"` or equivalent semantics, focus is visible, tap targets ≥ 24×24 px, WCAG AA contrast met (QR-3).
+- `csp-no-inline-script.spec` — load any lesson, inject `<script>alert(1)</script>` via DevTools and confirm CSP blocks it.
+
+### 4.4 Schema validation (ajv)
+
+Covered inline in `validate.test.ts` (existing file extended) — specific cases:
+- Chart config missing `type` fails
+- Chart config containing a string-typed `options.plugins.tooltip.callbacks.label` fails (denylist)
+- Quiz item with unknown `type` fails
+- Quiz item missing `answer` fails
+- Math without `latex` fails
+- A Plan A lesson JSON (checked in as fixture) passes the 1.1 schema
+- Items within the lesson `sections` beyond 40 fail `maxItems`
+
+### 4.5 Gherkin acceptance
+
+Appended scenarios to existing `docs/plugins/visual-kit/specs/surface-rendering.feature`:
+- Scenario: `lesson surface renders code with Prism syntax highlighting`
+- Scenario: `lesson surface renders math via <vk-math> with math.js preloaded`
+- Scenario: `lesson surface renders chart via <vk-chart> with chart.js preloaded`
+- Scenario: `lesson surface renders quiz via <vk-quiz> with quiz.js preloaded`
+- Scenario: `autoloader deduplicates repeated section bundles`
+- Scenario: `malformed section config renders visible <vk-error>`
+- Scenario: `quiz answer event is persisted to the plugin's events log`
+
+### 4.6 CI gates
+
+| Gate | Threshold | Policy |
+|------|-----------|--------|
+| Bundle size: `core.js` | ≤ 40 KB gz (production minified + gzipped) | Fail hard |
+| Bundle size: `quiz.js` | ≤ 10 KB gz | Fail hard |
+| Bundle size: `chart.js` | Measured at build + 10% headroom | Fail hard |
+| Bundle size: `math.js` | Measured at build + 10% headroom | Fail hard |
+| Pure-component lint | zero violations | Fail hard |
+| `unsafeHTML`/`unsafeJSON` grep-ban outside `lesson.ts` + `escape.ts` | zero violations | Fail hard |
+| `new Function(` / `eval(` grep-ban under `plugins/visual-kit/src/` | zero violations | Fail hard |
+| `npm audit --audit-level=high` for pinned deps | zero advisories | Fail hard |
+| Capabilities endpoint integration test | all bundles listed with SRI | Fail hard |
+| First-paint latency (Playwright trace, median of 5 runs) | ≤ 500 ms (QR-4) | Warn, not fail |
+
+**Bundle size methodology.** Measured on the minified, gzipped output in `dist/`. The `chart.js` and `math.js` gates are set empirically at build time (first green build + 10% headroom) rather than pre-specified — this avoids the "relax the gate when the bundle grows" anti-pattern the security reviewer flagged. If a bundle exceeds its established gate, the project decides between splitting the bundle or revisiting the feature — never silently raise the threshold.
 
 ---
 
@@ -551,11 +784,12 @@ plugins/paidagogos/
 
 1. Branch `feat/visual-kit-v1.1-plan-b1` off main.
 2. Implement per the plan (Plan B1 task breakdown — separate document).
-3. All tests pass (unit, integration, schema, bundle size, pure-components).
-4. Manual browser verification via Chrome DevTools MCP using each fixture — takes the place of the missing automated visual regression harness. Explicitly verify the V2-bug regression list: modulepreload + SRI work under CSP; KaTeX fonts load from data URLs; Chart.js dark mode defaults apply; Prism tokens render correctly.
-5. Tag `visual-kit--v1.1.0` in the marketplace.
-6. Bump paidagogos dependency to `~1.1.0`. Commit + PR.
-7. Once merged, "section type not yet supported" disappears from every paidagogos lesson.
+3. All automated tests pass: unit, integration, browser regression (§4.3), schema, bundle size, pure-component lint, `npm audit`, grep-bans.
+4. Gherkin scenarios (§4.5) added to `docs/plugins/visual-kit/specs/surface-rendering.feature` and run via the existing feature harness.
+5. Manual spot-check on one real paidagogos lesson in the dev browser — optional, since the browser regression suite covers the automated surface. Exists as a final eyeball step, not as coverage.
+6. Tag `visual-kit--v1.1.0` in the marketplace.
+7. Bump paidagogos dependency to `~1.1.0`. Commit + PR.
+8. Once merged, the `code` and `quiz` rendering regressions disappear from generated paidagogos lessons. `math` and `chart` components stand ready for a future `paidagogos:micro` update that starts emitting those section types.
 
 Forward compatibility: a consumer pinned to `~1.0.0` that receives a `1.1.0` install still works — schema is additive.
 
@@ -573,12 +807,10 @@ Forward compatibility: a consumer pinned to `~1.0.0` that receives a `1.1.0` ins
 
 ## 8. Open questions
 
-All minor; decide during implementation:
+Decisions deferred to real measurement during implementation:
 
-1. **Prism theme strategy.** Two bundled themes keyed off `prefers-color-scheme`, or one theme using CSS custom properties from `theme.css`? Lean toward option 2 — smaller, theme-engine-consistent.
-2. **KaTeX font delivery.** Data-URL embed (Option 1) vs `/vk/static/fonts/` route (Option 2). Data-URL keeps bundle self-contained — starting position.
-3. **Chart.js tree-shaking.** `chart.js/auto` imports every controller. Plan A lessons only need `bar`, `line`, `scatter`, possibly `pie`. Consider explicit registration to cut bundle to ~35 KB gz — but only if the auto path pushes past the 90 KB gate.
-4. **`unsafeJSON` helper location.** New file `src/render/escape.ts`? Or inline in `lesson.ts`? Lives at a natural home (escape utilities module).
+1. **Chart.js tree-shaking.** `chart.js/auto` is the starting position. If the measured `chart.js` bundle size comes in above ~90 KB gz, switch to explicit controller registration (`bar`, `line`, `scatter`, `pie` only). Decision waits on the first green build.
+2. **KaTeX math.js bundle size.** The data-URL font embed is expected to push `math.js` to ~180–220 KB gz. If it's above ~250 KB gz, reconsider Option 2 from §3.4 (static fonts route). Again — gate set empirically at first green build + 10% headroom per §4.6.
 
 ---
 
