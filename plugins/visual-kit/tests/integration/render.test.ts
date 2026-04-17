@@ -55,4 +55,20 @@ describe('surface render integration', () => {
     const res = await fetch(`${info.url}/p/demo/absent`);
     expect(res.status).toBe(404);
   });
+
+  it('serves /vk/theme.css with CSS content-type', async () => {
+    const info = await loadInfo(ws);
+    const res = await fetch(`${info.url}/vk/theme.css`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toMatch(/text\/css/);
+    expect(await res.text()).toContain(':root');
+  });
+
+  it('serves /vk/schemas/lesson.v1.json', async () => {
+    const info = await loadInfo(ws);
+    const res = await fetch(`${info.url}/vk/schemas/lesson.v1.json`);
+    expect(res.status).toBe(200);
+    const j = await res.json();
+    expect(j.$id).toContain('lesson.v1.json');
+  });
 });

@@ -15,6 +15,7 @@ import { isSafeSegment, resolveContained } from './paths.js';
 import { renderSurface } from '../render/dispatcher.js';
 import { renderFragment } from '../render/ssr.js';
 import { buildShell } from '../render/shell.js';
+import { serveVkPath } from './bundles.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const pkgPath = join(here, '../../package.json');
@@ -195,7 +196,12 @@ async function handleRequest(
   }
 
   if (method === 'GET' && url.pathname.startsWith('/vk/')) {
-    // /vk/core.js, /vk/theme.css, /vk/schemas/* — Task 14 wires these.
+    const reply = await serveVkPath(url.pathname);
+    if (reply) {
+      res.writeHead(reply.status, { ...reply.headers, ...securityHeaders() });
+      res.end(reply.body);
+      return;
+    }
     res.writeHead(404, { 'Content-Type': 'text/plain', ...securityHeaders() });
     res.end('Not Found');
     return;
