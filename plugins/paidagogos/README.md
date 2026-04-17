@@ -12,15 +12,13 @@ claude plugin install paidagogos
 
 ### Starting the visual server
 
-Before running lessons, start the visual server:
+Before running lessons, start visual-kit (per workspace):
 
 ```bash
-bash plugins/paidagogos/server/start-server.sh --project-dir .
+visual-kit serve --project-dir .
 ```
 
-This starts the server on port 7337 (configurable via `--port`). You can then use `/paidagogos [topic]` and lessons will appear in your browser at the URL shown in the output.
-
-Alternatively, `/paidagogos serve` will display the start command for you to run.
+You can then use `/paidagogos [topic]` and lessons will appear in your browser at the URL shown in the output.
 
 Open **http://localhost:7337** in your browser, then teach yourself anything:
 
@@ -51,6 +49,7 @@ Or on first use when prompted.
 
 | Version | Scope |
 |---------|-------|
-| 0.1.0 | `paidagogos` router + `paidagogos:micro` + visual server |
-| 0.2.0 | `paidagogos:quiz` standalone + `paidagogos:explain` (Feynman) |
-| 0.3.0 | `paidagogos:recall` + file-based progress |
+| 0.1.0 | `paidagogos` router + `paidagogos:micro` + in-house visual server |
+| 0.2.0 | Migrated to visual-kit dependency; lesson SurfaceSpec v1; dropped in-house server |
+| 0.3.0 | `paidagogos:quiz` standalone + `paidagogos:explain` (Feynman) |
+| 0.4.0 | `paidagogos:recall` + file-based progress |
