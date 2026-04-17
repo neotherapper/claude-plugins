@@ -1,0 +1,9 @@
+import './section.js';
+import './card.js';
+import './gallery.js';
+import './outline.js';
+import './comparison.js';
+import './feedback.js';
+import './loader.js';
+import './error.js';
+import './code.js';

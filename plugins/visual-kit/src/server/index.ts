@@ -14,7 +14,7 @@ import { SseHub } from './sse.js';
 import { isSafeSegment, resolveContained } from './paths.js';
 import { renderSurface } from '../render/dispatcher.js';
 import { renderFragment } from '../render/ssr.js';
-import { buildShell } from '../render/shell.js';
+import { buildShell, type BundleRef } from '../render/shell.js';
 import { serveVkPath } from './bundles.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -141,7 +141,7 @@ async function handleRequest(
 
   if (method === 'GET' && url.pathname === '/vk/capabilities') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', ...securityHeaders() });
-    res.end(JSON.stringify(buildCapabilities(version)));
+    res.end(JSON.stringify(await buildCapabilities(version)));
     return;
   }
 
@@ -173,21 +173,23 @@ async function handleRequest(
     try {
       spec = JSON.parse(raw);
     } catch {
-      return renderErrorPage(res, 'Invalid JSON in SurfaceSpec', { plugin, surfaceId });
+      const fallbackBundle = await resolveCoreBundle(version);
+      return renderErrorPage(res, 'Invalid JSON in SurfaceSpec', { plugin, surfaceId }, undefined, undefined, [fallbackBundle]);
     }
     const result = validateSpec(spec);
     const nonce = makeNonce();
     const csrf = makeCsrfToken(ctx.secret, { plugin, surfaceId, nonce });
+    const coreBundle = await resolveCoreBundle(version);
     if (!result.ok) {
       // Even on schema failure, render an error page (200) with vk-error fragment.
-      return renderErrorPage(res, `Schema: ${result.errors.join('; ')}`, { plugin, surfaceId }, nonce, csrf);
+      return renderErrorPage(res, `Schema: ${result.errors.join('; ')}`, { plugin, surfaceId }, nonce, csrf, [coreBundle]);
     }
     const fragment = renderFragment(renderSurface(spec as never));
     const { html, headers } = buildShell({
       title: `${plugin}/${surfaceId}`,
       nonce,
       csrfToken: csrf,
-      bundleUrls: ['/vk/core.js'],
+      bundles: [coreBundle],
       fragment,
     });
     res.writeHead(200, headers);
@@ -211,6 +213,11 @@ async function handleRequest(
   res.end('Not Found');
 }
 
+async function resolveCoreBundle(version: string): Promise<BundleRef> {
+  const caps = await buildCapabilities(version) as { bundles: Array<{ url: string; sri: string }> };
+  return caps.bundles.find(b => b.url === '/vk/core.js') ?? { url: '/vk/core.js', sri: 'sha384-dev' };
+}
+
 function badRequest(res: ServerResponse): void {
   res.writeHead(400, { 'Content-Type': 'text/plain', ...securityHeaders() });
   res.end('Bad Request');
@@ -222,13 +229,14 @@ function renderErrorPage(
   ctx: { plugin: string; surfaceId: string },
   nonce: string = makeNonce(),
   csrf: string = '',
+  bundles: BundleRef[] = [{ url: '/vk/core.js', sri: 'sha384-dev' }],
 ): void {
   const fragment = `<vk-error><h2 slot="title">Render error</h2><p slot="detail">${escapeHtml(detail)}</p></vk-error>`;
   const { html, headers } = buildShell({
     title: `${ctx.plugin}/${ctx.surfaceId}`,
     nonce,
     csrfToken: csrf,
-    bundleUrls: ['/vk/core.js'],
+    bundles,
     fragment,
   });
   res.writeHead(200, headers);

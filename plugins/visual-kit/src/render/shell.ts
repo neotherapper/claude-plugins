@@ -1,20 +1,25 @@
 import { buildCsp, securityHeaders } from '../server/security.js';
 
+export interface BundleRef {
+  url: string;
+  sri: string;
+}
+
 export interface ShellInput {
   title: string;
   nonce: string;
   csrfToken: string;
-  bundleUrls: string[];
+  bundles: BundleRef[];
   fragment: string;
   extraScriptSrc?: string[];
 }
 
 export function buildShell(input: ShellInput): { html: string; headers: Record<string, string> } {
-  const preload = input.bundleUrls
-    .map(u => `<link rel="modulepreload" href="${u}" crossorigin="anonymous">`)
+  const preload = input.bundles
+    .map(b => `<link rel="modulepreload" href="${b.url}" integrity="${b.sri}" crossorigin="anonymous">`)
     .join('\n    ');
-  const scripts = input.bundleUrls
-    .map(u => `<script type="module" src="${u}" nonce="${input.nonce}"></script>`)
+  const scripts = input.bundles
+    .map(b => `<script type="module" src="${b.url}" integrity="${b.sri}" crossorigin="anonymous" nonce="${input.nonce}"></script>`)
     .join('\n    ');
 
   const html = `<!DOCTYPE html>
