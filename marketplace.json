@@ -28,6 +28,32 @@
         "path": "plugins/namesmith"
       },
       "description": "Find the right name for your project. Brand interview, AI generation across 7 archetypes, live availability + pricing via Cloudflare or Porkbun, and per-project names.md persistence."
+    },
+    {
+      "name": "visual-kit",
+      "version": "1.0.0",
+      "source": {
+        "source": "github",
+        "repo": "neotherapper/claude-plugins",
+        "path": "plugins/visual-kit"
+      },
+      "description": "Shared local visual rendering for Claude Code plugins. Provides the vk-* component library, HTTP server, and SurfaceSpec JSON contract."
+    },
+    {
+      "name": "paidagogos",
+      "version": "0.2.0",
+      "source": {
+        "source": "github",
+        "repo": "neotherapper/claude-plugins",
+        "path": "plugins/paidagogos"
+      },
+      "description": "Interactive lesson builder for Claude Code plugins.",
+      "dependencies": [
+        {
+          "name": "visual-kit",
+          "version": "~1.0.0"
+        }
+      ]
     }
   ]
 }
