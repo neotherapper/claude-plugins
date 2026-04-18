@@ -23,9 +23,21 @@ await Promise.all(
 
 // ── KaTeX CSS inliner plugin ─────────────────────────────────────────────
 // Intercepts `import katexCss from 'katex/dist/katex.css'`, reads the file,
-// rewrites url(./fonts/*.woff2|woff|ttf) to data URLs, and returns the CSS as text.
+// strips non-woff2 src entries, rewrites url(./fonts/*.woff2) to data URLs,
+// and returns the CSS as text.
 const katexCssPath = require.resolve('katex/dist/katex.css');
 const katexDir = dirname(katexCssPath);
+
+function stripNonWoff2(css) {
+  // In each `src: ...;` declaration, keep only the url(...) format('woff2') entries.
+  return css.replace(/src\s*:\s*([^;]+);/g, (_m, body) => {
+    const entries = body.split(',').map(e => e.trim());
+    const woff2Only = entries.filter(e => /format\(['"]?woff2['"]?\)/.test(e));
+    if (woff2Only.length === 0) return `src: ${body};`; // defensive: keep original if no woff2
+    return `src: ${woff2Only.join(', ')};`;
+  });
+}
+
 const katexCssInliner = {
   name: 'katex-css-inliner',
   setup(b) {
@@ -35,7 +47,8 @@ const katexCssInliner = {
     }));
     b.onLoad({ filter: /.*/, namespace: 'katex-css' }, async () => {
       const raw = await readFile(katexCssPath, 'utf8');
-      const inlined = await inlineFontUrls(raw, katexDir);
+      const stripped = stripNonWoff2(raw);
+      const inlined = await inlineFontUrls(stripped, katexDir);
       return { contents: inlined, loader: 'text' };
     });
   },
