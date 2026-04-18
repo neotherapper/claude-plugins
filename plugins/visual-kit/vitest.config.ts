@@ -1,7 +1,9 @@
 import { defineConfig, Plugin } from 'vitest/config';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { createRequire } from 'module';
 
+const require = createRequire(import.meta.url);
 const MARKER = '\0css-raw:';
 
 function cssTextPlugin(): Plugin {
@@ -17,7 +19,19 @@ function cssTextPlugin(): Plugin {
           .replace(/[?#].*$/, '')
           .replace(MARKER, '');
         const dir = cleanImporter.split('/').slice(0, -1).join('/');
-        const abs = id.startsWith('/') ? id : resolve(dir, id);
+        let abs: string;
+        if (id.startsWith('/')) {
+          abs = id;
+        } else if (id.startsWith('.')) {
+          abs = resolve(dir, id);
+        } else {
+          // Bare-package CSS import (e.g. `katex/dist/katex.css`).
+          try {
+            abs = require.resolve(id, { paths: [dir] });
+          } catch {
+            abs = resolve(dir, id);
+          }
+        }
         const key = MARKER + (counter++);
         resolvedMap.set(key, abs);
         return key;
