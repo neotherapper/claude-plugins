@@ -98,3 +98,49 @@ Feature: visual-kit surface rendering — typed SurfaceSpec JSON → determinist
     When the skill GETs /vk/capabilities
     Then if "comparison" is absent, the skill prints a clear error and halts
     And if "comparison" is present, the skill writes its SurfaceSpec
+
+  # ── Plan B1 — rendering gaps ───────────────────────────────────────────
+
+  Scenario: lesson surface renders code with Prism syntax highlighting
+    When I write a lesson SurfaceSpec with a code section (language "javascript", source "const x = 1;")
+    Then GET /p/paidagogos/<lesson-id> returns 200
+    And the response body contains <vk-code language="javascript">
+    And the slotted content contains <span class="token keyword">const</span>
+
+  Scenario: lesson surface renders math via <vk-math> with math.js preloaded
+    When I write a lesson SurfaceSpec with a math section (latex "a^2+b^2=c^2", display true)
+    Then GET /p/paidagogos/<lesson-id> returns 200
+    And the response body contains <vk-math display>
+    And the response HTML <head> contains <link rel="modulepreload" href="/vk/math.js" integrity="sha384-…">
+
+  Scenario: lesson surface renders chart via <vk-chart> with chart.js preloaded
+    When I write a lesson SurfaceSpec with a chart section (config.type "bar", data.datasets non-empty)
+    Then GET /p/paidagogos/<lesson-id> returns 200
+    And the response body contains <vk-chart>
+    And the <vk-chart> contains a <script type="application/json"> whose body parses as JSON
+    And the response HTML <head> contains <link rel="modulepreload" href="/vk/chart.js" integrity="sha384-…">
+
+  Scenario: lesson surface renders quiz via <vk-quiz> with quiz.js preloaded
+    When I write a lesson SurfaceSpec with a quiz section containing one multiple_choice item
+    Then GET /p/paidagogos/<lesson-id> returns 200
+    And the response body contains <vk-quiz>
+    And the <vk-quiz> contains a <script type="application/json"> whose body parses as JSON with an items array
+    And the response HTML <head> contains <link rel="modulepreload" href="/vk/quiz.js" integrity="sha384-…">
+
+  Scenario: autoloader deduplicates repeated section bundles
+    When I write a lesson SurfaceSpec with two math sections, one chart section, and one quiz section
+    Then the rendered page contains exactly one modulepreload link for /vk/math.js
+    And exactly one modulepreload link for /vk/chart.js
+    And exactly one modulepreload link for /vk/quiz.js
+    And exactly one modulepreload link for /vk/core.js
+
+  Scenario: malformed chart config renders a visible <vk-error>
+    When I write a lesson SurfaceSpec with a chart section whose config is missing the "type" key
+    Then GET /p/paidagogos/<lesson-id> returns 200
+    And the response body contains a <vk-error> fragment
+
+  Scenario: quiz answer event is persisted to the plugin's events log
+    Given a page at /p/paidagogos/quiz-lesson with a rendered <vk-quiz>
+    When the browser POSTs /events with JSON {"type":"quiz_answer","index":0,"item_type":"multiple_choice","chosen":"a","correct":true,"ts":"..."} and the page's vk-csrf token
+    Then the server responds 204
+    And <workspace>/.paidagogos/state/events contains a new line with type "quiz_answer", index 0, and plugin "paidagogos"
