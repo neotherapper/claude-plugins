@@ -122,6 +122,13 @@ export async function handleEventPost(
     return;
   }
 
+  const validationError = validateEvent(parsed as Record<string, unknown>);
+  if (validationError) {
+    res.writeHead(400, securityHeaders());
+    res.end(`Bad Request: ${validationError}`);
+    return;
+  }
+
   // Append JSON line — plugin is server-derived, never client-supplied.
   const stateDir = join(ctx.projectDir, `.${plugin}`, 'state');
   await mkdir(stateDir, { recursive: true });
@@ -150,4 +157,31 @@ async function rotateIfNeeded(path: string): Promise<void> {
       await rename(path, path + '.' + Date.now());
     }
   } catch { /* no file yet */ }
+}
+
+const ISO_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+
+function validateEvent(ev: Record<string, unknown>): string | null {
+  const t = ev.type;
+  if (typeof t !== 'string') return 'missing type';
+  // Pass-through existing event types (Plan A did not formally validate shape).
+  // Only quiz_answer is strictly validated in B1.
+  if (t !== 'quiz_answer') return null;
+
+  if (typeof ev.index !== 'number' || !Number.isInteger(ev.index) || ev.index < 0 || ev.index > 99) {
+    return 'invalid index';
+  }
+  if (typeof ev.item_type !== 'string' || !['multiple_choice','fill_blank','explain'].includes(ev.item_type)) {
+    return 'invalid item_type';
+  }
+  if (typeof ev.chosen !== 'string' || ev.chosen.length > 1024) {
+    return 'invalid chosen (string or too long)';
+  }
+  if (typeof ev.correct !== 'boolean') {
+    return 'invalid correct';
+  }
+  if (typeof ev.ts !== 'string' || !ISO_DATE_TIME.test(ev.ts)) {
+    return 'invalid ts';
+  }
+  return null;
 }
