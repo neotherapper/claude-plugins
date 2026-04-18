@@ -47,7 +47,10 @@ export async function resolveBundleRefs(
   if (core) refs.push({ url: core.url, sri: core.sri });
   for (const name of names) {
     const found = capabilities.bundles.find(b => b.name === name);
-    if (found) refs.push({ url: found.url, sri: found.sri });
+    if (!found) {
+      throw new Error(`Unknown bundle name in resolveBundleRefs: ${name}`);
+    }
+    refs.push({ url: found.url, sri: found.sri });
   }
   return refs;
 }

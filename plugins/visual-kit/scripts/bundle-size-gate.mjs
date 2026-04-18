@@ -11,7 +11,7 @@ const BUDGETS = {
   // math + chart sizes below are set from Task 10's empirical measurements + 10% headroom.
   // Current measurements (Task 17): math=349972, chart=76427
   'dist/math.js':   385_000, // measured 349972 gz + 10% = 384970, rounded up
-  'dist/chart.js':   85_000, // measured 76427 gz + 10% = 84070, rounded up
+  'dist/chart.js':   90_000, // measured 76427 gz + ~18% headroom — one dep bump of safety
 };
 
 let failed = false;

@@ -71,8 +71,7 @@ describe('resolveBundleRefs', () => {
     ]);
   });
 
-  it('silently drops unknown bundle names (should not happen but be defensive)', async () => {
-    const refs = await resolveBundleRefs(['math', 'nonsense'], caps);
-    expect(refs.length).toBe(2);
+  it('throws on unknown bundle names (matches discoverRequiredBundles fail-loud stance)', async () => {
+    await expect(resolveBundleRefs(['math', 'nonsense'], caps)).rejects.toThrow(/Unknown bundle name/);
   });
 });
