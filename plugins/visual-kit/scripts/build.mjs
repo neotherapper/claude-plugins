@@ -30,6 +30,7 @@ await build({
   target: ['es2022'],
   sourcemap: false,
   platform: 'browser',
+  loader: { '.css': 'text' },
   logLevel: 'info',
 });
 
