@@ -6,10 +6,21 @@ import katexCss from 'katex/dist/katex.css';
 // Inject KaTeX CSS into document head once per page (bundle-side-effect).
 // Light-DOM rendering means KaTeX markup lives in the page's DOM, not shadow DOM,
 // so KaTeX CSS must cascade in from the page — can't live inside shadow DOM styles.
+//
+// The shell ships CSP `style-src 'self' 'nonce-<X>'`, so DOM-inserted <style>
+// elements need that nonce to be accepted. We pick up the current script's
+// nonce and propagate it to the injected <style>. `document.currentScript` is
+// null for module scripts, so we fall back to `<script[nonce]>` (the shell's
+// module <script> carries the active nonce).
 if (typeof document !== 'undefined' && !document.querySelector('style[data-vk-katex]')) {
   const styleEl = document.createElement('style');
   styleEl.setAttribute('data-vk-katex', '');
   styleEl.textContent = katexCss;
+  const currentNonce =
+    (document.currentScript as HTMLScriptElement | null)?.nonce ??
+    document.querySelector<HTMLScriptElement>('script[nonce]')?.nonce ??
+    '';
+  if (currentNonce) styleEl.nonce = currentNonce;
   document.head.appendChild(styleEl);
 }
 

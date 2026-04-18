@@ -14,7 +14,8 @@
     "test:coverage": "vitest run --coverage",
     "gate:security": "node scripts/test-security-headers.mjs",
     "gate:size": "node scripts/bundle-size-gate.mjs",
-    "verify": "pnpm run lint:pure && pnpm run build && pnpm run test && pnpm run gate:security && pnpm run gate:size"
+    "test:browser": "NODE_OPTIONS=--no-experimental-strip-types playwright test",
+    "verify": "pnpm run lint:pure && pnpm run build && pnpm run test && pnpm run gate:security && pnpm run gate:size && pnpm run test:browser"
   },
   "engines": {
     "node": ">=20.0.0"
