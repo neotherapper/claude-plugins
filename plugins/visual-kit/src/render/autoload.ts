@@ -38,18 +38,17 @@ export function discoverRequiredBundles(fragmentHtml: string): string[] {
   return [...bundles];
 }
 
-export async function resolveBundleRefs(
+export function resolveBundleRefs(
   names: string[],
   capabilities: { bundles: Array<{ name: string; url: string; sri: string }> },
-): Promise<BundleRef[]> {
+): BundleRef[] {
+  const byName = new Map(capabilities.bundles.map(b => [b.name, b]));
   const refs: BundleRef[] = [];
-  const core = capabilities.bundles.find(b => b.name === 'core');
+  const core = byName.get('core');
   if (core) refs.push({ url: core.url, sri: core.sri });
   for (const name of names) {
-    const found = capabilities.bundles.find(b => b.name === name);
-    if (!found) {
-      throw new Error(`Unknown bundle name in resolveBundleRefs: ${name}`);
-    }
+    const found = byName.get(name);
+    if (!found) throw new Error(`Unknown bundle name in resolveBundleRefs: ${name}`);
     refs.push({ url: found.url, sri: found.sri });
   }
   return refs;

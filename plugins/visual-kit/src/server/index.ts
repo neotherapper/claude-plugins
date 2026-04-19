@@ -196,7 +196,7 @@ async function handleRequest(
     const fragment = renderFragment(renderSurface(spec as never));
     const caps = await buildCapabilities(version) as { bundles: Array<{ name: string; url: string; sri: string }> };
     const needed = discoverRequiredBundles(fragment);
-    const bundles = await resolveBundleRefs(needed, caps);
+    const bundles = resolveBundleRefs(needed, caps);
     const { html, headers } = buildShell({
       title: `${plugin}/${surfaceId}`,
       nonce,

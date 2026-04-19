@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { discoverRequiredBundles, resolveBundleRefs } from '../../src/render/autoload.js';
 
+// resolveBundleRefs is synchronous — no I/O occurs; `await` in callers still works
+// but the function is typed and tested as sync to match its actual behavior.
+
 describe('discoverRequiredBundles', () => {
   it('returns empty array when only core tags are present', () => {
     expect(discoverRequiredBundles('<vk-section><vk-code>x</vk-code></vk-section>')).toEqual([]);
@@ -31,6 +34,15 @@ describe('discoverRequiredBundles', () => {
     expect(discoverRequiredBundles('&lt;vk-math&gt;')).toEqual([]);
   });
 
+  it('does not produce extra bundle when lesson text field contains "<vk-math>" (server-escaped)', () => {
+    // Lit escapes text-node interpolations to &lt;vk-math&gt; before the HTML
+    // reaches discoverRequiredBundles. This test pins that contract at the scanner
+    // level: the HTML-entity form must not trigger a bundle preload.
+    const serverRenderedHtml =
+      '<vk-section><p>Type &lt;vk-math&gt; to embed a formula.</p></vk-section>';
+    expect(discoverRequiredBundles(serverRenderedHtml)).toEqual([]);
+  });
+
   it('does not match attributes whose names start with vk-', () => {
     expect(discoverRequiredBundles('<div data-vk-math="x">hi</div>')).toEqual([]);
   });
@@ -57,13 +69,13 @@ describe('resolveBundleRefs', () => {
     ],
   };
 
-  it('always prepends core even when no names requested', async () => {
-    const refs = await resolveBundleRefs([], caps);
+  it('always prepends core even when no names requested', () => {
+    const refs = resolveBundleRefs([], caps);
     expect(refs).toEqual([{ url: '/vk/core.js', sri: 'sha384-core' }]);
   });
 
-  it('prepends core and appends discovered bundles in declaration order', async () => {
-    const refs = await resolveBundleRefs(['math', 'chart'], caps);
+  it('prepends core and appends discovered bundles in declaration order', () => {
+    const refs = resolveBundleRefs(['math', 'chart'], caps);
     expect(refs).toEqual([
       { url: '/vk/core.js',  sri: 'sha384-core' },
       { url: '/vk/math.js',  sri: 'sha384-math' },
@@ -71,7 +83,7 @@ describe('resolveBundleRefs', () => {
     ]);
   });
 
-  it('throws on unknown bundle names (matches discoverRequiredBundles fail-loud stance)', async () => {
-    await expect(resolveBundleRefs(['math', 'nonsense'], caps)).rejects.toThrow(/Unknown bundle name/);
+  it('throws on unknown bundle names (matches discoverRequiredBundles fail-loud stance)', () => {
+    expect(() => resolveBundleRefs(['math', 'nonsense'], caps)).toThrow(/Unknown bundle name/);
   });
 });
