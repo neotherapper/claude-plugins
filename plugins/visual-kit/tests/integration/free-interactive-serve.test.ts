@@ -40,6 +40,9 @@ describe('free-interactive surface (integration)', () => {
     expect(res.headers.get('content-security-policy')).toBeNull();
     expect(res.headers.get('x-content-type-options')).toBe('nosniff');
     expect(res.headers.get('referrer-policy')).toBe('no-referrer');
+    expect(res.headers.get('cross-origin-opener-policy')).toBe('same-origin');
+    expect(res.headers.get('cross-origin-resource-policy')).toBe('same-origin');
+    expect(res.headers.get('vary')).toBe('Origin');
 
     const body = await res.text();
     expect(body).toContain('<script>window.__marker=42</script>');
