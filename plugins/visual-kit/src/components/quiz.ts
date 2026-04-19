@@ -129,7 +129,8 @@ export class VkQuiz extends LitElement {
           @click=${(e: Event) => {
             const ta = (e.currentTarget as HTMLElement).parentElement!
               .querySelector<HTMLTextAreaElement>(`textarea[data-textarea="${index}"]`)!;
-            // Explain is self-grading — record participation, reveal reference.
+            // self-grading: always correct — explain items record participation
+            // and reveal the reference answer; no automated correctness check.
             this.emit(index, item, ta.value, true);
           }}
         >Submit</button>

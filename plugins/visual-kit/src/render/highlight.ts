@@ -17,14 +17,15 @@ const KNOWN = new Set([
 
 // Input cap — some Prism grammars (notably Markdown, Markup) have historically
 // exhibited ReDoS with crafted input. Any source over the cap is escape-only.
-const MAX_INPUT_BYTES = 100_000;
+// Named CHARS because String.length counts UTF-16 code units, not bytes.
+const MAX_INPUT_CHARS = 100_000;
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]!));
 }
 
 export function highlightToHtml(language: string, source: string): string {
-  if (source.length > MAX_INPUT_BYTES) return escapeHtml(source);
+  if (source.length > MAX_INPUT_CHARS) return escapeHtml(source);
   if (!KNOWN.has(language)) return escapeHtml(source);
   // 'html' maps to Prism's 'markup' grammar.
   const grammarKey = language === 'html' ? 'markup' : language;

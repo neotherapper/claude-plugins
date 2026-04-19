@@ -52,10 +52,13 @@ export class VkMath extends LitElement {
         maxSize: 10,         // cap rendered-element size multiplier
         maxExpand: 1000,     // cap macro-expansion depth (DoS guard)
       });
+      // lint-exception: .innerHTML bypass is intentional — KaTeX renderToString
+      // with trust:false produces safe HTML; unsafeHTML is not used here because
+      // the output is assigned to a property, not Lit-interpolated as raw markup.
       return html`<div .innerHTML=${rendered}></div>`;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      return html`<div class="math-error" style="color:var(--vk-warning,#d29922);font-family:monospace;font-size:.85rem">KaTeX error: ${msg}</div>`;
+      return html`<div class="vk-component-error">KaTeX error: ${msg}</div>`;
     }
   }
 }

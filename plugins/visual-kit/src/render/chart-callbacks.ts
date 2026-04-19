@@ -1,6 +1,13 @@
 // Keys that Chart.js documents as callback/function slots.
 // Any of these whose value is a STRING in a JSON-sourced config is a red flag —
-// schema rejects them, and this helper is a second-layer guard in the component.
+// this walker is the load-bearing callback guard in the component.
+//
+// NOTE: This is a best-effort denylist against Chart.js 4.x's known function
+// slots. Chart.js may add new function-valued API surface across minor versions.
+// A string value in an unknown function slot causes Chart.js to invoke it as a
+// non-function (TypeError in the browser) — user-visible but not exploitable.
+// The CALLBACK_CONTAINER_KEYS catch any string child of named callback objects,
+// which provides broader coverage than the per-key list alone.
 //
 // CALLBACK_KEYS: flagged when their *own* value is a string.
 // CALLBACK_CONTAINER_KEYS: flagged when any *child* string value is present.
