@@ -63,7 +63,7 @@ export class VkChart extends LitElement {
 
   render() {
     if (this.errorMessage) {
-      return html`<div style="color:var(--vk-warning,#d29922);font-family:monospace;font-size:.85rem;padding:.5rem">${this.errorMessage}</div>`;
+      return html`<div class="vk-component-error">${this.errorMessage}</div>`;
     }
     return html`
       <div style="position:relative;width:100%;max-width:720px">

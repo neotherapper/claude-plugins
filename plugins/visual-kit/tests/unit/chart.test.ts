@@ -23,6 +23,15 @@ describe('<vk-chart>', () => {
     expect(el.innerHTML).toContain('missing config script');
   });
 
+  it('error element uses CSS class, not inline style (CSP compliance)', async () => {
+    const el = document.createElement('vk-chart');
+    document.body.appendChild(el);
+    await (el as any).updateComplete;
+    const errorEl = el.querySelector('.vk-component-error');
+    expect(errorEl).not.toBeNull();
+    expect(errorEl?.hasAttribute('style')).toBe(false);
+  });
+
   it('renders error for invalid JSON', async () => {
     const el = document.createElement('vk-chart');
     const sc = document.createElement('script');

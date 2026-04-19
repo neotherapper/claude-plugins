@@ -15,3 +15,4 @@ html,body{margin:0;padding:0;background:var(--vk-bg);color:var(--vk-text);
   font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .vk-surface{max-width:860px;margin:0 auto;padding:2rem 1.5rem}
 a{color:var(--vk-accent)}
+.vk-component-error{color:var(--vk-warning);font-family:monospace;font-size:.85rem;padding:.5rem}

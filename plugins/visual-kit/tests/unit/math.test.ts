@@ -43,6 +43,7 @@ describe('<vk-math>', () => {
     expect(el.innerHTML.length).toBeGreaterThan(0);
   });
 
+
   it('does NOT produce a javascript: href for \\href{javascript:...}{x} (trust=false)', async () => {
     const el = document.createElement('vk-math');
     el.textContent = '\\href{javascript:alert(1)}{click}';
