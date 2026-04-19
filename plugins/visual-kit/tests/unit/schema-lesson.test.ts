@@ -28,7 +28,11 @@ describe('lesson.v1.json — B1 schema tightening', () => {
     expect(r.ok).toBe(false);
   });
 
-  it('rejects a chart section with string-typed callback field', () => {
+  it('accepts a chart options object — callback enforcement is done by the runtime walker, not the schema', () => {
+    // The schema validates structural requirements (config.type, config.data).
+    // String-typed callback fields are caught by chartConfigContainsCallbackFields
+    // at render time, not here. Testing that the schema does NOT duplicate that
+    // responsibility (no misleading top-level `not` denylist).
     const spec = { ...baseLesson, sections: [{
       type: 'chart',
       config: {
@@ -37,7 +41,7 @@ describe('lesson.v1.json — B1 schema tightening', () => {
       },
     }] };
     const r = validateSpec(spec);
-    expect(r.ok).toBe(false);
+    expect(r.ok).toBe(true);
   });
 
   it('accepts a quiz with multiple_choice item', () => {

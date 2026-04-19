@@ -60,16 +60,7 @@
 
     "chartOptions": {
       "type": "object",
-      "not": { "anyOf": [
-        { "required": ["onClick"],    "properties": { "onClick":    { "type": "string" } } },
-        { "required": ["onHover"],    "properties": { "onHover":    { "type": "string" } } },
-        { "required": ["onComplete"], "properties": { "onComplete": { "type": "string" } } },
-        { "required": ["filter"],     "properties": { "filter":     { "type": "string" } } },
-        { "required": ["sort"],       "properties": { "sort":       { "type": "string" } } },
-        { "required": ["generateLabels"], "properties": { "generateLabels": { "type": "string" } } },
-        { "required": ["callback"],   "properties": { "callback":   { "type": "string" } } },
-        { "required": ["formatter"],  "properties": { "formatter":  { "type": "string" } } }
-      ] }
+      "$comment": "Callback injection enforcement is handled server-side by chart-callbacks.ts (chartConfigContainsCallbackFields). A schema-level denylist only covers top-level keys and conveys false security, so none is included here."
     },
 
     "quizItem": {
