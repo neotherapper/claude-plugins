@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.0 — 2026-04-19
+## 1.2.0 — 2026-04-19
 
 ### Added
 - New opt-in surface kind `free-interactive` for AI-authored HTML+JS served without sanitisation or CSP. Intended for interactive content (live graphs, sliders, custom SVG). Schema: `/vk/schemas/free-interactive.v1.json`. Capabilities entry carries `"permissive": true` so clients can detect the relaxed trust model.
