@@ -53,7 +53,7 @@ export class VkMath extends LitElement {
         maxExpand: 1000,     // cap macro-expansion depth (DoS guard)
       });
       // lint-exception: .innerHTML bypass is intentional — KaTeX renderToString
-      // with trust:false produces safe HTML; unsafeHTML is not used here because
+      // with trust:false produces safe HTML; unsafe-HTML directive is not used here because
       // the output is assigned to a property, not Lit-interpolated as raw markup.
       return html`<div .innerHTML=${rendered}></div>`;
     } catch (err) {
