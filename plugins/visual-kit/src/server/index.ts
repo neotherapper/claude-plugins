@@ -14,6 +14,7 @@ import { isSafeSegment, resolveContained } from './paths.js';
 import { renderSurface } from '../render/dispatcher.js';
 import { renderFragment } from '../render/ssr.js';
 import { buildShell, type BundleRef } from '../render/shell.js';
+import { discoverRequiredBundles, resolveBundleRefs } from '../render/autoload.js';
 import { serveVkPath } from './bundles.js';
 
 // Injected at build time by scripts/build.mjs via esbuild define.
@@ -187,17 +188,20 @@ async function handleRequest(
     const result = validateSpec(spec);
     const nonce = makeNonce();
     const csrf = makeCsrfToken(ctx.secret, { plugin, surfaceId, nonce });
-    const coreBundle = await resolveCoreBundle(version);
     if (!result.ok) {
-      // Even on schema failure, render an error page (200) with vk-error fragment.
-      return renderErrorPage(res, `Schema: ${result.errors.join('; ')}`, { plugin, surfaceId }, nonce, csrf, [coreBundle]);
+      // Schema failure: render vk-error page with only core preloaded.
+      const core = await resolveCoreBundle(version);
+      return renderErrorPage(res, `Schema: ${result.errors.join('; ')}`, { plugin, surfaceId }, nonce, csrf, [core]);
     }
     const fragment = renderFragment(renderSurface(spec as never));
+    const caps = await buildCapabilities(version) as { bundles: Array<{ name: string; url: string; sri: string }> };
+    const needed = discoverRequiredBundles(fragment);
+    const bundles = resolveBundleRefs(needed, caps);
     const { html, headers } = buildShell({
       title: `${plugin}/${surfaceId}`,
       nonce,
       csrfToken: csrf,
-      bundles: [coreBundle],
+      bundles,
       fragment,
     });
     res.writeHead(200, headers);

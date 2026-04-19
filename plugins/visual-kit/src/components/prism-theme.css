@@ -1,0 +1,46 @@
+/* Prism token theme, driven by visual-kit's existing --vk-* palette.
+   One theme — dark/light adaptation inherits from the page via CSS variables. */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata        { color: var(--vk-muted, #959da5); font-style: italic; }
+.token.punctuation  { color: var(--vk-text, #cdd9e5); }
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted      { color: var(--vk-accent, #6cb6ff); }
+
+.token.boolean,
+.token.number       { color: var(--vk-accent-alt, #f69d50); }
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted     { color: var(--vk-success, #8ddb8c); }
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string { color: var(--vk-accent, #6cb6ff); }
+
+.token.atrule,
+.token.attr-value,
+.token.keyword      { color: var(--vk-accent, #6cb6ff); font-weight: 600; }
+
+.token.function,
+.token.class-name   { color: var(--vk-accent-alt, #f69d50); }
+
+.token.regex,
+.token.important,
+.token.variable     { color: var(--vk-warning, #d29922); }
+
+.token.important,
+.token.bold         { font-weight: bold; }
+.token.italic       { font-style: italic; }
+
+.token.entity       { cursor: help; }

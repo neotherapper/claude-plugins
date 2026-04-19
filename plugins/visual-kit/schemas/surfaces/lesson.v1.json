@@ -23,16 +23,79 @@
       "type": "object",
       "required": ["type"],
       "oneOf": [
-        { "properties": { "type": { "const": "concept" }, "text": { "type": "string" } }, "required": ["text"] },
-        { "properties": { "type": { "const": "why"     }, "text": { "type": "string" } }, "required": ["text"] },
-        { "properties": { "type": { "const": "code"    }, "language": { "type": "string" }, "source": { "type": "string" } }, "required": ["source"] },
-        { "properties": { "type": { "const": "chart"   }, "config": { "type": "object" } }, "required": ["config"] },
-        { "properties": { "type": { "const": "math"    }, "latex": { "type": "string" } }, "required": ["latex"] },
-        { "properties": { "type": { "const": "mistakes"}, "items": { "type": "array", "items": { "type": "string" } } }, "required": ["items"] },
-        { "properties": { "type": { "const": "generate"}, "task": { "type": "string" } }, "required": ["task"] },
-        { "properties": { "type": { "const": "quiz"    }, "items": { "type": "array" } }, "required": ["items"] },
-        { "properties": { "type": { "const": "resources"}, "items": { "type": "array" } }, "required": ["items"] },
-        { "properties": { "type": { "const": "next"    }, "concept": { "type": "string" } }, "required": ["concept"] }
+        { "properties": { "type": { "const": "concept" },  "text": { "type": "string" } }, "required": ["text"] },
+        { "properties": { "type": { "const": "why" },      "text": { "type": "string" } }, "required": ["text"] },
+        { "properties": { "type": { "const": "code" },
+                          "language": { "type": "string" },
+                          "source":   { "type": "string" } }, "required": ["source"] },
+        { "properties": { "type": { "const": "math" },
+                          "latex": { "type": "string" },
+                          "display": { "type": "boolean" } }, "required": ["latex"] },
+        { "properties": { "type": { "const": "chart" },
+                          "config": { "$ref": "#/$defs/chartConfig" } }, "required": ["config"] },
+        { "properties": { "type": { "const": "mistakes" },
+                          "items": { "type": "array", "items": { "type": "string" } } }, "required": ["items"] },
+        { "properties": { "type": { "const": "generate" }, "task": { "type": "string" } }, "required": ["task"] },
+        { "properties": { "type": { "const": "quiz" },
+                          "items": {
+                            "type": "array",
+                            "minItems": 1,
+                            "maxItems": 20,
+                            "items": { "$ref": "#/$defs/quizItem" }
+                          } }, "required": ["items"] },
+        { "properties": { "type": { "const": "resources" }, "items": { "type": "array" } }, "required": ["items"] },
+        { "properties": { "type": { "const": "next" },      "concept": { "type": "string" } }, "required": ["concept"] }
+      ]
+    },
+
+    "chartConfig": {
+      "type": "object",
+      "required": ["type", "data"],
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "data": { "type": "object" },
+        "options": { "$ref": "#/$defs/chartOptions" }
+      }
+    },
+
+    "chartOptions": {
+      "type": "object",
+      "$comment": "Callback injection enforcement is handled server-side by chart-callbacks.ts (chartConfigContainsCallbackFields). A schema-level denylist only covers top-level keys and conveys false security, so none is included here."
+    },
+
+    "quizItem": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "question", "options", "answer", "explanation"],
+          "properties": {
+            "type": { "const": "multiple_choice" },
+            "question": { "type": "string" },
+            "options":  { "type": "array", "items": { "type": "string" }, "minItems": 2, "maxItems": 6 },
+            "answer":   { "type": "string" },
+            "explanation": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "question", "answer", "explanation"],
+          "properties": {
+            "type": { "const": "fill_blank" },
+            "question": { "type": "string" },
+            "answer":   { "type": "string" },
+            "explanation": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "question", "answer", "explanation"],
+          "properties": {
+            "type": { "const": "explain" },
+            "question": { "type": "string" },
+            "answer":   { "type": "string" },
+            "explanation": { "type": "string" }
+          }
+        }
       ]
     }
   }
