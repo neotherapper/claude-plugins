@@ -187,6 +187,9 @@ async function handleRequest(
       return renderErrorPage(res, 'Invalid JSON in SurfaceSpec', { plugin, surfaceId }, undefined, undefined, [fallbackBundle]);
     }
     const result = validateSpec(spec);
+    // Pre-compute nonce + CSRF here because the schema-error path below needs
+    // them to render the strict-CSP vk-error page. The free-interactive branch
+    // ignores them — don't move this below that branch without handling both.
     const nonce = makeNonce();
     const csrf = makeCsrfToken(ctx.secret, { plugin, surfaceId, nonce });
     if (!result.ok) {
