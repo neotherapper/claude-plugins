@@ -25,12 +25,16 @@ Visual-kit owns all HTML rendering — the skill's only output is a `.json` Surf
 
 Run both checks before any content generation. Do not proceed past a failing check unless the error handling table below explicitly permits it.
 
-### Check 1: Server running
+### Check 1: Server running (auto-start if needed)
 
 Read `<workspace>/.visual-kit/server/state/server-info` from the project root.
 
-- If the file does not exist, or the `status` field is not `"running"`, halt immediately. See error handling table: **Server not running**.
-- If the file is readable and `status` is `"running"`, extract `port` and carry it forward.
+- If the file exists and `status` is `"running"`, extract `port` and carry it forward.
+- Otherwise, auto-start visual-kit — do NOT ask the user to run the command:
+  1. Run `visual-kit serve --project-dir <workspace>` as a background shell command (use the Bash tool with `run_in_background: true`).
+  2. Poll `<workspace>/.visual-kit/server/state/server-info` every 500 ms for up to 10 seconds, waiting for the file to exist and `status` to equal `"running"`.
+  3. When the file reports `"running"`, extract `port` and continue with the lesson flow.
+  4. If the timeout elapses, halt. See error handling table: **Server failed to auto-start**.
 
 ### Check 2: Expertise level
 
@@ -159,7 +163,7 @@ Do not include quiz answers, lesson content, or resource links in the chat respo
 
 | Error condition | User message | Action |
 |---|---|---|
-| Server not running (`.visual-kit/server/state/server-info` missing or `status` ≠ `"running"`) | `"visual-kit is not running. Run `visual-kit serve --project-dir .` to start it."` | Halt immediately. Do not generate content. |
+| Server failed to auto-start (auto-start timed out after 10 s, or `visual-kit` binary not found on `PATH`) | `"Could not start visual-kit automatically. Verify the binary is installed: run `which visual-kit`."` | Halt immediately. Do not generate content. Do not ask the user to start it manually — first re-check `PATH` and report the actual error from the background process. |
 | Lesson SurfaceSpec fails schema validation (any rule from lesson-schema.md violated) | `"Lesson generation failed. Try a more specific topic."` | Halt. Do NOT write the JSON file. |
 | Content write fails (file write error, permission denied, path not found) | `"Could not write lesson file. Check visual-kit is running."` | Halt. Do not present lesson content in chat. |
 | Vault lookup fails (vault not in session, index unreadable, read error) | *(no user message)* | Continue silently. Use ai-suggested resources for `resources[]` section. Do not block lesson generation. |

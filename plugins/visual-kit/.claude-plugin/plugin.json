@@ -2,7 +2,13 @@
   "name": "visual-kit",
   "version": "1.1.0",
   "description": "Shared local visual rendering for Claude Code plugins. Provides the vk-* component library, HTTP server, and SurfaceSpec JSON contract.",
-  "author": "neotherapper",
+  "author": {
+    "name": "Georgios Pilitsoglou",
+    "url": "https://pilitsoglou.com",
+    "github": "neotherapper"
+  },
+  "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/visual-kit",
+  "repository": "https://github.com/neotherapper/claude-plugins",
   "license": "MIT",
   "keywords": ["visualization", "library-plugin", "rendering"],
   "skills": []

@@ -23,7 +23,7 @@ Entry point for the `paidagogos` plugin. Classify the user's learning intent, de
 | "I don't understand [thing]" | Scope check → route to paidagogos:micro |
 | "walk me through [thing]" | Scope check → route to paidagogos:micro |
 | "/paidagogos [topic]" (bare invocation) | Scope check → route to paidagogos:micro |
-| "/paidagogos serve" or "start the server" | Respond: "Start visual-kit (per workspace): `visual-kit serve --project-dir .` — then open the URL shown in the output." |
+| "/paidagogos serve" or "start the server" | Start visual-kit yourself: run `visual-kit serve --project-dir .` as a background shell command (Bash with `run_in_background: true`), poll `.visual-kit/server/state/server-info` until `status` is `"running"`, then report the URL from the `port` field. Do NOT ask the user to run it. |
 | "quiz me on [thing]" | Respond: "`paidagogos:quiz` is coming in v0.2.0. Use `/paidagogos [topic]` to get a lesson with a built-in quiz." |
 | "what have I learned" / "show progress" | Respond: "Progress tracking is coming in v0.2.0." |
 | "continue my lesson on X" | Respond: "Session recall is coming in v0.2.0." |

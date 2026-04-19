@@ -24,6 +24,11 @@
       "description": "AI-powered blog post drafting. Write in your voice, optimised for virality."
     },
     {
+      "name": "visual-kit",
+      "source": "./plugins/visual-kit",
+      "description": "Shared local visual rendering for Claude Code plugins. Provides the vk-* component library, HTTP server, and SurfaceSpec JSON contract."
+    },
+    {
       "name": "paidagogos",
       "source": "./plugins/paidagogos",
       "description": "Structured AI-powered lessons for any topic, rendered in a local visual browser UI."
