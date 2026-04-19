@@ -33,7 +33,13 @@ function stripNonWoff2(css) {
   return css.replace(/src\s*:\s*([^;]+);/g, (_m, body) => {
     const entries = body.split(',').map(e => e.trim());
     const woff2Only = entries.filter(e => /format\(['"]?woff2['"]?\)/.test(e));
-    if (woff2Only.length === 0) return `src: ${body};`; // defensive: keep original if no woff2
+    if (woff2Only.length === 0) {
+      // Unexpected: KaTeX CSS src block has no woff2 entries — keeping original.
+      // Investigate at next KaTeX version bump; this may indicate a format change
+      // that would break the self-contained CSP font requirement.
+      console.warn('[katex-css-inliner] stripNonWoff2: no woff2 entries found in src block — keeping original');
+      return `src: ${body};`;
+    }
     return `src: ${woff2Only.join(', ')};`;
   });
 }
@@ -57,10 +63,13 @@ const katexCssInliner = {
 async function inlineFontUrls(css, baseDir) {
   // Match url(fonts/…) and url(./fonts/…) — KaTeX ships the former.
   const pattern = /url\(["']?(\.?\/?fonts\/[^)"']+)["']?\)/g;
-  const matches = [...css.matchAll(pattern)];
+  // Dedupe by URL string so each font file is read once.
+  const seen = new Map();
+  for (const m of css.matchAll(pattern)) {
+    if (!seen.has(m[0])) seen.set(m[0], m[1]);
+  }
   let out = css;
-  for (const m of matches) {
-    const rel = m[1];
+  for (const [urlToken, rel] of seen) {
     const absPath = join(baseDir, rel);
     let bytes;
     try {
@@ -75,7 +84,12 @@ async function inlineFontUrls(css, baseDir) {
               : 'application/octet-stream';
     const b64 = bytes.toString('base64');
     const dataUrl = `url(data:${mime};base64,${b64})`;
-    out = out.replace(m[0], dataUrl);
+    // replaceAll replaces every occurrence of this URL token in one pass.
+    out = out.replaceAll(urlToken, dataUrl);
+  }
+  // Invariant: no bare font URL should remain after inlining.
+  if (/url\(["']?\.?\/?fonts\//.test(out)) {
+    throw new Error('[katex-css-inliner] post-inline invariant failed: bare font URL remains in output');
   }
   return out;
 }
