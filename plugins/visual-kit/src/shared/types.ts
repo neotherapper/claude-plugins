@@ -1,5 +1,6 @@
 export type SurfaceKind =
-  | 'lesson' | 'gallery' | 'outline' | 'comparison' | 'feedback' | 'free';
+  | 'lesson' | 'gallery' | 'outline' | 'comparison' | 'feedback' | 'free'
+  | 'free-interactive';
 
 export interface SurfaceSpecBase {
   surface: SurfaceKind;
