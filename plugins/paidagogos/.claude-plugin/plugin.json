@@ -11,9 +11,6 @@
   "repository": "https://github.com/neotherapper/claude-plugins",
   "license": "MIT",
   "keywords": ["learning", "education", "lessons", "visual-kit"],
-  "dependencies": [
-    { "name": "visual-kit", "version": "~1.2.0" }
-  ],
   "skills": [
     {
       "name": "paidagogos",
@@ -21,7 +18,7 @@
       "description": "Use when the user asks to learn about a topic, generate a lesson, or run /paidagogos."
     },
     {
-      "name": "paidagogos:micro",
+      "name": "paidagogos-micro",
       "command": "/paidagogos:micro",
       "description": "Use when the user asks for a quick micro-lesson or runs /paidagogos:micro."
     }
