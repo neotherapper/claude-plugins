@@ -55,6 +55,7 @@ export class VkMath extends LitElement {
       // lint-exception: .innerHTML bypass is intentional — KaTeX renderToString
       // with trust:false produces safe HTML; unsafe-HTML directive is not used here because
       // the output is assigned to a property, not Lit-interpolated as raw markup.
+      // TODO: scope lint:pure-components away from exception comment lines so the hyphen workaround above is unnecessary.
       return html`<div .innerHTML=${rendered}></div>`;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);

@@ -22,6 +22,10 @@ const RELOAD_SCRIPT =
  * tag in `html`. If no </body> exists (fragment input), appends at the end.
  * Case-insensitive match. The LAST occurrence is used so nested srcdoc
  * payloads don't confuse the injection point.
+ *
+ * Note: the regex matches </body> wherever it appears in the string, including
+ * inside attribute values (e.g. data-x="</body>"). This is an accepted
+ * limitation for a trusted AI surface — a full HTML parser is not warranted.
  */
 export function injectReloadScript(html: string): string {
   const re = /<\/body\s*>/gi;

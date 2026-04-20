@@ -14,7 +14,7 @@ import { isSafeSegment, resolveContained } from './paths.js';
 import { renderSurface } from '../render/dispatcher.js';
 import { renderFragment } from '../render/ssr.js';
 import { buildShell, type BundleRef } from '../render/shell.js';
-import { renderFreeInteractive } from '../surfaces/free-interactive.js';
+import { renderFreeInteractive, type FreeInteractiveSpec } from '../surfaces/free-interactive.js';
 import { discoverRequiredBundles, resolveBundleRefs } from '../render/autoload.js';
 import { serveVkPath } from './bundles.js';
 
@@ -201,7 +201,7 @@ async function handleRequest(
       // Opt-in permissive surface: serve AI-authored HTML as-is. No CSP, no
       // CSRF binding, no shell. Host-allowlist + securityHeaders() still apply.
       // See: docs/superpowers/specs/2026-04-19-visual-kit-free-interactive-surface.md
-      const body = renderFreeInteractive(spec as never);
+      const body = renderFreeInteractive(spec as FreeInteractiveSpec);
       res.writeHead(200, {
         'Content-Type': 'text/html; charset=utf-8',
         ...securityHeaders(),

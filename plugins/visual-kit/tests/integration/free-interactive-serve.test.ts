@@ -94,6 +94,9 @@ describe('free-interactive surface (integration)', () => {
 
     const res = await fetch(`${info.url}/p/demo/bad`);
     expect(res.status).toBe(200);
+    const csp = res.headers.get('content-security-policy');
+    expect(csp).toBeTruthy();
+    expect(csp).toContain("nonce-");
     const body = await res.text();
     expect(body).toContain('vk-error');
     expect(body).toContain('Schema');

@@ -9,7 +9,7 @@
   "properties": {
     "surface": { "const": "free-interactive" },
     "version": { "const": 1 },
-    "html":  { "type": "string", "maxLength": 500000 },
+    "html":  { "type": "string", "minLength": 1, "maxLength": 500000 },
     "title": { "type": "string", "maxLength": 200 }
   }
 }
