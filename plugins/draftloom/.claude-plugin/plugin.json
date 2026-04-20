@@ -10,32 +10,5 @@
   "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/draftloom",
   "repository": "https://github.com/neotherapper/claude-plugins",
   "license": "MIT",
-  "keywords": ["blog", "writing", "seo", "viral", "voice-profile", "content"],
-  "skills": [
-    {
-      "name": "setup",
-      "command": "/draftloom:setup",
-      "description": "This skill should be used when the user asks to create a writing profile, set up their blog voice, create a new blog profile, or edit an existing profile."
-    },
-    {
-      "name": "draft",
-      "command": "/draftloom:draft",
-      "description": "This skill should be used when the user asks to write a blog post, draft a post, start a new post, help me write a blog post, or run draftloom draft."
-    },
-    {
-      "name": "eval",
-      "command": "/draftloom:eval",
-      "description": "This skill should be used when the user asks to score a post, evaluate a blog post, check a draft, or run draftloom eval."
-    }
-  ],
-  "agents": [
-    { "name": "orchestrator", "description": "Owns the eval loop — dispatches all agents, aggregates scores, decides next action." },
-    { "name": "writer", "description": "Drafts full posts on iteration 1 and patches sections_affected on iteration 2+." },
-    { "name": "seo-eval", "description": "Scores keyword density, meta description, heading hierarchy, and Flesch readability." },
-    { "name": "hook-eval", "description": "Scores first-sentence novelty, curiosity gap, title specificity, and scroll-stop power." },
-    { "name": "voice-eval", "description": "Scores tone adjective match, sentence rhythm, vocabulary, and brand voice example alignment." },
-    { "name": "readability-eval", "description": "Scores paragraph length, subheading frequency, bullet distribution, and sentence length variance." },
-    { "name": "distribution", "description": "Generates X hook, LinkedIn opener, email subject, and newsletter blurb from the final draft." }
-  ],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["blog", "writing", "seo", "viral", "voice-profile", "content"]
 }

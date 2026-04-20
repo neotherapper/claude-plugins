@@ -9,6 +9,5 @@
   "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/beacon",
   "repository": "https://github.com/neotherapper/claude-plugins",
   "license": "MIT",
-  "keywords": ["api-mapping", "site-analysis", "osint", "recon", "tech-packs"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["api-mapping", "site-analysis", "osint", "recon", "tech-packs"]
 }
