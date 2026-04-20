@@ -14,6 +14,7 @@ import { isSafeSegment, resolveContained } from './paths.js';
 import { renderSurface } from '../render/dispatcher.js';
 import { renderFragment } from '../render/ssr.js';
 import { buildShell, type BundleRef } from '../render/shell.js';
+import { renderFreeInteractive, type FreeInteractiveSpec } from '../surfaces/free-interactive.js';
 import { discoverRequiredBundles, resolveBundleRefs } from '../render/autoload.js';
 import { serveVkPath } from './bundles.js';
 
@@ -186,12 +187,27 @@ async function handleRequest(
       return renderErrorPage(res, 'Invalid JSON in SurfaceSpec', { plugin, surfaceId }, undefined, undefined, [fallbackBundle]);
     }
     const result = validateSpec(spec);
+    // Pre-compute nonce + CSRF here because the schema-error path below needs
+    // them to render the strict-CSP vk-error page. The free-interactive branch
+    // ignores them — don't move this below that branch without handling both.
     const nonce = makeNonce();
     const csrf = makeCsrfToken(ctx.secret, { plugin, surfaceId, nonce });
     if (!result.ok) {
       // Schema failure: render vk-error page with only core preloaded.
       const core = await resolveCoreBundle(version);
       return renderErrorPage(res, `Schema: ${result.errors.join('; ')}`, { plugin, surfaceId }, nonce, csrf, [core]);
+    }
+    if (result.kind === 'free-interactive') {
+      // Opt-in permissive surface: serve AI-authored HTML as-is. No CSP, no
+      // CSRF binding, no shell. Host-allowlist + securityHeaders() still apply.
+      // See: docs/superpowers/specs/2026-04-19-visual-kit-free-interactive-surface.md
+      const body = renderFreeInteractive(spec as FreeInteractiveSpec);
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        ...securityHeaders(),
+      });
+      res.end(body);
+      return;
     }
     const fragment = renderFragment(renderSurface(spec as never));
     const caps = await buildCapabilities(version) as { bundles: Array<{ name: string; url: string; sri: string }> };

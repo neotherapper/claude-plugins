@@ -28,7 +28,7 @@ const schemaDir = join(here, ASSET_OFFSET, 'schemas/surfaces');
 const ajv = new Ajv2020({ strict: false, allErrors: true });
 const validators = new Map<SurfaceKind, ValidateFunction>();
 
-const KINDS: SurfaceKind[] = ['lesson', 'gallery', 'outline', 'comparison', 'feedback', 'free'];
+const KINDS: SurfaceKind[] = ['lesson', 'gallery', 'outline', 'comparison', 'feedback', 'free', 'free-interactive'];
 
 export async function loadSchemas(): Promise<void> {
   // Skip if already loaded — Ajv rejects duplicate schema IDs, and in tests

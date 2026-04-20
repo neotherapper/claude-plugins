@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.2.0 — 2026-04-19
+
+### Added
+- New opt-in surface kind `free-interactive` for AI-authored HTML+JS served without sanitisation or CSP. Intended for interactive content (live graphs, sliders, custom SVG). Schema: `/vk/schemas/free-interactive.v1.json`. Capabilities entry carries `"permissive": true` so clients can detect the relaxed trust model.
+- Capabilities endpoint now emits a `permissive` flag for permissive surfaces.
+
+### Security posture of the new surface
+`free-interactive` serves AI-authored HTML+JS **without** DOMPurify sanitisation and **without** a Content-Security-Policy header. This matches the trust model of the superpowers brainstorming companion: localhost-only, AI is trusted, operator visually reviews output before interacting.
+
+Residual risks this surface does NOT defend against:
+- Prompt-injected AI output can exfiltrate via `fetch()` to the open internet.
+- A malicious page can probe other unauthenticated localhost services.
+- UI phishing within the served page.
+
+Defences that still apply to every response, including this surface:
+- Host-allowlist (`isHostAllowed`) blocks DNS-rebinding attempts.
+- Loopback binding keeps external hosts off the server.
+- Path-traversal protection (`resolveContained`) confines content reads to `.{plugin}/content/`.
+- Always-on security headers: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Resource-Policy: same-origin`.
+
+If you need defence against the residual risks, use the existing structured surfaces (`lesson`, `outline`, `free`, etc.). They are unchanged in this release.
+
+### Unchanged
+- All existing surfaces (`lesson`, `gallery`, `outline`, `comparison`, `feedback`, `free`) keep their strict CSP and, where applicable, their DOMPurify sanitisation.
+
 ## 1.1.0 — 2026-04-18
 
 Plan B1 — rendering gaps. Adds three lazily-loaded component bundles and upgrades `<vk-code>` with server-side syntax highlighting. No breaking schema changes.

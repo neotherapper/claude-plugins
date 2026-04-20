@@ -1,4 +1,5 @@
 import { listSurfaces } from '../render/validate.js';
+import type { SurfaceKind } from '../shared/types.js';
 
 // Injected at build time by scripts/build.mjs via esbuild define.
 // Falls back to a dev sentinel when running from source via ts-node / vitest.
@@ -18,12 +19,18 @@ const COMPONENTS = [
   'vk-math', 'vk-chart', 'vk-quiz',
 ];
 
+const PERMISSIVE: ReadonlySet<SurfaceKind> = new Set(['free-interactive']);
+
 export async function buildCapabilities(version: string): Promise<object> {
   return {
     visual_kit_version: version,
     schema_version: 1,
     surfaces: Object.fromEntries(
-      listSurfaces().map(k => [k, { schema: `/vk/schemas/${k}.v1.json` }]),
+      listSurfaces().map(k => {
+        const entry: Record<string, unknown> = { schema: `/vk/schemas/${k}.v1.json` };
+        if (PERMISSIVE.has(k)) entry.permissive = true;
+        return [k, entry];
+      }),
     ),
     components: COMPONENTS,
     bundles: [

@@ -31,8 +31,28 @@ describe('startServer (integration)', () => {
     expect(caps.visual_kit_version).toBeDefined();
     expect(caps.schema_version).toBe(1);
     expect(Object.keys(caps.surfaces)).toEqual(
-      expect.arrayContaining(['lesson','gallery','outline','comparison','feedback','free']),
+      expect.arrayContaining(['lesson','gallery','outline','comparison','feedback','free','free-interactive']),
     );
+  });
+
+  it('advertises free-interactive as a permissive surface', async () => {
+    await startServer({
+      projectDir: ws.dir,
+      host: '127.0.0.1',
+      urlHost: 'localhost',
+      foreground: true,
+    });
+    const { readFile } = await import('node:fs/promises');
+    const info = JSON.parse(await readFile(`${ws.dir}/.visual-kit/server/state/server-info`, 'utf8'));
+    const caps = await (await fetch(`${info.url}/vk/capabilities`)).json();
+
+    expect(caps.surfaces['free-interactive']).toBeDefined();
+    expect(caps.surfaces['free-interactive'].schema).toBe('/vk/schemas/free-interactive.v1.json');
+    expect(caps.surfaces['free-interactive'].permissive).toBe(true);
+
+    // Existing surfaces should NOT have the permissive flag set:
+    expect(caps.surfaces['lesson'].permissive).toBeUndefined();
+    expect(caps.surfaces['free'].permissive).toBeUndefined();
   });
 
   it('rejects requests with disallowed Host header', async () => {
