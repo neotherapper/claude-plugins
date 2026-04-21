@@ -31,9 +31,11 @@ import sys, json, os, shutil, textwrap
 installed_path, project_root, backup_path, mode = sys.argv[1:]
 
 PLUGINS = {
-    "visual-kit@neotherapper-plugins": "plugins/visual-kit",
+    "visual-kit@neotherapper-plugins":  "plugins/visual-kit",
     "paidagogos@neotherapper-plugins":  "plugins/paidagogos",
     "namesmith@neotherapper-plugins":   "plugins/namesmith",
+    "draftloom@neotherapper-plugins":   "plugins/draftloom",
+    "beacon@neotherapper-plugins":      "plugins/beacon",
 }
 
 def local_dir(key):
@@ -104,6 +106,21 @@ elif mode == "local":
     save(data)
     print("\033[1mSwitched to LOCAL mode\033[0m")
     cmd_status(data)
+
+    # visual-kit needs its dist/ built before the binary can load.
+    vk_dist = os.path.join(project_root, "plugins", "visual-kit", "dist", "cli.js")
+    if not os.path.exists(vk_dist):
+        print("\033[33m⚠ visual-kit dist/cli.js not found — building now...\033[0m")
+        import subprocess
+        vk_dir = os.path.join(project_root, "plugins", "visual-kit")
+        result = subprocess.run(["pnpm", "build"], cwd=vk_dir, capture_output=True, text=True)
+        if result.returncode == 0:
+            print("\033[32m✓ visual-kit built successfully\033[0m")
+        else:
+            print(f"\033[31m✗ visual-kit build failed:\033[0m\n{result.stderr.strip()}")
+            print("  Fix the build error, then re-run: ./scripts/plugin-phase.sh local")
+            sys.exit(1)
+
     print("\033[32m→ Run /reload-plugins in Claude Code to apply\033[0m\n")
 
 elif mode == "stable":

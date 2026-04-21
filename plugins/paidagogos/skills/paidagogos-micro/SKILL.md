@@ -141,7 +141,7 @@ After a successful file write, respond with exactly this format — no additiona
 
 ```
 Lesson ready: {topic} ({level})
-→ Open http://localhost:{port} (or it should have updated automatically)
+→ Open http://localhost:{port}/p/paidagogos/{slug}
 
 Estimated time: {estimated_minutes} minutes
 
@@ -152,8 +152,11 @@ Substitute:
 - `{topic}` — the `topic` field from the SurfaceSpec
 - `{level}` — the `level` field from the SurfaceSpec
 - `{port}` — from `<workspace>/.visual-kit/server/state/server-info`
+- `{slug}` — the lesson slug computed in Step 4 (e.g. `css-flexbox`)
 - `{estimated_minutes}` — the `estimated_minutes` field from the SurfaceSpec
 - `{next}` — the `concept` field of the `next` section (without the "When you're ready:" prefix — it is already in the template above)
+
+If the browser is already open to this URL (a repeat invocation on the same topic), it will auto-reload via SSE when the file is overwritten. On a new topic, the user must open the URL manually — there is no existing subscriber to trigger.
 
 Do not include quiz answers, lesson content, or resource links in the chat response. All content is in the HTML file.
 
