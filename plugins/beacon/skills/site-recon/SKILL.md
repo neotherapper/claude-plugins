@@ -113,6 +113,8 @@ See `references/tool-availability.md` for exact detection commands.
    - `csrfmiddlewaretoken` → Django (Definitive)
    - `<meta name="csrf-token"` → Rails (Definitive)
    - `cdn.shopify.com` or `window.Shopify` → Shopify (Definitive)
+   - `Zend_Controller_Exception` or `Zend_Exception` in error body → Zend Framework 1 (Definitive)
+   - `/library/Zend/` or `/application/controllers/` in stack trace → Zend Framework 1 (Definitive)
 
 4. **JS globals / cookies**: inspect inline scripts and `Set-Cookie` headers:
    - `__NEXT_DATA__` → Next.js
@@ -147,6 +149,7 @@ Log the result: `Framework: WordPress 6.5 (source: wp-content/ in HTML + generat
 - Rails: `grep -oP '@hotwired/turbo@\K[^"]*'` from importmap block
 - Shopify: `window.Shopify.theme.name` via JS eval in Phase 11
 - Django / FastAPI: version not exposed in production headers
+- Zend Framework 1: check error page stack traces for `/library/Zend/Version.php` path; probe `{site}/library/Zend/Version.php` for `VERSION` constant; otherwise version unknown
 
 ## Phase 4 — Tech pack lookup
 
