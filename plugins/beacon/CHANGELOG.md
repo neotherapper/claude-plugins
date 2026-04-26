@@ -7,6 +7,18 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.1] — 2026-04-26
+
+### Added
+
+- Tech pack: `technologies/zend-framework/1.x.md` — Zend Framework 1.x (EOL legacy)
+  - 10-section pack covering fingerprinting, MVC route surface, config file exposure,
+    Zend_Auth patterns, XML-RPC introspection, and ZF1-specific gotchas
+  - Phase 3 SKILL.md updated with ZF1 HTML/error-page fingerprinting signals
+  - Session-start hook updated to advertise Zend Framework 1 in tech pack list
+
+---
+
 ## [0.6.0] — 2026-04-15
 
 ### Added
