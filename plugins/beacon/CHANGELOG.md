@@ -39,6 +39,18 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.3] — 2026-04-27
+
+### Added
+
+- Tech pack: `technologies/aspnet/webforms-mvc.md` — ASP.NET WebForms & MVC
+  - 10-section pack: `__VIEWSTATE`/`__EVENTVALIDATION` WebForms fingerprints, `.axd` endpoint
+    probes, anti-forgery token acquisition, ViewState POST pattern, ELMAH/trace.axd exposure
+    check, ASP.NET Web API detection, SignalR detection, 10 gotchas
+  - Session-start hook updated to advertise ASP.NET in tech pack list
+
+---
+
 ## [0.6.1] — 2026-04-26
 
 ### Added
