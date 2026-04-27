@@ -101,6 +101,16 @@ Write docs/research/${SLUG}/constants.md    ← empty string
 Then check every tool in the tool availability matrix and log results in the session brief.
 See `references/tool-availability.md` for exact detection commands.
 
+**AI crawler check order (log each as AVAILABLE or TOOL-UNAVAILABLE):**
+1. Firecrawl MCP — `firecrawl_scrape` in tool list
+2. Spider MCP — `spider_scrape` or `spider_crawl` in tool list; or `SPIDER_API_KEY` env var set
+3. Scrapfly — `SCRAPFLY_API_KEY` env var set (specialist for DataDome/PerimeterX)
+4. Jina Reader — `curl -s -o /dev/null -w "%{http_code}" https://r.jina.ai/https://httpbin.org/get` returns 200
+5. Crawl4AI — `python3 -c "import crawl4ai"` exits 0
+6. Steel — `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health` returns 200; or `STEEL_API_KEY` env var
+
+Jina Reader is almost always available (no install, free tier). Log `[AVAILABLE:jina-reader]` if the probe returns 200.
+
 **Chrome MCP namespace:** In Phase 1, test BOTH Chrome MCP namespaces and record which works:
 - Try `mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_pages` first (plugin-level)
 - Fall back to `mcp__chrome-devtools__list_pages` (project-level)
@@ -229,14 +239,37 @@ If not found: continue — Phase 12 will scaffold a spec from all discovered end
 
 ## Bot protection handling
 
-When curl probes return 403 from Cloudflare (or similar):
+When curl probes return 403 from Cloudflare (or similar), escalate through this chain:
 
-1. **Identify immediately** — if Phase 2 `GET /robots.txt` returns 403, the site is curl-blocked
-2. **Pivot to browser fetch** — all subsequent HTTP probes must use `evaluate_script` with a `fetch()` call from within a page already loaded on the target domain (which has CF clearance)
-3. **For CORS-blocked probes** — fetch calls from page context to same-origin paths work; cross-origin probes return `{status: 0, type: "opaqueredirect"}` — log as `[CORS-OPAQUE:{path}]` and treat as "route exists but CORS-blocked"
-4. **Cloudflare Turnstile** — if a category/product page triggers a Turnstile challenge, the CDP `click` on the verify checkbox always times out. Use an existing-session browser (cmux with an open session) rather than a fresh CDP page. Log `[CF-TURNSTILE-BLOCKED:{url}]`
+**First, identify the WAF** — check response headers before choosing bypass:
+- `cf-ray` header → Cloudflare
+- `x-datadome-*` or `{"type":"DataDome"}` body → DataDome
+- `_px*` cookies → PerimeterX
+- `AkamaiGHost` in `Server` header → Akamai
 
-Log all curl 403s as `[CF-BLOCKED:curl]` and all browser pivots as `[CF-PIVOT:browser-fetch]`.
+Then escalate through the appropriate chain:
+
+**Step 1 — Firecrawl** (if MCP available): `firecrawl_scrape(url, formats=["markdown"])` — bypasses most Cloudflare configs. Log `[CF-PIVOT:firecrawl]`.
+
+**Step 2 — Spider** (if API key available): rotates fingerprints per request — effective against Cloudflare and Akamai. Log `[CF-PIVOT:spider]`.
+
+**Step 3 — Scrapfly** (if API key available, `asp=true`): **specialist for DataDome/PerimeterX** — 98% bypass rate on those WAFs. `curl "https://api.scrapfly.io/scrape?key={KEY}&url={url}&asp=true"`. Log `[CF-PIVOT:scrapfly]`.
+
+**Step 4 — Jina Reader** (always available, no install):
+```bash
+curl -s "https://r.jina.ai/{target_url}"
+```
+Returns clean markdown when curl 403s. Works for content pages; less effective on API endpoints. Log `[CF-PIVOT:jina]`.
+
+**Step 5 — Browser fetch**: use `evaluate_script` with `fetch()` from within a same-domain page. Log `[CF-PIVOT:browser-fetch]`.
+
+**Step 6 — Give up on that probe**: log `[CF-BLOCKED:all]` and move on. Do not loop.
+
+**Identification:** if Phase 2 `GET /robots.txt` returns 403, the site is curl-blocked — start Firecrawl/Jina immediately for all Phase 2–9 probes.
+
+**CORS-blocked probes:** browser fetch from same-origin page context works for same-domain paths. Cross-origin fetch returns `{status:0, type:"opaqueredirect"}` — log `[CORS-OPAQUE:{path}]`.
+
+**Cloudflare Turnstile:** CDP `click` on the verify checkbox always times out. Use cmux with existing CF-cleared session. Log `[CF-TURNSTILE-BLOCKED:{url}]`.
 
 ## E-commerce probe list (Phase 5 supplement)
 
@@ -340,6 +373,12 @@ Log these in the session brief and repeat in the generated INDEX.md:
 | `[TECH-PACK-LATE-LOAD:{framework}:{version}:phase={N}]` | Tech pack loaded after late framework discovery |
 | `[PHASE-GATE:P{N} missing — running now]` | Phase completion gate triggered a missed phase |
 | `[TOOL-UNAVAILABLE:gau:aliased]` | `gau` is aliased to another command; URL extractor unavailable |
+| `[AVAILABLE:jina-reader]` | Jina Reader reachable; used as curl fallback |
+| `[CF-PIVOT:firecrawl]` | Cloudflare blocked curl; Firecrawl used instead |
+| `[CF-PIVOT:spider]` | WAF blocked curl; Spider used (fingerprint rotation) |
+| `[CF-PIVOT:scrapfly]` | DataDome/PerimeterX blocked; Scrapfly asp=true used |
+| `[CF-PIVOT:jina]` | WAF blocked curl; Jina Reader used instead |
+| `[CF-BLOCKED:all]` | All probe methods (curl, Firecrawl, Spider, Scrapfly, Jina) blocked |
 
 ## Phase 11 — cmux usage guide
 
