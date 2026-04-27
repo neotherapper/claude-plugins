@@ -7,6 +7,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.5] — 2026-04-28
+
+### Added
+
+- Tech pack: `technologies/bigcommerce/current.md` (233 lines) — Storefront GraphQL via `window.BCData.gql_token`, store hash extraction from CDN URL, Management API v3 at `api.bigcommerce.com`, Stencil theme fingerprinting, 19 probe items
+- Tech pack: `technologies/opencart/3.x.md` (315 lines) — `route=extension/feed/google_base` product XML, REST API with `api/login` token, correct `extension/` route prefix (verified against OC 3.0.5.0 source), 14 probe items
+- Tech pack: `technologies/sfcc/current.md` (269 lines) — dual SCAPI (Shopper API, OAuth 2.1/SLAS) and OCAPI (legacy) coverage, `demandware.net` + `dw_*` cookie fingerprinting, PWA Kit headless pattern, 11 probe items
+- Tech pack: `technologies/saleor/current.md` (226 lines) — single `/graphql/` endpoint, channel-scoped product queries, Relay pagination, `tokenCreate` customer auth mutation, 11 probe items
+- Tech pack: `technologies/medusa/2.x.md` (181 lines) — v2 auth at `/auth/customer/emailpass` (corrected from v1 `/store/auth/token`), `NEXT_PUBLIC_MEDUSA_BACKEND_URL` extraction, publishable API key from page source, 11 probe items
+- Tech pack: `technologies/wix/current.md` (196 lines) — `/_api/wix-ecommerce-reader/v1/catalog/products/query` internal API, dual XSRF token requirement, `metaSiteId` extraction, 11 probe items
+- Tech pack: `technologies/squarespace/current.md` (230 lines) — `?format=json` suffix works on any page (richest unauthenticated technique), `sqs-*` CSS class fingerprinting, `crumb` CSRF extraction, 12 probe items
+- Tech pack: `technologies/ecwid/current.md` (165 lines) — store ID from script tag → fully public products + categories API at `app.ecwid.com`, no auth required, 9 probe items
+- Session-start hook updated to advertise all 8 new tech packs
+
+---
+
 ## [0.6.4] — 2026-04-28
 
 ### Added
