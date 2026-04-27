@@ -49,6 +49,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
     check, ASP.NET Web API detection, SignalR detection, 10 gotchas
   - Session-start hook updated to advertise ASP.NET in tech pack list
 
+### Fixed
+
+- `references/tool-availability.md`: gau alias detection — output-checking validation replaces
+  `which gau` to detect git alias; Chrome MCP now documents both plugin-level and project-level
+  namespaces with stale CDP connection recovery instructions
+- `references/browser-recon.md`: new Cloudflare/bot protection section covering cf-ray detection,
+  same-origin browser fetch() pivot strategy, Turnstile limitation; cmux commands corrected
+  from real session failures (--load-state removed, --surface flag required, get html selector
+  requirement documented)
+
+### Changed
+
+- Eval workspace: `skills/site-recon-workspace/` created with old-skill-snapshot (v0.5.0 baseline),
+  4 eval test cases, iteration-1 results showing with-skill improvements over baseline
+- Plugin version bumped to 0.6.3
+
 ---
 
 ## [0.6.1] — 2026-04-26
