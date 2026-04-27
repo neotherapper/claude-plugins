@@ -1,0 +1,69 @@
+{
+  "eval_id": 3,
+  "eval_name": "phase-completion-gate",
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "Session brief contains phase markers for all 12 phases",
+      "passed": true,
+      "evidence": "session-brief.md Phase Completion Markers section shows [P1✓] through [P11✓] explicitly, with Phase 12 documented in Phase Details section as 'Phase 12: Output Synthesis — All files written to docs/research/jsonplaceholder-typicode-com/'. All 12 phases have explicit markers or completion documentation."
+    },
+    {
+      "text": "Phase 12 runs only after P1-P11 markers are present",
+      "passed": true,
+      "evidence": "session-brief.md shows Phase Completion Markers section with all [P1✓]-[P11✓] listed sequentially before the Phase Details section which documents Phase 12 output. The ordering is structurally correct — P11 is marked complete before P12 documentation appears."
+    },
+    {
+      "text": "INDEX.md created",
+      "passed": true,
+      "evidence": "outputs/docs/research/jsonplaceholder-typicode-com/INDEX.md exists and is 1362 bytes — substantive content, not empty."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "total_steps": 12,
+    "errors_encountered": 0,
+    "output_chars": 1362,
+    "transcript_chars": 3200
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "grader_duration_seconds": 0.0,
+    "total_duration_seconds": 0.0
+  },
+  "claims": [
+    {
+      "claim": "typicode/jsonplaceholder has 5220 GitHub stars",
+      "type": "factual",
+      "verified": false,
+      "evidence": "session-brief.md states this in Phase 9 OSINT but cannot be verified from the static output files."
+    },
+    {
+      "claim": "Tech pack unavailable for Express",
+      "type": "process",
+      "verified": true,
+      "evidence": "session-brief.md logs '[TECH-PACK-UNAVAILABLE:express:unknown]' in Phase 4 and in the Graceful Degradation Log — consistent with P4 being completed (not skipped) with a graceful degradation signal."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Phase 12 runs only after P1-P11 markers are present",
+        "reason": "This assertion can only be verified from the session brief ordering, which is authored by the executor itself. A skill that writes P1-P11 markers at the end then runs P12 would still pass. Consider adding a timestamp or step-counter assertion to enforce actual ordering."
+      }
+    ],
+    "overall": "Assertions are solid for detecting the phase-skipping regression. The completion gate check is meaningful but relies on session-brief ordering, which could theoretically be gamed."
+  }
+}

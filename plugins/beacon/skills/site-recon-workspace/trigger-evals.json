@@ -1,0 +1,20 @@
+[
+  {"query": "analyse https://www.jetpens.com — i want to find all the product APIs they have", "should_trigger": true},
+  {"query": "map the api surface of https://penchalet.com — it sells fountain pens", "should_trigger": true},
+  {"query": "research https://woocommerce-demo.com and document how to pull product data from it", "should_trigger": true},
+  {"query": "what endpoints does https://demo.opencart.com expose for products and cart?", "should_trigger": true},
+  {"query": "use beacon to check out https://httpbin.org", "should_trigger": true},
+  {"query": "find all the APIs on https://shop.example.com — i need to know if it has a product JSON endpoint", "should_trigger": true},
+  {"query": "check this site for me https://somestore.com, what can i extract programmatically?", "should_trigger": true},
+  {"query": "/beacon:analyze https://example.com", "should_trigger": true},
+  {"query": "how do i authenticate with the jetpens API we found last week", "should_trigger": false},
+  {"query": "write me a python script to fetch products from /wp-json/wc/v3/products", "should_trigger": false},
+  {"query": "explain how woocommerce auth works with consumer keys", "should_trigger": false},
+  {"query": "tell me about the penchalet research we did before", "should_trigger": false},
+  {"query": "fix the bug in my site scraper where the requests are getting 403", "should_trigger": false},
+  {"query": "what is the difference between REST API v2 and v3 in woocommerce", "should_trigger": false},
+  {"query": "add error handling to this fetch call", "should_trigger": false},
+  {"query": "i want to load the existing research for jetpens.com", "should_trigger": false},
+  {"query": "site-intel: what APIs does the jetpens site have", "should_trigger": false},
+  {"query": "can you debug why my magento graphql query is returning null", "should_trigger": false}
+]

@@ -7,6 +7,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.4] — 2026-04-28
+
+### Added
+
+- Tech pack: `technologies/prestashop/8.x.md` — PrestaShop 8.x
+  - 10-section pack: `PrestaShop-{hash}` cookie + `window.prestashop` JS global fingerprinting,
+    Web Services API (`/api/`), front-office AJAX controllers (always active, no key), PS 8.1+
+    API Platform (`/api/v2/`), cart AJAX POST-body pattern, 12 module detections, 11 gotchas
+  - Covers both Web Services API (XML/JSON, key-gated) and unauthenticated front-office endpoints
+  - Session-start hook updated to advertise PrestaShop in tech pack list
+
+---
+
 ## [0.6.2] — 2026-04-27
 
 ### Added

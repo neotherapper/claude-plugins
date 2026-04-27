@@ -1,0 +1,339 @@
+{
+  "metadata": {
+    "skill_name": "site-recon",
+    "skill_path": "plugins/beacon/skills/site-recon",
+    "executor_model": "claude-sonnet-4-6",
+    "analyzer_model": "claude-sonnet-4-6",
+    "timestamp": "2026-04-27T00:00:00Z",
+    "evals_run": [1, 2, 3, 4],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "scaffold-no-touch",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Phase 1 creates files with Write tool, not touch command",
+          "passed": true,
+          "evidence": "session-brief.md states 'Created scaffold files using Write (NOT touch)' and 'Scaffold Method: Write (not touch) ✓'. No touch command found in outputs."
+        },
+        {
+          "text": "docs/research directory created with correct slug",
+          "passed": true,
+          "evidence": "outputs/docs/research/httpbin-org/ directory exists with correct slug."
+        },
+        {
+          "text": "INDEX.md created and non-empty",
+          "passed": true,
+          "evidence": "outputs/docs/research/httpbin-org/INDEX.md is 1272 bytes with full content including summary table and API reference."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "scaffold-no-touch",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.0,
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Phase 1 creates files with Write tool, not touch command",
+          "passed": false,
+          "evidence": "session-brief.md shows explicit bash touch command: 'touch docs/research/${SLUG}/{INDEX,tech-stack,site-map,constants}.md'. Files confirmed 0 bytes."
+        },
+        {
+          "text": "docs/research directory created with correct slug",
+          "passed": false,
+          "evidence": "No outputs/docs/research/httpbin-org/ path exists. Files placed at outputs/httpbin-org/ and outputs/ root — incorrect structure."
+        },
+        {
+          "text": "INDEX.md created and non-empty",
+          "passed": false,
+          "evidence": "outputs/httpbin-org/INDEX.md is 0 bytes (touch-created). The non-empty INDEX.md at outputs/ root is at the wrong path."
+        }
+      ],
+      "notes": ["Old skill uses touch for Phase 1 scaffold — creates 0-byte placeholders instead of Write-created files"]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "ecommerce-probe-list",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "WooCommerce tech pack loaded",
+          "passed": true,
+          "evidence": "session-brief.md shows '[LOADED:woocommerce:10.x]' sourced from wcAnalytics.woo_version JS global (version 10.7.0-rc.1)."
+        },
+        {
+          "text": "At least one of /wp-json/wc/store/v1/products or /wp-json/wc/v3/products probed",
+          "passed": true,
+          "evidence": "Both endpoints probed: store/v1/products (working) and wc/v3/products (401 auth required). wc-ajax fragment endpoint also probed."
+        },
+        {
+          "text": "api-surfaces/ directory contains at least one file",
+          "passed": true,
+          "evidence": "outputs/docs/research/woocommerce-com-woocommerce-demo/api-surfaces/woocommerce-store-api.md exists."
+        }
+      ],
+      "notes": ["/woocommerce-demo/ returned 404 — analysis ran on main woocommerce.com marketplace site instead"]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "ecommerce-probe-list",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "WooCommerce tech pack loaded",
+          "passed": true,
+          "evidence": "session-brief.md shows '[LOADED:woocommerce:9.x]'. Tech pack loaded (version 9.x vs actual 10.7.0-rc.1 — version detection mismatch)."
+        },
+        {
+          "text": "At least one of /wp-json/wc/store/v1/products or /wp-json/wc/v3/products probed",
+          "passed": true,
+          "evidence": "Both endpoints probed: wc/v3/products (401) and store/v1/products (200, products listed). wc-ajax also probed."
+        },
+        {
+          "text": "api-surfaces/ directory contains at least one file",
+          "passed": true,
+          "evidence": "outputs/docs/research/woocommerce-com/api-surfaces/woocommerce-store-api.md exists."
+        }
+      ],
+      "notes": ["WooCommerce version detected as 9.x but actual site runs 10.7.0-rc.1 — version detection mismatch not caught by eval assertions"]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "phase-completion-gate",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Session brief contains phase markers for all 12 phases",
+          "passed": true,
+          "evidence": "session-brief.md shows [P1✓] through [P11✓] explicitly with Phase 12 output synthesis documented. All 12 phases present with completion markers."
+        },
+        {
+          "text": "Phase 12 runs only after P1-P11 markers are present",
+          "passed": true,
+          "evidence": "Phase Completion Markers section lists P1-P11 before Phase Details section documents Phase 12 output. Correct ordering."
+        },
+        {
+          "text": "INDEX.md created",
+          "passed": true,
+          "evidence": "outputs/docs/research/jsonplaceholder-typicode-com/INDEX.md exists, 1362 bytes with substantive content."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "phase-completion-gate",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.33,
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Session brief contains phase markers for all 12 phases",
+          "passed": false,
+          "evidence": "P4, P9, P10, P11 show 'SKIPPED' section headers with no [P*✓] markers. Four phases have no completion markers."
+        },
+        {
+          "text": "Phase 12 runs only after P1-P11 markers are present",
+          "passed": false,
+          "evidence": "Phase 12 documentation appears despite P4/P9/P10/P11 having no completion markers. Precondition not enforced."
+        },
+        {
+          "text": "INDEX.md created",
+          "passed": true,
+          "evidence": "outputs/docs/research/jsonplaceholder-typicode-com/INDEX.md exists, 2805 bytes."
+        }
+      ],
+      "notes": ["P4 SKIPPED (tech pack not needed), P9 SKIPPED (OSINT not needed), P10 SKIPPED (Browse Plan — no browser), P11 SKIPPED (Active Browse — no browser). Old skill skips phases instead of logging graceful degradation signals."]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "late-tech-pack-trigger",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.67,
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "WordPress tech pack loaded",
+          "passed": true,
+          "evidence": "SESSION-BRIEF.md shows '[TECH-PACK-LATE-LOAD:wordpress:7.x:phase=6]' and '[LOADED:wordpress:6.x] (fallback)'. Tech pack loaded via late discovery."
+        },
+        {
+          "text": "Framework detected from feed or HTTP signals, not just HTML",
+          "passed": true,
+          "evidence": "Framework detected from Atom feed <generator> tag containing 'v=7.1-alpha-62259'. INDEX.md confirms 'Detection Source: Atom feed generator tag (late discovery)'."
+        },
+        {
+          "text": "tech-stack.md documents the discovery source",
+          "passed": false,
+          "evidence": "outputs/docs/research/wordpress-org-news/tech-stack.md is the generic WordPress tech pack template with no site-specific discovery source information. Discovery source documented in INDEX.md and SESSION-BRIEF.md instead."
+        }
+      ],
+      "notes": ["7.x tech pack unavailable — 6.x loaded as fallback. Discovery source correctly in INDEX.md but missing from tech-stack.md."]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "late-tech-pack-trigger",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.33,
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "WordPress tech pack loaded",
+          "passed": false,
+          "evidence": "session-brief.md: 'Status: NOT LOADED'. '[TECH-PACK-NOT-LOADED:wordpress:7.1-alpha]'. Phase 4 was never reached because Phase 3 returned [FRAMEWORK-UNKNOWN] for feed URL."
+        },
+        {
+          "text": "Framework detected from feed or HTTP signals, not just HTML",
+          "passed": true,
+          "evidence": "Phase 6 documents: '<generator>https://wordpress.org/?v=7.1-alpha-62259</generator> in RSS feed' as framework discovery source. tech-stack.md documents 'Source: generator tag in feed XML'. Detection happened; no action was taken on it."
+        },
+        {
+          "text": "tech-stack.md documents the discovery source",
+          "passed": true,
+          "evidence": "outputs/docs/research/wordpress-org-news-feed/tech-stack.md has detailed 'Framework Detection Notes (OLD SKILL BEHAVIOR)' section documenting the Phase 3 miss, Phase 6 generator tag discovery, and why no tech pack was loaded. Source documented more completely than with_skill."
+        }
+      ],
+      "notes": ["Irony: old_skill's tech-stack.md documents the discovery source more completely than with_skill's, despite failing to act on that discovery. No late-tech-pack-trigger mechanism in old skill v0.5.0."]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.9175,
+        "stddev": 0.1722,
+        "min": 0.67,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "tokens": {
+        "mean": 0,
+        "stddev": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "old_skill": {
+      "pass_rate": {
+        "mean": 0.415,
+        "stddev": 0.3596,
+        "min": 0.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "tokens": {
+        "mean": 0,
+        "stddev": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.50",
+      "time_seconds": "+0.0",
+      "tokens": "+0"
+    }
+  },
+  "notes": [
+    "Eval 2 (ecommerce-probe-list) passes for both configurations — does not differentiate skill versions. Old skill loads wrong WooCommerce version (9.x vs actual 10.x) but no assertion checks version accuracy.",
+    "Eval 4 (late-tech-pack-trigger) reveals an unexpected result: old_skill's tech-stack.md documents the discovery source more thoroughly than with_skill's. The assertion passes for old_skill and fails for with_skill on assertion 3.",
+    "with_skill delivers the core feature improvements (Write tool scaffold, all-phase completion markers, late tech pack trigger) with a 50-point pass rate advantage (+0.50 mean pass rate delta).",
+    "Timing data not available — placeholder zeros used. Token counts unavailable as runs were not instrumented.",
+    "runs_per_configuration is 1 — stddev values reflect eval-to-eval variance, not run-to-run variance. A proper benchmark would use 3+ runs per eval per configuration."
+  ]
+}

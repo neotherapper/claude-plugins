@@ -1,0 +1,68 @@
+{
+  "eval_id": 2,
+  "eval_name": "ecommerce-probe-list",
+  "run_type": "old_skill",
+  "expectations": [
+    {
+      "text": "WooCommerce tech pack loaded",
+      "passed": true,
+      "evidence": "old_skill session-brief.md shows '[LOADED:woocommerce:9.x] — from plugins/beacon/technologies/woocommerce/9.x.md'. The tech pack was loaded (version 9.x, not 10.x as detected by with_skill)."
+    },
+    {
+      "text": "At least one of /wp-json/wc/store/v1/products or /wp-json/wc/v3/products probed",
+      "passed": true,
+      "evidence": "old_skill session-brief.md endpoint table shows both '/wp-json/wc/v3/products' (Consumer Key, 401) and '/wp-json/wc/store/v1/products' (200, 100 products). Both WooCommerce API surfaces were probed."
+    },
+    {
+      "text": "api-surfaces/ directory contains at least one file",
+      "passed": true,
+      "evidence": "outputs/docs/research/woocommerce-com/api-surfaces/woocommerce-store-api.md exists. File present in directory listing."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "total_steps": 12,
+    "errors_encountered": 0,
+    "output_chars": 3100,
+    "transcript_chars": 2700
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "grader_duration_seconds": 0.0,
+    "total_duration_seconds": 0.0
+  },
+  "claims": [
+    {
+      "claim": "WooCommerce version is 9.x",
+      "type": "factual",
+      "verified": false,
+      "evidence": "old_skill loaded woocommerce:9.x but with_skill detected WooCommerce 10.7.0-rc.1 from the wcAnalytics JS global on the same target. The 9.x load appears to be a tech pack version mismatch — the old skill may have detected an incorrect or outdated version."
+    },
+    {
+      "claim": "100 products returned from /wp-json/wc/store/v1/products",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Session brief states '200 - 100 products' but this cannot be independently verified from output files. with_skill reports 5 products from the same endpoint, suggesting the 100 number may be inaccurate or reflect pagination."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": ["Version discrepancy: old_skill reports WooCommerce 9.x while with_skill detects 10.7.0-rc.1 from the same site"],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "Both with_skill and old_skill pass all 3 assertions despite loading different WooCommerce versions (10.x vs 9.x). The eval does not check version accuracy. Adding an assertion like 'tech pack version matches detected wcAnalytics.woo_version' would make this eval discriminating enough to catch the version detection gap."
+      }
+    ],
+    "overall": "This eval passes for old_skill, meaning it does not differentiate the two skill versions on e-commerce probe quality. The version detection gap (9.x vs 10.x) is a meaningful behavioral difference that goes completely unchecked."
+  }
+}

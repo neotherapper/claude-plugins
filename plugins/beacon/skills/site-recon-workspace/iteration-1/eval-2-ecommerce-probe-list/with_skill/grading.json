@@ -1,0 +1,78 @@
+{
+  "eval_id": 2,
+  "eval_name": "ecommerce-probe-list",
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "WooCommerce tech pack loaded",
+      "passed": true,
+      "evidence": "session-brief.md shows '[LOADED:woocommerce:10.x] - from wcAnalytics JS global, version: 10.7.0-rc.1'. eval-report.md confirms 'Tech Pack ID: LOADED:woocommerce:10.x'. The tech pack load is substantiated by the detection source (wcAnalytics.woo_version JS global)."
+    },
+    {
+      "text": "At least one of /wp-json/wc/store/v1/products or /wp-json/wc/v3/products probed",
+      "passed": true,
+      "evidence": "session-brief.md endpoint table shows both '/wp-json/wc/store/v1/products' (GET, None auth, Phase 5, 'Product listing - working') and '/wp-json/wc/v3/products' (GET, 401 auth required, Phase 5). eval-report.md confirms store/v1/products 'returned 5 products' and wc/v3/products returned 401."
+    },
+    {
+      "text": "api-surfaces/ directory contains at least one file",
+      "passed": true,
+      "evidence": "outputs/docs/research/woocommerce-com-woocommerce-demo/api-surfaces/woocommerce-store-api.md exists. File is present in the directory listing."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "total_steps": 12,
+    "errors_encountered": 0,
+    "output_chars": 3200,
+    "transcript_chars": 2800
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "grader_duration_seconds": 0.0,
+    "total_duration_seconds": 0.0
+  },
+  "claims": [
+    {
+      "claim": "WooCommerce version is 10.7.0-rc.1",
+      "type": "factual",
+      "verified": true,
+      "evidence": "session-brief.md states 'WordPress 6.9.4 + WooCommerce 10.7.0-rc.1' sourced from wcAnalytics.woo_version JS global — a reliable in-page signal."
+    },
+    {
+      "claim": "/woocommerce-demo/ returns 404, so target is actually the main WooCommerce.com site",
+      "type": "factual",
+      "verified": true,
+      "evidence": "session-brief.md Note and eval-report.md both state the /woocommerce-demo/ path returns 404 and the actual analysis was of woocommerce.com marketplace. The slug 'woocommerce-com-woocommerce-demo' reflects the attempted target path."
+    },
+    {
+      "claim": "wc-ajax endpoint probed",
+      "type": "process",
+      "verified": true,
+      "evidence": "session-brief.md endpoint table includes '/?wc-ajax=get_refreshed_fragments' returning 'Cart fragments - working' in Phase 5."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": ["The /woocommerce-demo/ 404 means the eval prompt's target URL redirected to the main site — the WooCommerce version detected (10.x) may differ from what would be on an actual demo store if one existed."],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "api-surfaces/ directory contains at least one file",
+        "reason": "This assertion only checks existence, not content. A 0-byte woocommerce-store-api.md would still pass. Consider asserting that the file documents at least one endpoint with HTTP method, path, and auth requirement."
+      },
+      {
+        "reason": "No assertion checks that wc-ajax endpoints were probed (only /wp-json routes). The wc-ajax=get_refreshed_fragments endpoint is a distinct WooCommerce surface that an old skill might miss — it would be worth adding as an assertion."
+      }
+    ],
+    "overall": "The three assertions effectively catch tech pack loading and API probing. Adding content-depth verification for api-surfaces/ would strengthen the eval."
+  }
+}

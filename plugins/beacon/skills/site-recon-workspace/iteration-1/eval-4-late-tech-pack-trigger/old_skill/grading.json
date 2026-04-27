@@ -1,0 +1,69 @@
+{
+  "eval_id": 4,
+  "eval_name": "late-tech-pack-trigger",
+  "run_type": "old_skill",
+  "expectations": [
+    {
+      "text": "WordPress tech pack loaded",
+      "passed": false,
+      "evidence": "old_skill session-brief.md explicitly states under Tech Pack: 'Status: NOT LOADED (this is the eval result being measured)' and logs '[TECH-PACK-NOT-LOADED:wordpress:7.1-alpha] — Phase 4 was never reached'. The EVAL-4 BASELINE RESULT section confirms 'WordPress tech pack loaded? NO'. No LOADED:wordpress:* signal appears anywhere in the old_skill outputs."
+    },
+    {
+      "text": "Framework detected from feed or HTTP signals, not just HTML",
+      "passed": true,
+      "evidence": "old_skill session-brief.md Phase 6 documents: 'Framework discovered here: <generator>https://wordpress.org/?v=7.1-alpha-62259</generator> in RSS feed'. The framework WAS detected from the feed generator tag (a non-HTML XML signal) in Phase 6 — the detection happened, but no late re-trigger mechanism exists to act on it. tech-stack.md also documents 'Framework: WordPress, Source: generator tag in feed XML'. The detection itself passed; the failure is that no action was taken on the discovery."
+    },
+    {
+      "text": "tech-stack.md documents the discovery source",
+      "passed": true,
+      "evidence": "old_skill outputs/docs/research/wordpress-org-news-feed/tech-stack.md explicitly documents: 'Framework: WordPress, Source: generator tag in feed XML (v=7.1-alpha-62259)' in its property table, and includes a detailed 'Framework Detection Notes (OLD SKILL BEHAVIOR)' section explaining the Phase 3 miss and Phase 6 discovery. This is the most complete discovery-source documentation of either run."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 2,
+    "total": 3,
+    "pass_rate": 0.33
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "total_steps": 12,
+    "errors_encountered": 0,
+    "output_chars": 2783,
+    "transcript_chars": 4200
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "grader_duration_seconds": 0.0,
+    "total_duration_seconds": 0.0
+  },
+  "claims": [
+    {
+      "claim": "Phase 4 was never reached because Phase 3 returned FRAMEWORK-UNKNOWN",
+      "type": "process",
+      "verified": true,
+      "evidence": "session-brief.md Phase 4 section: 'NOT EXECUTED. OLD skill: Once framework and major version are known — since Phase 3 returned [FRAMEWORK-UNKNOWN], Phase 4 was skipped entirely.' This is the root cause of the tech-pack-not-loaded failure."
+    },
+    {
+      "claim": "No late-tech-pack-trigger mechanism in old skill",
+      "type": "process",
+      "verified": true,
+      "evidence": "session-brief.md Phase 6: 'But no re-trigger: OLD skill v0.5.0 does not have a late-tech-pack-trigger mechanism. Phase 4 has already been skipped. The framework is now known but Phase 4 cannot be re-entered.' EVAL-4 BASELINE RESULT confirms 'Phase 4 re-triggered? NO'."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "WordPress tech pack loaded",
+        "reason": "This is the most discriminating assertion in the eval and it correctly FAILS for old_skill. Consider adding a second variant: 'TECH-PACK-LATE-LOAD signal logged' to separately test that the skill emits the canonical log entry, not just that a pack is loaded. The with_skill emits this signal; the old_skill does not. This would add a fourth assertion with clear pass/fail differentiation."
+      }
+    ],
+    "overall": "Assertions effectively identify the late-tech-pack-trigger regression. Interestingly, old_skill passes assertion 3 (tech-stack.md documents discovery source) better than with_skill — a documentation irony worth noting."
+  }
+}

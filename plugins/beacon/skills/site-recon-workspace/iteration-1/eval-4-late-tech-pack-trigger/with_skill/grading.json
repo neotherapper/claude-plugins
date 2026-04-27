@@ -1,0 +1,69 @@
+{
+  "eval_id": 4,
+  "eval_name": "late-tech-pack-trigger",
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "WordPress tech pack loaded",
+      "passed": true,
+      "evidence": "SESSION-BRIEF.md shows '[TECH-PACK-LATE-LOAD:wordpress:7.x:phase=6]' and '[LOADED:wordpress:6.x] (fallback - 7.x unavailable)'. The WordPress tech pack was loaded (6.x as fallback since 7.x is not in the plugin repo). INDEX.md confirms 'Tech pack loaded via late discovery in Phase 6 from feed generator tag'."
+    },
+    {
+      "text": "Framework detected from feed or HTTP signals, not just HTML",
+      "passed": true,
+      "evidence": "SESSION-BRIEF.md Phase 3 notes 'Generator: https://wordpress.org/?v=7.1-alpha-62259 / Extracted: WordPress 7.1-alpha / Confidence: DEFINITIVE (generator tag is authoritative)'. The framework was detected from the Atom feed's <generator> tag — a non-HTML XML signal. INDEX.md Framework table shows 'Detection Source: Atom feed generator tag (late discovery)'."
+    },
+    {
+      "text": "tech-stack.md documents the discovery source",
+      "passed": false,
+      "evidence": "outputs/docs/research/wordpress-org-news/tech-stack.md contains the generic WordPress tech pack template (frontmatter: name=wordpress, version=6.x, title '# WordPress Tech Pack') with generic API surface documentation. It does not mention the Atom feed generator tag, the late load trigger, WordPress 7.1-alpha, or the discovery source at all. The discovery source is documented in INDEX.md and SESSION-BRIEF.md instead."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.67
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "total_steps": 12,
+    "errors_encountered": 0,
+    "output_chars": 2850,
+    "transcript_chars": 3400
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "grader_duration_seconds": 0.0,
+    "total_duration_seconds": 0.0
+  },
+  "claims": [
+    {
+      "claim": "WordPress 7.1-alpha detected via generator tag",
+      "type": "factual",
+      "verified": true,
+      "evidence": "SESSION-BRIEF.md Phase 3 shows generator tag URL containing 'v=7.1-alpha-62259'. INDEX.md confirms 'Framework: WordPress 7.1-alpha' with detection source 'Atom feed generator tag'."
+    },
+    {
+      "claim": "Phase 4 re-triggered after Phase 6 discovery",
+      "type": "process",
+      "verified": true,
+      "evidence": "SESSION-BRIEF.md Phase 4 section states 'Tech pack lookup (late discovery triggered)' and Phase 6 section confirms 'Triggered re-run of Phase 4 (late discovery rule)'. The [TECH-PACK-LATE-LOAD:wordpress:7.x:phase=6] log entry is the canonical signal."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": ["7.x tech pack not available — 6.x loaded as fallback. Discovery was accurate but pack version is one major version behind."],
+    "needs_review": [],
+    "workarounds": ["Fell back to wordpress/6.x.md since 7.x does not exist in plugin tech pack repository"]
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "tech-stack.md documents the discovery source",
+        "reason": "The assertion targets tech-stack.md but the skill placed discovery source information in INDEX.md instead. The assertion is reasonable — tech-stack.md is the most logical file for discovery provenance — but since the eval passed the more important assertions (tech pack loaded, framework detected from feed), consider clarifying whether the intent is 'any output file documents the source' or specifically 'tech-stack.md'. The current failure is a documentation placement issue, not a functional failure."
+      }
+    ],
+    "overall": "The two passing assertions confirm the core late-tech-pack-trigger feature works. The failing assertion highlights a documentation gap: discovery provenance should be in tech-stack.md but ended up in INDEX.md."
+  }
+}

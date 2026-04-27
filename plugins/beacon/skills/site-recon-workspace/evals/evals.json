@@ -12,8 +12,14 @@
     {
       "id": 2,
       "eval_name": "ecommerce-probe-list",
-      "prompt": "Research https://woocommerce.com/woocommerce-demo — it's a WooCommerce demo store. Map all available product APIs and cart endpoints. Run all 12 phases and document what you find.",
-      "expected_output": "WooCommerce tech pack loaded (LOADED:woocommerce:9.x in session brief). E-commerce probe list applied: /wp-json/wc/store/v1/products, /wp-json/wc/v3/products, and wc-ajax endpoints probed. INDEX.md and api-surfaces/ created.",
+      "prompt": "Research https://woocommerce.com/woocommerce-demo — it's a WooCommerce demo store. Map all available product APIs and cart endpoints. Run all 12 phases and document what you find. Make sure to detect the actual WooCommerce version from wcAnalytics.woo_version or the generator meta tag and load the matching tech pack version.",
+      "expected_output": "WooCommerce tech pack loaded at the correct detected version (not just defaulting to 9.x if the site runs a newer version). E-commerce probe list applied: /wp-json/wc/store/v1/products, /wp-json/wc/v3/products, and wc-ajax endpoints probed. tech-stack.md records the actual WooCommerce version from the site. INDEX.md and api-surfaces/ created.",
+      "assertions": [
+        {"text": "WooCommerce tech pack loaded (LOADED:woocommerce in session brief)"},
+        {"text": "At least one of /wp-json/wc/store/v1/products or /wp-json/wc/v3/products probed"},
+        {"text": "api-surfaces/ directory contains at least one file"},
+        {"text": "tech-stack.md records actual detected WooCommerce version from the site (not a default assumption)"}
+      ],
       "files": []
     },
     {
