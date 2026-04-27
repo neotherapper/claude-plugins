@@ -7,6 +7,78 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.2] — 2026-04-27
+
+### Added
+
+- Tech pack: `technologies/woocommerce/9.x.md` — WooCommerce 9.x (WordPress e-commerce plugin)
+  - 10-section pack covering fingerprinting (cookies, JS globals, Store API namespace), REST API v3
+    and Store API v1 surfaces, Consumer Key/Secret auth, legacy `wc-ajax` endpoints, and 10 gotchas
+  - 25 endpoint entries including product catalog, cart, checkout, coupons, shipping, payment gateways
+- Tech pack: `technologies/magento/2.x.md` — Magento 2.4.x (Adobe Commerce)
+  - 10-section pack covering HTTP header fingerprinting (`X-Magento-Tags`), REST V1 and GraphQL
+    surfaces, Bearer token and OAuth auth, RequireJS bundle patterns, and 11 gotchas
+  - GraphQL introspection probe, multi-store `Store:` header requirement, Varnish caching awareness
+- SKILL.md v0.6.0 — site-recon skill improvements derived from Pen-Chalet and JetPens session analysis:
+  - **Fix:** Phase 1 scaffold now uses `Write` (not `touch`) to avoid Write-before-Read failures
+  - **Fix:** `www.` prefix stripped from URL before slug generation
+  - **Fix:** gau alias detection — `which gau` replaced with output-checking validation
+  - **New:** Chrome MCP namespace detection in Phase 1 — both namespaces tested, working one recorded
+  - **New:** Phase 4 late discovery rule — tech pack re-triggered when framework found in phases 5–9
+  - **New:** Phase 12 completion gate — all 11 phase markers verified before writing output files
+  - **New:** Bot protection section — Cloudflare curl-403 pivot strategy and Turnstile limitation
+  - **New:** E-commerce probe list — 20+ platform-specific endpoints for Phase 5 (WooCommerce,
+    Magento, ZF1, Shopify, ASP.NET); "no API" verdict requires all probes exhausted
+  - **New:** cmux usage guide — exact command syntax for navigation, eval, HTML, screenshot
+  - **New:** Fingerprinting signals for Magento 2, WooCommerce, and ASP.NET in Phase 3
+  - **New:** Version extraction for Magento 2, WooCommerce, and ASP.NET
+  - **New:** 8 new graceful degradation signals (CF-BLOCKED, CF-PIVOT, CHROME-NAMESPACE, etc.)
+- Session-start hook updated to advertise WooCommerce and Magento 2 in tech pack list
+- Session analysis: `docs/research/beacon-session-analysis/session-analysis.md` — 353-line retrospective
+  on Pen-Chalet and JetPens beacon runs documenting 13 error patterns and 15 recommended improvements
+
+---
+
+## [0.6.3] — 2026-04-27
+
+### Added
+
+- Tech pack: `technologies/aspnet/webforms-mvc.md` — ASP.NET WebForms & MVC
+  - 10-section pack: `__VIEWSTATE`/`__EVENTVALIDATION` WebForms fingerprints, `.axd` endpoint
+    probes, anti-forgery token acquisition, ViewState POST pattern, ELMAH/trace.axd exposure
+    check, ASP.NET Web API detection, SignalR detection, 10 gotchas
+  - Session-start hook updated to advertise ASP.NET in tech pack list
+
+### Fixed
+
+- `references/tool-availability.md`: gau alias detection — output-checking validation replaces
+  `which gau` to detect git alias; Chrome MCP now documents both plugin-level and project-level
+  namespaces with stale CDP connection recovery instructions
+- `references/browser-recon.md`: new Cloudflare/bot protection section covering cf-ray detection,
+  same-origin browser fetch() pivot strategy, Turnstile limitation; cmux commands corrected
+  from real session failures (--load-state removed, --surface flag required, get html selector
+  requirement documented)
+
+### Changed
+
+- Eval workspace: `skills/site-recon-workspace/` created with old-skill-snapshot (v0.5.0 baseline),
+  4 eval test cases, iteration-1 results showing with-skill improvements over baseline
+- Plugin version bumped to 0.6.3
+
+---
+
+## [0.6.1] — 2026-04-26
+
+### Added
+
+- Tech pack: `technologies/zend-framework/1.x.md` — Zend Framework 1.x (EOL legacy)
+  - 10-section pack covering fingerprinting, MVC route surface, config file exposure,
+    Zend_Auth patterns, XML-RPC introspection, and ZF1-specific gotchas
+  - Phase 3 SKILL.md updated with ZF1 HTML/error-page fingerprinting signals
+  - Session-start hook updated to advertise Zend Framework 1 in tech pack list
+
+---
+
 ## [0.6.0] — 2026-04-15
 
 ### Added

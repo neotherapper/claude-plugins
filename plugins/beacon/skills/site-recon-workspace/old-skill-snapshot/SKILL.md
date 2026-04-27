@@ -1,7 +1,7 @@
 ---
 name: site-recon
 description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 12-phase systematic investigation of a website and produces a complete persistent docs/research/{site-name}/ folder.
-version: 0.6.0
+version: 0.5.0
 ---
 
 # site-recon — Research Mode
@@ -27,7 +27,6 @@ docs/research/{site-slug}/
 ```
 
 Derive `{site-slug}` from the domain: `example.com` → `example-com`, `api.example.com` → `api-example-com`.
-Strip `www.` before slugifying: `www.jetpens.com` → `jetpens-com`, not `www-jetpens-com`.
 
 ## The 12 phases — always in this order
 
@@ -83,33 +82,13 @@ See `references/session-brief-format.md` for the complete schema.
 ## Phase 1 — Scaffold and tool check
 
 ```bash
-# Strip www. then slugify
-SLUG=$(echo "{url}" | sed -E 's|https?://(www\.)?||;s|/.*||;s|\.|-|g')
+SLUG=$(echo "{url}" | sed -E 's|https?://||;s|/.*||;s|\.|-|g')
 mkdir -p docs/research/${SLUG}/{api-surfaces,specs,scripts}
-```
-
-**Critical:** Do NOT use `touch` to create output files — the Write tool requires a prior Read.
-Use `Write` directly with empty string content for each output file, or they will fail at Phase 12.
-
-```
-Write docs/research/${SLUG}/INDEX.md        ← empty string
-Write docs/research/${SLUG}/tech-stack.md   ← empty string
-Write docs/research/${SLUG}/site-map.md     ← empty string
-Write docs/research/${SLUG}/constants.md    ← empty string
+touch docs/research/${SLUG}/{INDEX,tech-stack,site-map,constants}.md
 ```
 
 Then check every tool in the tool availability matrix and log results in the session brief.
 See `references/tool-availability.md` for exact detection commands.
-
-**Chrome MCP namespace:** In Phase 1, test BOTH Chrome MCP namespaces and record which works:
-- Try `mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_pages` first (plugin-level)
-- Fall back to `mcp__chrome-devtools__list_pages` (project-level)
-- Log the working namespace as `[CHROME-NAMESPACE:{active}]` in the session brief
-- Use ONLY the recorded namespace for all Chrome MCP calls in phases 10–11
-
-**gau alias check:** `which gau` is not sufficient — `gau` may be aliased to `git add --update`.
-Run `gau --version 2>&1 | grep -i "getallurls\|gau"` to confirm it is the URL extractor.
-If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 
 ## Phase 3 — Fingerprinting (first match wins)
 
@@ -142,17 +121,6 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
    - `window.__nuxt` → Nuxt
    - `_shopify_y` or `_shopify_s` cookies → Shopify
    - `_[a-z0-9_]+_session` cookie pattern → Rails
-   - `X-Magento-Tags` or `X-Magento-Cache-Id` response headers → Magento 2 (Definitive)
-   - `mage-cache-sessid` cookie → Magento 2 (High)
-   - `data-mage-init` attribute in HTML → Magento 2 (High)
-   - `window.woocommerce_params` or `wc-cart-hash` cookie → WooCommerce (Definitive)
-   - `window.wc` JS global present → WooCommerce (High)
-   - `__VIEWSTATE` hidden input field → ASP.NET WebForms (Definitive)
-   - `.aspx` in URL paths → ASP.NET (High)
-   - `ASP.NET_SessionId` cookie → ASP.NET (High)
-   - `X-Powered-By: ASP.NET` header → ASP.NET (Definitive)
-   - Atom/RSS feed `<generator>` tag → check for framework signal:
-     `Zend_Feed_Writer` → Zend Framework 1, `Ghost` → Ghost, etc.
 
 5. **Endpoint probes** (for API-only and CMS sites):
    ```bash
@@ -182,9 +150,6 @@ Log the result: `Framework: WordPress 6.5 (source: wp-content/ in HTML + generat
 - Shopify: `window.Shopify.theme.name` via JS eval in Phase 11
 - Django / FastAPI: version not exposed in production headers
 - Zend Framework 1: check error page stack traces for `/library/Zend/Version.php` path; probe `{site}/library/Zend/Version.php` for `VERSION` constant; otherwise version unknown
-- Magento 2: `GET /magento_version` (returns version string directly); fallback: grep `/pub/static/version{N}/` path — `N` is a deploy timestamp, not the Magento version
-- WooCommerce: generator meta tag `<meta name="generator" content="WooCommerce {version}">` or `/wp-json/wc/v3/system_status` (requires auth)
-- ASP.NET: version rarely exposed; `X-Powered-By: ASP.NET` may include version; check `ScriptResource.axd` query string for hash hints
 
 ## Phase 4 — Tech pack lookup
 
@@ -209,11 +174,6 @@ If web search fallback used, offer a PR at the end of Phase 12:
 Version mismatch: if `15.x` requested but only `14.x` exists, use `14.x` and log
 `[TECH-PACK-VERSION-MISMATCH:nextjs:15.x→14.x]`.
 
-**Late discovery rule:** If a new framework signal is found in Phase 5, 6, 7, or 9 (e.g., ZF1 from
-an Atom feed generator tag, ASP.NET from a response header), immediately pause and re-run Phase 4
-for that framework before continuing. Do not defer the tech pack lookup to Phase 12. Log:
-`[TECH-PACK-LATE-LOAD:{framework}:{version}:phase={N}]`
-
 ## Phase 8 — OpenAPI auto-detection
 
 Probe these paths in order; stop at the first 200 response that returns JSON or YAML:
@@ -226,51 +186,6 @@ Probe these paths in order; stop at the first 200 response that returns JSON or 
 
 If found: save to `specs/{slug}.openapi.yaml`, mark `source: auto-downloaded`.  
 If not found: continue — Phase 12 will scaffold a spec from all discovered endpoints.
-
-## Bot protection handling
-
-When curl probes return 403 from Cloudflare (or similar):
-
-1. **Identify immediately** — if Phase 2 `GET /robots.txt` returns 403, the site is curl-blocked
-2. **Pivot to browser fetch** — all subsequent HTTP probes must use `evaluate_script` with a `fetch()` call from within a page already loaded on the target domain (which has CF clearance)
-3. **For CORS-blocked probes** — fetch calls from page context to same-origin paths work; cross-origin probes return `{status: 0, type: "opaqueredirect"}` — log as `[CORS-OPAQUE:{path}]` and treat as "route exists but CORS-blocked"
-4. **Cloudflare Turnstile** — if a category/product page triggers a Turnstile challenge, the CDP `click` on the verify checkbox always times out. Use an existing-session browser (cmux with an open session) rather than a fresh CDP page. Log `[CF-TURNSTILE-BLOCKED:{url}]`
-
-Log all curl 403s as `[CF-BLOCKED:curl]` and all browser pivots as `[CF-PIVOT:browser-fetch]`.
-
-## E-commerce probe list (Phase 5 supplement)
-
-When an e-commerce platform is detected (WooCommerce, Magento, Shopify, ZF1, ASP.NET, or `[FRAMEWORK-UNKNOWN]` on a store-like site), run these additional probes in Phase 5:
-
-**Product discovery:**
-- `GET /wp-json/wc/store/v1/products?per_page=20` — WooCommerce Store API (no auth)
-- `GET /wp-json/wc/v3/products?per_page=5` — WooCommerce REST API (may need consumer key)
-- `POST /graphql {"query":"{ products { items { name sku price { regularPrice { amount { value } } } } } }"}` — Magento 2
-- `GET /products.json?limit=5` — Shopify
-- `GET /Compare/loadAjax` — ZF1 comparison AJAX
-- `GET /Compare/getPopularComparisonsAjax` — ZF1 curated product groups
-- `GET /Compare/addProductAjax?products_id=1` — ZF1 single product JSON
-
-**Search and autocomplete:**
-- `GET /search/suggestions?q=test` — generic autocomplete
-- `GET /autocomplete?q=test` — variant
-- `GET /search/autocomplete?q=test` — variant
-- `GET /autocomplete.aspx?keyword=test` — ASP.NET variant
-- `GET /Search/index/q/test/format/json` — ZF1 style
-
-**Cart AJAX:**
-- `GET /cart/addAjax?products_id=1` — ZF1 cart add (returns JSON)
-- `GET /cart/getAddListAjax?products_ids=1,2` — ZF1 batch product cards
-- `POST /wp-json/wc/store/v1/cart/add-item` — WooCommerce Store API
-- `GET /?wc-ajax=get_refreshed_fragments` — WooCommerce legacy cart
-
-**Feeds and structured data:**
-- `GET /feeds/products` — product XML/JSON feed
-- `GET /feeds/google` — Google Shopping feed
-- `GET /feed` and `GET /blog/feed` — Atom/RSS (check `<generator>` tag for framework signal)
-- `GET /sitemap_products_1.xml` — Shopify product sitemap
-
-**Note:** A "no programmable API" conclusion requires ALL of the above to be probed and return non-useful responses. A 404 on `/wp-json/wc/v3/` does not mean the site has no API.
 
 ## Phase 10 — Browse plan
 
@@ -332,62 +247,8 @@ Log these in the session brief and repeat in the generated INDEX.md:
 | `[PHASE-11-AUTH:manual]` | User logged in manually; auth state saved to `.beacon/auth-state.json` |
 | `[PHASE-11-UNAUTH]` | Phase 11 ran without authentication |
 | `[OPENAPI-SKIPPED:har-to-openapi-unavailable]` | har-to-openapi not found; HAR preserved at `.beacon/capture.har` |
-| `[CF-BLOCKED:curl]` | Cloudflare returned 403 on curl probes; pivoted to browser fetch |
-| `[CF-PIVOT:browser-fetch]` | All HTTP probes run via browser `fetch()` from page context |
-| `[CF-TURNSTILE-BLOCKED:{url}]` | Cloudflare Turnstile challenge blocked CDP interaction; used cmux existing session |
-| `[CORS-OPAQUE:{path}]` | Probe returned opaque redirect — route exists but CORS-blocked |
-| `[CHROME-NAMESPACE:{active}]` | Active Chrome MCP namespace recorded in Phase 1 |
-| `[TECH-PACK-LATE-LOAD:{framework}:{version}:phase={N}]` | Tech pack loaded after late framework discovery |
-| `[PHASE-GATE:P{N} missing — running now]` | Phase completion gate triggered a missed phase |
-| `[TOOL-UNAVAILABLE:gau:aliased]` | `gau` is aliased to another command; URL extractor unavailable |
-
-## Phase 11 — cmux usage guide
-
-When cmux is available (logged `[AVAILABLE:cmux]` in Phase 1), use these exact commands:
-
-```bash
-# Open a URL and get surface ID
-cmux browser open https://example.com          # returns surface UUID like "surface:83"
-
-# Navigate an existing surface
-cmux browser --surface surface:83 goto https://example.com/products
-
-# Get current URL
-cmux browser --surface surface:83 get url
-
-# Evaluate JavaScript (returns JSON or string)
-cmux browser --surface surface:83 eval "JSON.stringify(window.location.href)"
-
-# Get HTML of a specific element (selector is REQUIRED)
-cmux browser --surface surface:83 get html "body"
-
-# Take screenshot
-cmux browser --surface surface:83 screenshot --out /tmp/page.png
-```
-
-Surface IDs: `cmux browser open` returns a UUID. Use `cmux browser --surface {id}` for all subsequent calls on that surface. Surface IDs look like `surface:83` or a UUID string — always quote them.
 
 ## Phase 12 — Output synthesis
-
-**Phase completion gate — verify before writing:**
-
-Before executing Phase 12, check the session brief for completion markers:
-```
-[P1✓] Scaffold and tool check
-[P2✓] Passive recon
-[P3✓] Fingerprint
-[P4✓] Tech pack (or UNAVAILABLE logged)
-[P5✓] Known patterns
-[P6✓] Feeds & structure
-[P7✓] JS & source maps
-[P8✓] OpenAPI detect
-[P9✓] OSINT
-[P10✓] Browse plan compiled
-[P11✓] Active browse (or SKIPPED logged)
-```
-
-If any phase marker is absent from the session brief, run that phase now before writing output.
-Log: `[PHASE-GATE: P{N} missing — running now]`. Do not skip phases to save time.
 
 **Load `references/output-synthesis.md` before executing this phase** — it contains
 the full instructions for reading the session brief and writing all output files.

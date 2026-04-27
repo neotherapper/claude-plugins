@@ -1,0 +1,13 @@
+{
+  "eval_id": 4,
+  "eval_name": "late-tech-pack-trigger",
+  "prompt": "Map the API surface of https://wordpress.org/news/feed/ — this is a WordPress Atom feed endpoint. Start with Phase 1 and work through all 12 phases. I want to see how you handle tech pack lookup when you discover the framework from a feed.",
+  "expected_output": "WordPress tech pack loaded after feed discovery. Phase 4 is re-triggered (TECH-PACK-LATE-LOAD logged).",
+  "assertions": [
+    {"text": "WordPress tech pack loaded"},
+    {"text": "Framework detected from feed or HTTP signals, not just HTML"},
+    {"text": "tech-stack.md documents the discovery source"}
+  ],
+  "with_skill_result": "PASS - [TECH-PACK-LATE-LOAD:wordpress:7.x:phase=6]",
+  "old_skill_result": "FAIL - No tech pack loaded"
+}

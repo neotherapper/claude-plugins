@@ -1,0 +1,34 @@
+{
+  "skill_name": "site-recon",
+  "skill_path": "plugins/beacon/skills/site-recon/SKILL.md",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "scaffold-no-touch",
+      "prompt": "Analyse https://httpbin.org and produce a docs/research/ folder documenting its API surface. Run all 12 phases. Focus especially on the scaffold step — I want to see how you create the output directory and files.",
+      "expected_output": "Phase 1 creates output files using Write tool (not touch). docs/research/httpbin-org/ directory exists with INDEX.md, tech-stack.md, site-map.md, constants.md all created via Write.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "eval_name": "ecommerce-probe-list",
+      "prompt": "Research https://woocommerce.com/woocommerce-demo — it's a WooCommerce demo store. Map all available product APIs and cart endpoints. Run all 12 phases and document what you find.",
+      "expected_output": "WooCommerce tech pack loaded (LOADED:woocommerce:9.x in session brief). E-commerce probe list applied: /wp-json/wc/store/v1/products, /wp-json/wc/v3/products, and wc-ajax endpoints probed. INDEX.md and api-surfaces/ created.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "eval_name": "phase-completion-gate",
+      "prompt": "Analyse https://jsonplaceholder.typicode.com — a fake REST API for testing. Run a full beacon site analysis across all 12 phases. I want to see the complete phase sequence in your session brief.",
+      "expected_output": "All 12 phases executed. Session brief shows phase completion markers [P1✓] through [P11✓] or SKIPPED before Phase 12 runs. No phases silently skipped. INDEX.md and api-surfaces/rest-api.md created.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "eval_name": "late-tech-pack-trigger",
+      "prompt": "Map the API surface of https://wordpress.org/news/feed/ — this is a WordPress Atom feed endpoint. Start with Phase 1 and work through all 12 phases. I want to see how you handle tech pack lookup when you discover the framework from a feed.",
+      "expected_output": "WordPress tech pack loaded after feed discovery. If ZF1 or other framework detected from generator tag, Phase 4 is re-triggered (TECH-PACK-LATE-LOAD logged). Session brief documents framework source as the feed generator tag.",
+      "files": []
+    }
+  ]
+}

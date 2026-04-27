@@ -18,9 +18,26 @@ Fallback: curl -s {url} for page content; /sitemap.xml for URL discovery
 ```
 
 ### Chrome DevTools MCP
+
+Two namespaces exist depending on how the MCP server is registered. Test BOTH in Phase 1
+and record which one responds. Use ONLY the recorded namespace for all of Phase 11.
+
 ```
-Available if: 'mcp__chrome-devtools__new_page' in MCP tool list
-Fallback: check for cmux; if neither, skip Phase 11
+# Plugin-level (preferred — registered via plugin system):
+Test: attempt mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_pages
+  → If it returns a list (even empty): log [CHROME-NAMESPACE:plugin]
+
+# Project-level (fallback — registered in project .mcp.json):
+Test: attempt mcp__chrome-devtools__list_pages
+  → If it returns a list: log [CHROME-NAMESPACE:project]
+
+# Neither responds:
+  → Check cmux; if neither: log [TOOL-UNAVAILABLE:chrome-devtools-mcp]
+```
+
+**Important:** If list_pages returns a timeout or "Network.enable timed out", the Chrome
+process may have a stale CDP connection. Ask the user to: restart Chrome, run
+`pkill -f chrome-devtools-mcp`, then retry before giving up on Chrome MCP entirely.
 ```
 
 ### cmux browser
@@ -40,8 +57,15 @@ Log: [AVAILABLE] context7  OR  [TOOL-UNAVAILABLE:context7]
 
 ### GAU (GetAllURLs)
 ```bash
-which gau && echo "gau available"
-# Fallback: Wayback CDX API (no install, always works)
+# 'which gau' is NOT sufficient — gau may be aliased to 'git add --update'
+# Confirm the binary is the URL extractor before marking available:
+GAU_CHECK=$(gau --version 2>&1 || gau --help 2>&1 || true)
+if echo "$GAU_CHECK" | grep -qi "getallurls\|gau.*version"; then
+  echo "[AVAILABLE] gau"
+else
+  echo "[TOOL-UNAVAILABLE:gau:aliased-or-not-found]"
+fi
+# Fallback: Wayback CDX API (no install, always works — see phase-detail.md Phase 9)
 ```
 
 ---
@@ -59,35 +83,45 @@ which gau && echo "gau available"
 
 ---
 
-## cmux Browser Commands (Phase 11)
+## cmux Browser Commands (Phase 11) — CORRECTED SIGNATURES
 
 Use when `$CMUX_SURFACE_ID` is set or `cmux` is available.
 
+`cmux browser wait --load-state complete` is NOT a valid command — remove it if encountered.
+
 ```bash
-# Open browser in current pane
-cmux browser open-split https://example.com
+# Open a new browser tab and get its surface ID
+cmux browser open https://example.com
+# Returns output like: "surface:83" or a UUID string
 
-# Navigate (CMUX_SURFACE_ID is auto-used inside cmux)
-cmux browser goto https://example.com/api/docs
-cmux browser wait --load-state complete
+# All subsequent commands require --surface {id}
+SURF="surface:83"   # replace with actual ID from open
 
-# Accessibility snapshot (structured text — use for AI reasoning)
-cmux browser snapshot --compact
+# Navigate to URL
+cmux browser --surface $SURF goto https://example.com/products
 
-# Screenshot to file
-cmux browser screenshot --out docs/research/example-com/browse-snapshots/api-docs.png
+# Get current URL (useful to confirm navigation succeeded)
+cmux browser --surface $SURF get url
 
-# Evaluate JavaScript
-cmux browser evaluate "JSON.stringify(window.__NEXT_DATA__?.props, null, 2)"
-cmux browser evaluate "Object.keys(window).filter(k => k.startsWith('__'))"
+# Evaluate JavaScript — ALWAYS wrap return value in JSON.stringify
+cmux browser --surface $SURF eval "JSON.stringify(window.__NEXT_DATA__)"
+cmux browser --surface $SURF eval "JSON.stringify(Object.keys(window).filter(k=>k.startsWith('wc')))"
 
-# Network request capture
-cmux browser surface:N network requests        ← list all captured requests since page load
-cmux browser surface:N network route "*/api/*" --body '{"mock":true}'  ← intercept/mock
+# Get HTML of element — CSS selector is REQUIRED (bare 'get html' fails)
+cmux browser --surface $SURF get html "body"
+cmux browser --surface $SURF get html "#product-list"
 
-# Interact
-cmux browser click "button[data-id=login]"
-cmux browser fill "input[name=email]" "test@example.com"
+# Take screenshot
+cmux browser --surface $SURF screenshot --out docs/research/example-com/screenshot.png
+
+# List network requests captured since page load
+cmux browser --surface $SURF list network
+
+# Common failure modes:
+#   'Error: Unsupported browser subcommand: --load-state'  → remove --load-state
+#   'Error: browser requires a subcommand'                 → add a subcommand
+#   'Error: Invalid surface handle: get'                   → add --surface flag
+#   '(eval):1: bad math expression: illegal character: \'  → JSON.stringify the return value
 ```
 
 Full reference: `docs/guides/cmux-browser.md` (in nikai project)

@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "eval_name": "phase-completion-gate",
+  "prompt": "Analyse https://jsonplaceholder.typicode.com — a fake REST API for testing. Run a full beacon site analysis across all 12 phases. I want to see the complete phase sequence in your session brief.",
+  "expected_output": "All 12 phases executed. Session brief shows phase completion markers [P1✓] through [P11✓] or SKIPPED before Phase 12 runs.",
+  "assertions": [
+    {"text": "Session brief contains phase markers for all 12 phases"},
+    {"text": "Phase 12 runs only after P1-P11 markers are present"},
+    {"text": "INDEX.md created"}
+  ],
+  "with_skill_result": "PASS - All 12 phases executed",
+  "old_skill_result": "FAIL - P4, P9, P10, P11 silently skipped"
+}

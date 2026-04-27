@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "scaffold-no-touch",
+  "prompt": "Analyse https://httpbin.org and produce a docs/research/ folder documenting its API surface. Run all 12 phases. Focus especially on the scaffold step — I want to see how you create the output directory and files.",
+  "expected_output": "Phase 1 creates output files using Write tool, not touch. docs/research/httpbin-org/ directory exists with INDEX.md, tech-stack.md, site-map.md, constants.md all created via Write.",
+  "assertions": [
+    {"text": "Phase 1 creates files with Write tool, not touch command", "check": "grep -r 'touch' outputs/ | grep -v '# ' | wc -l == 0"},
+    {"text": "docs/research directory created with correct slug", "check": "ls outputs/docs/research/ | head -1 matches httpbin-org"},
+    {"text": "INDEX.md created and non-empty", "check": "wc -c outputs/docs/research/httpbin-org/INDEX.md > 100"}
+  ],
+  "with_skill_result": "PASS - Uses Write tool",
+  "old_skill_result": "FAIL - Uses touch command"
+}
