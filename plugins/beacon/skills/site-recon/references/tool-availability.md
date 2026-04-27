@@ -83,35 +83,45 @@ fi
 
 ---
 
-## cmux Browser Commands (Phase 11)
+## cmux Browser Commands (Phase 11) — CORRECTED SIGNATURES
 
 Use when `$CMUX_SURFACE_ID` is set or `cmux` is available.
 
+`cmux browser wait --load-state complete` is NOT a valid command — remove it if encountered.
+
 ```bash
-# Open browser in current pane
-cmux browser open-split https://example.com
+# Open a new browser tab and get its surface ID
+cmux browser open https://example.com
+# Returns output like: "surface:83" or a UUID string
 
-# Navigate (CMUX_SURFACE_ID is auto-used inside cmux)
-cmux browser goto https://example.com/api/docs
-cmux browser wait --load-state complete
+# All subsequent commands require --surface {id}
+SURF="surface:83"   # replace with actual ID from open
 
-# Accessibility snapshot (structured text — use for AI reasoning)
-cmux browser snapshot --compact
+# Navigate to URL
+cmux browser --surface $SURF goto https://example.com/products
 
-# Screenshot to file
-cmux browser screenshot --out docs/research/example-com/browse-snapshots/api-docs.png
+# Get current URL (useful to confirm navigation succeeded)
+cmux browser --surface $SURF get url
 
-# Evaluate JavaScript
-cmux browser evaluate "JSON.stringify(window.__NEXT_DATA__?.props, null, 2)"
-cmux browser evaluate "Object.keys(window).filter(k => k.startsWith('__'))"
+# Evaluate JavaScript — ALWAYS wrap return value in JSON.stringify
+cmux browser --surface $SURF eval "JSON.stringify(window.__NEXT_DATA__)"
+cmux browser --surface $SURF eval "JSON.stringify(Object.keys(window).filter(k=>k.startsWith('wc')))"
 
-# Network request capture
-cmux browser surface:N network requests        ← list all captured requests since page load
-cmux browser surface:N network route "*/api/*" --body '{"mock":true}'  ← intercept/mock
+# Get HTML of element — CSS selector is REQUIRED (bare 'get html' fails)
+cmux browser --surface $SURF get html "body"
+cmux browser --surface $SURF get html "#product-list"
 
-# Interact
-cmux browser click "button[data-id=login]"
-cmux browser fill "input[name=email]" "test@example.com"
+# Take screenshot
+cmux browser --surface $SURF screenshot --out docs/research/example-com/screenshot.png
+
+# List network requests captured since page load
+cmux browser --surface $SURF list network
+
+# Common failure modes:
+#   'Error: Unsupported browser subcommand: --load-state'  → remove --load-state
+#   'Error: browser requires a subcommand'                 → add a subcommand
+#   'Error: Invalid surface handle: get'                   → add --surface flag
+#   '(eval):1: bad math expression: illegal character: \'  → JSON.stringify the return value
 ```
 
 Full reference: `docs/guides/cmux-browser.md` (in nikai project)
