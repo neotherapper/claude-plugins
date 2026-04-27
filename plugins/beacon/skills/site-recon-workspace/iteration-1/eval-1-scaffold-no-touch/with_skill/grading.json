@@ -1,0 +1,69 @@
+{
+  "eval_id": 1,
+  "eval_name": "scaffold-no-touch",
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "Phase 1 creates files with Write tool, not touch command",
+      "passed": true,
+      "evidence": "session-brief.md states 'Created scaffold files using Write (NOT touch)' and the summary confirms 'Scaffold Method: Write (not touch) ✓'. grep for 'touch' in outputs/ finds only these two comment lines in session-brief.md — no Bash touch command executed."
+    },
+    {
+      "text": "docs/research directory created with correct slug",
+      "passed": true,
+      "evidence": "outputs/docs/research/httpbin-org/ directory exists and contains INDEX.md, tech-stack.md, site-map.md, constants.md. Slug 'httpbin-org' is correct for httpbin.org."
+    },
+    {
+      "text": "INDEX.md created and non-empty",
+      "passed": true,
+      "evidence": "outputs/docs/research/httpbin-org/INDEX.md is 1272 bytes and contains a full summary table, infrastructure section, Quick API Reference table with 12 endpoints, and Notes section — substantive content, not a placeholder."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "total_steps": 12,
+    "errors_encountered": 0,
+    "output_chars": 1272,
+    "transcript_chars": 2451
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "grader_duration_seconds": 0.0,
+    "total_duration_seconds": 0.0
+  },
+  "claims": [
+    {
+      "claim": "30+ endpoints discovered",
+      "type": "factual",
+      "verified": false,
+      "evidence": "INDEX.md lists 12 endpoints in the Quick API Reference table. Session brief says '30+' but the documented evidence shows 12. The claim is not fully verified from the outputs alone."
+    },
+    {
+      "claim": "AWS hosting detected via X-Amzn-Trace-Id header",
+      "type": "factual",
+      "verified": true,
+      "evidence": "INDEX.md Infrastructure section states 'Hosting: AWS (X-Amzn-Trace-Id header)' — a verifiable HTTP header signal."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Phase 1 creates files with Write tool, not touch command",
+        "reason": "The assertion is checked against session-brief.md text, not the actual tool call transcript. A session brief that incorrectly described its own behavior would produce a false PASS. Consider also checking that the scaffold files have non-zero byte content immediately after Phase 1 (before Phase 12 write) — Write with empty string still produces 0-byte files indistinguishable from touch."
+      }
+    ],
+    "overall": "Assertions are well-targeted for the regression being tested. The no-touch check is meaningful and discriminates between the two skill versions clearly."
+  }
+}

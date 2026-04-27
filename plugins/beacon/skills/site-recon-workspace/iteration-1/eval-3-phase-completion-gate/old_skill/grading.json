@@ -1,0 +1,58 @@
+{
+  "eval_id": 3,
+  "eval_name": "phase-completion-gate",
+  "run_type": "old_skill",
+  "expectations": [
+    {
+      "text": "Session brief contains phase markers for all 12 phases",
+      "passed": false,
+      "evidence": "old_skill session-brief.md shows '### P4 SKIPPED (Tech Pack)', '### P9 SKIPPED (OSINT)', '### P10 SKIPPED (Browse Plan)', '### P11 SKIPPED (Active Browse)' — four phases have no [P*✓] completion markers and are explicitly skipped. P4, P9, P10, P11 do not appear as checked phases. The eval's predefined old_skill_result confirms 'P4, P9, P10, P11 silently skipped'."
+    },
+    {
+      "text": "Phase 12 runs only after P1-P11 markers are present",
+      "passed": false,
+      "evidence": "Since P4, P9, P10, P11 have no completion markers (only 'SKIPPED' section headers), the precondition of P1-P11 markers being present is not met before Phase 12 runs. Phase 12 documentation appears in the session brief despite four phases having no [P*✓] marker."
+    },
+    {
+      "text": "INDEX.md created",
+      "passed": true,
+      "evidence": "outputs/docs/research/jsonplaceholder-typicode-com/INDEX.md exists and is 2805 bytes — substantive content present. This assertion passes regardless of the phase skipping issue."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 2,
+    "total": 3,
+    "pass_rate": 0.33
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "total_steps": 12,
+    "errors_encountered": 0,
+    "output_chars": 2805,
+    "transcript_chars": 2400
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "grader_duration_seconds": 0.0,
+    "total_duration_seconds": 0.0
+  },
+  "claims": [
+    {
+      "claim": "Tech pack not needed for simple REST API (reason for P4 skip)",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The old skill documents '[TECH-PACK-UNAVAILABLE:express:unknown]' as the degradation signal — but the SESSION-BRIEF section says 'P4 SKIPPED — Not needed for simple REST API'. This is editorial justification, not a graceful-degradation log. The with_skill version also has no Express tech pack but still marks [P4✓] with the UNAVAILABLE log. The skip vs log difference is the real regression."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": ["old_skill skips phases P4, P9, P10, P11 instead of logging graceful degradation signals"]
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "No suggestions — the two failing assertions correctly identify the phase-skipping regression. The one passing assertion (INDEX.md exists) is correctly lenient — the old skill does produce output even when skipping phases."
+  }
+}

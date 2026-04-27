@@ -1,0 +1,58 @@
+{
+  "eval_id": 1,
+  "eval_name": "scaffold-no-touch",
+  "run_type": "old_skill",
+  "expectations": [
+    {
+      "text": "Phase 1 creates files with Write tool, not touch command",
+      "passed": false,
+      "evidence": "session-brief.md explicitly shows the bash command used: 'touch docs/research/${SLUG}/{INDEX,tech-stack,site-map,constants}.md' and states 'Directory created with 4 empty (0-byte) files via touch'. The old skill uses touch, not Write. The httpbin-org/INDEX.md in outputs/ is confirmed 0 bytes."
+    },
+    {
+      "text": "docs/research directory created with correct slug",
+      "passed": false,
+      "evidence": "The old_skill outputs/ directory contains files at outputs/INDEX.md, outputs/site-map.md etc. (root level) and outputs/httpbin-org/ — there is no outputs/docs/research/httpbin-org/ path. The old skill does not create the docs/research/ intermediate directory structure required by the assertion."
+    },
+    {
+      "text": "INDEX.md created and non-empty",
+      "passed": false,
+      "evidence": "outputs/httpbin-org/INDEX.md (the Phase 1 scaffold file) is 0 bytes — a touch-created empty placeholder. outputs/INDEX.md at the root is 1181 bytes but that is the Phase 12 synthesis output, not the Phase 1 scaffold at the expected docs/research/httpbin-org/ path. The assertion path docs/research/httpbin-org/INDEX.md does not exist in old_skill outputs."
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 3,
+    "total": 3,
+    "pass_rate": 0.0
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "total_steps": 12,
+    "errors_encountered": 0,
+    "output_chars": 1181,
+    "transcript_chars": 2130
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "grader_duration_seconds": 0.0,
+    "total_duration_seconds": 0.0
+  },
+  "claims": [
+    {
+      "claim": "Phase 1 scaffold files are 0-byte",
+      "type": "factual",
+      "verified": true,
+      "evidence": "outputs/httpbin-org/INDEX.md confirmed 0 bytes via wc -c. This matches the session brief's statement 'Directory created with 4 empty (0-byte) files via touch'."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": ["Phase 12 output synthesis was placed at outputs/ root (outputs/INDEX.md) rather than outputs/docs/research/httpbin-org/ — separate from the 0-byte touch scaffolds in outputs/httpbin-org/"]
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "No suggestions — the three assertions cleanly discriminate the old skill's touch-based scaffold failure. All three fail for old_skill and all three pass for with_skill, making this a high-signal eval."
+  }
+}

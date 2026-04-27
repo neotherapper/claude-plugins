@@ -18,6 +18,12 @@ No network calls. No new tools. Pure synthesis from what Phases 1–11 captured.
 
 ### tech-stack.md
 
+**CRITICAL:** `tech-stack.md` contains **site-specific discovered data** from the session brief —
+NOT the content of the loaded tech pack. The tech pack is a probe guide, not a report.
+Do not copy any content from the tech pack file into tech-stack.md. If the tech pack was
+loaded as `[LOADED:wordpress:6.x]`, tech-stack.md says `Framework: WordPress 6.5` (what you
+found on the site), not the WordPress tech pack instructions.
+
 Copy the Infrastructure table rows from the session brief verbatim into this format:
 
 ```markdown
