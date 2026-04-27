@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "eval_name": "ecommerce-probe-list",
+  "prompt": "Research https://woocommerce.com/woocommerce-demo — it's a WooCommerce demo store. Map all available product APIs and cart endpoints. Run all 12 phases and document what you find.",
+  "expected_output": "WooCommerce tech pack loaded, e-commerce probe list applied: /wp-json/wc/store/v1/products, /wp-json/wc/v3/products, wc-ajax endpoints probed.",
+  "assertions": [
+    {"text": "WooCommerce tech pack loaded"},
+    {"text": "At least one of /wp-json/wc/store/v1/products or /wp-json/wc/v3/products probed"},
+    {"text": "api-surfaces/ directory contains at least one file"}
+  ],
+  "with_skill_result": "PASS - WooCommerce 10.x loaded, Store API probed",
+  "old_skill_result": "PASS - WooCommerce 9.x loaded, e-commerce probes applied"
+}
