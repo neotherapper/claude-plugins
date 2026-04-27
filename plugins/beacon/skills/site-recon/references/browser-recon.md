@@ -4,6 +4,48 @@ This reference covers the full Phase 11 execution flow: tool detection, auth set
 
 ---
 
+## Cloudflare and Bot Protection
+
+When the target site is behind Cloudflare (detected by 403 on Phase 2 curl probes):
+
+### Identification
+A Cloudflare block is confirmed when:
+- `GET /robots.txt` via curl returns HTTP 403 (not 401 — that is auth)
+- Response body contains `cloudflare` or `cf-ray` header is present
+- Log immediately: `[CF-BLOCKED:curl]`
+
+### Pivot strategy
+All Phase 2, 5, 6, 8 probes must be run via browser `fetch()` from inside a page
+already loaded on the target domain (which holds a CF clearance cookie):
+
+```javascript
+// Run inside evaluate_script() from a page on the target domain
+const result = await fetch('/robots.txt').then(async r => ({
+  status: r.status,
+  type: r.type,
+  body: r.ok ? await r.text() : null
+}));
+JSON.stringify(result)
+```
+
+Log: `[CF-PIVOT:browser-fetch]`
+
+**CORS-blocked probes:** Same-origin `fetch()` from page context works for all paths on the
+same domain. Cross-origin requests (e.g., to crt.sh from within the target page) return
+`{status: 0, type: "opaqueredirect"}` — this means the route exists but CORS blocks the body.
+Log as `[CORS-OPAQUE:{path}]` and note the route exists.
+
+### Cloudflare Turnstile
+If a page triggers a Turnstile challenge (visible as a spinner/checkbox in the page), the CDP
+`click()` on the verify checkbox will time out with: `The element did not become interactive
+within the configured timeout`. This is a fundamental limitation — Turnstile is designed to
+prevent CDP interaction.
+
+**Resolution:** switch to a cmux surface that holds an existing CF clearance from a real browser
+session. Do NOT retry the CDP click — it will always fail. Log: `[CF-TURNSTILE-BLOCKED:{url}]`
+
+---
+
 ## Phase 11a — Tool Detection + Auth Setup
 
 ### Detection Logic
@@ -75,14 +117,51 @@ Key corrections vs older signatures:
 - `list_network_requests({resourceTypes: [...]})` — filter results client-side after retrieval
 - Use `document.readyState` polling (readyState === "complete") for load detection
 
-### cmux Per-URL Loop
+## cmux Browser Commands (Phase 11) — CORRECTED SIGNATURES
+
+The cmux commands in this file reflect v1.x syntax observed in production sessions.
+`cmux browser wait --load-state complete` is NOT a valid command in this version.
 
 ```bash
-cmux browser surface:N goto {url}
-cmux browser surface:N wait --load-state complete
-cmux browser surface:N eval "JSON.stringify((() => { ... globals ... })()"
-cmux browser surface:N network requests
-cmux browser surface:N snapshot --compact
+# Open a new browser tab and get its surface ID
+cmux browser open https://example.com
+# Returns output like: "surface:83" or a UUID string
+
+# All subsequent commands require --surface {id}
+SURF="surface:83"   # replace with actual ID from open
+
+# Navigate to URL
+cmux browser --surface $SURF goto https://example.com/products
+
+# Get current URL (useful to confirm navigation succeeded)
+cmux browser --surface $SURF get url
+
+# Evaluate JavaScript — ALWAYS wrap return value in JSON.stringify
+cmux browser --surface $SURF eval "JSON.stringify(window.__NEXT_DATA__)"
+cmux browser --surface $SURF eval "JSON.stringify(Object.keys(window).filter(k=>k.startsWith('wc')))"
+
+# Get HTML of element — CSS selector is REQUIRED (bare 'get html' fails)
+cmux browser --surface $SURF get html "body"
+cmux browser --surface $SURF get html "#product-list"
+
+# Take screenshot
+cmux browser --surface $SURF screenshot --out docs/research/example-com/screenshot.png
+
+# List network requests captured since page load
+cmux browser --surface $SURF list network
+
+# Common failure modes:
+#   'Error: Unsupported browser subcommand: --load-state'  → remove --load-state
+#   'Error: browser requires a subcommand'                 → add a subcommand
+#   'Error: Invalid surface handle: get'                   → add --surface flag
+#   '(eval):1: bad math expression: illegal character: \'  → JSON.stringify the return value
+```
+
+**Backslash escaping in eval:** When the JS string contains backslashes or single quotes,
+pass it as a heredoc or use double-outer/single-inner quoting:
+```bash
+cmux browser --surface $SURF eval "JSON.stringify(fetch('/api/products').then(r=>r.json()))"
+# Not safe with single quotes inside — use JSON.stringify to wrap
 ```
 
 ---
