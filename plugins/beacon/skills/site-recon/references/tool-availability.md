@@ -17,6 +17,114 @@ CLI available if: $(which firecrawl) exits 0
 Fallback: curl -s {url} for page content; /sitemap.xml for URL discovery
 ```
 
+**Extended Firecrawl usage (beyond URL discovery):**
+- Phase 2/6 when curl 403s: `firecrawl_scrape(url, formats=["markdown"])` — bypasses many Cloudflare configs; returns clean content
+- Phase 6 sitemap: `firecrawl_crawl(site, maxDepth=1)` — structured URL tree without manual XML parsing
+- Phase 7 JS links: `firecrawl_scrape(url, formats=["links"])` — all hrefs/scripts without browser
+
+### Jina Reader
+```
+No install required. Zero-config URL-prefix API.
+Available if: HTTP 200 from https://r.jina.ai/https://httpbin.org/get
+  curl -s -o /dev/null -w "%{http_code}" https://r.jina.ai/https://httpbin.org/get
+MCP: community server 'mcp-jina-reader' (check MCP tool list for 'jina_reader')
+Fallback: Firecrawl or browser fetch
+```
+
+**Usage pattern:**
+```bash
+# Fetch any URL as clean LLM-ready markdown (JS rendered, ads removed):
+curl -s "https://r.jina.ai/{target_url}"
+
+# JSON output with structured fields:
+curl -s -H "Accept: application/json" "https://r.jina.ai/{target_url}"
+
+# Force crawl past cached version:
+curl -s -H "X-No-Cache: true" "https://r.jina.ai/{target_url}"
+```
+
+- Free: 1M tokens/month, no API key required for basic use
+- Use for: Phase 2 fallback when curl 403s, Phase 6 feed/sitemap extraction, Phase 9 OSINT URL content
+- Limit: not a Cloudflare bypass tool — heavy bot-protected sites still block it; use Firecrawl or browser fetch for those
+
+### Crawl4AI
+```
+Available if: python3 -c "import crawl4ai" exits 0
+MCP: check MCP tool list for 'crawl4ai'
+Fallback: Jina Reader → Firecrawl → browser fetch
+```
+
+**Usage (Python async — Phase 6 deep crawl):**
+```python
+from crawl4ai import AsyncWebCrawler
+import asyncio
+async def crawl(url):
+    async with AsyncWebCrawler() as c:
+        r = await c.arun(url=url)
+        return r.markdown  # 67% fewer tokens than raw HTML
+asyncio.run(crawl("{target_url}"))
+```
+
+- Free, self-hosted OSS (Apache 2.0), 58k+ stars — no external API calls
+- Use when data sovereignty required or Firecrawl quota exhausted
+
+### Spider
+```
+MCP available if: 'spider_scrape' or 'spider_crawl' in MCP tool list
+API available if: SPIDER_API_KEY env var set
+```
+
+**Usage pattern:**
+```bash
+# Via API (rotates fingerprints per request — strong Cloudflare/Akamai bypass):
+curl -H "Authorization: Bearer {SPIDER_API_KEY}" \
+     -H "Content-Type: application/json" \
+     -d '{"url":"{target_url}","return_format":"markdown"}' \
+     https://api.spider.cloud/crawl
+```
+
+- Free tier available; per-request pricing from $0.01
+- Key advantage: **fingerprint rotation on every request** — different from Firecrawl's static bypass
+- Use when: Firecrawl blocked, Akamai-protected sites, need fresh fingerprint per probe
+
+### Scrapfly
+```
+API available if: SCRAPFLY_API_KEY env var set
+SDK available if: $(python3 -c "import scrapfly" 2>/dev/null) exits 0
+```
+
+**Usage pattern (asp=true for anti-bot bypass):**
+```bash
+# 98% bypass success on Cloudflare, DataDome, PerimeterX, Akamai:
+curl "https://api.scrapfly.io/scrape?key={API_KEY}&url={target_url}&asp=true&render_js=true"
+```
+
+- Free tier: 1000 credits/month
+- **Best-in-class for DataDome/PerimeterX** — different threat model from Cloudflare
+- `asp=true` activates Anti-Scraping Protection bypass (Curlium + Scrapium engines)
+- Use when: site uses DataDome/PerimeterX (detectable from response headers), all other methods blocked
+
+### Steel (self-hosted headless browser)
+```
+Available if: steel server running locally or STEEL_API_KEY env var set
+  curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health → 200
+MCP: community MCP server available
+```
+
+**Usage pattern:**
+```python
+# Open-source, self-hosted (Apache 2.0), 100 hrs/month free on Steel Cloud:
+from steel import Steel
+client = Steel(steel_api_key="{key}")  # or omit for local
+session = client.sessions.create()
+# Use CDP URL with existing browser automation tools
+cdp_url = session.cdp_url
+```
+
+- Phase 11 alternative to Chrome DevTools MCP — persistent sessions, stealth included
+- Self-hostable: `docker run -p 3000:3000 steel/steel`
+- Use when: Chrome DevTools MCP unavailable, need persistent authenticated session
+
 ### Chrome DevTools MCP
 
 Two namespaces exist depending on how the MCP server is registered. Test BOTH in Phase 1
@@ -72,14 +180,28 @@ fi
 
 ## Full Fallback Matrix
 
-| Phase | Primary | Fallback | No-tool result |
-|-------|---------|---------|----------------|
-| 3 Fingerprint | Wappalyzer MCP | Header + HTML grep | Generic signals only |
-| 2/6 URL discovery | Firecrawl map | curl /sitemap.xml | Sitemap only |
-| 4 Tech pack | GitHub raw URL | context7 MCP → web search | [TECH-PACK-UNAVAILABLE:name:ver] |
-| 9 OSINT — URL history | GAU | Wayback + CommonCrawl CDX | CDX APIs always work |
-| 11 Active browse | Chrome DevTools MCP | cmux browser | [PHASE-11-SKIPPED] |
-| Script download | GitHub raw URL | Local .beacon/ cache | [GENERATED-INLINE:path] |
+| Phase | Primary | Fallback 1 | Fallback 2 | Fallback 3 (specialist) | No-tool result |
+|-------|---------|-----------|-----------|------------------------|----------------|
+| 3 Fingerprint | Wappalyzer MCP | Header + HTML grep | — | — | Generic signals only |
+| 2/6 URL discovery | Firecrawl crawl | Spider | Jina Reader | curl /sitemap.xml | Sitemap only |
+| 2/5 CF-blocked probes | Firecrawl scrape | Spider (fingerprint rotation) | Jina Reader | Scrapfly `asp=true` | [CF-BLOCKED:all] |
+| 2/5 DataDome/PerimeterX | Scrapfly `asp=true` | Firecrawl | Browser fetch | — | [CF-BLOCKED:all] |
+| 4 Tech pack | GitHub raw URL | context7 MCP | Web search | — | [TECH-PACK-UNAVAILABLE] |
+| 6 Feed/content extraction | Firecrawl scrape | Jina Reader | Crawl4AI | Spider | curl RSS/Atom |
+| 9 OSINT — URL history | GAU | Wayback + CommonCrawl CDX | — | — | CDX APIs always work |
+| 9 OSINT — page content | Jina Reader | Firecrawl | Spider | curl | Skip if none |
+| 11 Active browse | Chrome DevTools MCP | cmux browser | Steel (self-hosted) | — | [PHASE-11-SKIPPED] |
+| Script download | GitHub raw URL | Local .beacon/ cache | — | — | [GENERATED-INLINE:path] |
+
+**Bot protection detection matrix** — identify the WAF before choosing the bypass tool:
+
+| WAF Signal | How to detect | Best bypass |
+|------------|--------------|-------------|
+| Cloudflare | `cf-ray` response header; 403 with `cloudflare` in body | Firecrawl → Spider → browser fetch |
+| DataDome | `x-datadome-*` headers; JSON `{"type":"DataDome"}` body | Scrapfly `asp=true` |
+| PerimeterX | `_px*` cookies; `403 Access Denied by PerimeterX` body | Scrapfly `asp=true` |
+| Akamai | `AkamaiGHost` in `Server` header; `x-akamai-*` headers | Spider (fingerprint rotation) |
+| Generic 403 | No WAF header signal | Try all in order |
 
 ---
 
