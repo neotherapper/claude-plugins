@@ -7,6 +7,21 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.6] — 2026-04-28
+
+### Added
+
+- Tech pack: `technologies/shopware/6.x.md` (322 lines) — dominant DACH e-commerce platform
+  - Three API layers: Store API (`/store-api/`), Admin API (`/api/`), Sync API
+  - Key recon: `sw-access-key` extraction from page source → context token → full product catalog
+  - `POST /store-api/product-listing/{categoryId}` returns prices without auth (access key only)
+  - `POST /store-api/search-suggest` — search autocomplete as product discovery
+  - Admin OpenAPI spec at `/api/_info/openapi3.json` reveals full Admin API surface
+  - 23 probe checklist items, 12 gotchas including DACH market context
+  - Session-start hook updated to advertise Shopware 6
+
+---
+
 ## [0.6.5] — 2026-04-28
 
 ### Added
