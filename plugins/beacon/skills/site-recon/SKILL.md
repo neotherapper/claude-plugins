@@ -51,6 +51,17 @@ maximise the signal available to Phase 10. Phase 10 is a synthesis step — it c
 a concrete target list *before* any browser opens. Phase 11 executes the plan. The AI
 never browses blindly.
 
+**Phase 7 note:** Phase 6 conclusions about API availability are PROVISIONAL. Phase 7 JS
+analysis routinely overrides Phase 6 "no API" verdicts — AJAX endpoints are embedded in JS
+bundles, not HTML. Never finalise the API surface until Phase 7 is complete.
+
+**Phase 7 browser-fallback:** If curl returns 404 for all JS bundle URLs (URL rewriting may
+serve a 404 HTML page instead of the JS file), log `[PHASE-7-CURL-BLOCKED:retrying-via-browser]`
+and fetch the same URLs via `cmux browser eval fetch('/path/to/bundle.js').then(r=>r.text())`.
+JS bundles on PrestaShop and similar platforms require correct Referer and session cookies that
+only the browser context provides. Phase 7 is not complete until at least one JS bundle read
+succeeds, or browser fetch also fails.
+
 ## Session brief
 
 Maintain a running markdown document in context throughout the run. This is your
@@ -224,6 +235,19 @@ an Atom feed generator tag, ASP.NET from a response header), immediately pause a
 for that framework before continuing. Do not defer the tech pack lookup to Phase 12. Log:
 `[TECH-PACK-LATE-LOAD:{framework}:{version}:phase={N}]`
 
+**Tech pack checklist comparison (run immediately after loading any tech pack):**
+After loading a tech pack (at Phase 4 time, or after a late discovery), compare the pack's
+probe checklist section against the Discovered Endpoints table in the session brief. Count how
+many checklist items have NOT yet been probed. Log:
+`[TECH-PACK-SUPPLEMENTAL-PROBE:{n} items from checklist not yet run]`
+Run all outstanding checklist items before proceeding. Do not start Phase 12 until the tech
+pack's checklist is exhausted — reading the pack but skipping its probes is the most common
+cause of incomplete output files.
+
+**External tech pack update rule:** If the user says a tech pack was added or updated externally
+after Phase 5 already ran, re-read the new pack, run its checklist comparison, and execute any
+outstanding probes before Phase 12. Log: `[TECH-PACK-RELOAD:{framework}]`
+
 ## Phase 8 — OpenAPI auto-detection
 
 Probe these paths in order; stop at the first 200 response that returns JSON or YAML:
@@ -305,6 +329,25 @@ When an e-commerce platform is detected (WooCommerce, Magento, Shopify, ZF1, ASP
 
 **Note:** A "no programmable API" conclusion requires ALL of the above to be probed and return non-useful responses. A 404 on `/wp-json/wc/v3/` does not mean the site has no API.
 
+**Critical:** Do NOT write "no JSON API" or "no programmable endpoints" in any output file until
+Phase 7 (JS bundle analysis) is fully complete. JS bundles routinely reveal AJAX endpoints that
+are invisible to Phase 5/6 probing — e.g., a search endpoint that returns HTML by default but
+JSON when `ajaxSearch=1` is appended, or a GTM data endpoint embedded only in theme JS. Phase 6
+conclusions about API availability are always provisional until Phase 7 is done.
+
+**Pagination with hidden form fields (server-rendered sites):**
+When category/product listing uses server-side pagination with hidden form fields (common on
+ASP.NET, OpenCart, PrestaShop), use the navigate→extract→POST sequence:
+```
+1. goto /category-page  (via cmux or Chrome MCP)
+2. eval: document.querySelector('input[name="s"]').value  → extract current state
+3. eval: fetch('/category.aspx', {method:'POST', body:'p=loadmore&pp=24&cid=2&s=25'})
+         .then(r=>r.text()).then(h => count product links)
+4. Repeat, incrementing 's' by page size until response returns 0 products
+```
+Stop condition is in the response, not in a URL counter. Extract the next state value from
+each response rather than guessing the increment.
+
 ## Phase 10 — Browse plan
 
 Before opening any browser, compile a prioritised list from all phase 2–9 findings:
@@ -339,6 +382,28 @@ Summary of sub-phases:
 - **11d** — Run `npx har-to-openapi`; merge with passive spec if Phase 8 found one
 
 If neither Chrome DevTools MCP nor cmux is available: log `[PHASE-11-SKIPPED]`, proceed to Phase 12.
+
+**Chrome MCP fail-fast rule:** If two consecutive Chrome MCP calls (to the recorded namespace)
+both fail with timeout or connection errors, immediately declare `[CHROME-MCP-UNAVAILABLE]` and
+switch to cmux. Do not spend more than 2 attempts diagnosing the Chrome debug port — that's
+user-side configuration. If the plugin-namespaced Chrome MCP returns "browser already running"
+on every call, the profile lock at `~/.cache/chrome-devtools-mcp/chrome-profile` needs clearing:
+```bash
+pkill -f chrome-devtools-mcp
+rm -rf ~/.cache/chrome-devtools-mcp/chrome-profile
+```
+Then retry once before switching to cmux.
+
+**Subagent dispatch rule for Phase 11:** Background subagents do not inherit Bash permissions
+from the main session. If cmux is the browse tool, Phase 11 must run in the main session — not
+dispatched as a background subagent. Use subagents only for Phases 1–9 (curl-based and passive);
+keep Phases 10–11 in the main session where Bash works.
+
+**Verification pass after subagent dispatch:** After subagents complete Phases 1–9 for multiple
+sites, the main session should read the relevant tech packs and run a verification pass: compare
+each pack's probe checklist against the subagent's session brief, then run outstanding probes
+inline in the main session. This catches misses caused by subagent permission constraints.
+Log: `[VERIFICATION-PASS:{site-slug}:{n} missing probes run]`
 
 After Phase 11 completes, set `OPENAPI_STATUS` to the full Markdown table row for INDEX.md:
 - Phase 11 ran + spec generated:
@@ -379,6 +444,14 @@ Log these in the session brief and repeat in the generated INDEX.md:
 | `[CF-PIVOT:scrapfly]` | DataDome/PerimeterX blocked; Scrapfly asp=true used |
 | `[CF-PIVOT:jina]` | WAF blocked curl; Jina Reader used instead |
 | `[CF-BLOCKED:all]` | All probe methods (curl, Firecrawl, Spider, Scrapfly, Jina) blocked |
+| `[PHASE-7-CURL-BLOCKED:retrying-via-browser]` | JS bundle fetch returned 404; retrying via browser eval |
+| `[CHROME-MCP-UNAVAILABLE]` | 2 consecutive Chrome MCP failures; switched to cmux |
+| `[CHROME-MCP-PROFILE-LOCK]` | Plugin Chrome MCP stuck; profile lock cleared |
+| `[VERIFICATION-PASS:{slug}:{n} missing probes run]` | Post-subagent tech pack verification completed |
+| `[TECH-PACK-SUPPLEMENTAL-PROBE:{n} items from checklist not yet run]` | Pack loaded; checklist comparison found outstanding probes |
+| `[TECH-PACK-RELOAD:{framework}]` | Tech pack updated externally; re-run Phase 5 probes |
+| `[CF-BYPASS:brand-subpage]` | Category page blocked; brand/manufacturer sub-page used as alternate |
+| `[PRODUCT-SITEMAP-SEED:{count} URLs]` | Product sitemap used as enumeration fallback |
 
 ## Phase 11 — cmux usage guide
 
