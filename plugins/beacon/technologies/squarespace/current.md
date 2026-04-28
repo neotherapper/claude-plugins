@@ -12,16 +12,18 @@ status: official
 
 | Signal | Type | Value | Confidence |
 |--------|------|-------|------------|
-| `static1.squarespace.com` in HTML | HTML source | CDN hostname in `<script src>` or `<link href>` | Definitive |
-| `images.squarespace-cdn.com` in HTML | HTML source | Product image CDN hostname in `<img src>` | Definitive |
-| `window.Static` JS global | JS global | Squarespace site config object present in page source | Definitive |
+| `static1.squarespace.com` in HTML | HTML source | CDN hostname in `<script src>` or `<link href>` for CSS/JS/file assets | Definitive |
+| `images.squarespace-cdn.com` in HTML | HTML source | Product and page image CDN hostname in `<img src>` | Definitive |
+| `window.Static` JS global | JS global | Squarespace site config object; set as `var Static = window.Static \|\| {}; Static.SQUARESPACE_CONTEXT = {...}` in page source | Definitive |
 | `window.Y.Squarespace` JS global | JS global | Squarespace namespace present in page source | Definitive |
 | `window.SQUARESPACE_TEMPLATE` JS global | JS global | Template config object present in page source | Definitive |
-| `sqs-*` CSS class names | HTML source | Squarespace-specific class names on DOM elements | Definitive |
+| `sqs-*` CSS class names | HTML source | Squarespace-specific class names on DOM elements (e.g. `sqs-image-block`, `sqs-code-block`, `sqs-block-button`, `sqs-announcement-bar-dropzone`) | Definitive |
 | `squarespace.com` in canonical URL | HTML meta | `<link rel="canonical">` contains squarespace.com | Definitive |
 | `.squarespace.com` domain | Domain | Unbranded Squarespace site using default subdomain | Definitive |
+| `data-name="static-context"` script tag | HTML source | `<script data-name="static-context">` wrapping the `Static.SQUARESPACE_CONTEXT` assignment | Definitive |
 | `{.} Squarespace` HTML comment | HTML source | Template comment marker in page source | High |
-| `crumb` hidden field in forms | HTML source | Squarespace CSRF token field present in form elements | High |
+| `crumb` cookie | Browser cookies | Session CSRF token set by Squarespace; documented in Squarespace cookie policy as "Session — Prevents cross-site request forgery" | High |
+| `crumb` hidden field in forms | HTML source | Same CSRF token value embedded in HTML form elements | High |
 | `X-ServedBy` response header | HTTP header | Fastly CDN header indicating Squarespace hosting | High |
 | Wappalyzer detection | Browser extension | Wappalyzer identifies Squarespace | High |
 
@@ -42,6 +44,9 @@ curl -s https://SITE_DOMAIN/ | grep -oP '"collection"\s*:\s*\{[^}]+' | head -c 5
 
 # Check for CDN fingerprint and CSRF crumb field:
 curl -s https://SITE_DOMAIN/ | grep -E 'static1\.squarespace\.com|images\.squarespace-cdn\.com|sqs-|window\.Static|crumb'
+
+# Confirm sqs- CSS class presence (definitive fingerprint):
+curl -s https://SITE_DOMAIN/ | grep -oP 'class="[^"]*sqs-[^"]*"' | head -10
 ```
 
 ## 2. Default API Surfaces
@@ -50,43 +55,52 @@ curl -s https://SITE_DOMAIN/ | grep -E 'static1\.squarespace\.com|images\.square
 
 | Endpoint | Method | Auth | Notes |
 |----------|--------|------|-------|
-| `https://SITE_DOMAIN/?format=json` | GET | None | Full site page data as JSON — always works, undocumented |
-| `https://SITE_DOMAIN/products?format=json` | GET | None | Product listing as JSON; also try `/shop`, `/store`, `/collection` |
-| `https://SITE_DOMAIN/{product-slug}?format=json` | GET | None | Single product detail including variants, prices, images |
-| `https://SITE_DOMAIN/search?format=json&q={query}` | GET | None | Search results as JSON; filter by `contentType: "product"` |
+| `https://SITE_DOMAIN/?format=json-pretty` | GET | None | Full site page data as JSON — `json-pretty` is the form documented by Squarespace; `?format=json` also observed to work in practice as a compact variant |
+| `https://SITE_DOMAIN/products?format=json-pretty` | GET | None | Product listing as JSON; also try `/shop`, `/store`, `/collection`; store page path varies per site |
+| `https://SITE_DOMAIN/{product-slug}?format=json-pretty` | GET | None | Single product detail including variants, prices, images |
+| `https://SITE_DOMAIN/search?format=json-pretty&q={query}` | GET | None | Search results as JSON; filter by `contentType: "product"` |
 | `https://SITE_DOMAIN/sitemap.xml` | GET | None | Full site sitemap; enumerate product and page URLs |
-| `https://SITE_DOMAIN/api/commerce/inventory` | GET | Session cookie | Inventory data; session-based |
-| `https://SITE_DOMAIN/api/commerce/useraccountapi` | GET | Session cookie | Customer account info; session-based |
-| `https://SITE_DOMAIN/api/shop/cart/full` | GET | Session cookie | Full cart contents with line items and totals |
+| `https://SITE_DOMAIN/api/shop/cart/full` | GET | Session cookie | Full cart contents with line items and totals (session-based) |
 | `https://SITE_DOMAIN/api/shop/cart` | POST | Session cookie + `crumb` | Cart mutation; requires CSRF crumb token |
 
-### Official Commerce API (API key required — `https://api.squarespace.com/1.0/`)
+Note: The internal `?format=json-pretty` endpoint is not a stable alternative to the official API. Squarespace explicitly documents it as a development/debugging tool. It works on any Squarespace page type (homepage, store, product, blog, search). Pagination via this endpoint returns approximately 20 items per page with a next-page offset link.
+
+### Official Commerce API (API key required — `https://api.squarespace.com/{version}/`)
+
+As of 2025, Squarespace uses integer versioning (v1, v2, v3 — non-SemVer). v2 is current and recommended for new integrations; v1.0 and v1.1 remain supported as legacy.
 
 | Endpoint | Method | Auth | Notes |
 |----------|--------|------|-------|
-| `https://api.squarespace.com/1.0/commerce/inventory` | GET | `Authorization: Bearer {api_key}` | Full inventory data |
-| `https://api.squarespace.com/1.0/commerce/orders` | GET | `Authorization: Bearer {api_key}` | Order list with pagination |
-| `https://api.squarespace.com/1.0/commerce/products` | GET | `Authorization: Bearer {api_key}` | Product catalog via official API |
-| `https://api.squarespace.com/1.0/commerce/transactions` | GET | `Authorization: Bearer {api_key}` | Transaction records |
-| `https://api.squarespace.com/1.0/data/stores/{store_id}/products` | GET | `Authorization: Bearer {api_key}` | Store-specific product list |
+| `https://api.squarespace.com/v2/commerce/products` | GET | `Authorization: Bearer {api_key}` | Product catalog — v2 is current; supports physical, service, gift card, and download product types |
+| `https://api.squarespace.com/v2/commerce/products/{ids}` | GET | `Authorization: Bearer {api_key}` | Specific products by ID including variants and images |
+| `https://api.squarespace.com/v2/commerce/inventory` | GET | `Authorization: Bearer {api_key}` | Full inventory data with per-variant stock levels |
+| `https://api.squarespace.com/v2/commerce/orders` | GET | `Authorization: Bearer {api_key}` | Order list with cursor-based pagination |
+| `https://api.squarespace.com/v2/commerce/transactions` | GET | `Authorization: Bearer {api_key}` | Transaction records |
+| `https://api.squarespace.com/v2/commerce/store-pages` | GET | `Authorization: Bearer {api_key}` | Retrieve all store pages for the site |
+| `https://api.squarespace.com/v2/commerce/profiles` | GET | `Authorization: Bearer {api_key}` | Customer profiles (read-only) |
+
+All official Commerce API endpoints use HTTPS, REST conventions, and `Authorization: Bearer {api_key}` authentication. Responses use cursor-based pagination: `pagination.nextPageCursor`, `pagination.hasNextPage`, and `pagination.nextPageUrl`.
 
 ## 3. Config / Constants Locations
 
 | Location | How to access | Contains |
 |----------|---------------|----------|
-| `window.Static` | View page source or browser console | Site config: locale, currency, base URL, template ID, collection data |
+| `window.Static` | View page source or browser console | Squarespace site config namespace; initialized as `var Static = window.Static \|\| {}` |
+| `window.Static.SQUARESPACE_CONTEXT` | Browser console or `<script data-name="static-context">` in page source | Full site context: websiteId, siteId, facebookAppId, rollups, collection data, authenticatedAccount, locale, currency, template ID |
 | `window.Y.Squarespace` | Browser console | Squarespace namespace; page context and site metadata |
 | `window.SQUARESPACE_TEMPLATE` | View page source | Template name and configuration |
-| `window.Static.SQUARESPACE_CONTEXT` | Browser console | Full site context: websiteId, siteId, collection, authenticatedAccount |
 | Inline `<script>` JSON blocks | View page source | Store collection IDs, product variant data, pricing embedded in page |
-| `/?format=json` response body | HTTP GET | `collection`, `items`, `pagination`, `website` fields — full structured data |
-| `crumb` cookie | Browser cookies | CSRF token value; required for all internal POST requests |
+| `/?format=json-pretty` response body | HTTP GET | `collection`, `items`, `pagination`, `website` fields — full structured data |
+| `crumb` cookie | Browser cookies | Session CSRF token; documented by Squarespace as preventing CSRF; changes per session |
 | `SiteUserInfo` cookie | Browser cookies | Customer session state for authenticated browsing |
 
 **Extract store page URL and collection structure:**
 
 ```bash
-# Get the full JSON context from homepage:
+# Get the full JSON context from homepage (json-pretty is the documented form):
+curl -s "https://SITE_DOMAIN/?format=json-pretty" | python3 -m json.tool | head -100
+
+# Both forms work in practice:
 curl -s "https://SITE_DOMAIN/?format=json" | python3 -m json.tool | head -100
 
 # Find the store collection page from sitemap:
@@ -95,7 +109,7 @@ curl -s "https://SITE_DOMAIN/sitemap.xml" | grep -oP '<loc>[^<]+</loc>' | grep -
 # Probe common store page paths as JSON:
 for path in /shop /store /products /collection; do
   echo "--- $path ---"
-  curl -s -o /dev/null -w "%{http_code}" "https://SITE_DOMAIN${path}?format=json"
+  curl -s -o /dev/null -w "%{http_code}" "https://SITE_DOMAIN${path}?format=json-pretty"
   echo
 done
 ```
@@ -105,8 +119,8 @@ done
 | Pattern | Location | Notes |
 |---------|----------|-------|
 | `Authorization: Bearer {api_key}` | HTTP request header | Official Commerce API; API key generated in Squarespace admin panel under Settings > Advanced > API Keys |
-| `crumb` cookie value | Cookie jar | CSRF token; extracted from page source or cookies; must be sent with all internal POST requests |
-| `crumb` hidden form field | HTML form elements | Same CSRF token embedded in form HTML; changes per session |
+| `crumb` cookie value | Cookie jar | Session CSRF token; documented by Squarespace; must be sent with all internal POST requests; changes every session |
+| `crumb` hidden form field | HTML form elements | Same CSRF token value embedded in form HTML; changes per session |
 | `SiteUserInfo` session cookie | Cookie jar | Customer session cookie set on login; required for authenticated internal API calls |
 
 **Extract crumb CSRF token from page source:**
@@ -125,20 +139,20 @@ curl -s -b /tmp/sqs-cookies.txt -X POST "https://SITE_DOMAIN/api/shop/cart" \
   -d "{\"crumb\":\"$CRUMB\", ...}"
 ```
 
-Note: The official Commerce API key is generated in the Squarespace admin dashboard under Settings > Advanced > API Keys. It is not obtainable without store owner access. For passive recon, rely entirely on `?format=json` internal endpoints.
+Note: The official Commerce API key is generated in the Squarespace admin dashboard under Settings > Advanced > API Keys. It is not obtainable without store owner access. For passive recon, rely entirely on `?format=json-pretty` internal endpoints.
 
 ## 5. JS Bundle Patterns
 
 | Path | Content |
 |------|---------|
-| `https://static1.squarespace.com/static/` | Theme static assets — CSS, JS, fonts |
+| `https://static1.squarespace.com/static/` | Theme static assets — CSS, JS, fonts; also hosts CSS custom files and unlinked uploaded files |
 | `https://static1.squarespace.com/static/squarespace.legacy.latest-en.js` | Squarespace Universal JS (core framework) |
 | `https://static1.squarespace.com/static/ta/*/js/*.js` | Squarespace template-specific JS bundles |
-| `https://images.squarespace-cdn.com/content/` | Product and page images via Squarespace image CDN |
+| `https://images.squarespace-cdn.com/content/` | Product and page images via Squarespace image CDN (used for Asset Library and image block uploads) |
 | `https://sqs-video.com/` | Squarespace-hosted video assets |
 | `https://SITE_DOMAIN/universal/scripts-compressed/` | Site-compiled JS bundle path (template-dependent) |
 
-Extract actual asset URLs from HTML `<script src>` tags — the template ID in CDN paths is site-specific and must be read from the live page.
+CDN hostname notes: `static1.squarespace.com` hosts CSS custom files and unlinked file uploads; `images.squarespace-cdn.com` hosts images uploaded via Asset Library or image block GUI. Both are current CDN hostnames (confirmed 2025-2026). Extract actual asset URLs from live page `<script src>` tags — the template ID embedded in CDN paths is site-specific.
 
 ```bash
 # Extract all Squarespace CDN asset URLs from page source:
@@ -185,46 +199,55 @@ Source maps are not expected to be present. Squarespace is a closed SaaS platfor
 
 | Endpoint | Data | Notes |
 |----------|------|-------|
-| `/?format=json` | Full page data including site config, collection info, item listings | Always works on any Squarespace page; no auth required |
-| `/products?format=json` (or `/shop`, `/store`) | Product listing with names, slugs, prices, variants, images | Store page path varies by template; find from sitemap |
-| `/{product-slug}?format=json` | Single product with all variants, pricing, images, descriptions, inventory state | Product slug from sitemap or listing response |
-| `/search?format=json&q={query}` | All content types matching query; filter `contentType: "product"` for products | Returns blog, events, products, pages — must filter |
+| `/?format=json-pretty` | Full page data including site config, collection info, item listings | Works on any Squarespace page; no auth required; `?format=json` also observed to work; ~20 items per page with pagination offset |
+| `/products?format=json-pretty` (or `/shop`, `/store`) | Product listing with names, slugs, prices, variants, images | Store page path varies by template; find from sitemap; store pages load up to 200 products at a time |
+| `/{product-slug}?format=json-pretty` | Single product with all variants, pricing, images, descriptions, inventory state | Use slug from sitemap or listing response |
+| `/search?format=json-pretty&q={query}` | All content types matching query; filter `contentType: "product"` for products | Returns blog, events, products, pages — must filter |
 | `/sitemap.xml` | All product, page, blog, and event URLs | Best starting point; reveals store page path and all product slugs |
 | `/api/shop/cart/full` | Current session cart state with line items and totals | Session-based; useful to observe cart schema |
+| Product page HTML (JSON-LD) | Built-in Product schema auto-generated by Squarespace on product pages | Squarespace automatically emits JSON-LD `<script type="application/ld+json">` with product name, price, availability; limited in detail but no auth needed |
 
 ## 9. Probe Checklist
 
 - [ ] `HEAD https://SITE_DOMAIN/` — check `X-ServedBy` header for Fastly/Squarespace pattern; confirm CDN response
-- [ ] `GET https://SITE_DOMAIN/` — grep HTML for `static1.squarespace.com`, `window.Static`, `sqs-*` class names, `crumb` hidden field to confirm Squarespace fingerprint
-- [ ] Extract `window.Static` from page source — capture `websiteId`, `siteId`, template ID, collection structure, locale, currency
-- [ ] `GET https://SITE_DOMAIN/?format=json` — full site JSON data; always works; reveals site config, page collection, item listings
+- [ ] `GET https://SITE_DOMAIN/` — grep HTML for `static1.squarespace.com`, `window.Static`, `sqs-*` class names, `data-name="static-context"` script tag, `crumb` hidden field to confirm Squarespace fingerprint
+- [ ] Extract `window.Static.SQUARESPACE_CONTEXT` from `<script data-name="static-context">` in page source — capture `websiteId`, `siteId`, template ID, collection structure, locale, currency, facebookAppId
+- [ ] `GET https://SITE_DOMAIN/?format=json-pretty` — full site JSON data; always works; reveals site config, page collection, item listings; note `?format=json` also observed to work as compact form
 - [ ] `GET https://SITE_DOMAIN/sitemap.xml` — parse full site structure to find store page path (`/shop`, `/store`, `/products`) and enumerate all product slugs
-- [ ] `GET https://SITE_DOMAIN/{store-path}?format=json` — product listing as JSON with names, prices, variants; store path found from sitemap
-- [ ] `GET https://SITE_DOMAIN/{product-slug}?format=json` — single product detail JSON including all variants, option names, pricing tiers, images
-- [ ] `GET https://SITE_DOMAIN/search?format=json&q=test` — confirm search active; note total result count; filter `contentType: "product"` for store size estimate
-- [ ] Extract `websiteId` and `siteId` from `/?format=json` response — store for reference in all further requests
+- [ ] `GET https://SITE_DOMAIN/{store-path}?format=json-pretty` — product listing as JSON with names, prices, variants; store path found from sitemap; up to 200 products per page
+- [ ] `GET https://SITE_DOMAIN/{product-slug}?format=json-pretty` — single product detail JSON including all variants, option names, pricing tiers, images; on 7.1 sites check `/p/` segment in product URL pattern
+- [ ] `GET https://SITE_DOMAIN/search?format=json-pretty&q=test` — confirm search active; note total result count; filter `contentType: "product"` for store size estimate
+- [ ] Extract `websiteId` and `siteId` from `/?format=json-pretty` response — store for reference in all further requests
 - [ ] Extract `crumb` CSRF token from page source or cookies — required for any internal POST requests
 - [ ] `GET https://SITE_DOMAIN/api/shop/cart/full` — observe cart JSON schema (session-based, may return empty cart)
+- [ ] Check product page HTML for `<script type="application/ld+json">` — Squarespace auto-emits Product JSON-LD on product pages
 - [ ] Scan HTML `<script src>` tags for third-party integration signals — check for Klaviyo, Acuity, Afterpay, Facebook Pixel, Google Analytics
+- [ ] Determine Squarespace version (7.0 vs 7.1) from page structure or `SQUARESPACE_CONTEXT` — affects product URL patterns
 
 ## 10. Gotchas
 
-- **`?format=json` is the single most powerful recon technique:** Appending `?format=json` to any Squarespace page URL returns that page's full structured JSON data — no auth required. This works on the homepage, store pages, product pages, blog pages, and search. It reveals product names, prices, variants, descriptions, images, and site config in one request. Always start here.
+- **`?format=json-pretty` is the documented form; `?format=json` also works:** Squarespace's developer documentation specifically names `?format=json-pretty` as the parameter to append to any page URL to view JSON data. The pack previously used `?format=json` throughout — both are observed to work in practice, but `json-pretty` is the documented form. Squarespace explicitly warns this is not a stable alternative to the official API and should not be used as a replacement.
 
-- **Store page URL varies by template and merchant configuration:** The e-commerce store page may be at `/shop`, `/store`, `/products`, `/collection`, or a custom URL slug. Do not hard-code `/shop`. Find the actual path from `sitemap.xml` or the `/?format=json` collection listing.
+- **Product URL structure differs between version 7.0 and 7.1:** In Squarespace 7.1, product URLs always include a fixed `/p/` segment: `{store-page-url}/p/{product-slug}` (e.g. `/store/p/my-product`). This `/p/` cannot be removed or customized. In Squarespace 7.0, products may use `/products/{slug}`, `/shop/{slug}`, or `/{store-page}/{product-slug}` depending on template. Identify the version before assuming URL structure. Find actual patterns from `sitemap.xml` or the store listing JSON.
+
+- **Official API is now versioned as v2 (integer versioning):** The base path `1.0/` used in the original pack is legacy. As of 2025, Squarespace uses integer versioning (v1, v2, v3 — non-SemVer). v2 is current and recommended for Products, Inventory, and Orders. v1.0 and v1.1 remain supported. Use `https://api.squarespace.com/v2/commerce/...` for new integrations.
+
+- **Official API pagination is cursor-based:** The official Commerce API uses `pagination.nextPageCursor`, `pagination.hasNextPage`, and `pagination.nextPageUrl` in responses. The `cursor` parameter cannot be combined with other query parameters. Responses return up to 50 items per page. The internal `?format=json-pretty` endpoint returns ~20 items per page with a separate offset-based next-page link.
+
+- **Store page URL varies by template and merchant configuration:** The e-commerce store page may be at `/shop`, `/store`, `/products`, `/collection`, or a custom URL slug. Do not hard-code `/shop`. Find the actual path from `sitemap.xml` or the `/?format=json-pretty` collection listing.
 
 - **Custom domains hide `.squarespace.com`:** Merchants use custom domains and the `.squarespace.com` subdomain does not appear in HTML. Use `static1.squarespace.com` CDN references in HTML as the definitive fingerprint — not the domain name.
 
-- **Commerce is plan-gated:** Squarespace Commerce features (products, checkout, inventory) are only available on Business and Commerce plan subscriptions. Not all Squarespace sites have a store. Confirm commerce presence via `sitemap.xml` product URLs or `?format=json` on the store page before assuming Commerce is enabled.
+- **Commerce is plan-gated:** Squarespace Commerce features (products, checkout, inventory) are only available on Business and Commerce plan subscriptions. Not all Squarespace sites have a store. Confirm commerce presence via `sitemap.xml` product URLs or `?format=json-pretty` on the store page before assuming Commerce is enabled.
 
-- **Official API requires store owner access:** The official Commerce API (`api.squarespace.com/1.0/`) requires an API key generated in the Squarespace admin panel. This is not obtainable without store owner credentials. For external recon, rely entirely on `?format=json` internal endpoints and `sitemap.xml`.
+- **Official API requires store owner access:** The official Commerce API (`api.squarespace.com/v2/`) requires an API key generated in the Squarespace admin panel. This is not obtainable without store owner credentials. For external recon, rely entirely on `?format=json-pretty` internal endpoints and `sitemap.xml`.
 
-- **`crumb` is a per-session CSRF token:** The `crumb` value changes with each new session. It must be extracted from the current page source or cookies before each POST request to internal APIs. Using a stale `crumb` will cause POST requests to fail with a CSRF error.
+- **`crumb` is a per-session CSRF token:** Squarespace's own cookie policy documents the `crumb` cookie as a session-scoped CSRF prevention mechanism. The value changes with each new session. It must be extracted from the current page source or cookies before each POST request to internal APIs. Using a stale `crumb` will cause POST requests to fail.
 
-- **Search results include all content types:** The `/search?format=json&q=` endpoint returns products, blog posts, events, and pages mixed together. Filter by `contentType: "product"` in the JSON response to isolate product results. The `totalSize` field reflects all content types, not just products.
+- **Search results include all content types:** The `/search?format=json-pretty&q=` endpoint returns products, blog posts, events, and pages mixed together. Filter by `contentType: "product"` in the JSON response to isolate product results. The `totalSize` field reflects all content types, not just products.
 
-- **Product URL patterns are template-dependent:** Product pages use either `/products/{slug}` or `/shop/{slug}` or `/{store-page-slug}/{product-slug}` depending on the Squarespace template version and store configuration. Enumerate slugs from `sitemap.xml` or the store listing `?format=json` response rather than guessing URL structure.
-
-- **Squarespace Commerce has ~88,000 active stores:** It is a mid-market e-commerce platform with deep template integration. All commerce functionality (cart, checkout, inventory) is managed natively within Squarespace — no separate storefront app is used.
+- **Squarespace auto-emits Product JSON-LD on product pages:** Squarespace automatically generates basic `<script type="application/ld+json">` Product schema on product pages with name, price, and availability. This is limited and not customizable by the merchant. It is useful for recon as an additional source of product data without needing `?format=json-pretty`.
 
 - **Stripe and PayPal are native integrations:** Squarespace Commerce uses Stripe and PayPal natively for payment processing. Presence of `js.stripe.com` in HTML on a Squarespace site is expected and does not indicate a custom Stripe integration.
+
+- **Squarespace Commerce has ~88,000 active stores:** It is a mid-market e-commerce platform with deep template integration. All commerce functionality (cart, checkout, inventory) is managed natively within Squarespace — no separate storefront app is used.
