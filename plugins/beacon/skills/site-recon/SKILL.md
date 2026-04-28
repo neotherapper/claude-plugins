@@ -137,26 +137,29 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 1. **Wappalyzer MCP** (if available): `lookup_site(url)` → framework + version
 
 2. **HTTP headers**: `curl -sI {url}` → grep for:
-   - `Ghost-Version` → Ghost
-   - `x-nuxt` → Nuxt
-   - `X-Inertia` → Laravel/Inertia
-   - `x-shopify-stage: production` → Shopify (Definitive)
-   - `X-Powered-By: Strapi` or `X-Strapi-Version` → Strapi (Definitive)
-   - `server: uvicorn` → FastAPI (combined signal)
-   - `X-Runtime` → Rails (combined signal — confirm with `csrf-token` meta or `_*_session` cookie before concluding Rails; `X-Runtime` alone is not sufficient)
+- `Ghost-Version` → Ghost
+- `x-nuxt` → Nuxt
+- `X-Inertia` → Laravel/Inertia
+- `x-shopify-stage: production` → Shopify (Definitive)
+- `X-Powered-By: Strapi` or `X-Strapi-Version` → Strapi (Definitive)
+- `server: uvicorn` → FastAPI (combined signal)
+- `X-Runtime` → Rails (combined signal — confirm with `csrf-token` meta or `_*_session` cookie before concluding Rails; `X-Runtime` alone is not sufficient)
+- `X-Powered-By: Express` → Express (Definitive)
 
 3. **HTML signals**: `curl -s {url}` → grep for:
-   - `wp-content/` → WordPress
-   - `/_next/` → Next.js
-   - `/_nuxt/` → Nuxt
-   - `laravel_session` → Laravel
-   - `/_astro/` or `astro-island` → Astro
-   - `content="Astro v` → Astro + version (Definitive)
-   - `csrfmiddlewaretoken` → Django (Definitive)
-   - `<meta name="csrf-token"` → Rails (Definitive)
-   - `cdn.shopify.com` or `window.Shopify` → Shopify (Definitive)
-   - `Zend_Controller_Exception` or `Zend_Exception` in error body → Zend Framework 1 (Definitive)
-   - `/library/Zend/` or `/application/controllers/` in stack trace → Zend Framework 1 (Definitive)
+- `wp-content/` → WordPress
+- `/_next/` → Next.js
+- `/_nuxt/` → Nuxt
+- `laravel_session` → Laravel
+- `/_astro/` or `astro-island` → Astro
+- `content="Astro v` → Astro + version (Definitive)
+- `csrfmiddlewaretoken` → Django (Definitive)
+- `<meta name="csrf-token"` → Rails (Definitive)
+- `cdn.shopify.com` or `window.Shopify` → Shopify (Definitive)
+- `Zend_Controller_Exception` or `Zend_Exception` in error body → Zend Framework 1 (Definitive)
+- `/library/Zend/` or `/application/controllers/` in stack trace → Zend Framework 1 (Definitive)
+- `X-Powered-By: Express` → Express (Definitive)
+- "Cannot GET /" → Express (High)
 
 4. **JS globals / cookies**: inspect inline scripts and `Set-Cookie` headers:
    - `__NEXT_DATA__` → Next.js
