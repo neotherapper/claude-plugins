@@ -148,7 +148,7 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 
 3. **HTML signals**: `curl -s {url}` → grep for:
 - `wp-content/` → WordPress
-- `/_next/` → Next.js
+- `/_next/` → Next.js/React
 - `/_nuxt/` → Nuxt
 - `laravel_session` → Laravel
 - `/_astro/` or `astro-island` → Astro
@@ -160,6 +160,9 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 - `/library/Zend/` or `/application/controllers/` in stack trace → Zend Framework 1 (Definitive)
 - `X-Powered-By: Express` → Express (Definitive)
 - "Cannot GET /" → Express (High)
+- `create-react-app` → React (Definitive)
+- `/static/js/main.*.js` → React (High)
+- `__REACT_DEVTOOLS_GLOBAL_HOOK__` → React (Definitive)
 
 4. **JS globals / cookies**: inspect inline scripts and `Set-Cookie` headers:
    - `__NEXT_DATA__` → Next.js
