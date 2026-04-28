@@ -7,6 +7,38 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.7] — 2026-04-28
+
+### Added
+
+- Tech pack: `technologies/ec-cube/4.x.md` (265 lines) — Japan's dominant open-source e-commerce
+  - API is **GraphQL** (not REST) via `eccube-api4` plugin at `/api`; OAuth2 Authorization Code only
+  - Session cookie is `eccube` (single Symfony session, not the 2.x/3.x multi-cookie pattern)
+  - Symfony version matrix: 4.0→Symfony 3.4, 4.1→4.4, 4.2→5.4, 4.3→Symfony 6.4
+  - CSS source maps ship by default; admin route is configurable (harden = change it)
+
+- Tech pack: `technologies/nopcommerce/4.x.md` (325 lines) — ASP.NET Core e-commerce (Eastern Europe / enterprise)
+  - Two distinct API plugin ecosystems: SevenSpikes (OAuth 2.0) vs Official nopCommerce Web API (JWT + X-API-KEY)
+  - Swagger UI at `{site}/api/index.html`; definitive cookie: `.Nop.Authentication`
+  - Slug routing: ALL entity types (products, categories, manufacturers) resolve at root — no URL prefix
+  - `nopAjaxCart` is third-party — NOT a reliable fingerprint signal
+
+- Tech pack: `technologies/cs-cart/current.md` (350 lines) — PHP e-commerce, Eastern Europe / CIS
+  - Current version 4.20.x (not 4.17.x as commonly cited); covers 4.17–4.20
+  - 30+ REST API entities including Multi-Vendor-only endpoints (`/api/vendors/`, `/api/master_products/`)
+  - `window.Tygh` JS global is the single most reliable fingerprint (Definitive)
+  - Multi-Vendor detection: `GET /api/vendors/` — 200/401=Multi-Vendor, 404=single-store
+
+- Tech pack: `technologies/sylius/2.x.md` (261 lines) — Symfony-based PHP e-commerce, European enterprise
+  - Response format is JSON-LD + Hydra (`hydra:member` collections), NOT HAL
+  - Admin JWT endpoint changed in 2.x: `POST /api/v2/admin-authentication-token` (not `/admin/authentication-token`)
+  - Channel/locale/currency cookies: `sylius_channel`, `sylius_locale`, `sylius_currency` — all Definitive
+  - Locale-prefixed storefront URLs (`/en_US/`); API at `/api/v2/` has NO locale prefix
+
+- Session-start hook updated to advertise EC-CUBE, nopCommerce, CS-Cart, Sylius
+
+---
+
 ## [0.6.6] — 2026-04-28
 
 ### Added
