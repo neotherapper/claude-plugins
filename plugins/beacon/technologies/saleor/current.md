@@ -1,6 +1,6 @@
 ---
 framework: saleor
-version: "current"
+version: "3.22.x / 3.23"
 last_updated: "2026-04-28"
 author: "@neotherapper"
 status: official
@@ -13,13 +13,15 @@ status: official
 | Signal | Type | Value | Confidence |
 |--------|------|-------|------------|
 | `POST /graphql/` responds with JSON | HTTP probe | GraphQL JSON response body | Definitive (when confirmed as Saleor) |
-| `X-Saleor-*` response headers | HTTP header | Any `X-Saleor-` prefixed header | Definitive |
 | `*.saleor.cloud` domain | Domain pattern | Hostname ends in `.saleor.cloud` | Definitive |
+| `GET /.well-known/jwks.json` returns JWKS JSON | HTTP GET | Public key set for JWS webhook signatures | High |
 | `__typename: "Shop"` in introspection | GraphQL response | `{ __typename }` returns `"Shop"` type present | High |
 | GraphQL Playground or GraphiQL at `/graphql/` | Browser / HTTP | Interactive IDE served at `/graphql/` | High |
-| `/dashboard/` returns Saleor login page | HTTP GET | React SPA login screen | High |
+| `/dashboard/` returns Saleor login page | HTTP GET | React SPA login screen (conventional default; path is configurable) | High |
 | `@saleor/sdk` in JS bundle | JS bundle string | `@saleor/sdk` substring | High |
 | Next.js `__NEXT_DATA__` with `apiUrl` pointing to `/graphql/` | JS global | `window.__NEXT_DATA__.runtimeConfig.apiUrl` | High |
+| `Saleor-Event` header on webhook receiver POST | HTTP header | Webhook event type header on incoming Saleor webhooks | High (webhook receivers) |
+| `X-Saleor-*` response headers | HTTP header | Legacy `X-Saleor-` prefixed headers (deprecated; still common pre-4.0) | Medium |
 | `/_next/` paths present | URL pattern | Next.js static assets | Medium (frontend only) |
 | Vercel deployment headers (`x-vercel-*`) | HTTP header | Vercel CDN headers | Medium (storefront only) |
 
@@ -30,8 +32,8 @@ curl -s -X POST {site}/graphql/ \
   -H "Content-Type: application/json" \
   -d '{"query":"{ shop { name domain { host } version } }"}' | python3 -m json.tool
 
-# Check for Saleor Cloud domain pattern
-curl -sI {site}/graphql/ | grep -i "x-saleor"
+# Check for JWKS endpoint — strong Saleor signal
+curl -sI {site}/.well-known/jwks.json
 
 # Extract apiUrl from Next.js storefront
 curl -s {storefront}/ | grep -oP '"apiUrl":"\K[^"]+'
@@ -45,10 +47,11 @@ Saleor is GraphQL-first — **the entire API surface is a single endpoint**.
 |----------|--------|------|-------|
 | `/graphql/` | POST | None / Bearer | Main API endpoint; JSON body with `query` key |
 | `/graphql/` | GET | None | Serves GraphQL Playground / GraphiQL (browser) |
-| `/dashboard/` | GET | None | Admin SPA login page; always at this path |
+| `/dashboard/` | GET | None | Admin SPA login page; conventional default path (configurable via `APP_MOUNT_URI`) |
+| `/.well-known/jwks.json` | GET | None | Public key set for JWS RS256 webhook signature verification |
 | `/openid-connect/` | GET | None | OpenID Connect discovery (if OIDC plugin active) |
 | `/.well-known/openid-configuration` | GET | None | OIDC config (if plugin active) |
-| `/api/webhooks/` | POST | HMAC | Saleor App webhook receiver (Next.js storefront) |
+| `/api/webhooks/` | POST | HMAC / JWS | Saleor App webhook receiver (Next.js storefront) |
 | `/plugins/mirumee.payments.adyen/webhook/` | POST | Plugin | Adyen payment plugin webhook |
 | `/plugins/mirumee.payments.braintree/webhook/` | POST | Plugin | Braintree payment plugin webhook |
 
@@ -108,8 +111,9 @@ Saleor is GraphQL-first — **the entire API surface is a single endpoint**.
 |---------|----------|-------|
 | Customer JWT (`tokenCreate` mutation) | `Authorization: Bearer {token}` | Short-lived; refresh with `tokenRefresh` |
 | Staff JWT (same mutation, higher perms) | `Authorization: Bearer {token}` | Same endpoint; permissions determined by account role |
-| App token | `Authorization: Bearer {app_token}` | Per-app; granular permissions set in dashboard |
-| Webhook HMAC (`X-Saleor-Signature`) | Request header on incoming webhooks | Verify Saleor event webhooks with app secret |
+| App token | `Authorization: Bearer {app_token}` | Per-app; granular permissions set in dashboard; created via `appTokenCreate` or at app install |
+| Webhook HMAC-SHA256 (`Saleor-Signature`) | Request header on incoming webhooks | Used when webhook `secretKey` is set; `X-Saleor-Signature` is the legacy alias (deprecated, removed in 4.0) |
+| Webhook JWS RS256 (`Saleor-Signature`) | Request header on incoming webhooks | Used when no `secretKey` is set; detached-payload JWS; verify public key from `/.well-known/jwks.json` |
 
 **Customer / staff JWT acquisition:**
 ```graphql
@@ -188,7 +192,7 @@ In Next.js: source maps appear at `/_next/static/chunks/{chunk}.js.map`.
 | `{ categories(first:100) { edges { node { id name slug level } } } }` | Full category tree with IDs | Public; use IDs for product filtering |
 | `{ collections(first:100, channel:"default-channel") { edges { node { id name slug } } } }` | All collections | Requires channel |
 | `{ attributes(first:100) { edges { node { id name slug type inputType } } } }` | Product attribute schema | Public; reveals product data model |
-| `{ products(first:100, channel:"default-channel") { edges { node { name slug } } } }` | Product catalog | Channel required; empty result = wrong channel slug |
+| `{ products(first:100, channel:"default-channel") { edges { node { name slug } } } }` | Product catalog | Channel required; empty result means wrong slug or no products — Saleor does not distinguish these by design |
 | `{ __schema { types { name kind fields { name } } } }` | Full GraphQL schema | May be disabled in production |
 | `/dashboard/` | Saleor admin login SPA | Confirms Saleor; no credentials needed |
 
@@ -198,29 +202,31 @@ Run these in order. Record result (✓ 200 / ✗ 403 / -- 404) for each.
 
 - [ ] `POST {site}/graphql/` with `{"query":"{ __typename }"}` — confirm GraphQL responds (Definitive)
 - [ ] `POST {site}/graphql/` with `{"query":"{ shop { name domain { host } version } }"}` — shop identity
+- [ ] `GET {site}/.well-known/jwks.json` — JWKS public key set; 200 with JSON is a strong Saleor signal
 - [ ] `POST {site}/graphql/` with `{"query":"{ __schema { types { name kind } } }"}` — full schema introspection
 - [ ] `POST {site}/graphql/` with categories query (`first:100`) — category tree with IDs
 - [ ] `POST {site}/graphql/` with collections query (`channel:"default-channel"`) — collections list
 - [ ] `POST {site}/graphql/` with attributes query (`first:100`) — attribute schema
-- [ ] `POST {site}/graphql/` with products query (`channel:"default-channel"`) — product catalog
+- [ ] `POST {site}/graphql/` with products query (`channel:"default-channel"`) — product catalog; empty result does not confirm wrong slug (Saleor silences wrong-slug errors by design)
 - [ ] `POST {site}/graphql/` with `{"query":"{ channels { id name slug currencyCode } }"}` — enumerate channels (may require staff auth; 200 with empty = auth needed)
-- [ ] `GET {site}/dashboard/` — Saleor admin login page (confirms Saleor; note response)
+- [ ] `GET {site}/dashboard/` — Saleor admin login page (conventional default; if 404 also try `{site}/`); note response
 - [ ] `GET {site}/.well-known/openid-configuration` — OIDC config (200 = OIDC plugin active)
 - [ ] `GET {storefront}/` — check for `__NEXT_DATA__` and `apiUrl` in HTML source
 - [ ] `GET {storefront}/_next/static/chunks/pages/_app*.js` — extract `apiUrl` and `@saleor/sdk` presence
 - [ ] `GET {site}/graphql/` in browser — check for GraphQL Playground / GraphiQL UI
-- [ ] `HEAD {site}/graphql/` — check response headers for `X-Saleor-*`
+- [ ] `HEAD {site}/graphql/` — check response headers for `Saleor-Signature` or legacy `X-Saleor-*`
 - [ ] `GET {storefront}/api/webhooks/` — Saleor App webhook receiver endpoint
 
 ## 10. Gotchas
 
 - **Separate domains for API and storefront.** Saleor's Django API and the Next.js storefront commonly run on different domains (e.g., `api.example.com` for GraphQL and `www.example.com` for the storefront). Always probe both independently. Saleor Cloud uses `*.saleor.cloud` for the API.
-- **Channel slug is required for most storefront data.** Products, collections, and pricing all require a `channel` argument. `"default-channel"` is the convention but is not guaranteed. If product queries return an empty edges array, try enumerating channels or guessing common slugs (`default`, `usd`, `eur`, `en`).
+- **Channel slug is required for most storefront data.** Products, collections, and pricing all require a `channel` argument. `"default-channel"` is the conventional slug but is not guaranteed. An empty `edges` array does not distinguish "wrong channel slug" from "no products in this channel" — Saleor returns empty silently on a wrong slug by design to prevent channel enumeration. The reliable ways to discover the actual slug are: reading `window.__NEXT_DATA__` or `NEXT_PUBLIC_SALEOR_API_URL` config on the storefront, querying `{ channels { slug } }` with staff auth, or finding the slug in the dashboard.
 - **Introspection may be disabled in production.** A `{ __typename }` probe confirms the GraphQL endpoint is live even when introspection is turned off. An introspection error does not mean the endpoint is blocked.
 - **Staff-only queries return empty data, not 403.** Saleor silently returns `null` or an empty edges array for queries requiring staff permissions rather than a 403 error. Absence of data is not proof the endpoint is inaccessible.
 - **Relay-style pagination.** Saleor uses cursor-based pagination (`first`, `last`, `before`, `after`) — not page numbers. To page through results, use `pageInfo { hasNextPage endCursor }` and pass `after: "{endCursor}"` in the next request.
-- **The dashboard path is fixed.** `/dashboard/` is always the Saleor admin path — it is not randomized. Login credentials are not default values; do not attempt brute-force or stuffing.
+- **The dashboard path is configurable, not fixed.** `/dashboard/` is the conventional default set by `APP_MOUNT_URI` in the dashboard build, but operators can mount the dashboard at any path (e.g., `/admin/`, `/`). If `GET {site}/dashboard/` returns 404, check the JS bundle for `APP_MOUNT_URI` or try the root `/`. Login credentials are not default values; do not attempt brute-force or stuffing.
 - **Saleor Cloud domain is a Definitive signal.** Any `*.saleor.cloud` hostname is a Saleor Cloud API instance. The custom storefront domain may be on a CDN (Vercel, Cloudflare) with no Saleor-specific headers.
 - **App tokens are per-application with granular permissions.** Unlike a global API key, each Saleor App has its own token and permission scope. Token enumeration from the dashboard is required to understand the full access surface.
 - **`product.pricing` is null without channel context.** A product node without a price in a given channel returns `pricing: null`. This is expected — the product exists but is not listed in that channel.
-- **Webhook signatures use HMAC-SHA256.** Saleor signs outbound webhook events with `X-Saleor-Signature`. Verify using the app's signing secret from the dashboard.
+- **Webhook signatures have two modes and a header rename.** When a webhook `secretKey` is set, Saleor signs with HMAC-SHA256. When no `secretKey` is set, Saleor uses JWS RS256 with a detached payload; the verifier must fetch the public key from `GET {api}/.well-known/jwks.json`. The header in current 3.x is `Saleor-Signature` (no `X-` prefix). The legacy `X-Saleor-Signature` is deprecated and will be removed in Saleor 4.0; both headers are sent during the transition period.
+- **Auto-checkout completion (3.23+).** If the `automaticCompletion` flag is enabled on a channel's `CheckoutSettings`, Saleor can complete a checkout without an explicit `checkoutComplete` mutation call. Once auto-completed, the `Checkout` object is deleted and any subsequent queries or mutations on that checkout ID return errors or the previously created `Order`. Be aware when probing checkout flows on 3.23+ instances.
