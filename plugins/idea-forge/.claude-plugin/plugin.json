@@ -1,0 +1,14 @@
+{
+  "name": "idea-forge",
+  "version": "0.1.0",
+  "author": {
+    "name": "Georgios Pilitsoglou",
+    "url": "https://pilitsoglou.com",
+    "github": "neotherapper"
+  },
+  "description": "Two-stage business idea pipeline: surface opportunity gaps and evaluate viability.",
+  "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/idea-forge",
+  "repository": "https://github.com/neotherapper/claude-plugins",
+  "license": "MIT",
+  "keywords": ["business-ideas", "idea-generation", "idea-evaluation", "market-research", "startup"]
+}
