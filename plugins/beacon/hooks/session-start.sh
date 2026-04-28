@@ -14,7 +14,7 @@ Two skills are available:
                 Trigger: "tell me about [site]", "load research for...", /beacon:load
 
 Output always goes to: docs/research/{site-name}/
-Tech packs available for: WordPress, WooCommerce, Magento 2, PrestaShop, Shopware 6, ASP.NET, BigCommerce, OpenCart, Squarespace, Wix, Ecwid, Salesforce CC, Saleor, Medusa, Next.js, Nuxt, Django, Rails, Astro, Laravel, Shopify, Ghost, Zend Framework 1
+Tech packs available for: WordPress, WooCommerce, Magento 2, PrestaShop, Shopware 6, EC-CUBE, nopCommerce, CS-Cart, Sylius, ASP.NET, BigCommerce, OpenCart, Squarespace, Wix, Ecwid, Salesforce CC, Saleor, Medusa, Next.js, Nuxt, Django, Rails, Astro, Laravel, Shopify, Ghost, Zend Framework 1
 
 ============================
 EOF
