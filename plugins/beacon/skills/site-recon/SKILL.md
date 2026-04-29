@@ -163,6 +163,14 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 - `create-react-app` → React (Definitive)
 - `/static/js/main.*.js` → React (High)
 - `__REACT_DEVTOOLS_GLOBAL_HOOK__` → React (Definitive)
+- `content="Sylius"` → Sylius (Definitive)
+- `/admin/` + `sylius` in cookies → Sylius (High)
+- `content="PrestaShop"` → PrestaShop (Definitive)
+- `/admin[random]/` → PrestaShop (High)
+- `/modules/` → PrestaShop/OpenCart (Medium)
+- `/catalog/view/theme/default/stylesheet/stylesheet.css` → OpenCart (Definitive)
+- `sw-context-token` cookie → Shopware (Definitive)
+- `sw-version` header → Shopware (Definitive)
 
 4. **JS globals / cookies**: inspect inline scripts and `Set-Cookie` headers:
    - `__NEXT_DATA__` → Next.js

@@ -61,7 +61,8 @@ See [`docs/platform/`](docs/platform/) for detailed per-platform setup guides.
 
 ## Tech packs
 
-Beacon ships with tech packs for WordPress, Next.js, Nuxt, Django, Rails, Shopify, Astro, Laravel, Ghost, Express, and React. Each pack tells Beacon where to look for APIs, config values, auth patterns, and known public endpoints on sites using that framework.\n
+Beacon ships with tech packs for WordPress, Next.js, Nuxt, Django, Rails, Shopify, Astro, Laravel, Ghost, Express, React, Sylius, PrestaShop, OpenCart, and Shopware. Each pack tells Beacon where to look for APIs, config values, auth patterns, and known public endpoints on sites using that framework.
+
 Missing a framework? Beacon will web-search for it and offer to open a PR so the community benefits too.
 
 ## Contributing
