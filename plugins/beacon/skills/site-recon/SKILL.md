@@ -171,6 +171,15 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 - `/catalog/view/theme/default/stylesheet/stylesheet.css` → OpenCart (Definitive)
 - `sw-context-token` cookie → Shopware (Definitive)
 - `sw-version` header → Shopware (Definitive)
+- `X-Bc-Api-Version` header → BigCommerce (Definitive)
+- `/api/storefront/cart` → BigCommerce (High)
+- `/bc-static/` → BigCommerce (Medium)
+- `content="Wix.com Website Builder"` → Wix (Definitive)
+- `X-Wix-Request-Id` header → Wix (High)
+- `/_api/wix-site/v1/site` → Wix (High)
+- `content="Squarespace"` → Squarespace (Definitive)
+- `X-Squarespace-Version` header → Squarespace (Definitive)
+- `/api/commerce/v1/products` → Squarespace (High)
 
 4. **JS globals / cookies**: inspect inline scripts and `Set-Cookie` headers:
    - `__NEXT_DATA__` → Next.js
