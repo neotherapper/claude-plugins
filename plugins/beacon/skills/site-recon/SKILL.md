@@ -180,6 +180,14 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 - `content="Squarespace"` → Squarespace (Definitive)
 - `X-Squarespace-Version` header → Squarespace (Definitive)
 - `/api/commerce/v1/products` → Squarespace (High)
+- `X-Ecwid-Storefront-Id` header → Ecwid (Definitive)
+- `app.ecwid.com/script.js` → Ecwid (Definitive)
+- `content="Big Cartel"` → Big Cartel (Definitive)
+- `X-BigCartel-Version` header → Big Cartel (Definitive)
+- `/bigcartel.js` → Big Cartel (High)
+- `X-Square-Store-Id` header → Square Online (Definitive)
+- `content="Square Online"` → Square Online (Definitive)
+- `/api/store/v1/products` → Square Online (High)
 
 4. **JS globals / cookies**: inspect inline scripts and `Set-Cookie` headers:
    - `__NEXT_DATA__` → Next.js

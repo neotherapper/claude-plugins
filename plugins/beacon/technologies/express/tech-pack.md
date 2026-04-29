@@ -86,3 +86,41 @@ app.post('/auth/register', (req, res) => {...});
 - This tech pack should be loaded when beacon detects Node.js applications
 - Activate when any Express fingerprinting rule matches
 - Run Express-specific discovery phases
+
+## 12. Framework-Specific Google Dorks
+
+Use these Google search queries to discover exposed endpoints, configuration files, and documentation for this framework.
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:/api/` | Express API routes and endpoints |
+| `site:{domain} inurl:/routes/` | Express route definition files |
+| `site:{domain} "express" "router"` | Express router endpoint references |
+| `site:{domain} inurl:express-session` | Express session middleware paths |
+
+### Complete Dork List for Express
+
+```
+# API endpoints
+site:{domain} inurl:/api/
+site:{domain} inurl:/auth/login
+site:{domain} inurl:/health
+
+# Framework-specific paths
+site:{domain} inurl:/routes/
+site:{domain} inurl:/public/
+
+# Configuration files
+site:{domain} filetype:js "express"
+site:{domain} filetype:json "package.json"
+
+# Documentation/leaks
+site:{domain} "Express" "api" "endpoint"
+site:{domain} "express-session" "secret"
+
+# Admin/debug paths
+site:{domain} inurl:/api/
+site:{domain} inurl:/debug/
+```

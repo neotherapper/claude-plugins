@@ -251,3 +251,41 @@ Wix Stores product URLs follow a default pattern: `{site}/product-page/{product-
 - **Headless Wix changes the observable network surface:** Wix now supports headless deployments (Next.js, etc.) via `@wix/sdk` and `@wix/stores` npm packages. A headless Wix store will not emit the internal `/_api/` requests visible in DevTools — it will instead make calls to `www.wixapis.com` REST endpoints. Detect headless mode by the absence of internal API calls and the presence of `@wix/sdk` in the site's dependency manifest.
 
 - **`~825k stores` figure is outdated:** As of 2025-2026, Wix powers approximately 3.5 million active e-commerce stores globally, making it a major player in the SMB e-commerce space. The old figure significantly understated its scale.
+
+## 12. Framework-Specific Google Dorks
+
+Use these Google search queries to discover exposed endpoints, configuration files, and documentation for this framework.
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:/_api/wix-ecommerce-storefront-web/` | Wix Stores internal API |
+| `site:{domain} inurl:static.wixstatic.com` | Wix CDN-hosted assets |
+| `site:{domain} "wix" "api"` | Wix Stores API references |
+| `site:{domain} "wix" "storefront"` | Wix storefront configuration |
+
+### Complete Dork List for Wix
+
+```
+# API endpoints
+site:{domain} inurl:/_api/wix-ecommerce-storefront-web/
+site:{domain} inurl:/api.wixapis.com/stores/v2/
+site:{domain} inurl:/sitemap.xml
+
+# Framework-specific paths
+site:{domain} inurl:static.wixstatic.com
+site:{domain} inurl:/shop/
+
+# Configuration files
+site:{domain} filetype:js "window.__wix_site__"
+site:{domain} filetype:js "svSession"
+
+# Documentation/leaks
+site:{domain} "Wix" "api" "endpoint"
+site:{domain} "XSRF-TOKEN" "cookie"
+
+# Admin/debug paths
+site:{domain} inurl:/_api/wix-ecommerce-storefront-web/
+site:{domain} inurl:/account/
+```

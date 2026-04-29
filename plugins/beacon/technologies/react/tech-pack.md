@@ -166,4 +166,70 @@ When React is detected, probe for these ecosystem technologies:
 - React version probing activates during JS bundle analysis phase
 - API surface mapping focuses on `/api/` and `/graphql` endpoints
 - Additional discovery of related technologies (state management, styling)
-- Error page analysis for React-specific errors
+
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"useEffect(" language:javascript` | React useEffect hook usage |
+| `"useState(" language:javascript` | React useState hook usage |
+| `"createContext(" language:javascript` | React context creation |
+| `"React.Component" language:javascript` | Class component definitions |
+
+### Example Queries for React
+
+```bash
+# Search for custom API routes/endpoints
+site:github.com "React" "api" filetype:js "fetch"
+
+# Search for authentication patterns
+site:github.com "React" "auth" "context" language:javascript
+
+# Search for configuration files with endpoint definitions
+site:github.com "React" "package" "endpoint" language:javascript
+
+# Search for custom post types, taxonomies, or extensions
+site:github.com "React" "component" "custom" language:javascript
+```
+
+## 12. Framework-Specific Google Dorks
+
+Use these Google search queries to discover exposed endpoints, configuration files, and documentation for this framework.
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:/static/js/` | React compiled JS bundles |
+| `site:{domain} inurl:/api/` | React app API calls |
+| `site:{domain} "react" "api" "fetch"` | React API fetch call references |
+| `site:{domain} inurl:__react` | React dev tools or global objects |
+
+### Complete Dork List for React
+
+```
+# API endpoints
+site:{domain} inurl:/api/
+site:{domain} inurl:/graphql
+site:{domain} inurl:/auth/login
+
+# Framework-specific paths
+site:{domain} inurl:/static/js/
+site:{domain} inurl:/asset-manifest.json
+
+# Configuration files
+site:{domain} filetype:js "react"
+site:{domain} filetype:json "package.json"
+
+# Documentation/leaks
+site:{domain} "React" "api" "endpoint"
+site:{domain} "useEffect" "fetch" "api"
+
+# Admin/debug paths
+site:{domain} inurl:/api/
+site:{domain} inurl:/__react/devtools
+```

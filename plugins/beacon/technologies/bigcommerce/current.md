@@ -228,6 +228,44 @@ Source maps are almost always absent on standard Stencil/Cornerstone stores. Hea
 
 - **Customer GraphQL queries require a customer impersonation token, not the standard storefront token.** The `{ customer { ... } }` GraphQL query requires a customer impersonation token (generated server-side via Management API), not the page-embedded `gql_token`. Using the standard token returns null for customer data even when a customer is logged in.
 
+## 12. Framework-Specific Google Dorks
+
+Use these Google search queries to discover exposed endpoints, configuration files, and documentation for this framework.
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:/api/v3/` | BigCommerce Management API v3 endpoints |
+| `site:{domain} inurl:cdn11.bigcommerce.com` | BigCommerce CDN-hosted assets |
+| `site:{domain} "bigcommerce" "api"` | BigCommerce API references |
+| `site:{domain} "storefront" "token"` | BigCommerce Storefront GraphQL tokens |
+
+### Complete Dork List for BigCommerce
+
+```
+# API endpoints
+site:{domain} inurl:/graphql
+site:{domain} inurl:/api/v3/
+site:{domain} inurl:/api/storefront/
+
+# Framework-specific paths
+site:{domain} inurl:cdn11.bigcommerce.com
+site:{domain} inurl:/login.php
+
+# Configuration files
+site:{domain} filetype:js "BCData"
+site:{domain} filetype:json "store_hash"
+
+# Documentation/leaks
+site:{domain} "BigCommerce" "api" "endpoint"
+site:{domain} "gql_token" "Bearer"
+
+# Admin/debug paths
+site:{domain} inurl:/admin/
+site:{domain} inurl:/customer/current.jwt
+```
+
 - **Akamai WAF is common in front of BigCommerce stores.** Many mid-to-large BigCommerce merchants use Akamai for DDoS protection and WAF. Aggressive probing triggers rate limiting and 429 responses. Back off on 429s and space requests. Detect Akamai via `X-Check-Cacheable`, `AkamaiGHost`, or `X-Akamai-*` response headers.
 
 - **`/customer/current.jwt` requires a valid `app_client_id`.** The Current Customer JWT endpoint always requires an `app_client_id` query parameter matching an active API Account's client ID. Without it, the endpoint returns an error. Guest shoppers return 404 regardless of the client ID.

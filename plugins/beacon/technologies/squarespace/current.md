@@ -251,3 +251,41 @@ Source maps are not expected to be present. Squarespace is a closed SaaS platfor
 - **Stripe and PayPal are native integrations:** Squarespace Commerce uses Stripe and PayPal natively for payment processing. Presence of `js.stripe.com` in HTML on a Squarespace site is expected and does not indicate a custom Stripe integration.
 
 - **Squarespace Commerce has ~88,000 active stores:** It is a mid-market e-commerce platform with deep template integration. All commerce functionality (cart, checkout, inventory) is managed natively within Squarespace — no separate storefront app is used.
+
+## 12. Framework-Specific Google Dorks
+
+Use these Google search queries to discover exposed endpoints, configuration files, and documentation for this framework.
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:/products/` | Squarespace store product pages |
+| `site:{domain} inurl:static1.squarespace.com` | Squarespace CDN-hosted assets |
+| `site:{domain} "squarespace" "api"` | Squarespace Commerce API references |
+| `site:{domain} "squarespace" "format=json"` | Squarespace internal JSON endpoints |
+
+### Complete Dork List for Squarespace
+
+```
+# API endpoints
+site:{domain} inurl:/?format=json-pretty
+site:{domain} inurl:/api/shop/cart
+site:{domain} inurl:/api.squarespace.com/v2/
+
+# Framework-specific paths
+site:{domain} inurl:static1.squarespace.com
+site:{domain} inurl:/shop/
+
+# Configuration files
+site:{domain} filetype:js "Static.SQUARESPACE_CONTEXT"
+site:{domain} filetype:js "crumb"
+
+# Documentation/leaks
+site:{domain} "Squarespace" "api" "endpoint"
+site:{domain} "crumb" "cookie"
+
+# Admin/debug paths
+site:{domain} inurl:/api/shop/cart/full
+site:{domain} inurl:/customer/current.jwt
+```

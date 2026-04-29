@@ -177,3 +177,70 @@ Run these probes and record results (✓ success / ✗ error / – not applicabl
 - **`__APOLLO_STATE__` is a goldmine.** The Apollo cache serialises every entity with its ID and all fetched fields. Read `window.__APOLLO_STATE__` in the browser to see all data the app has ever fetched — type names, IDs, field values — without making a single API call.
 - **Partial success is valid.** A response with both `data` and `errors` is not a failure — it means some resolvers succeeded and others failed. Treat each resolver result independently.
 - **Hasura JWT claims are in headers, not in the token itself.** Hasura reads user identity from `x-hasura-user-id`, `x-hasura-role`, `x-hasura-org-id` headers (extracted from JWT or set directly). If you have a valid session token, you can set these headers manually to test different roles.
+
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"type Query" language:graphql` | GraphQL Query type definitions |
+| `"type Mutation" language:graphql` | GraphQL Mutation type definitions |
+| `"schema {" language:graphql` | GraphQL schema definitions |
+| `"@deprecated" language:graphql` | Deprecated field markers |
+
+### Example Queries for GraphQL
+
+```bash
+# Search for custom API routes/endpoints
+site:github.com "GraphQL" "api" filetype:graphql "type Query"
+
+# Search for authentication patterns
+site:github.com "GraphQL" "auth" "Bearer" language:graphql
+
+# Search for configuration files with endpoint definitions
+site:github.com "GraphQL" "schema" "endpoint" language:graphql
+
+# Search for custom post types, taxonomies, or extensions
+site:github.com "GraphQL" "type" "custom" language:graphql
+```
+
+## 12. Framework-Specific Google Dorks
+
+Use these Google search queries to discover exposed endpoints, configuration files, and documentation for this framework.
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:/graphql` | GraphQL API endpoints |
+| `site:{domain} inurl:__schema` | GraphQL introspection schema |
+| `site:{domain} "graphql" "query"` | GraphQL query references in content |
+| `site:{domain} inurl:graphql-ws` | GraphQL WebSocket subscription endpoints |
+
+### Complete Dork List for GraphQL
+
+```
+# API endpoints
+site:{domain} inurl:/graphql
+site:{domain} inurl:/api/graphql
+site:{domain} inurl:/v1/graphql
+
+# Framework-specific paths
+site:{domain} inurl:__typename
+site:{domain} inurl:graphql-ws
+
+# Configuration files
+site:{domain} filetype:json "openapi" "graphql"
+site:{domain} filetype:js "ApolloClient"
+
+# Documentation/leaks
+site:{domain} "GraphQL" "api" "endpoint"
+site:{domain} "hasura" "x-hasura-role"
+
+# Admin/debug paths
+site:{domain} inurl:/graphql
+site:{domain} inurl:/graphiql
+```

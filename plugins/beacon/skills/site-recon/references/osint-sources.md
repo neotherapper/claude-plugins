@@ -25,6 +25,50 @@ curl -s "http://web.archive.org/cdx/search/cdx?url=*.${TARGET}/*&output=json&fl=
   | python3 -c "import sys,json; [print(r[0]) for r in json.load(sys.stdin)[1:]]"
 ```
 
+---
+
+## Wayback Machine Versioning Analysis
+
+Track API endpoint evolution over time by filtering CDX results by timestamp. Reveals deprecated endpoints that may still be accessible, versioned API paths, and historical authentication patterns.
+
+```bash
+TARGET="example.com"
+
+# Get API endpoints by year — reveals versioning history
+for YEAR in 2022 2023 2024 2025 2026; do
+  echo "=== ${YEAR} ==="
+  curl -s "http://web.archive.org/cdx/search/cdx?url=*.${TARGET}/api/*&output=json&fl=original,timestamp&from=${YEAR}0101&to=${YEAR}1231&collapse=urlkey" \
+    | python3 -c "import sys,json; [print(r[0], r[1][:4]+'-'+r[1][4:6]+'-'+r[1][6:8]) for r in json.load(sys.stdin)[1:]]" 2>/dev/null
+done
+
+# Find deprecated endpoints still responding 200
+# Step 1: Get historical endpoints
+HISTORICAL=$(curl -s "http://web.archive.org/cdx/search/cdx?url=*.${TARGET}/*&output=json&fl=original&collapse=urlkey&limit=1000" \
+  | python3 -c "import sys,json; print('\n'.join([r[0] for r in json.load(sys.stdin)[1:]]))" 2>/dev/null)
+
+# Step 2: Probe each historical path against live site
+echo "$HISTORICAL" | grep -E "(/api/|/v[0-9]|/admin/)" | while read url; do
+  path=$(echo "$url" | sed "s|https\?://[^/]*/||")
+  status=$(curl -s -o /dev/null -w "%{http_code}" "https://${TARGET}/${path}")
+  [ "$status" = "200" ] && echo "LIVE (was historical): /${path}"
+done
+```
+
+**What it reveals:**
+- Endpoints deprecated in UI but still accessible server-side
+- API versioning patterns (`/api/v1/` → `/api/v2/`) 
+- Authentication changes over time (old endpoints may have weaker auth)
+- Retired admin paths that still respond
+
+**Versioning patterns to look for:**
+| Pattern | Example | Risk if still live |
+|---------|---------|-------------------|
+| `/api/v1/`, `/api/v2/` | Versioned REST APIs | Old version may lack current auth checks |
+| `/_old/`, `/legacy/` | Legacy paths | Often forgotten, weaker security |
+| `/beta/`, `/staging/` | Pre-production | Debug mode, test credentials |
+| `/wp-json/wp/v1/` → `/wp/v2/` | WordPress REST | v1 may have different permissions |
+| `/rest/V1/` → `/rest/V2/` | Magento/Adobe Commerce | Version落差 in auth |
+
 **What to extract:** URL paths, especially `/api/*`, `/v[0-9]/*`, `/graphql`, `/admin/*`
 
 ---
@@ -300,6 +344,10 @@ Document all OSINT findings in the session brief under:
 **CDX Sources:**
 - Wayback CDX: {N} URLs found — notable patterns: {patterns}
 - CommonCrawl: {N} URLs found / skipped (no recent index)
+
+**Versioning Analysis (Wayback):**
+- Historical endpoints found: {N} — version patterns: {patterns}
+- Deprecated endpoints still live: {list}
 
 **Subdomains (crt.sh):**
 - {subdomain} [{flag: STAGING-ENV / API / ADMIN}]

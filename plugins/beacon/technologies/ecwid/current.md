@@ -190,6 +190,44 @@ No source maps are available for Ecwid's widget JS. If the host site uses its ow
 
 - **Pagination uses `offset` and `limit`:** Products are paginated with `?limit=100&offset=0`. Increment `offset` by `limit` on each request until the returned `items` count is less than `limit`. There is no cursor-based pagination. Maximum `limit` is 100.
 
+## 12. Framework-Specific Google Dorks
+
+Use these Google search queries to discover exposed endpoints, configuration files, and documentation for this framework.
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:app.ecwid.com` | Ecwid widget and API endpoints |
+| `site:{domain} inurl:/api/v3/` | Ecwid REST API v3 endpoints |
+| `site:{domain} "ecwid" "api"` | Ecwid API references |
+| `site:{domain} "public_" "token"` | Ecwid public access tokens |
+
+### Complete Dork List for Ecwid
+
+```
+# API endpoints
+site:{domain} inurl:/api/v3//profile
+site:{domain} inurl:/api/v3//products
+site:{domain} inurl:/sitemap.xml
+
+# Framework-specific paths
+site:{domain} inurl:app.ecwid.com
+site:{domain} inurl:/product-page/
+
+# Configuration files
+site:{domain} filetype:js "window.ec"
+site:{domain} filetype:js "storeId"
+
+# Documentation/leaks
+site:{domain} "Ecwid" "api" "endpoint"
+site:{domain} "public_" "Bearer"
+
+# Admin/debug paths
+site:{domain} inurl:/api/v3//profile
+site:{domain} inurl:/account/login
+```
+
 - **Rate limit is 600 req/min — with hard failure on bad tokens:** The public API allows 600 requests per minute. Exceeding this returns HTTP 429 with a `Retry-After` header. Additionally, if more than 20 req/min or 600 total requests arrive with a non-working token, the IP is blocked for an extended period. Use valid tokens and respect the limit.
 
 - **`profile` endpoint returns limited data with public token:** With a public token, `/profile` returns only store ID, website URL, platform type, and Instant Site settings. Company address, social links, enabled payment methods, and currency are only available with a private token that has `read_store_profile` scope. Do not assume the public-token profile response is the complete picture.
