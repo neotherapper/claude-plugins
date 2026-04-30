@@ -7,6 +7,25 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.8] — 2026-04-30
+
+### Added
+
+- Phase 9 OSINT sources — 11 new patterns added:
+  - **Subdomain Discovery**: DNSDumpster, VirusTotal, BuiltWith
+  - **Live Capture**: urlscan.io
+  - **Infrastructure**: ASN/IP Range Lookup, Censys
+  - **S3 Buckets**: Public bucket enumeration
+  - **Passive DNS Alternative**: Farsight DNSDB
+  - **External References**: Paste Site Search, Package Registry Search, Bug Bounty Scope Search
+
+### Changed
+
+- Session brief format updated with new fields for all new OSINT sources
+- Both `osint-sources.md` files now in sync (707 lines each)
+
+---
+
 ## [0.6.7] — 2026-04-28
 
 ### Added
