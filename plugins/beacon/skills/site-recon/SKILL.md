@@ -188,6 +188,15 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 - `X-Square-Store-Id` header → Square Online (Definitive)
 - `content="Square Online"` → Square Online (Definitive)
 - `/api/store/v1/products` → Square Online (High)
+- `content="Joomla!"` → Joomla (Definitive)
+- `X-Generator: Joomla` header → Joomla (Definitive)
+- `/administrator/` → Joomla (High)
+- `content="Webflow"` → Webflow (Definitive)
+- `X-Webflow-Site` header → Webflow (Definitive)
+- `/js/webflow.js` → Webflow (Definitive)
+- `content="Drupal"` → Drupal (Definitive)
+- `X-Generator: Drupal` header → Drupal (Definitive)
+- `/core/` → Drupal (High)
 
 4. **JS globals / cookies**: inspect inline scripts and `Set-Cookie` headers:
    - `__NEXT_DATA__` → Next.js
