@@ -228,6 +228,149 @@ Source maps are almost always absent on standard Stencil/Cornerstone stores. Hea
 
 - **Customer GraphQL queries require a customer impersonation token, not the standard storefront token.** The `{ customer { ... } }` GraphQL query requires a customer impersonation token (generated server-side via Management API), not the page-embedded `gql_token`. Using the standard token returns null for customer data even when a customer is logged in.
 
+## 12. Framework-Specific Google Dorks
+
+Use these Google search queries to discover exposed endpoints, configuration files, and documentation for this framework.
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:/api/v3/` | BigCommerce Management API v3 endpoints |
+| `site:{domain} inurl:cdn11.bigcommerce.com` | BigCommerce CDN-hosted assets |
+| `site:{domain} "bigcommerce" "api"` | BigCommerce API references |
+| `site:{domain} "storefront" "token"` | BigCommerce Storefront GraphQL tokens |
+
+### Complete Dork List for BigCommerce
+
+```
+# API endpoints
+site:{domain} inurl:/graphql
+site:{domain} inurl:/api/v3/
+site:{domain} inurl:/api/storefront/
+
+# Framework-specific paths
+site:{domain} inurl:cdn11.bigcommerce.com
+site:{domain} inurl:/login.php
+
+# Configuration files
+site:{domain} filetype:js "BCData"
+site:{domain} filetype:json "store_hash"
+
+# Documentation/leaks
+site:{domain} "BigCommerce" "api" "endpoint"
+site:{domain} "gql_token" "Bearer"
+
+# Admin/debug paths
+site:{domain} inurl:/admin/
+site:{domain} inurl:/customer/current.jwt
+```
+
 - **Akamai WAF is common in front of BigCommerce stores.** Many mid-to-large BigCommerce merchants use Akamai for DDoS protection and WAF. Aggressive probing triggers rate limiting and 429 responses. Back off on 429s and space requests. Detect Akamai via `X-Check-Cacheable`, `AkamaiGHost`, or `X-Akamai-*` response headers.
 
 - **`/customer/current.jwt` requires a valid `app_client_id`.** The Current Customer JWT endpoint always requires an `app_client_id` query parameter matching an active API Account's client ID. Without it, the endpoint returns an error. Guest shoppers return 404 regardless of the client ID.
+
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"<pattern>" language:<lang> path:<path>` | <description> |
+
+### Example Queries
+
+```bash
+# Search for custom endpoints
+site:github.com "<framework>" "api" filetype:<ext>
+
+# Search for auth patterns  
+site:github.com "<framework>" "auth" "middleware"
+
+# Search for config files
+site:github.com "<framework>" "config" "endpoint"
+```
+
+## 13. Cross-Cutting OSINT Patterns
+
+These patterns apply across frameworks and should be checked for any detected technology.
+
+### Favicon Hashing
+
+Identify technology stack by hashing favicon and searching Shodan/Censys for same stack:
+
+```bash
+# Get favicon hash (mmh3 hash of favicon content)
+curl -s "https://{domain}/favicon.ico" | python3 -c "
+import sys, hashlib, base64
+data = sys.stdin.buffer.read()
+# Simple mmh3 hash simulation using Python
+import mmh3 2>/dev/null || pip install mmh3
+# Or use: python3 -c "import mmh3; print(mmh3.hash(data))"
+print('Favicon hash needed for Shodan search: icon_hash')
+"
+
+# Search Shodan for same favicon (indicates shadow IT subdomains)
+# site:shodan.io search: icon_hash:{hash}
+```
+
+**What it reveals:** Hidden subdomains running same framework stack as main site.
+
+### Source Map Discovery
+
+Check for source maps across all JS bundles:
+
+```bash
+# Extract all JS bundle URLs from HTML
+curl -s "https://{domain}/" | grep -oP 'src="[^"]+\.js[^"]*"' | grep -oP '"[^"]+' | tr -d '"' > js_urls.txt
+
+# Check each for .map file
+while read url; do
+  map_url="${url}.map"
+  status=$(curl -s -o /dev/null -w "%{http_code}" "${map_url}")
+  [ "$status" = "200" ] && echo "SOURCE MAP: ${map_url}"
+done < js_urls.txt
+```
+
+**Build tool patterns:**
+| Build Tool | Source Map Pattern | Detection |
+|------------|-------------------|------------|
+| Webpack | `{bundle}.js.map` or `//# sourceMappingURL=` | Check response header `X-SourceMap` |
+| Vite | `{name}-[hash].js.map` | Vite manifest `manifest.json` |
+| Rollup | `{bundle}.js.map` | Check `sourceMappingURL` comment |
+| esbuild | `{bundle}.js.map` | Check `sourceMappingURL` comment |
+| Next.js | `/_next/static/chunks/*.js.map` | Only if `productionBrowserSourceMaps: true` |
+
+### Tech Stack → API Pattern Mapping
+
+Auto-map detected frameworks to likely endpoint patterns:
+
+| Framework | Common API Patterns |
+|-----------|---------------------|
+| Next.js | `/api/*`, `/_next/data/*`, `/api/auth/*`, `/api/trpc/*` |
+| WordPress | `/wp-json/*`, `/wp-json/wp/v2/*`, `/wp-admin/admin-ajax.php` |
+| Shopify | `/api/2024-10/graphql.json`, `/products.json`, `/collections.json` |
+| Rails | `/api/v1/*`, `/assets/*`, `/users/sign_in` |
+| Laravel | `/api/*`, `/livewire/message/*`, `/sanctum/csrf-cookie` |
+| Strapi | `/api/*`, `/admin/*`, `/api/upload*` |
+| Magento | `/rest/V1/*`, `/pub/static/*` |
+| Django | `/api/*`, `/admin/*`, `/accounts/*` |
+
+When Phase 3 detects a framework, use this table to prioritize Phase 5/6/7 probes.
+
+### Email Naming Convention Analysis
+
+Extract emails from theHarvester/GitHub results to predict internal subdomains:
+
+```bash
+# Sample emails found: john.doe@example.com, jane.smith@example.com
+# Predicted subdomains: mail.example.com, smtp.example.com, exchange.example.com
+
+# Common patterns:
+# first.last@ → internal.example.com, mail.example.com
+# firstinitial+last@ → owa.example.com, outlook.example.com
+```
+
+**Add to Phase 9 session brief:** Note email patterns and predicted subdomains.

@@ -1,0 +1,82 @@
+[
+  {
+    "query": "ok i keep hearing about css flexbox but i genuinely do not understand how it works — can you teach me? i'm coming from old-school float layouts",
+    "should_trigger": true
+  },
+  {
+    "query": "explain async/await to me in javascript, i understand callbacks but promises still confuse me",
+    "should_trigger": true
+  },
+  {
+    "query": "i want to properly learn sql joins — inner, left, right, the whole thing. i always mix them up in interviews",
+    "should_trigger": true
+  },
+  {
+    "query": "show me how (a+b)² works visually, like with something i can play with — sliders would be great",
+    "should_trigger": true
+  },
+  {
+    "query": "I don't really get how derivatives work conceptually. I memorised the rules but I want to actually understand what they mean geometrically",
+    "should_trigger": true
+  },
+  {
+    "query": "teach me about the CAP theorem, I'm a mid-level backend dev trying to understand distributed systems better",
+    "should_trigger": true
+  },
+  {
+    "query": "animate projectile motion for me — I want to see how changing the launch angle affects the trajectory",
+    "should_trigger": true
+  },
+  {
+    "query": "can you explain how transformers work in LLMs? I know python and basic linear algebra but I've never studied ML formally",
+    "should_trigger": true
+  },
+  {
+    "query": "/paidagogos:micro — binary search trees, I'm a beginner",
+    "should_trigger": true
+  },
+  {
+    "query": "I want to understand normal distributions — can you plot one and let me adjust the mean and standard deviation to see what changes?",
+    "should_trigger": true
+  },
+  {
+    "query": "walk me through how git rebase works, I've been afraid to use it and just always merge",
+    "should_trigger": true
+  },
+  {
+    "query": "my junior dev asked me to explain the difference between stack and heap memory and I realized I can't actually explain it well — help me understand it properly",
+    "should_trigger": true
+  },
+  {
+    "query": "i have a bug in my useEffect — it fires twice on mount even though I only have one dependency in the array. here's the code: [paste]",
+    "should_trigger": false
+  },
+  {
+    "query": "write unit tests for my UserService class, it has methods for create, update, delete. I'm using Jest",
+    "should_trigger": false
+  },
+  {
+    "query": "review my authentication middleware for security vulnerabilities — i'm using JWT and storing the secret in .env",
+    "should_trigger": false
+  },
+  {
+    "query": "what is 2 to the power of 10?",
+    "should_trigger": false
+  },
+  {
+    "query": "help me set up a GitHub Actions CI/CD pipeline for my Node.js app that runs tests and deploys to AWS on merge to main",
+    "should_trigger": false
+  },
+  {
+    "query": "my python script keeps throwing KeyError on line 47, here's the traceback — can you figure out what's wrong?",
+    "should_trigger": false
+  },
+  {
+    "query": "refactor this React component to use hooks instead of class-based syntax, it's about 200 lines",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to build a REST API in Express that handles user auth and file uploads — can you scaffold it for me?",
+    "should_trigger": false
+  }
+]

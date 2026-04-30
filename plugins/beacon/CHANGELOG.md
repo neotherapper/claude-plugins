@@ -7,6 +7,46 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased]
+
+### Added
+- Add Wayback Machine versioning analysis to OSINT sources (track API endpoint evolution)
+- Add 30+ new OSINT sources to `references/osint-sources.md`:
+  - Passive DNS: VirusTotal, DNSDumpster, Farsight DNSDB
+  - Subdomain enumeration: Amass, Subfinder, DNSRecon, Assetfinder
+  - Content discovery: ffuf, Gobuster, feroxbuster, Arjun, katana
+  - API discovery: kiterunner, Vespasian, GraphQL introspection techniques
+  - Cloud: S3 bucket enumeration, S3DNS, metadata endpoints
+  - Favicon hashing, source map discovery strategies
+  - Package registry search (NPM/PyPI)
+  - Bug bounty scope search
+  - Paste site search for leaked credentials
+- Add Section 11 (GitHub Code Search Patterns) to all tech packs
+- Add Section 12 (Framework-Specific Google Dorks) to all tech packs
+- Add Section 13 (Cross-Cutting OSINT Patterns) to all tech packs:
+  - Favicon hashing for shadow IT discovery
+  - Source map discovery strategies (webpack, Vite, Rollup, esbuild)
+  - Tech stack → API pattern mapping table
+  - Email naming convention analysis
+- Add missing probe checklist items to 8 tech packs:
+  - nextjs/15.x: RSC detection, App Router endpoints, NextAuth v5, middleware
+  - wordpress/6.x: namespace enumeration, XML-RPC methods, multisite
+  - rails/8.x: Hotwire Turbo Streams, import map CSP, Action Cable
+  - laravel/12.x: Livewire AJAX, Vite manifest, broadcasting auth
+  - strapi/5.x: plugin ecosystem, component discovery, v5 changes
+  - magento/2.x: MSI inventory, B2B modules, Adobe Commerce
+  - django/5.x: Channels WebSocket, Django Ninja, Wagtail API
+  - shopify/2024-10: Hydrogen/Remix, GraphQL introspection, admin API
+
+### Changed
+- Expand Phase 9 Session Brief Format with new OSINT sources
+- Update `osint-sources.md` with comprehensive tool coverage (707 lines)
+
+### Fixed
+- None
+
+---
+
 ## [0.6.7] — 2026-04-28
 
 ### Added

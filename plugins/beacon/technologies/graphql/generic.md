@@ -177,3 +177,152 @@ Run these probes and record results (✓ success / ✗ error / – not applicabl
 - **`__APOLLO_STATE__` is a goldmine.** The Apollo cache serialises every entity with its ID and all fetched fields. Read `window.__APOLLO_STATE__` in the browser to see all data the app has ever fetched — type names, IDs, field values — without making a single API call.
 - **Partial success is valid.** A response with both `data` and `errors` is not a failure — it means some resolvers succeeded and others failed. Treat each resolver result independently.
 - **Hasura JWT claims are in headers, not in the token itself.** Hasura reads user identity from `x-hasura-user-id`, `x-hasura-role`, `x-hasura-org-id` headers (extracted from JWT or set directly). If you have a valid session token, you can set these headers manually to test different roles.
+
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"type Query" language:graphql` | GraphQL Query type definitions |
+| `"type Mutation" language:graphql` | GraphQL Mutation type definitions |
+| `"schema {" language:graphql` | GraphQL schema definitions |
+| `"@deprecated" language:graphql` | Deprecated field markers |
+
+### Example Queries for GraphQL
+
+```bash
+# Search for custom API routes/endpoints
+site:github.com "GraphQL" "api" filetype:graphql "type Query"
+
+# Search for authentication patterns
+site:github.com "GraphQL" "auth" "Bearer" language:graphql
+
+# Search for configuration files with endpoint definitions
+site:github.com "GraphQL" "schema" "endpoint" language:graphql
+
+# Search for custom post types, taxonomies, or extensions
+site:github.com "GraphQL" "type" "custom" language:graphql
+```
+
+## 12. Framework-Specific Google Dorks
+
+Use these Google search queries to discover exposed endpoints, configuration files, and documentation for this framework.
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:/graphql` | GraphQL API endpoints |
+| `site:{domain} inurl:__schema` | GraphQL introspection schema |
+| `site:{domain} "graphql" "query"` | GraphQL query references in content |
+| `site:{domain} inurl:graphql-ws` | GraphQL WebSocket subscription endpoints |
+
+### Complete Dork List for GraphQL
+
+```
+# API endpoints
+site:{domain} inurl:/graphql
+site:{domain} inurl:/api/graphql
+site:{domain} inurl:/v1/graphql
+
+# Framework-specific paths
+site:{domain} inurl:__typename
+site:{domain} inurl:graphql-ws
+
+# Configuration files
+site:{domain} filetype:json "openapi" "graphql"
+site:{domain} filetype:js "ApolloClient"
+
+# Documentation/leaks
+site:{domain} "GraphQL" "api" "endpoint"
+site:{domain} "hasura" "x-hasura-role"
+
+# Admin/debug paths
+site:{domain} inurl:/graphql
+site:{domain} inurl:/graphiql
+```
+
+## 13. Cross-Cutting OSINT Patterns
+
+These patterns apply across frameworks and should be checked for any detected technology.
+
+### Favicon Hashing
+
+Identify technology stack by hashing favicon and searching Shodan/Censys for same stack:
+
+```bash
+# Get favicon hash (mmh3 hash of favicon content)
+curl -s "https://{domain}/favicon.ico" | python3 -c "
+import sys, hashlib, base64
+data = sys.stdin.buffer.read()
+# Simple mmh3 hash simulation using Python
+import mmh3 2>/dev/null || pip install mmh3
+# Or use: python3 -c "import mmh3; print(mmh3.hash(data))"
+print('Favicon hash needed for Shodan search: icon_hash')
+"
+
+# Search Shodan for same favicon (indicates shadow IT subdomains)
+# site:shodan.io search: icon_hash:{hash}
+```
+
+**What it reveals:** Hidden subdomains running same framework stack as main site.
+
+### Source Map Discovery
+
+Check for source maps across all JS bundles:
+
+```bash
+# Extract all JS bundle URLs from HTML
+curl -s "https://{domain}/" | grep -oP 'src="[^"]+\.js[^"]*"' | grep -oP '"[^"]+' | tr -d '"' > js_urls.txt
+
+# Check each for .map file
+while read url; do
+  map_url="${url}.map"
+  status=$(curl -s -o /dev/null -w "%{http_code}" "${map_url}")
+  [ "$status" = "200" ] && echo "SOURCE MAP: ${map_url}"
+done < js_urls.txt
+```
+
+**Build tool patterns:**
+| Build Tool | Source Map Pattern | Detection |
+|------------|-------------------|------------|
+| Webpack | `{bundle}.js.map` or `//# sourceMappingURL=` | Check response header `X-SourceMap` |
+| Vite | `{name}-[hash].js.map` | Vite manifest `manifest.json` |
+| Rollup | `{bundle}.js.map` | Check `sourceMappingURL` comment |
+| esbuild | `{bundle}.js.map` | Check `sourceMappingURL` comment |
+| Next.js | `/_next/static/chunks/*.js.map` | Only if `productionBrowserSourceMaps: true` |
+
+### Tech Stack → API Pattern Mapping
+
+Auto-map detected frameworks to likely endpoint patterns:
+
+| Framework | Common API Patterns |
+|-----------|---------------------|
+| Next.js | `/api/*`, `/_next/data/*`, `/api/auth/*`, `/api/trpc/*` |
+| WordPress | `/wp-json/*`, `/wp-json/wp/v2/*`, `/wp-admin/admin-ajax.php` |
+| Shopify | `/api/2024-10/graphql.json`, `/products.json`, `/collections.json` |
+| Rails | `/api/v1/*`, `/assets/*`, `/users/sign_in` |
+| Laravel | `/api/*`, `/livewire/message/*`, `/sanctum/csrf-cookie` |
+| Strapi | `/api/*`, `/admin/*`, `/api/upload*` |
+| Magento | `/rest/V1/*`, `/pub/static/*` |
+| Django | `/api/*`, `/admin/*`, `/accounts/*` |
+
+When Phase 3 detects a framework, use this table to prioritize Phase 5/6/7 probes.
+
+### Email Naming Convention Analysis
+
+Extract emails from theHarvester/GitHub results to predict internal subdomains:
+
+```bash
+# Sample emails found: john.doe@example.com, jane.smith@example.com
+# Predicted subdomains: mail.example.com, smtp.example.com, exchange.example.com
+
+# Common patterns:
+# first.last@ → internal.example.com, mail.example.com
+# firstinitial+last@ → owa.example.com, outlook.example.com
+```
+
+**Add to Phase 9 session brief:** Note email patterns and predicted subdomains.

@@ -137,26 +137,61 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 1. **Wappalyzer MCP** (if available): `lookup_site(url)` → framework + version
 
 2. **HTTP headers**: `curl -sI {url}` → grep for:
-   - `Ghost-Version` → Ghost
-   - `x-nuxt` → Nuxt
-   - `X-Inertia` → Laravel/Inertia
-   - `x-shopify-stage: production` → Shopify (Definitive)
-   - `X-Powered-By: Strapi` or `X-Strapi-Version` → Strapi (Definitive)
-   - `server: uvicorn` → FastAPI (combined signal)
-   - `X-Runtime` → Rails (combined signal — confirm with `csrf-token` meta or `_*_session` cookie before concluding Rails; `X-Runtime` alone is not sufficient)
-
-3. **HTML signals**: `curl -s {url}` → grep for:
-   - `wp-content/` → WordPress
-   - `/_next/` → Next.js
-   - `/_nuxt/` → Nuxt
-   - `laravel_session` → Laravel
-   - `/_astro/` or `astro-island` → Astro
-   - `content="Astro v` → Astro + version (Definitive)
-   - `csrfmiddlewaretoken` → Django (Definitive)
-   - `<meta name="csrf-token"` → Rails (Definitive)
-   - `cdn.shopify.com` or `window.Shopify` → Shopify (Definitive)
-   - `Zend_Controller_Exception` or `Zend_Exception` in error body → Zend Framework 1 (Definitive)
-   - `/library/Zend/` or `/application/controllers/` in stack trace → Zend Framework 1 (Definitive)
+- `Ghost-Version` → Ghost
+- `x-nuxt` → Nuxt
+- `X-Inertia` → Laravel/Inertia
+- `x-shopify-stage: production` → Shopify (Definitive)
+- `X-Powered-By: Strapi` or `X-Strapi-Version` → Strapi (Definitive)
+- `server: uvicorn` → FastAPI (combined signal)
+- `X-Runtime` → Rails (combined signal — confirm with `csrf-token` meta or `_*_session` cookie before concluding Rails; `X-Runtime` alone is not sufficient)
+- `X-Powered-By: Express` → Express (Definitive)
+- "Cannot GET /" → Express (High)
+- `create-react-app` → React (Definitive)
+- `/static/js/main.*.js` → React (High)
+- `__REACT_DEVTOOLS_GLOBAL_HOOK__` → React (Definitive)
+- `content="Sylius"` → Sylius (Definitive)
+- `/admin/` + `sylius` in cookies → Sylius (High)
+- `X-Magento-Cache-Debug` → Magento (Definitive)
+- `/pub/static/` → Magento (High)
+- `content="Magento"` → Magento (Definitive)
+- `/woocommerce/` → WooCommerce (High)
+- `X-WooCommerce-Version` → WooCommerce (Definitive)
+- `window.woocommerce_params` → WooCommerce (Definitive)
+- `X-Generator: TYPO3` header → TYPO3 (Definitive)
+- `content="TYPO3 CMS"` → TYPO3 (Definitive)
+- `/typo3/` → TYPO3 (High)
+- `content="PrestaShop"` → PrestaShop (Definitive)
+- `/admin[random]/` → PrestaShop (High)
+- `/modules/` → PrestaShop/OpenCart (Medium)
+- `/catalog/view/theme/default/stylesheet/stylesheet.css` → OpenCart (Definitive)
+- `sw-context-token` cookie → Shopware (Definitive)
+- `sw-version` header → Shopware (Definitive)
+- `X-Bc-Api-Version` header → BigCommerce (Definitive)
+- `/api/storefront/cart` → BigCommerce (High)
+- `/bc-static/` → BigCommerce (Medium)
+- `content="Wix.com Website Builder"` → Wix (Definitive)
+- `X-Wix-Request-Id` header → Wix (High)
+- `/_api/wix-site/v1/site` → Wix (High)
+- `content="Squarespace"` → Squarespace (Definitive)
+- `X-Squarespace-Version` header → Squarespace (Definitive)
+- `/api/commerce/v1/products` → Squarespace (High)
+- `X-Ecwid-Storefront-Id` header → Ecwid (Definitive)
+- `app.ecwid.com/script.js` → Ecwid (Definitive)
+- `content="Big Cartel"` → Big Cartel (Definitive)
+- `X-BigCartel-Version` header → Big Cartel (Definitive)
+- `/bigcartel.js` → Big Cartel (High)
+- `X-Square-Store-Id` header → Square Online (Definitive)
+- `content="Square Online"` → Square Online (Definitive)
+- `/api/store/v1/products` → Square Online (High)
+- `content="Joomla!"` → Joomla (Definitive)
+- `X-Generator: Joomla` header → Joomla (Definitive)
+- `/administrator/` → Joomla (High)
+- `content="Webflow"` → Webflow (Definitive)
+- `X-Webflow-Site` header → Webflow (Definitive)
+- `/js/webflow.js` → Webflow (Definitive)
+- `content="Drupal"` → Drupal (Definitive)
+- `X-Generator: Drupal` header → Drupal (Definitive)
+- `/core/` → Drupal (High)
 
 4. **JS globals / cookies**: inspect inline scripts and `Set-Cookie` headers:
    - `__NEXT_DATA__` → Next.js
@@ -517,6 +552,6 @@ Summary:
 Load these when you need detailed guidance — they are not always necessary:
 
 - **`references/phase-detail.md`** — Every probe URL, bash command, grep pattern, and CDX API parameter for phases 2, 5, 6, 7, and 9
-- **`references/osint-sources.md`** — Phase 9 data sources: CDX APIs, crt.sh, GitHub search, Google dorking, robots.txt/sitemap mining, JSON-LD extraction
+- **`references/osint-sources.md`** — Phase 9 data sources: CDX APIs, crt.sh, DNSDumpster, VirusTotal, urlscan.io, ASN, Censys, GitHub search, Google dorking, robots.txt/sitemap mining, JSON-LD extraction, S3 buckets, Paste sites, NPM/PyPI, bug bounty scopes
 - **`references/session-brief-format.md`** — Complete session brief schema with all fields
 - **`references/tool-availability.md`** — Tool detection commands, full fallback matrix, browser command reference

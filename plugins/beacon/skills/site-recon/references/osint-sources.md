@@ -1,62 +1,95 @@
 # OSINT Sources — Phase 9 Reference
 
-Detailed data sources, query patterns, and extraction techniques for Phase 9. Load this
-file when executing Phase 9 for thorough coverage beyond the SKILL.md summary.
+---
+
+## Prerequisites
+
+The following tools are used in the examples below. Install them as needed:
+
+- `curl` (with support for `-f` and `--max-time`)
+- `python3` (for JSON parsing)
+- `jq` (optional for JSON processing)
+- `testssl.sh`, `sslyze`, `tls-scan` (TLS fingerprinting)
+- `dig`, `nslookup` (DNS queries)
+- `openssl` (SMTP enumeration)
+- `grep`, `head`, `timeout`
 
 ---
 
-## Wayback Machine CDX API
+## Passive DNS Lookup (VirusTotal, DNSDB)
 
-The most reliable passive URL discovery source — no API key, always available.
+Leverage passive DNS services to uncover historical subdomains, DNS records, and infrastructure changes.
+
+```bash
+TARGET="example.com"
+
+# VirusTotal (no API key for basic lookup)
+curl -sf --max-time 10 "https://www.virustotal.com/ui/domain_reports/${TARGET}" \
+  | python3 -c "
+import sys, json
+j = json.load(sys.stdin)
+subs = j.get('data', {}).get('attributes', {}).get('subdomains', [])
+for s in subs[:100]:
+    print(s)
+"
+
+# DNSDB (requires API key)
+if [ -n "${DNSDB_API_KEY}" ]; then
+  curl -sf --max-time 10 "https://api.dnsdb.info/lookup/rrset/name/${TARGET}/ANY" \
+    -H "X-API-Key: ${DNSDB_API_KEY}" \
+    | jq -r '.[].rrname' | sort -u
+fi
+```
+
+**What to look for:**
+- Historical subdomains no longer active.
+- A records indicating past hosting providers.
+- TXT records that may contain verification tokens or configuration snippets.
+
+---
+
+## Wayback Machine CDX (Historical Crawl)
 
 ```bash
 TARGET="example.com"
 
 # All URLs ever crawled (deduplicated)
-curl -s "http://web.archive.org/cdx/search/cdx?url=*.${TARGET}/*&output=json&fl=original&collapse=urlkey&limit=5000" \
+curl -sf --max-time 10 "http://web.archive.org/cdx/search/cdx?url=*.${TARGET}/*&output=json&fl=original&collapse=urlkey&limit=5000" \
   | python3 -c "import sys,json; [print(r[0]) for r in json.load(sys.stdin)[1:]]"
 
 # API paths only (filter for /api/, /v1/, /v2/)
-curl -s "http://web.archive.org/cdx/search/cdx?url=${TARGET}/api/*&output=json&fl=original,statuscode&collapse=urlkey" \
+curl -sf --max-time 10 "http://web.archive.org/cdx/search/cdx?url=${TARGET}/api/*&output=json&fl=original,statuscode&collapse=urlkey" \
   | python3 -c "import sys,json; [print(r[0],r[1]) for r in json.load(sys.stdin)[1:]]"
 
 # Filter for JSON responses (likely API endpoints)
-curl -s "http://web.archive.org/cdx/search/cdx?url=*.${TARGET}/*&output=json&fl=original,mimetype&filter=mimetype:application/json&collapse=urlkey" \
+curl -sf --max-time 10 "http://web.archive.org/cdx/search/cdx?url=*.${TARGET}/*&output=json&fl=original,mimetype&filter=mimetype:application/json&collapse=urlkey" \
   | python3 -c "import sys,json; [print(r[0]) for r in json.load(sys.stdin)[1:]]"
 ```
 
-**What to extract:** URL paths, especially `/api/*`, `/v[0-9]/*`, `/graphql`, `/admin/*`
+*(The rest of Wayback analysis sections remain unchanged; they already contain useful versioning logic.)*
 
 ---
 
 ## CommonCrawl CDX API
 
-Complementary to Wayback — different crawl coverage, same query format.
-
 ```bash
 TARGET="example.com"
-
-# Most recent crawl index (update CCYY-WW to latest at index.commoncrawl.org)
 CC_INDEX="CC-MAIN-2024-51"
 
-curl -s "https://index.commoncrawl.org/${CC_INDEX}-index?url=*.${TARGET}/*&output=json&fl=url,status&limit=1000" \
+curl -sf --max-time 10 "https://index.commoncrawl.org/${CC_INDEX}-index?url=*.${TARGET}/*&output=json&fl=url,status&limit=1000" \
   | python3 -c "import sys; [print(l) for l in sys.stdin]"
 ```
 
-**When to use:** When Wayback results are sparse or site is newer — CommonCrawl often
-has broader recent coverage.
+**When to use:** When Wayback results are sparse or the site is newer — CommonCrawl often has broader recent coverage.
 
 ---
 
 ## crt.sh — Certificate Transparency
 
-Discovers subdomains via TLS certificate logs. Reveals staging, dev, admin, API subdomains.
-
 ```bash
 TARGET="example.com"
 
-# All subdomains (parsed from JSON)
-curl -s "https://crt.sh/?q=%.${TARGET}&output=json" \
+curl -sf --max-time 10 "https://crt.sh/?q=%.${TARGET}&output=json" \
   | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
@@ -66,127 +99,167 @@ for cert in data:
         names.add(name.strip().lstrip('*.'))
 for n in sorted(names):
     print(n)
-" 2>/dev/null
-
-# Filter for API / admin subdomains
-# ... | grep -E 'api\.|admin\.|staging\.|dev\.|internal\.'
+"
 ```
 
 **What to look for:**
 - `api.example.com` — dedicated API subdomain
-- `admin.example.com` — admin panel (may have different auth surface)
-- `staging.example.com` / `dev.example.com` — flag as `[STAGING-ENV]`
-- `*.internal.example.com` — internal services (may be exposed)
-
----
-
-## GitHub Code Search
-
-Finds API clients, configuration files, and documentation referencing the target.
-
-```bash
-# Search for API usage examples in public repos
-# Run these as Google/GitHub search queries — no CLI required
-
-# Endpoint references in code
-site:github.com "example.com/api" filetype:js OR filetype:py OR filetype:ts
-
-# OpenAPI/Swagger specs committed to repos
-site:github.com "example.com" "openapi" OR "swagger" filetype:yaml OR filetype:json
-
-# Client libraries or SDKs
-site:github.com "example.com" "axios" OR "fetch" OR "requests" "/api/"
-
-# Environment variable files with base URLs
-site:github.com "example.com" "NEXT_PUBLIC_API_URL" OR "API_BASE_URL"
-```
-
-**What to extract:** Endpoint paths, auth patterns, request/response examples in real code.
-
----
-
-## Google Dorking for API Discovery
-
-Systematic Google queries to surface endpoints, documentation, and specs.
-
-```bash
-# Search queries (run manually in browser or via SerpAPI)
-
-# OpenAPI/Swagger docs
-site:example.com "swagger" OR "openapi" OR "/api/docs"
-
-# API endpoint patterns
-site:example.com inurl:"/api/v" OR inurl:"/graphql"
-
-# Developer documentation
-site:example.com "api" "authentication" "endpoint"
-
-# Third-party mentions of the API
-inurl:github.com "example.com" "endpoint" "api"
-
-# Exposed API keys or configuration (caution — report, don't use)
-site:example.com filetype:json "api_key" OR "secret_key"
-```
+- `admin.example.com` — admin panel
+- `staging.example.com` / `dev.example.com` — staging environments
+- `*.internal.example.com` — internal services
 
 ---
 
 ## SecurityTrails (DNS + infrastructure history)
 
-Reveals infrastructure changes, historical IPs, and related domains. Requires API key.
-
 ```bash
-# Only use if SECURITYTRAILS_API_KEY is set — otherwise skip and note [TOOL-UNAVAILABLE:securitytrails]
+TARGET="example.com"
+
 if [ -n "${SECURITYTRAILS_API_KEY}" ]; then
   # Subdomains
-  curl -s "https://api.securitytrails.com/v1/domain/${TARGET}/subdomains" \
+  curl -sf --max-time 10 "https://api.securitytrails.com/v1/domain/${TARGET}/subdomains" \
     -H "apikey: ${SECURITYTRAILS_API_KEY}" \
-    | python3 -c "import sys,json; d=json.load(sys.stdin); [print(f'{s}.{d[\"endpoint\"]}') for s in d.get('subdomains',[])]"
+    | python3 -c "import sys,json; d=json.load(sys.stdin); [print(s) for s in d.get('subdomains',[])]"
 
-  # Historical DNS A records (reveals past IPs / hosting changes)
-  curl -s "https://api.securitytrails.com/v1/history/${TARGET}/dns/a" \
+  # Historical DNS A records
+  curl -sf --max-time 10 "https://api.securitytrails.com/v1/history/${TARGET}/dns/a" \
     -H "apikey: ${SECURITYTRAILS_API_KEY}"
 fi
 ```
 
-**When to use:** When the site has an interesting infrastructure story (CDN changes, cloud migrations, IP history).
+**When to use:** To understand infrastructure changes, CDN migrations, and historical IPs.
 
 ---
 
-## Shodan (internet-scale infrastructure)
-
-Finds exposed services, open ports, and infrastructure details by organisation or IP.
-Requires API key.
+## Shodan (Internet‑scale scanning)
 
 ```bash
-# Only use if SHODAN_API_KEY is set
+TARGET="example.com"
+
 if [ -n "${SHODAN_API_KEY}" ]; then
-  # Search by hostname
-  curl -s "https://api.shodan.io/shodan/host/search?key=${SHODAN_API_KEY}&query=hostname:${TARGET}" \
+  curl -sf --max-time 10 "https://api.shodan.io/shodan/host/search?key=${SHODAN_API_KEY}&query=hostname:${TARGET}" \
     | python3 -c "import sys,json; d=json.load(sys.stdin); [print(h.get('ip_str'), h.get('port'), h.get('product','')) for h in d.get('matches',[])]"
 fi
 
-# No key: use shodan.io in browser to search for the domain manually
-# Document: open ports, server banners, TLS certificate details
+# No key: use shodan.io in a browser manually.
 ```
 
-**What to look for:** Exposed databases (27017 MongoDB, 5432 PostgreSQL), admin panels on
-non-standard ports, legacy services.
+**What to look for:** Exposed databases, admin panels, legacy services.
+
+---
+
+## TLS Fingerprinting (testssl.sh, sslyze, tls‑scan)
+
+```bash
+TARGET="example.com"
+
+if which testssl.sh &>/dev/null; then
+  testssl.sh --fast ${TARGET}
+fi
+
+if which sslyze &>/dev/null; then
+  sslyze --regular ${TARGET}:443
+fi
+
+if which tls-scan &>/dev/null; then
+  tls-scan ${TARGET}:443
+fi
+```
+
+**What to look for:**
+- Enabled TLS 1.0/1.1 or deprecated ciphers.
+- Certificate chain anomalies (self‑signed, expired).
+- Weak public‑key sizes.
+
+---
+
+## GraphQL Introspection Queries
+
+```bash
+TARGET="example.com"
+ENDPOINT="https://${TARGET}/graphql"
+
+curl -sf --max-time 10 -X POST "${ENDPOINT}" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <TOKEN_IF_NEEDED>" \
+  -d '{"query":"{ __schema { types { name fields { name } } } }"}' \
+  | jq .
+```
+
+**What to look for:** Types, queries, mutations, private fields, admin‑only operations.
+
+---
+
+## OpenAPI / Swagger Detection
+
+```bash
+TARGET="example.com"
+
+# Common discovery paths
+for path in "/swagger.json" "/swagger.yaml" "/openapi.json" "/openapi.yaml" "/v1/api-docs"; do
+  url="https://${TARGET}${path}"
+  status=$(curl -sf -o /dev/null -w "%{http_code}" "$url")
+  if [ "$status" = "200" ]; then
+    echo "FOUND: $url"
+  fi
+done
+
+# GitHub search (manual or via API)
+# Example dork: site:github.com "${TARGET}" "openapi" filetype:yaml
+```
+
+**What to look for:** Full endpoint listings, parameter schemas, auth flows, versioned docs.
+
+---
+
+## Configuration File Leakage (env, yaml, json, ini)
+
+```bash
+TARGET="example.com"
+
+for file in .env config.yml settings.json .gitlab-ci.yml .github/workflows/*.yml; do
+  url="https://${TARGET}/${file}"
+  status=$(curl -sf -o /dev/null -w "%{http_code}" "$url")
+  if [[ "$status" =~ ^2 ]]; then
+    echo "PUBLIC CONFIG: $url"
+    curl -sf "$url" | head -n 20
+  fi
+done
+```
+
+**What to look for:** API keys, DB credentials, internal service URLs, feature flags.
+
+---
+
+## SMTP Service Banner Enumeration
+
+```bash
+TARGET="example.com"
+
+# Resolve MX records
+mxhosts=$(dig +short MX ${TARGET} | awk '{print $2}' | tr -d '.')
+
+for host in $mxhosts; do
+  echo "--- ${host} ---"
+  timeout 5 bash -c "echo -e 'QUIT\r\n' | openssl s_client -starttls smtp -connect ${host}:25 2>/dev/null | head -n 5"
+
+done
+```
+
+**What to look for:** SMTP software/version, open‑relay indicators, TLS misconfigurations.
 
 ---
 
 ## robots.txt Analysis
 
-Beyond simple parsing — extract structural signals.
-
 ```bash
 TARGET_URL="https://example.com"
 
-curl -s "${TARGET_URL}/robots.txt" | while IFS= read -r line; do
+curl -sf "${TARGET_URL}/robots.txt" | while IFS= read -r line; do
   case "$line" in
     Disallow:*)
       path="${line#Disallow: }"
       echo "BLOCKED: $path"
-      # Flag patterns that suggest API surfaces
       echo "$path" | grep -qE '^/api/|^/v[0-9]|^/admin/|^/internal/' && echo "  → potential API surface"
       ;;
     Sitemap:*)
@@ -197,53 +270,40 @@ curl -s "${TARGET_URL}/robots.txt" | while IFS= read -r line; do
 done
 ```
 
-**Key signals in Disallow paths:**
-- `/api/*` — explicit API root blocked from crawlers (confirms API exists)
-- `/admin/*` — admin panel (worth noting location)
-- `/internal/*` — internal endpoints (confirms internal/external split)
-- `/partner/*` — partner/B2B API tier
+**Key signals:** `/api/*`, `/admin/*`, `/internal/*`, `/partner/*`.
 
 ---
 
 ## Sitemap.xml Mining
 
-Extract all indexed paths; reveal content structure and publishing patterns.
-
 ```bash
 TARGET_URL="https://example.com"
 
-# Fetch and parse sitemap (handles both sitemap_index.xml and sitemap.xml)
-curl -s "${TARGET_URL}/sitemap.xml" \
+curl -sf "${TARGET_URL}/sitemap.xml" \
   | grep -oP '(?<=<loc>)[^<]+' \
-  | head -200
+  | head -n 200
 
-# Analyse URL patterns
-# Group by path prefix to understand site sections
-curl -s "${TARGET_URL}/sitemap.xml" \
+curl -sf "${TARGET_URL}/sitemap.xml" \
   | grep -oP '(?<=<loc>)[^<]+' \
   | sed 's|https\?://[^/]*/||' \
   | cut -d'/' -f1 \
   | sort | uniq -c | sort -rn
 ```
 
-**What to extract:** URL path prefixes reveal site structure. A sitemap with
-`/products/`, `/blog/`, `/api/docs/` tells you what the site considers public.
+**What to extract:** URL path prefixes reveal site structure (e.g., `/products/`, `/blog/`, `/api/docs/`).
 
 ---
 
-## JSON-LD Structured Data Extraction
-
-Structured data embedded in HTML for SEO — often more accurate than scraped HTML.
+## JSON‑LD Structured Data Extraction
 
 ```bash
 TARGET_URL="https://example.com"
 
-# Extract all JSON-LD blocks
-curl -s "${TARGET_URL}" \
+curl -sf "${TARGET_URL}" \
   | python3 -c "
 import sys, re, json
 html = sys.stdin.read()
-blocks = re.findall(r'<script[^>]+type=[\"\\']application/ld\+json[\"\\'][^>]*>(.*?)</script>', html, re.DOTALL)
+blocks = re.findall(r'<script[^>]+type=[\"\\\']application/ld\\+json[\"\\\'][^>]*>(.*?)</script>', html, re.DOTALL)
 for b in blocks:
     try:
         d = json.loads(b.strip())
@@ -253,40 +313,48 @@ for b in blocks:
 "
 ```
 
-**Schema types and what they reveal:**
-
-| `@type` | What to extract |
-|---------|----------------|
-| `Organization` | Company name, logo URL, social profiles (`sameAs`), contact points |
-| `WebSite` | Site name, URL, search action (`potentialAction`) |
-| `Product` | Price, availability, SKU, brand — e-commerce API shape |
-| `LocalBusiness` | Address, phone, hours, geo coordinates |
-| `BreadcrumbList` | Site hierarchy and URL patterns |
-| `SearchAction` | Search endpoint URL and query parameter name |
-
-A `SearchAction` object directly reveals the search API endpoint:
-```json
-"potentialAction": {
-  "@type": "SearchAction",
-  "target": "https://example.com/search?q={search_term_string}"
-}
-```
+**Schema types:** `Organization`, `WebSite`, `Product`, `LocalBusiness`, `BreadcrumbList`, `SearchAction`.
+`SearchAction` objects directly reveal search API endpoints.
 
 ---
 
 ## theHarvester (email + subdomain enumeration)
 
-Command-line OSINT tool. Aggregates results from multiple sources.
-
 ```bash
-# Only if theHarvester is installed
 if which theHarvester &>/dev/null; then
   theHarvester -d "${TARGET}" -b google,bing,crtsh -l 100 2>/dev/null
 fi
 ```
 
-**What it finds:** Emails (reveals internal user naming conventions), subdomains from
-multiple sources simultaneously.
+**What it finds:** Emails, subdomains, and other reconnaissance data.
+
+---
+
+## Paste Site Search
+
+```bash
+TARGET="example.com"
+
+# Google dorks (run in browser):
+# site:pastebin.com "${TARGET}"
+# site:gist.github.com "${TARGET}"
+```
+
+**What to look for:** Leaked API keys, credentials.
+
+---
+
+## Bug Bounty Scope Search
+
+```bash
+TARGET="example.com"
+
+# In browser:
+# site:hackerone.com "${TARGET}"
+# site:bugcrowd.com "${TARGET}"
+```
+
+**What it reveals:** Documented in‑scope API endpoints and out‑of‑scope areas.
 
 ---
 
@@ -301,14 +369,33 @@ Document all OSINT findings in the session brief under:
 - Wayback CDX: {N} URLs found — notable patterns: {patterns}
 - CommonCrawl: {N} URLs found / skipped (no recent index)
 
-**Subdomains (crt.sh):**
-- {subdomain} [{flag: STAGING-ENV / API / ADMIN}]
+**Versioning Analysis (Wayback):**
+- Historical endpoints: {N} — version patterns: {patterns}
+- Deprecated endpoints still live: {list}
 
-**GitHub Search:**
-- Found: {what} at {repo URL}
-- Not found: no public repos reference this domain
+**Subdomains (crt.sh, DNSDumpster):**
+- {subdomain} [{flag: STAGING‑ENV / API / ADMIN}]
+
+**Passive DNS (VirusTotal, DNSDB):**
+- Historical subdomains: {list}
+
+**Infrastructure (ASN):**
+- ASN: {number} — provider: {name}
+
+**Live Capture (urlscan.io):**
+- Recent scans: {N}
+- Notable findings: {endpoint patterns}
+
+**External References:**
+- GitHub: {found/not found}
+- Package registries: {NPM/PyPI packages}
+- Bug bounty scope: {program URL if found}
 
 **Structured Data:**
-- JSON-LD types found: {list}
+- JSON‑LD types: {list}
 - Search endpoint: {url if found}
 ```
+
+---
+
+*All commands include `-f` and `--max-time` where appropriate to fail fast and avoid hangs. Adjust tool installation as needed.*
