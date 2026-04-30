@@ -145,26 +145,21 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 - `server: uvicorn` → FastAPI (combined signal)
 - `X-Runtime` → Rails (combined signal — confirm with `csrf-token` meta or `_*_session` cookie before concluding Rails; `X-Runtime` alone is not sufficient)
 - `X-Powered-By: Express` → Express (Definitive)
-
-3. **HTML signals**: `curl -s {url}` → grep for:
-- `wp-content/` → WordPress
-- `/_next/` → Next.js/React
-- `/_nuxt/` → Nuxt
-- `laravel_session` → Laravel
-- `/_astro/` or `astro-island` → Astro
-- `content="Astro v` → Astro + version (Definitive)
-- `csrfmiddlewaretoken` → Django (Definitive)
-- `<meta name="csrf-token"` → Rails (Definitive)
-- `cdn.shopify.com` or `window.Shopify` → Shopify (Definitive)
-- `Zend_Controller_Exception` or `Zend_Exception` in error body → Zend Framework 1 (Definitive)
-- `/library/Zend/` or `/application/controllers/` in stack trace → Zend Framework 1 (Definitive)
-- `X-Powered-By: Express` → Express (Definitive)
 - "Cannot GET /" → Express (High)
 - `create-react-app` → React (Definitive)
 - `/static/js/main.*.js` → React (High)
 - `__REACT_DEVTOOLS_GLOBAL_HOOK__` → React (Definitive)
 - `content="Sylius"` → Sylius (Definitive)
 - `/admin/` + `sylius` in cookies → Sylius (High)
+- `X-Magento-Cache-Debug` → Magento (Definitive)
+- `/pub/static/` → Magento (High)
+- `content="Magento"` → Magento (Definitive)
+- `/woocommerce/` → WooCommerce (High)
+- `X-WooCommerce-Version` → WooCommerce (Definitive)
+- `window.woocommerce_params` → WooCommerce (Definitive)
+- `X-Generator: TYPO3` header → TYPO3 (Definitive)
+- `content="TYPO3 CMS"` → TYPO3 (Definitive)
+- `/typo3/` → TYPO3 (High)
 - `content="PrestaShop"` → PrestaShop (Definitive)
 - `/admin[random]/` → PrestaShop (High)
 - `/modules/` → PrestaShop/OpenCart (Medium)
