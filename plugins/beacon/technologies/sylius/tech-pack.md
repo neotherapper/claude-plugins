@@ -180,3 +180,44 @@ Check these Sylius-specific endpoints:
 - Focus discovery on e-commerce specific endpoints
 - Include Sylius in e-commerce probe checklist
 - Run extended e-commerce analysis phases
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"<pattern>" language:<lang> path:<path>` | <description> |
+
+### Example Queries
+
+```bash
+# Search for custom endpoints
+site:github.com "<framework>" "api" filetype:<ext>
+
+# Search for auth patterns  
+site:github.com "<framework>" "auth" "middleware"
+
+# Search for config files
+site:github.com "<framework>" "config" "endpoint"
+```
+
+## 12. Framework-Specific Google Dorks
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:<path>` | <description> |
+
+### Complete Dork List
+
+```
+# API endpoints
+site:{domain} inurl:/api/
+site:{domain} inurl:/v1/
+
+# Framework paths
+site:{domain} inurl:<specific-path>
+```

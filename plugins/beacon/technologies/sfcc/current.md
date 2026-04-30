@@ -267,3 +267,45 @@ Unlike Shopify, SFCC has no unauthenticated product catalog API. Public data is 
 - **Sandbox URLs reveal instance structure:** Sandbox instances follow the URL pattern `{instance}-{realm}-{account}.commercecloud.salesforce.com`. Production stores use custom domains and never expose this structure directly.
 
 - **PWA Kit is a different fingerprint from SFRA:** Salesforce PWA Kit (React/Next.js) is SFCC's headless frontend. It calls SCAPI but renders as a React SPA — standard SFRA signals (`window.SFRA`, `demandware.static` paths) are absent. Detect PWA Kit by React chunk patterns (`/_next/`, `/static/js/`), SCAPI calls in network traffic, and Salesforce Commerce Cloud response headers.
+
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"<pattern>" language:<lang> path:<path>` | <description> |
+
+### Example Queries
+
+```bash
+# Search for custom endpoints
+site:github.com "<framework>" "api" filetype:<ext>
+
+# Search for auth patterns  
+site:github.com "<framework>" "auth" "middleware"
+
+# Search for config files
+site:github.com "<framework>" "config" "endpoint"
+```
+
+## 12. Framework-Specific Google Dorks
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:<path>` | <description> |
+
+### Complete Dork List
+
+```
+# API endpoints
+site:{domain} inurl:/api/
+site:{domain} inurl:/v1/
+
+# Framework paths
+site:{domain} inurl:<specific-path>
+```

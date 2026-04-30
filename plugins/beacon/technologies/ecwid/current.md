@@ -231,3 +231,26 @@ site:{domain} inurl:/account/login
 - **Rate limit is 600 req/min — with hard failure on bad tokens:** The public API allows 600 requests per minute. Exceeding this returns HTTP 429 with a `Retry-After` header. Additionally, if more than 20 req/min or 600 total requests arrive with a non-working token, the IP is blocked for an extended period. Use valid tokens and respect the limit.
 
 - **`profile` endpoint returns limited data with public token:** With a public token, `/profile` returns only store ID, website URL, platform type, and Instant Site settings. Company address, social links, enabled payment methods, and currency are only available with a private token that has `read_store_profile` scope. Do not assume the public-token profile response is the complete picture.
+
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"<pattern>" language:<lang> path:<path>` | <description> |
+
+### Example Queries
+
+```bash
+# Search for custom endpoints
+site:github.com "<framework>" "api" filetype:<ext>
+
+# Search for auth patterns  
+site:github.com "<framework>" "auth" "middleware"
+
+# Search for config files
+site:github.com "<framework>" "config" "endpoint"
+```

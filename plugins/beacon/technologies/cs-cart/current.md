@@ -348,3 +348,45 @@ Run these in order. Record result (✓ 200 / ✗ 403 / – 404 / ? 401) for each
 - **JSON-LD on product pages is the fastest zero-auth data source.** Every CS-Cart product page (both `?dispatch=` and SEO `.html` URLs) contains a `<script type="application/ld+json">` block with the product's name, price, currency, availability (`InStock`/`OutOfStock`), SKU, brand, and primary image URL. This requires no API key and works even when the REST API is disabled. Pair with sitemap-derived URL lists for full catalog coverage.
 
 - **Add-on controllers follow a predictable dispatch pattern.** Every installed add-on that exposes a front-end controller registers a dispatch value `{addon_id}.{mode}`. Read the page source for non-standard `dispatch=` values (anything that is not products, categories, search, checkout, auth, profiles, order, sitemap) — these reveal installed add-ons. Admin-panel add-on dispatch values follow the same pattern via `admin.php?dispatch={addon}.manage`.
+
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"<pattern>" language:<lang> path:<path>` | <description> |
+
+### Example Queries
+
+```bash
+# Search for custom endpoints
+site:github.com "<framework>" "api" filetype:<ext>
+
+# Search for auth patterns  
+site:github.com "<framework>" "auth" "middleware"
+
+# Search for config files
+site:github.com "<framework>" "config" "endpoint"
+```
+
+## 12. Framework-Specific Google Dorks
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:<path>` | <description> |
+
+### Complete Dork List
+
+```
+# API endpoints
+site:{domain} inurl:/api/
+site:{domain} inurl:/v1/
+
+# Framework paths
+site:{domain} inurl:<specific-path>
+```

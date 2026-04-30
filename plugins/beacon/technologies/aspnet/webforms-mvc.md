@@ -193,3 +193,44 @@ Run these in order. Record result (✓ 200 / ✗ 403 / – 404) for each.
 - **`__RequestVerificationToken` must match the session.** The anti-forgery token is tied to the `ASP.NET_SessionId` cookie. If you use a fresh curl session, you must GET the form page, save cookies, extract the token, then POST — all with the same cookie jar.
 - **SignalR endpoints are WebSocket.** `/signalr/negotiate` returns JSON; the actual connection upgrades to WebSocket. Probe `/signalr/hubs` for the auto-generated hub proxy JS.
 - **DNN/Umbraco/Telerik detection.** Many ASP.NET sites use CMS or component libraries that add their own endpoints. Check for `/desktopmodules/` (DNN), `/umbraco/` (Umbraco), and `Telerik.Web.UI.WebResource.axd` (Telerik) — each adds significant API surface.
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"<pattern>" language:<lang> path:<path>` | <description> |
+
+### Example Queries
+
+```bash
+# Search for custom endpoints
+site:github.com "<framework>" "api" filetype:<ext>
+
+# Search for auth patterns  
+site:github.com "<framework>" "auth" "middleware"
+
+# Search for config files
+site:github.com "<framework>" "config" "endpoint"
+```
+
+## 12. Framework-Specific Google Dorks
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:<path>` | <description> |
+
+### Complete Dork List
+
+```
+# API endpoints
+site:{domain} inurl:/api/
+site:{domain} inurl:/v1/
+
+# Framework paths
+site:{domain} inurl:<specific-path>
+```

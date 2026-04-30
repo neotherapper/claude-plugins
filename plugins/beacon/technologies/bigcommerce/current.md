@@ -269,3 +269,26 @@ site:{domain} inurl:/customer/current.jwt
 - **Akamai WAF is common in front of BigCommerce stores.** Many mid-to-large BigCommerce merchants use Akamai for DDoS protection and WAF. Aggressive probing triggers rate limiting and 429 responses. Back off on 429s and space requests. Detect Akamai via `X-Check-Cacheable`, `AkamaiGHost`, or `X-Akamai-*` response headers.
 
 - **`/customer/current.jwt` requires a valid `app_client_id`.** The Current Customer JWT endpoint always requires an `app_client_id` query parameter matching an active API Account's client ID. Without it, the endpoint returns an error. Guest shoppers return 404 regardless of the client ID.
+
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"<pattern>" language:<lang> path:<path>` | <description> |
+
+### Example Queries
+
+```bash
+# Search for custom endpoints
+site:github.com "<framework>" "api" filetype:<ext>
+
+# Search for auth patterns  
+site:github.com "<framework>" "auth" "middleware"
+
+# Search for config files
+site:github.com "<framework>" "config" "endpoint"
+```

@@ -552,6 +552,6 @@ Summary:
 Load these when you need detailed guidance — they are not always necessary:
 
 - **`references/phase-detail.md`** — Every probe URL, bash command, grep pattern, and CDX API parameter for phases 2, 5, 6, 7, and 9
-- **`references/osint-sources.md`** — Phase 9 data sources: CDX APIs, crt.sh, GitHub search, Google dorking, robots.txt/sitemap mining, JSON-LD extraction
+- **`references/osint-sources.md`** — Phase 9 data sources: CDX APIs, crt.sh, DNSDumpster, VirusTotal, urlscan.io, ASN, Censys, GitHub search, Google dorking, robots.txt/sitemap mining, JSON-LD extraction, S3 buckets, Paste sites, NPM/PyPI, bug bounty scopes
 - **`references/session-brief-format.md`** — Complete session brief schema with all fields
 - **`references/tool-availability.md`** — Tool detection commands, full fallback matrix, browser command reference

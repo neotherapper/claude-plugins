@@ -230,3 +230,45 @@ Run these in order. Record result (✓ 200 / ✗ 403 / -- 404) for each.
 - **`product.pricing` is null without channel context.** A product node without a price in a given channel returns `pricing: null`. This is expected — the product exists but is not listed in that channel.
 - **Webhook signatures have two modes and a header rename.** When a webhook `secretKey` is set, Saleor signs with HMAC-SHA256. When no `secretKey` is set, Saleor uses JWS RS256 with a detached payload; the verifier must fetch the public key from `GET {api}/.well-known/jwks.json`. The header in current 3.x is `Saleor-Signature` (no `X-` prefix). The legacy `X-Saleor-Signature` is deprecated and will be removed in Saleor 4.0; both headers are sent during the transition period.
 - **Auto-checkout completion (3.23+).** If the `automaticCompletion` flag is enabled on a channel's `CheckoutSettings`, Saleor can complete a checkout without an explicit `checkoutComplete` mutation call. Once auto-completed, the `Checkout` object is deleted and any subsequent queries or mutations on that checkout ID return errors or the previously created `Order`. Be aware when probing checkout flows on 3.23+ instances.
+
+## 11. GitHub Code Search Patterns
+
+Use these queries on GitHub to find custom endpoints, plugin code, and configuration examples for this framework.
+
+### Framework-Specific Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `"<pattern>" language:<lang> path:<path>` | <description> |
+
+### Example Queries
+
+```bash
+# Search for custom endpoints
+site:github.com "<framework>" "api" filetype:<ext>
+
+# Search for auth patterns  
+site:github.com "<framework>" "auth" "middleware"
+
+# Search for config files
+site:github.com "<framework>" "config" "endpoint"
+```
+
+## 12. Framework-Specific Google Dorks
+
+### Discovery Queries
+
+| Search Query | What it finds |
+|--------------|---------------|
+| `site:{domain} inurl:<path>` | <description> |
+
+### Complete Dork List
+
+```
+# API endpoints
+site:{domain} inurl:/api/
+site:{domain} inurl:/v1/
+
+# Framework paths
+site:{domain} inurl:<specific-path>
+```
