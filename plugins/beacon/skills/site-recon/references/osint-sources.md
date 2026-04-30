@@ -334,6 +334,237 @@ multiple sources simultaneously.
 
 ---
 
+## DNSDumpster (free DNS enumeration)
+
+Free DNS enumeration — fills gap between crt.sh (certificates) and paid tools. No API key required.
+
+```bash
+TARGET="example.com"
+
+# DNS enumeration via web interface (parse HTML)
+curl -s "https://dnsdumpster.com/${TARGET}" \
+  | grep -oP '(?<=<td>)[^<]+(?=</td>)' \
+  | grep -E '^[a-z0-9]' | sort -u
+```
+
+**What to look for:**
+- Subdomains beyond certificate logs (crt.sh misses non-HTTPS subdomains)
+- Flag patterns: `api`, `admin`, `staging`, `dev`, `internal`, `vpn`
+
+**When to use:** As supplement to crt.sh when certificate-based enumeration returns few results.
+
+---
+
+## VirusTotal (passive DNS)
+
+Passive DNS history — reveals historical subdomains and relationships. Free tier: 3-5 queries/day.
+
+```bash
+TARGET="example.com"
+
+# Query via web (no key needed for basic domain lookup):
+curl -s "https://www.virustotal.com/ui/domain_reports/${TARGET}" \
+  | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+if 'data' in d:
+    subdomains = d['data'].get('attributes', {}).get('subdomains', [])
+    for s in subdomains[:50]:
+        print(s)
+"
+```
+
+**What to look for:**
+- Historical subdomains no longer in use
+- DNS record types revealing infrastructure
+
+**When to use:** When crt.sh returns sparse results.
+
+---
+
+## BuiltWith (technology stack)
+
+Technology stack fingerprinting — validates/complements Phase 3 manual detection.
+
+```bash
+TARGET="example.com"
+
+# BuiltWith lookup via web
+curl -s "https://builtwith.com/${TARGET}" \
+  | grep -oP '(?<=<div[^>]*>)[^<]+(?=</div>)' \
+  | head -50
+```
+
+**What to look for:**
+- JS libraries, frameworks, CMS detection
+- Hosting provider, CDN
+
+**When to use:** To validate framework detection in Phase 3.
+
+---
+
+## urlscan.io (live page capture)
+
+Live page capture with historical snapshots — catches endpoints CDX misses.
+
+```bash
+TARGET="example.com"
+
+# Search for previous scans of domain
+curl -s "https://urlscan.io/api/v1/search/?q=domain:${TARGET}&limit=50" \
+  | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+for result in d.get('results', []):
+    print(result.get('_id'), result.get('task', {}).get('url'))
+"
+```
+
+**What it reveals:**
+- Live DOM, AJAX endpoints, hidden parameters
+- API keys embedded in frontend JS
+
+**When to use:** To capture live state where Wayback CDX returns stale data.
+
+---
+
+## ASN/IP Range Lookup (infrastructure)
+
+Maps IP ranges to organisations — discovers adjacent services, cloud infrastructure.
+
+```bash
+TARGET="example.com"
+
+# Get IP for target
+IP=$(dig +short ${TARGET} | head -1)
+
+# Query ARIN whois for ASN
+whois -h whois.arin.net "n ${IP}" | grep -i "orgid\|asn"
+```
+
+**What it reveals:**
+- Hosting provider and ASN
+- Cloud infrastructure (AWS, Azure, GCP IP ranges)
+
+**When to use:** To understand infrastructure story.
+
+---
+
+## Censys (Shodan alternative)
+
+Internet-wide scanning data — alternative to Shodan for TLS/cert analysis.
+
+```bash
+TARGET="example.com"
+
+# Search certificates (free endpoint)
+curl -s "https://search.censys.io/api/v1/search/certificates?q=${TARGET}&per_page=50"
+```
+
+**What to look for:**
+- TLS certificates beyond crt.sh
+
+**When to use:** As alternative to Shodan.
+
+---
+
+## S3 Bucket Enumeration
+
+Common misconfiguration — exposed buckets with backups, data, or API keys.
+
+```bash
+TARGET="example.com"
+
+# Brute-force common bucket names
+bucket_names=("${TARGET}" "www-${TARGET}" "static-${TARGET}" "assets-${TARGET}")
+
+for bucket in "${bucket_names[@]}"; do
+  status=$(curl -s -o /dev/null -w "%{http_code}" "https://${bucket}.s3.amazonaws.com/")
+  [ "$status" = "200" ] && echo "PUBLIC: https://${bucket}.s3.amazonaws.com/"
+done
+```
+
+**What to look for:**
+- Public read access to bucket contents
+
+**When to use:** For sites with AWS infrastructure.
+
+---
+
+## Farsight DNSDB (passive DNS alternative)
+
+Passive DNS with different coverage than crt.sh.
+
+```bash
+TARGET="example.com"
+
+# Use https://www.dnsdb.org/ (web interface)
+```
+
+**What it reveals:**
+- Historical DNS records different from crt.sh
+
+**When to use:** As supplement to crt.sh.
+
+---
+
+## Paste Site Search
+
+Search for leaked credentials on paste sites.
+
+```bash
+TARGET="example.com"
+
+# Google dorks (run in browser):
+# site:pastebin.com "${TARGET}"
+# site:gist.github.com "${TARGET}"
+```
+
+**What to look for:**
+- Leaked API keys, credentials
+
+**When to use:** Selectively — high noise but high impact.
+
+---
+
+## Package Registry Search
+
+Search NPM/PyPI for official SDKs.
+
+```bash
+TARGET="example.com"
+
+# npm: https://www.npmjs.com/search?q=${TARGET}
+# PyPI: https://pypi.org/search/?q=${TARGET}
+```
+
+**What it reveals:**
+- Official SDK structure, auth patterns
+
+**When to use:** For sites with official developer SDKs.
+
+---
+
+## Bug Bounty Scope Search
+
+Bug bounty program scopes reveal documented attack surface.
+
+```bash
+TARGET="example.com"
+
+# In browser:
+# site:hackerone.com "${TARGET}"
+# site:bugcrowd.com "${TARGET}"
+```
+
+**What it reveals:**
+- Documented API endpoints (in-scope)
+- Out-of-scope areas
+
+**When to use:** To understand target's documented attack surface.
+
+---
+
 ## Phase 9 Session Brief Format
 
 Document all OSINT findings in the session brief under:
@@ -349,12 +580,23 @@ Document all OSINT findings in the session brief under:
 - Historical endpoints found: {N} — version patterns: {patterns}
 - Deprecated endpoints still live: {list}
 
-**Subdomains (crt.sh):**
+**Subdomains (crt.sh, DNSDumpster):**
 - {subdomain} [{flag: STAGING-ENV / API / ADMIN}]
 
-**GitHub Search:**
-- Found: {what} at {repo URL}
-- Not found: no public repos reference this domain
+**Passive DNS (VirusTotal, DNSDB):**
+- Historical subdomains: {list}
+
+**Infrastructure (ASN):**
+- ASN: {number} — provider: {name}
+
+**Live Capture (urlscan.io):**
+- Recent scans: {N}
+- Notable findings: {endpoint patterns}
+
+**External References:**
+- GitHub: {found/not found}
+- Package registries: {NPM/PyPI packages}
+- Bug bounty scope: {program URL if found}
 
 **Structured Data:**
 - JSON-LD types found: {list}
