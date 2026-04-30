@@ -251,3 +251,90 @@ site:{domain} inurl:/v1/
 # Framework paths
 site:{domain} inurl:<specific-path>
 ```
+
+## 13. Cross-Cutting OSINT Patterns
+
+These patterns apply across frameworks and should be checked for any detected technology.
+
+### Favicon Hashing
+
+Identify technology stack by hashing favicon and searching Shodan/Censys for same stack:
+
+```bash
+# Get favicon hash (mmh3 hash of favicon content)
+curl -s "https://{domain}/favicon.ico" | python3 -c "
+import sys, hashlib
+data = sys.stdin.buffer.read()
+# Simple mmh3 hash simulation using Python
+try:
+    import mmh3
+    print('Favicon hash:', mmh3.hash(data))
+except ImportError:
+    print('Install mmh3: pip install mmh3')
+"
+
+# Search Shodan for same favicon (indicates shadow IT subdomains)
+# site:shodan.io search: icon_hash:{hash}
+```
+
+**What it reveals:** Hidden subdomains running same framework stack as main site.
+
+### Source Map Discovery
+
+Check for source maps across all JS bundles:
+
+```bash
+# Extract all JS bundle URLs from HTML
+curl -s "https://{domain}/" | grep -oP 'src="[^"]+\.js[^"]*"' | grep -oP '"[^"]+"' | tr -d '"' > js_urls.txt
+
+# Check each for .map file
+while read url; do
+  map_url="${url}.map"
+  status=$(curl -s -o /dev/null -w "%{http_code}" "${map_url}")
+  [ "$status" = "200" ] && echo "SOURCE MAP: ${map_url}"
+done < js_urls.txt
+```
+
+**Build tool patterns:**
+| Build Tool | Source Map Pattern | Detection |
+|------------|-------------------|------------|
+| Webpack | `{bundle}.js.map` or `//# sourceMappingURL=` | Check response header `X-SourceMap` |
+| Vite | `{name}-[hash].js.map` | Vite manifest `manifest.json` |
+| Rollup | `{bundle}.js.map` | Check `sourceMappingURL` comment |
+| esbuild | `{bundle}.js.map` | Check `sourceMappingURL` comment |
+| Next.js | `/_next/static/chunks/*.js.map` | Only if `productionBrowserSourceMaps: true` |
+
+### Tech Stack → API Pattern Mapping
+
+Auto-map detected frameworks to likely endpoint patterns:
+
+| Framework | Common API Patterns |
+|-----------|---------------------|
+| Next.js | `/api/*`, `/_next/data/*`, `/api/auth/*`, `/api/trpc/*` |
+| WordPress | `/wp-json/*`, `/wp-json/wp/v2/*`, `/wp-admin/admin-ajax.php` |
+| Shopify | `/api/2024-10/graphql.json`, `/products.json`, `/collections.json` |
+| Rails | `/api/v1/*`, `/assets/*`, `/users/sign_in` |
+| Laravel | `/api/*`, `/livewire/message/*`, `/sanctum/csrf-cookie` |
+| Strapi | `/api/*`, `/admin/*`, `/api/upload*` |
+| Magento | `/rest/V1/*`, `/pub/static/*` |
+| Django | `/api/*`, `/admin/*`, `/accounts/*` |
+| Express | `/api/*`, `/v1/*`, `/health` |
+| Astro | `/_astro/*`, `/api/*` |
+| Ghost | `/ghost/api/*`, `/members/api/*` |
+
+When Phase 3 detects a framework, use this table to prioritize Phase 5/6/7 probes.
+
+### Email Naming Convention Analysis
+
+Extract emails from theHarvester/GitHub results to predict internal subdomains:
+
+```bash
+# Sample emails found: john.doe@example.com, jane.smith@example.com
+# Predicted subdomains: mail.example.com, smtp.example.com, exchange.example.com
+
+# Common patterns:
+# first.last@ → internal.example.com, mail.example.com
+# firstinitial+last@ → owa.example.com, outlook.example.com
+```
+
+**Add to Phase 9 session brief:** Note email patterns and predicted subdomains.
