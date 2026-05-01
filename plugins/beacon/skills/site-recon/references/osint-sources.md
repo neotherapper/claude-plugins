@@ -357,7 +357,73 @@ TARGET="example.com"
 **What it reveals:** Documented in‑scope API endpoints and out‑of‑scope areas.
 
 ---
+## Additional OSINT Techniques
 
+- **Censys alternative queries** – Use Censys API to enumerate TLS certificates, services, and exposed ports.
+  ```bash
+  if [ -n "${CENSYS_API_ID}" ] && [ -n "${CENSYS_API_SECRET}" ]; then
+    curl -sf --max-time 10 -u "${CENSYS_API_ID}:${CENSYS_API_SECRET}" "https://search.censys.io/api/v2/hosts/search?q=${TARGET}" | jq .
+  fi
+  ```
+
+- **Netcraft Site Report** – Provides hosting history, technology stack, and phishing data.
+  ```bash
+  curl -sf --max-time 10 "https://siteinfo.netcraft.com/site/${TARGET}"
+  ```
+
+- **Cloudflare Radar (domain‑stats)** – Shows traffic trends and top‑level resolver usage.
+  ```bash
+  curl -sf --max-time 10 "https://radar.cloudflare.com/api/v1/domain/${TARGET}"
+  ```
+
+- **Public code search for hard‑coded secrets** – Expand GitHub dork to include configuration files.
+  ```bash
+  # Run in browser or via API:
+  # site:github.com "${TARGET}" ("AWS_SECRET_ACCESS_KEY" OR "PRIVATE_KEY" OR "password")
+  ```
+
+- **Nmap service & script scans** – Quick network fingerprint without full port sweep.
+  ```bash
+  nmap -sV -p 80,443,22,25 --script=http-enum,ssl-cert,ssh-auth-methods "${TARGET}"
+  ```
+
+- **ZoomEye (alternative to Shodan)** – Search by hostname for exposed services.
+  ```bash
+  if [ -n "${ZOOMEYE_API_KEY}" ]; then
+    curl -sf --max-time 10 "https://api.zoomeye.org/host/search?query=hostname:${TARGET}" -H "API-KEY: ${ZOOMEYE_API_KEY}" | jq .
+  fi
+  ```
+
+- **VirusTotal file hash lookup** – Find files previously submitted that reference the domain.
+  ```bash
+  # Replace <HASH> with known file hash
+  curl -sf --max-time 10 "https://www.virustotal.com/api/v3/files/<HASH>" -H "x-apikey: ${VT_API_KEY}"
+  ```
+
+**What to look for:** Persistent infrastructure artifacts, hidden admin panels, leaked keys in code, unusual service banners, historic traffic spikes, and any artifacts that map to the target’s attack surface.
+
+---
+## Subdomain Brute‑Force (Amass)
+
+```bash
+TARGET="example.com"
+amass enum -d "${TARGET}" -src -ip -json amass_output.json
+```
+
+**What to look for:** Subdomains discovered via DNS brute‑force and OSINT sources, enumeration of IP ranges.
+
+---
+## Public Git Repository Discovery
+
+```bash
+TARGET="example.com"
+# Search for exposed .git directories
+curl -sf --max-time 10 "https://${TARGET}/.git/HEAD" && echo "Public .git repo exposed"
+```
+
+**What to look for:** Presence of `.git` directories, exposed commit history, configuration files.
+
+---
 ## Phase 9 Session Brief Format
 
 Document all OSINT findings in the session brief under:
