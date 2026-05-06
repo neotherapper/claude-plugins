@@ -26,6 +26,9 @@ curl -s "${URL}/humans.txt"
 
 # HTTP headers (full)
 curl -sI "${URL}" 2>&1
+
+# Rate limit headers detection (X-RateLimit-*, Retry-After)
+curl -sI "${URL}" 2>&1 | grep -iE "x-ratelimit|retry-after|rate.limit" || echo "No rate limit headers detected"
 ```
 
 **crt.sh subdomain enumeration:**
@@ -50,6 +53,7 @@ Look for: `api.`, `staging.`, `dev.`, `admin.`, `app.`, `beta.` subdomains.
 - robots.txt Disallow count and any interesting paths
 - JWKS found? → confirms JWT auth
 - security.txt contact email (useful for scoping)
+- Rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After)
 
 ---
 

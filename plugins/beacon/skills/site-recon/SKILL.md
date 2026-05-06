@@ -224,7 +224,21 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
    curl -s {url}/api/?format=api | grep -i 'django rest framework'
    ```
 
-6. **No match**: log `[FRAMEWORK-UNKNOWN]`, continue with generic probes
+6. **Favicon hash matching** (fallback when other signals inconclusive):
+    ```bash
+    # Compute mmh3 hash of favicon and search Shodan for framework match
+    curl -sf --max-time 10 "{url}/favicon.ico" -o /tmp/favicon.ico
+    python3 -c "
+    import mmh3, sys
+    try:
+        with open('/tmp/favicon.ico', 'rb') as f:
+            print(mmh3.hash(f.read()))
+    except: pass
+    "
+    ```
+    Search results at `https://www.shodan.io/search?query=icon_hash:{hash}` reveal the framework and version. Same hash across subdomains = same stack (shadow IT discovery).
+
+ 7. **No match**: log `[FRAMEWORK-UNKNOWN]`, continue with generic probes
 
 Log the result: `Framework: WordPress 6.5 (source: wp-content/ in HTML + generator meta, confidence: high)`
 
