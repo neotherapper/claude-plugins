@@ -424,6 +424,342 @@ curl -sf --max-time 10 "https://${TARGET}/.git/HEAD" && echo "Public .git repo e
 **What to look for:** Presence of `.git` directories, exposed commit history, configuration files.
 
 ---
+
+## Cloud Infrastructure Enumeration
+
+### Cloud Storage Discovery
+
+```bash
+TARGET="example.com"
+TARGET_SLUG=$(echo "${TARGET}" | tr '.' '-')
+
+# AWS S3 buckets
+for pattern in "${TARGET_SLUG}" "${TARGET}" "${TARGET//./-}" "assets-${TARGET}" "${TARGET}-assets" "${TARGET}-media"; do
+  curl -sf --max-time 5 "https://${pattern}.s3.amazonaws.com/" && echo "S3 bucket found: ${pattern}"
+  curl -sf --max-time 5 "https://s3.amazonaws.com/${pattern}/" && echo "S3 bucket found (path style): ${pattern}"
+done
+
+# Azure Blob Storage
+curl -sf --max-time 5 "https://${TARGET_SLUG}.blob.core.windows.net/" && echo "Azure Blob Storage found"
+curl -sf --max-time 5 "https://${TARGET}.blob.core.windows.net/" && echo "Azure Blob Storage found"
+
+# Google Cloud Storage
+curl -sf --max-time 5 "https://storage.googleapis.com/${TARGET_SLUG}/" && echo "GCS bucket found"
+curl -sf --max-time 5 "https://${TARGET}.storage.googleapis.com/" && echo "GCS bucket found"
+
+# Cloudflare R2
+curl -sf --max-time 5 "https://${TARGET_SLUG}.r2.cloudflarestorage.com/" && echo "Cloudflare R2 bucket found"
+```
+
+**What to look for:** Publicly accessible cloud storage buckets containing assets, backups, or sensitive data.
+
+---
+
+## Container & Orchestration Discovery
+
+```bash
+TARGET="example.com"
+
+# Docker Registry API
+curl -sf --max-time 5 "https://${TARGET}/v2/_catalog" && echo "Docker Registry API accessible"
+curl -sf --max-time 5 "https://${TARGET}/v2/" && echo "Docker Registry v2 endpoint"
+
+# Kubernetes API (common ports)
+for port in 6443 8443 8080; do
+  curl -k -sf --max-time 5 "https://${TARGET}:${port}/api/v1/namespaces" && echo "Kubernetes API found on port ${port}"
+  curl -k -sf --max-time 5 "https://${TARGET}:${port}/apis/apps/v1/deployments" && echo "Kubernetes deployments endpoint on port ${port}"
+done
+
+# Container orchestration dashboards
+for path in "/dashboard" "/kubernetes-dashboard" "/k8s-dashboard" "/rancher" "/portainer"; do
+  curl -sf --max-time 5 "https://${TARGET}${path}" | grep -q "<title>" && echo "Container dashboard found at ${path}"
+done
+```
+
+**What to look for:** Exposed container registries, Kubernetes API endpoints, and management dashboards.
+
+---
+
+## CI/CD Pipeline Enumeration
+
+```bash
+TARGET="example.com"
+
+# GitHub Actions (via API if repository known)
+# curl -sf --max-time 5 "https://api.github.com/repos/${ORG}/${REPO}/actions/workflows"
+
+# GitLab CI
+curl -sf --max-time 5 "https://${TARGET}/.gitlab-ci.yml" && echo "GitLab CI config found"
+curl -sf --max-time 5 "https://gitlab.${TARGET}/.gitlab-ci.yml" && echo "GitLab CI config found on gitlab subdomain"
+
+# Jenkins
+curl -sf --max-time 5 "https://${TARGET}/jenkins/" | grep -q "Jenkins" && echo "Jenkins dashboard found"
+curl -sf --max-time 5 "https://${TARGET}/jenkins/api/json" && echo "Jenkins API accessible"
+
+# CircleCI, Travis CI configuration patterns
+for file in ".circleci/config.yml" ".travis.yml" "azure-pipelines.yml" ".github/workflows/" ".gitlab/"; do
+  curl -sf --max-time 5 "https://${TARGET}/${file}" && echo "CI/CD config found: ${file}"
+done
+```
+
+**What to look for:** CI/CD configuration files, automation endpoints, and build pipeline access.
+
+---
+
+## Advanced API Documentation Discovery
+
+```bash
+TARGET="example.com"
+
+# RAML (RESTful API Modeling Language)
+curl -sf --max-time 5 "https://${TARGET}/api.raml" && echo "RAML spec found"
+curl -sf --max-time 5 "https://${TARGET}/api/api.raml" && echo "RAML spec found"
+
+# API Blueprint
+curl -sf --max-time 5 "https://${TARGET}/api.apib" && echo "API Blueprint found"
+curl -sf --max-time 5 "https://${TARGET}/docs/api.apib" && echo "API Blueprint found"
+
+# GraphQL Playground/IDE endpoints
+curl -sf --max-time 5 "https://${TARGET}/graphql" | grep -q "GraphQL" && echo "GraphQL endpoint found"
+curl -sf --max-time 5 "https://${TARGET}/graphiql" | grep -q "GraphiQL" && echo "GraphiQL IDE found"
+curl -sf --max-time 5 "https://${TARGET}/playground" | grep -q "GraphQL" && echo "GraphQL Playground found"
+
+# Postman/Insomnia collections
+for ext in "json" "yaml" "yml"; do
+  curl -sf --max-time 5 "https://${TARGET}/postman-collection.${ext}" && echo "Postman collection found"
+  curl -sf --max-time 5 "https://${TARGET}/insomnia-collection.${ext}" && echo "Insomnia collection found"
+done
+```
+
+**What to look for:** Alternative API specification formats and interactive API exploration tools.
+
+---
+
+## Mobile App Analysis Techniques
+
+```bash
+# Mobile API endpoint patterns often include:
+# - /api/v1/ (versioned APIs)
+# - /mobile/ or /m/ prefixes
+# - /app/ endpoints
+# - Firebase Realtime Database endpoints
+# - OneSignal push notification endpoints
+
+TARGET="example.com"
+
+# Common mobile API patterns
+for path in "/api/v1/" "/mobile/" "/m/" "/app/"; do
+  curl -sf --max-time 5 "https://${TARGET}${path}" && echo "Mobile API pattern found: ${path}"
+done
+
+# Firebase endpoints (common in mobile apps)
+curl -sf --max-time 5 "https://${TARGET}.firebaseio.com/.json" && echo "Firebase Realtime Database found"
+curl -sf --max-time 5 "https://${TARGET}-default-rtdb.firebaseio.com/.json" && echo "Firebase default database found"
+
+# Mobile push notification services
+curl -sf --max-time 5 "https://${TARGET}/onesignal/" | grep -q "OneSignal" && echo "OneSignal push service found"
+curl -sf --max-time 5 "https://${TARGET}/push/" | grep -q "push" && echo "Push notification endpoint found"
+```
+
+**What to look for:** Mobile-optimized API endpoints, Firebase configurations, and push notification services.
+
+---
+
+## Modern Web Framework Analysis
+
+```bash
+TARGET="example.com"
+
+# Next.js App Router (Next.js 13+)
+curl -sf --max-time 5 "https://${TARGET}/_next/" | grep -q "next" && echo "Next.js detected"
+curl -sf --max-time 5 "https://${TARGET}/api/" | grep -q "route" && echo "Next.js API routes possibly present"
+
+# Vite/Rollup source maps
+curl -sf --max-time 5 "https://${TARGET}/src/main.ts" && echo "Vite source file exposed"
+curl -sf --max-time 5 "https://${TARGET}/dist/main.js.map" && echo "Source map exposed"
+curl -sf --max-time 5 "https://${TARGET}/assets/index.*.js.map" && echo "Vite/Rollup source map exposed"
+
+# WebAssembly modules
+curl -sf --max-time 5 "https://${TARGET}/static/js/main.wasm" && echo "WebAssembly module found"
+curl -sf --max-time 5 "https://${TARGET}/pkg/*.wasm" && echo "Rust WebAssembly module possibly found"
+
+# Edge runtime detection (Cloudflare Workers, Vercel Edge)
+curl -I --max-time 5 "https://${TARGET}" | grep -i "server" | grep -E "(workers|vercel|netlify|cloudflare)" && echo "Edge runtime detected"
+```
+
+**What to look for:** Modern framework artifacts, source maps, WebAssembly modules, and edge runtime indicators.
+
+---
+
+## CORS & CSP Header Analysis
+
+`Content-Security-Policy` and `Access-Control-Allow-Origin` headers directly enumerate allowed API origins and internal domains — one of the highest-signal sources for API surface mapping.
+
+```bash
+TARGET="example.com"
+
+# Extract CSP connect-src to find allowed API domains
+curl -sI "https://${TARGET}" | grep -i "content-security-policy" | \
+  grep -oE "connect-src[^;]*" || echo "No CSP header"
+
+# Check CORS headers across multiple paths
+for path in "/api" "/api/products" "/graphql" "/admin"; do
+  curl -sI -H "Origin: https://example.com" "https://${TARGET}${path}" | \
+    grep -i "access-control"
+done
+```
+
+**What to look for:**
+- `connect-src 'self' https://api.example.com https://*.akamaihd.net` — internal API domains and CDN origins
+- `Access-Control-Allow-Origin: https://dashboard.example.com` — reveals admin/subdomain relationships
+- CSP `frame-ancestors` reveals what can embed the site
+
+---
+
+## SPF/DKIM/DMARC Record Analysis
+
+DNS TXT records for email authentication reveal all sending infrastructure (third-party email services, internal servers).
+
+```bash
+TARGET="example.com"
+
+# SPF record — lists all authorized sending IPs/domains
+dig +short TXT "${TARGET}" | grep "v=spf1"
+
+# Check for includes that reveal third-party services
+dig +short TXT "${TARGET}" | grep -oE "include:[^ ]+" | while read inc; do
+  domain="${inc#include }"
+  echo "SPF include: $domain"
+  dig +short TXT "$domain" 2>/dev/null | head -3
+done
+
+# DMARC — reveals reporting address
+dig +short TXT "_dmarc.${TARGET}"
+```
+
+**What to look for:**
+- `v=spf1 include:_spf.google.com` → Google Workspace
+- `v=spf1 include:servers.mcsv.net` → Mailchimp
+- `v=spf1 include:amazonses.com` → AWS SES
+- `v=spf1 include:sendgrid.net` → SendGrid
+- DMARC `rua=mailto:dmarc-reports@example.com` → reporting address domain
+
+---
+
+## Favicon Hash Matching
+
+Compute the mmh3 hash of `favicon.ico` and search Shodan to identify exact framework version and find related subdomains.
+
+```bash
+TARGET="example.com"
+
+# Get favicon and compute mmh3 hash
+curl -sf --max-time 10 "https://${TARGET}/favicon.ico" -o /tmp/favicon.ico
+pip install mmh3 2>/dev/null || true
+HASH=$(python3 -c "
+import mmh3, sys
+try:
+    with open('/tmp/favicon.ico', 'rb') as f:
+        print(mmh3.hash(f.read()))
+except: print('error')
+" 2>/dev/null)
+
+echo "Favicon hash: ${HASH}"
+echo "Search Shodan: https://www.shodan.io/search?query=icon_hash:${HASH}"
+```
+
+**What it reveals:**
+- Framework/fingerprint from hash → exact version
+- Same hash = same stack = shadow IT subdomains
+- Also try: https:// favicon.io / https://api.faviconkit.com/{domain}
+
+---
+
+## GA/GTM ID Cross-Referencing
+
+Google Analytics and Tag Manager IDs can be searched across the web to find sister domains, staging environments, and subdomains not in crt.sh.
+
+```bash
+TARGET="example.com"
+
+# Extract GA4 (G-XXXXX) and UA-XXXXX IDs from page source
+curl -sf --max-time 10 "https://${TARGET}" | grep -oE "G-[A-Z0-9]{10,}" | sort -u
+curl -sf --max-time 10 "https://${TARGET}" | grep -oE "UA-[0-9]{7,}-[0-9]{1,}" | sort -u
+
+# Extract GTM container ID
+curl -sf --max-time 10 "https://${TARGET}" | grep -oE "GTM-[A-Z0-9]{4,7}" | sort -u
+```
+
+**Search strategies (run in browser):**
+- `G-XXXXXXXXXX site:*` — find all sites with same GA4
+- `UA-XXXXXX-X site:*` — find all sites with same UA
+- `GTM-XXXXXX site:*` — find all sites with same GTM container
+- GTM container ID → query GTM API to enumerate all tags (includes API endpoints used for analytics)
+
+---
+
+## Third-Party API Key Extraction from Page Source
+
+Stripe publishable keys, reCAPTCHA site keys, Mapbox tokens, Algolia app IDs, Intercom app IDs, and similar third-party API credentials are almost always embedded in the page source.
+
+```bash
+TARGET="example.com"
+
+# Stripe publishable key
+curl -sf "https://${TARGET}" | grep -oE "pk_live_[A-Za-z0-9]{24}" | head -1
+
+# reCAPTCHA site key
+curl -sf "https://${TARGET}" | grep -oE "6L[A-Za-z0-9_-]{35,45}" | head -1
+
+# Algolia
+curl -sf "https://${TARGET}" | grep -oE "appId['\"]?\s*:\s*['\"][A-Za-z0-9]{10,20}" | head -1
+
+# Intercom
+curl -sf "https://${TARGET}" | grep -oE "app_id['\"]?\s*:\s*['\"][0-9]{5,10}" | head -1
+
+# Mapbox
+curl -sf "https://${TARGET}" | grep -oE "pk\.[A-Za-z0-9.-]{20,}" | head -1
+
+# Sentry DSN
+curl -sf "https://${TARGET}" | grep -oE "https://[a-f0-9]+@sentry\.io/[0-9]+" | head -1
+```
+
+**What it reveals:**
+- Confirms third-party integrations in use
+- Key prefixes identify exact service
+- Stripe `pk_live_` = live payments enabled
+- Key can be tested (not exploited) to confirm validity
+
+---
+
+## WAF Fingerprinting Expansion
+
+Beyond Cloudflare and DataDome, detect additional WAFs that reveal infrastructure:
+
+```bash
+TARGET="example.com"
+
+# Detect WAF from response headers
+HEADERS=$(curl -sI "https://${TARGET}" 2>&1)
+
+echo "$HEADERS" | grep -i "x-sucuri-id" && echo "→ Sucuri WAF"
+echo "$HEADERS" | grep -i "x-iinfo" && echo "→ Imperva/Incapsula"
+echo "$HEADERS" | grep -i "x-amzn-requestid" && echo "→ AWS WAF"
+echo "$HEADERS" | grep -i "x-wa-info" && echo "→ F5 BIG-IP"
+echo "$HEADERS" | grep -i "barra_counter_session" && echo "→ Barracuda"
+echo "$HEADERS" | grep -i "server" | grep -i "ddos-guard" && echo "→ DDOS-Guard"
+echo "$HEADERS" | grep -i "x-cdn" | grep -i "fastly" && echo "→ Fastly WAF"
+
+# Detect from response body (block pages)
+BODY=$(curl -sf --max-time 5 "https://${TARGET}/?waf-test=1" 2>&1)
+echo "$BODY" | grep -i "cloudflare" && echo "→ Cloudflare"
+echo "$BODY" | grep -i "datadome" && echo "→ DataDome"
+echo "$BODY" | grep -i "perimeterx" && echo "→ PerimeterX"
+echo "$BODY" | grep -i "incapsula" && echo "→ Imperva"
+```
+
+---
+
 ## Phase 9 Session Brief Format
 
 Document all OSINT findings in the session brief under:
@@ -460,6 +796,25 @@ Document all OSINT findings in the session brief under:
 **Structured Data:**
 - JSON‑LD types: {list}
 - Search endpoint: {url if found}
+
+**DNS Records (Phase 9):**
+- SPF includes: {third-party email services (Google, Mailchimp, SendGrid, etc.)}
+- DMARC reporting: {reporting domain}
+- DKIM selector: {if found}
+
+**Third-Party Integrations (page source):**
+- Stripe: {pk_live_ found / not found}
+- reCAPTCHA: {site key found / not found}
+- GA4/UA: {tracking IDs found}
+- GTM: {container ID found}
+- Other: {Algolia, Intercom, Mapbox, etc.}
+
+**WAF Detection:**
+- {WAF name} — signal: {header/body}
+
+**Favicon:**
+- Hash: {mmh3 hash}
+- Framework match: {from Shodan search}
 ```
 
 ---
