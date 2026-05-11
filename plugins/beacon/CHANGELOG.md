@@ -10,6 +10,18 @@ Versions follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **New Tech Packs**: SolidJS, SvelteKit, React Native, Vercel (4 frameworks)
+- **New OSINT Patterns** in `references/osint-sources.md`:
+  - Cloud Infrastructure Enumeration (AWS S3, Azure Blob, GCS, Cloudflare R2)
+  - Container & Orchestration Discovery (Docker Registry, Kubernetes API, dashboards)
+  - CI/CD Pipeline Enumeration (GitHub Actions, GitLab CI, Jenkins, CircleCI)
+  - Advanced API Documentation Discovery (RAML, API Blueprint, GraphQL Playground)
+  - Mobile App Analysis Techniques (Firebase, push notifications)
+  - Modern Web Framework Analysis (Next.js App Router, Vite, WebAssembly)
+- **New Detection Scripts**:
+  - `scripts/cloud-enum.sh` - Cloud storage enumeration
+  - `scripts/container-scan.sh` - Container & orchestration discovery
+  - `scripts/cicd-scan.sh` - CI/CD pipeline enumeration
 - Add Wayback Machine versioning analysis to OSINT sources (track API endpoint evolution)
 - Add 30+ new OSINT sources to `references/osint-sources.md`:
   - Passive DNS: VirusTotal, DNSDumpster, Farsight DNSDB
