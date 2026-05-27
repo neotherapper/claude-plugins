@@ -29,18 +29,22 @@ docs/research/{site-slug}/
 Derive `{site-slug}` from the domain: `example.com` → `example-com`, `api.example.com` → `api-example-com`.
 Strip `www.` before slugifying: `www.jetpens.com` → `jetpens-com`, not `www-jetpens-com`.
 
-## The 12 phases — always in this order
+## The 14 phases — always in this order
 
 | # | Phase | What happens |
 |---|-------|-------------|
 | 1 | Scaffold | Create output folder; check tool availability |
+| 1.5 | Multi-source Domain Discovery | Discover related domains from local databases, config files, and cached data |
 | 2 | Passive recon | robots.txt, sitemaps, .well-known, HTTP headers, crt.sh subdomains |
+| 2.5 | Data Source Inventory | Inventory local databases, migration files, seed scripts, and previous scan results |
 | 3 | Fingerprint | Detect framework + version (Wappalyzer → headers → HTML → JS) |
 | 4 | Tech pack | Load framework guide from GitHub, context7, or web search |
 | 5 | Known patterns | Apply every item in the tech pack's probe checklist |
 | 6 | Feeds & structure | RSS/Atom, JSON-LD, GraphQL introspection, API version enumeration |
+| 6b | Security Exposure Scan | Check for exposed secrets, config files, payment data, and PII |
 | 7 | JS & source maps | Download bundles, grep for endpoints and auth patterns, check .map files |
 | 8 | OpenAPI detect | Probe 15 standard paths; download spec if found |
+| 8.5 | PII & Payment Data Classification | Classify severity of exposed data (CRITICAL/HIGH/MEDIUM/LOW) |
 | 9 | OSINT | Wayback CDX, CommonCrawl CDX, GitHub code search, Google dorks |
 | 10 | Browse plan | Compile a prioritised URL list + actions from all phase 2–9 findings |
 | 11 | Active browse | Execute the browse plan via cmux or Chrome DevTools MCP; HAR → OpenAPI |
@@ -92,6 +96,125 @@ Bot protection: {name or none detected}
 See `references/session-brief-format.md` for the complete schema.
 
 ## Phase 1 — Scaffold and tool check
+
+**New: Multi-source Domain Discovery**
+After creating the output folder, run **Phase 1.5** to discover related domains:
+```bash
+# Phase 1.5: Multi-source Domain Discovery
+# Check local databases for domains
+find . -name "*.db" -o -name "*.sqlite" | while read db; do
+  sqlite3 "$db" "SELECT DISTINCT url, domain, shopify_domain FROM stores WHERE url LIKE '%http%' LIMIT 50;" 2>/dev/null || true
+  sqlite3 "$db" "SELECT DISTINCT url FROM shops LIMIT 50;" 2>/dev/null || true
+  sqlite3 "$db" "SELECT DISTINCT domain FROM merchants LIMIT 50;" 2>/dev/null || true
+done
+
+# Check scraper config files
+find . -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" | while read config; do
+  grep -oE 'domain:\s*"[^"]+"' "$config" | awk -F'"' '{print $2}' || true
+done
+
+# Check cached/enriched data
+find . -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" | while read json_file; do
+  grep -oE '"domain"\s*:\s*"[^"]+"' "$json_file" | awk -F'"' '{print $4}' || true
+  grep -oE '"url"\s*:\s*"https?://[^"]+"' "$json_file" | awk -F'"' '{print $4}' | sed -E 's|https?://||;s|/.*||' || true
+done
+
+# Cross-reference and deduplicate domains
+cat <(sqlite3 commands) <(grep commands) | sort | uniq > "docs/research/${SLUG}/discovered_domains.txt"
+```
+
+Log results in the session brief:
+```markdown
+### Discovered Domains
+| Domain | Source | Notes |
+|--------|--------|-------|
+| example.com | local database | Active store |
+```
+
+---
+
+## Phase 1.5 — Multi-source Domain Discovery
+
+**Input**: Base domain or project name.
+**Actions**:
+1. **Check local SQLite/SQL databases**:
+   - glob: `**/*.db`, `**/*.sqlite`
+   - Query columns: `url`, `domain`, `shopify_domain`
+2. **Check scraper config files**:
+   - glob: `**/stores/*.config.mjs`, `**/scrapers/*.config.*`
+   - Extract `domain:` field from each
+3. **Check cached/enriched data**:
+   - glob: `**/*.json`, `**/*.jsonl`, `**/*.ndjson`
+   - Search for `domain` or `url` fields
+4. **Cross-reference and deduplicate domains**
+
+**Output**: Consolidated domain list saved to `docs/research/{SLUG}/discovered_domains.txt`.
+
+---
+
+## Phase 2 — Passive recon
+
+**New: Data Source Inventory**
+After passive recon, run **Phase 2.5** to inventory local data sources:
+```bash
+# Phase 2.5: Data Source Inventory
+# Check database schema files
+find . -name "schema.prisma" -o -name "*.drizzle.ts" -o -name "*.typeorm.ts" | while read schema; do
+  echo "Database schema: $schema"
+  grep -E 'model|entity|table' "$schema" | head -10
+  echo "---"
+done
+
+# Check migration files
+find . -name "migrations/*.sql" -o -name "*.migration.ts" | while read migration; do
+  echo "Migration: $migration"
+  grep -E 'CREATE TABLE|ALTER TABLE' "$migration" | head -5
+  echo "---"
+done
+
+# Check seed scripts
+find . -name "seed*.ts" -o -name "seed*.js" | while read seed; do
+  echo "Seed script: $seed"
+  grep -E 'insert|create.*store|upsert' "$seed" | head -5
+  echo "---"
+done
+
+# Check previous scan results
+find docs/research/ -name "INDEX.md" | while read research; do
+  echo "Previous scan: $research"
+  grep -E 'Framework|Auth|Endpoint' "$research" | head -3
+  echo "---"
+done
+```
+
+Log results in the session brief:
+```markdown
+### Data Sources
+| Type | Source Path | Record Count |
+|------|-------------|--------------|
+| Database | data/stores.db | 9621 |
+```
+
+---
+
+## Phase 2.5 — Data Source Inventory
+
+**Input**: Project directory.
+**Actions**:
+1. **Database schema files**:
+   - glob: `**/schema.prisma`, `**/*.drizzle.ts`, `**/*.typeorm.ts`
+   - Extract table structures
+2. **Migration files**:
+   - glob: `**/migrations/*.sql`, `**/*.migration.ts`
+   - Extract `CREATE TABLE`/`ALTER TABLE` statements
+3. **Seed scripts**:
+   - glob: `**/seed*.ts`, `**/seed*.js`
+   - Extract `insert`/`create` patterns
+4. **Previous scan results**:
+   - glob: `docs/research/**/INDEX.md`
+   - Extract framework/auth/endpoint data
+
+**Output**: Inventory of local data sources in the session brief.
 
 ```bash
 # Strip www. then slugify
@@ -450,7 +573,6 @@ After Phase 11 completes, set `OPENAPI_STATUS` to the full Markdown table row fo
 ## Graceful degradation signals
 
 Log these in the session brief and repeat in the generated INDEX.md:
-
 | Signal | Meaning |
 |--------|---------|
 | `[TOOL-UNAVAILABLE:wappalyzer]` | Used header/HTML grep instead |
@@ -479,6 +601,7 @@ Log these in the session brief and repeat in the generated INDEX.md:
 | `[CF-PIVOT:scrapfly]` | DataDome/PerimeterX blocked; Scrapfly asp=true used |
 | `[CF-PIVOT:jina]` | WAF blocked curl; Jina Reader used instead |
 | `[CF-BLOCKED:all]` | All probe methods (curl, Firecrawl, Spider, Scrapfly, Jina) blocked |
+| `[PHASE-6B-FALSE-POSITIVE:{path}]` | Cloudflare challenge page misidentified as `.env`/`.git/config` |
 | `[PHASE-7-CURL-BLOCKED:retrying-via-browser]` | JS bundle fetch returned 404; retrying via browser eval |
 | `[CHROME-MCP-UNAVAILABLE]` | 2 consecutive Chrome MCP failures; switched to cmux |
 | `[CHROME-MCP-PROFILE-LOCK]` | Plugin Chrome MCP stuck; profile lock cleared |
@@ -487,6 +610,7 @@ Log these in the session brief and repeat in the generated INDEX.md:
 | `[TECH-PACK-RELOAD:{framework}]` | Tech pack updated externally; re-run Phase 5 probes |
 | `[CF-BYPASS:brand-subpage]` | Category page blocked; brand/manufacturer sub-page used as alternate |
 | `[PRODUCT-SITEMAP-SEED:{count} URLs]` | Product sitemap used as enumeration fallback |
+| `[PCI-DSS-VIOLATION:CRITICAL]` | Card BIN + last4 + expiry or CVC/CVV found; immediate disclosure required |
 
 ## Phase 11 — cmux usage guide
 
@@ -514,6 +638,61 @@ cmux browser --surface surface:83 screenshot --out /tmp/page.png
 
 Surface IDs: `cmux browser open` returns a UUID. Use `cmux browser --surface {id}` for all subsequent calls on that surface. Surface IDs look like `surface:83` or a UUID string — always quote them.
 
+## Phase 8.5 — PII and Payment Data Classification
+
+**Input**: All discovered endpoints, `constants.md` values, JS bundle leaks, exposed files (Phase 6b).
+
+**Actions**:
+1. **Flag Payment Endpoints**:
+   - Paths containing `/payment`, `/checkout`, `/order`, `/cart`, `/transaction`.
+   - Endpoints returning `payment_method`, `transaction_id`, `cardBin`, `lastFour`, `expiryDate`.
+
+2. **Grep for Payment Integrations**:
+   - JS bundles: `stripe|paypal|braintree|adyen|authorize\.net`.
+   - Config files: `STRIPE_KEY|PAYPAL_CLIENT_ID`.
+
+3. **Classify Leaks**:
+```bash
+# CRITICAL (PCI DSS violation)
+grep -E "\b(4[0-9]{12}|5[1-5][0-9]{14}|6(?:011|5[0-9]{2})[0-9]{12})\b" exposed_files/*
+grep -E "cardBin.*lastFour.*expiry" js_bundles/*
+
+# PII
+grep -E "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}" exposed_files/*
+grep -E "\bname.*address.*phone\b" exposed_files/*
+
+# Secrets
+grep -E "API_KEY|SECRET|PASSWORD|DB_PASSWORD" exposed_files/*
+```
+
+4. **Severity Matrix**:
+| Severity   | Criteria                                                                 | Action Required                     |
+|------------|-------------------------------------------------------------------------|--------------------------------------|
+| CRITICAL   | Card BIN + last4 + expiry, CVC/CVV, HMAC signatures                        | Immediate disclosure                 |
+| HIGH       | Database credentials, 100+ MB logs, live payment processor keys         | Review within 24 hours                |
+| MEDIUM     | Server paths, plugin versions, email lists                              | Review within 7 days                  |
+| LOW        | Trivial errors, no PII                                                  | Note in findings                     |
+| MITIGATED  | File exists but returns 301/302/403/404, or empty                       | None                                 |
+
+**Output**: Append to `INDEX.md`:
+
+```markdown
+## Security Exposure
+
+| Path                     | Severity   | PII Found | Payment Data | Evidence                                  |
+|--------------------------|------------|-----------|--------------|--------------------------------------------|
+| /wp-content/debug.log    | CRITICAL   | 125 emails| Yes          | Stripe keys + card BINs in log             |
+| /api/checkout/process    | HIGH       | No        | Yes          | LastFour + expiry in response              |
+| /.env                    | HIGH       | No        | No           | DB_PASSWORD=example                        |
+```
+
+**PCI DSS Awareness**:
+- **CRITICAL**: Card BIN + last4 + expiry = **PCI DSS violation** (immediate breach reporting required).
+- **CRITICAL**: CVC/CVV match results = **PCI DSS violation** (stored in logs).
+- **HIGH**: HMAC webhook signatures = **replay attacks** (API abuse risk).
+
+---
+
 ## Phase 12 — Output synthesis
 
 **Phase completion gate — verify before writing:**
@@ -526,8 +705,10 @@ Before executing Phase 12, check the session brief for completion markers:
 [P4✓] Tech pack (or UNAVAILABLE logged)
 [P5✓] Known patterns
 [P6✓] Feeds & structure
+[P6b✓] Security Exposure Scan
 [P7✓] JS & source maps
 [P8✓] OpenAPI detect
+[P8.5✓] PII & Payment Data Classification
 [P9✓] OSINT
 [P10✓] Browse plan compiled
 [P11✓] Active browse (or SKIPPED logged)
