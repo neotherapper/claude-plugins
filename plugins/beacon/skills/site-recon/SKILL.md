@@ -1,12 +1,12 @@
 ---
 name: site-recon
-description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 12-phase systematic investigation of a website and produces a complete persistent docs/research/{site-name}/ folder.
+description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 16-phase systematic investigation of a website and produces a complete persistent docs/research/{site-name}/ folder.
 version: 0.6.0
 ---
 
 # site-recon — Research Mode
 
-Systematically analyse a target website across 12 ordered phases. Each phase writes
+Systematically analyse a target website across 16 ordered phases. Each phase writes
 findings to an in-memory **session brief** (a running markdown document in context).
 Phase 12 flushes everything to disk as structured research files.
 
@@ -29,7 +29,7 @@ docs/research/{site-slug}/
 Derive `{site-slug}` from the domain: `example.com` → `example-com`, `api.example.com` → `api-example-com`.
 Strip `www.` before slugifying: `www.jetpens.com` → `jetpens-com`, not `www-jetpens-com`.
 
-## The 14 phases — always in this order
+## The 16 phases — always in this order
 
 | # | Phase | What happens |
 |---|-------|-------------|
@@ -222,6 +222,42 @@ SLUG=$(echo "{url}" | sed -E 's|https?://(www\.)?||;s|/.*||;s|\.|-|g')
 mkdir -p docs/research/${SLUG}/{api-surfaces,specs,scripts}
 ```
 
+**New: Multi-source Domain Discovery**
+After creating the output folder, run **Phase 1.5** to discover related domains:
+```bash
+# Phase 1.5: Multi-source Domain Discovery
+# Check local databases for domains
+find . -name "*.db" -o -name "*.sqlite" -print0 | while IFS= read -r -d '' db; do
+  sqlite3 "$db" "SELECT DISTINCT url, domain, shopify_domain FROM stores WHERE url LIKE '%http%' LIMIT 50;" 2>/dev/null || true
+  sqlite3 "$db" "SELECT DISTINCT url FROM shops LIMIT 50;" 2>/dev/null || true
+  sqlite3 "$db" "SELECT DISTINCT domain FROM merchants LIMIT 50;" 2>/dev/null || true
+done
+
+# Check scraper config files
+find . -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" -print0 | while IFS= read -r -d '' config; do
+  grep -oE 'domain:\s*"[^"]+"' "$config" | awk -F'"' '{print $2}' || true
+done
+
+# Check cached/enriched data
+find . -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" -print0 | while IFS= read -r -d '' json_file; do
+  grep -oE '"domain"\s*:\s*"[^"]+"' "$json_file" | awk -F'"' '{print $4}' || true
+  grep -oE '"url"\s*:\s*"https?://[^"]+"' "$json_file" | awk -F'"' '{print $4}' | sed -E 's|https?://||;s|/.*||' || true
+done
+
+# Cross-reference and deduplicate domains
+cat <(sqlite3 commands) <(grep commands) | sort | uniq > "docs/research/${SLUG}/discovered_domains.txt"
+```
+
+Log results in the session brief:
+```markdown
+### Discovered Domains
+| Domain | Source | Notes |
+|--------|--------|-------|
+| example.com | local database | Active store |
+```
+
+---
+
 **Critical:** Do NOT use `touch` to create output files — the Write tool requires a prior Read.
 Use `Write` directly with empty string content for each output file, or they will fail at Phase 12.
 
@@ -254,6 +290,95 @@ Jina Reader is almost always available (no install, free tier). Log `[AVAILABLE:
 **gau alias check:** `which gau` is not sufficient — `gau` may be aliased to `git add --update`.
 Run `gau --version 2>&1 | grep -i "getallurls\|gau"` to confirm it is the URL extractor.
 If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
+
+---
+
+## Phase 1.5 — Multi-source Domain Discovery
+
+**Input**: Base domain or project name.
+**Actions**:
+1. **Check local SQLite/SQL databases**:
+   - glob: `**/*.db`, `**/*.sqlite`
+   - Query columns: `url`, `domain`, `shopify_domain`
+2. **Check scraper config files**:
+   - glob: `**/stores/*.config.mjs`, `**/scrapers/*.config.*`
+   - Extract `domain:` field from each
+3. **Check cached/enriched data**:
+   - glob: `**/*.json`, `**/*.jsonl`, `**/*.ndjson`
+   - Search for `domain` or `url` fields
+4. **Cross-reference and deduplicate domains**
+
+**Output**: Consolidated domain list saved to `docs/research/{SLUG}/discovered_domains.txt`.
+
+---
+
+## Phase 2 — Passive recon
+
+See `references/phase-detail.md` for detailed probe commands, grep patterns, and API parameters.
+
+**New: Data Source Inventory**
+After passive recon, run **Phase 2.5** to inventory local data sources:
+```bash
+# Phase 2.5: Data Source Inventory
+# Check database schema files
+find . -name "schema.prisma" -o -name "*.drizzle.ts" -o -name "*.typeorm.ts" -print0 | while IFS= read -r -d '' schema; do
+  echo "Database schema: $schema"
+  grep -E 'model|entity|table' "$schema" | head -10
+  echo "---"
+done
+
+# Check migration files
+find . -name "migrations/*.sql" -o -name "*.migration.ts" -print0 | while IFS= read -r -d '' migration; do
+  echo "Migration: $migration"
+  grep -E 'CREATE TABLE|ALTER TABLE' "$migration" | head -5
+  echo "---"
+done
+
+# Check seed scripts
+find . -name "seed*.ts" -o -name "seed*.js" -print0 | while IFS= read -r -d '' seed; do
+  echo "Seed script: $seed"
+  grep -E 'insert|create.*store|upsert' "$seed" | head -5
+  echo "---"
+done
+
+# Check previous scan results
+find docs/research/ -name "INDEX.md" -print0 | while IFS= read -r -d '' research; do
+  echo "Previous scan: $research"
+  grep -E 'Framework|Auth|Endpoint' "$research" | head -3
+  echo "---"
+done
+```
+
+Log results in the session brief:
+```markdown
+### Data Sources
+| Type | Source Path | Record Count |
+|------|-------------|--------------|
+| Database | data/stores.db | 9621 |
+```
+
+---
+
+## Phase 2.5 — Data Source Inventory
+
+**Input**: Project directory.
+**Actions**:
+1. **Database schema files**:
+   - glob: `**/schema.prisma`, `**/*.drizzle.ts`, `**/*.typeorm.ts`
+   - Extract table structures
+2. **Migration files**:
+   - glob: `**/migrations/*.sql`, `**/*.migration.ts`
+   - Extract `CREATE TABLE`/`ALTER TABLE` statements
+3. **Seed scripts**:
+   - glob: `**/seed*.ts`, `**/seed*.js`
+   - Extract `insert`/`create` patterns
+4. **Previous scan results**:
+   - glob: `docs/research/**/INDEX.md`
+   - Extract framework/auth/endpoint data
+
+**Output**: Inventory of local data sources in the session brief.
+
+---
 
 ## Phase 3 — Fingerprinting (first match wins)
 
@@ -405,6 +530,75 @@ cause of incomplete output files.
 **External tech pack update rule:** If the user says a tech pack was added or updated externally
 after Phase 5 already ran, re-read the new pack, run its checklist comparison, and execute any
 outstanding probes before Phase 12. Log: `[TECH-PACK-RELOAD:{framework}]`
+
+---
+
+## Phase 6b — Security Exposure Scan
+
+**Input**: Target URL, all discovered paths from Phases 2–6.
+
+**Actions**:
+1. **Check for exposed config files**:
+   ```bash
+   for path in .env .env.local .env.production config.php wp-config.php \
+               config.yml config.json config.yaml database.yml \
+               settings.py settings.json appsettings.json \
+               .git/config .git/HEAD .svn/entries .hgignore \
+               Dockerfile docker-compose.yml kubernetes.yaml \
+               backup.sql dump.sql db.sql export.sql \
+               debug.log error.log access.log install.log; do
+     status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "${url}/${path}")
+     if [ "$status" != "404" ] && [ "$status" != "000" ]; then
+       size=$(curl -s --max-time 5 "${url}/${path}" | wc -c)
+       echo "${path} → HTTP ${status} (${size} bytes)"
+     fi
+   done
+   ```
+
+2. **Check for exposed payment data**:
+   ```bash
+   for path in orders.json transactions.csv payments.log \
+               stripe_config.js paypal_config.js billing.sql \
+               receipts/ invoices/ orders/ payments/; do
+     status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "${url}/${path}")
+     if [ "$status" != "404" ] && [ "$status" != "000" ]; then
+       size=$(curl -s --max-time 5 "${url}/${path}" | wc -c)
+       echo "${path} → HTTP ${status} (${size} bytes)"
+     fi
+   done
+   ```
+
+3. **Check for PII exposure**:
+   ```bash
+   for path in customers.json users.csv employees.sql \
+               personnel/ staff/ users/ members/ clients/; do
+     status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "${url}/${path}")
+     if [ "$status" != "404" ] && [ "$status" != "000" ]; then
+       echo "${path} → HTTP ${status}"
+     fi
+   done
+   ```
+
+4. **Check for exposed admin/API docs**:
+   ```bash
+   for path in phpinfo.php info.php test.php admin/phpinfo.php \
+               swagger/ api/docs/ graphql/playground graphiql \
+               _debug/ debug/ dev/ api/debug/; do
+     status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "${url}/${path}")
+     if [ "$status" != "404" ] && [ "$status" != "000" ]; then
+       echo "${path} → HTTP ${status}"
+     fi
+   done
+   ```
+
+**False positive handling**: Cloudflare challenge pages can be misidentified as config file content.
+If an exposed file check returns content containing "cf-browser-verification" or "Just a moment...",
+log `[PHASE-6B-FALSE-POSITIVE:{path}]` and mark as `MITIGATED`.
+
+**Output**: Append findings to the session brief with severity assessment. High-severity findings
+should be reported to the user immediately rather than waiting for Phase 12 output.
+
+---
 
 ## Phase 8 — OpenAPI auto-detection
 
@@ -610,6 +804,7 @@ Log these in the session brief and repeat in the generated INDEX.md:
 | `[TECH-PACK-RELOAD:{framework}]` | Tech pack updated externally; re-run Phase 5 probes |
 | `[CF-BYPASS:brand-subpage]` | Category page blocked; brand/manufacturer sub-page used as alternate |
 | `[PRODUCT-SITEMAP-SEED:{count} URLs]` | Product sitemap used as enumeration fallback |
+| `[PHASE-6B-FALSE-POSITIVE:{path}]` | Cloudflare challenge page misidentified as `.env`/`.git/config` |
 | `[PCI-DSS-VIOLATION:CRITICAL]` | Card BIN + last4 + expiry or CVC/CVV found; immediate disclosure required |
 
 ## Phase 11 — cmux usage guide
@@ -637,6 +832,8 @@ cmux browser --surface surface:83 screenshot --out /tmp/page.png
 ```
 
 Surface IDs: `cmux browser open` returns a UUID. Use `cmux browser --surface {id}` for all subsequent calls on that surface. Surface IDs look like `surface:83` or a UUID string — always quote them.
+
+---
 
 ## Phase 8.5 — PII and Payment Data Classification
 
@@ -668,8 +865,8 @@ grep -E "API_KEY|SECRET|PASSWORD|DB_PASSWORD" exposed_files/*
 4. **Severity Matrix**:
 | Severity   | Criteria                                                                 | Action Required                     |
 |------------|-------------------------------------------------------------------------|--------------------------------------|
-| CRITICAL   | Card BIN + last4 + expiry, CVC/CVV, HMAC signatures                        | Immediate disclosure                 |
-| HIGH       | Database credentials, 100+ MB logs, live payment processor keys         | Review within 24 hours                |
+| CRITICAL   | Card BIN + last4 + expiry, CVC/CVV                                       | Immediate disclosure                 |
+| HIGH       | Database credentials, 100+ MB logs, live payment processor keys, HMAC webhook signatures | Review within 24 hours                |
 | MEDIUM     | Server paths, plugin versions, email lists                              | Review within 7 days                  |
 | LOW        | Trivial errors, no PII                                                  | Note in findings                     |
 | MITIGATED  | File exists but returns 301/302/403/404, or empty                       | None                                 |
