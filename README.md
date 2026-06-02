@@ -29,7 +29,8 @@ In future sessions, ask questions about the site and Beacon routes directly to t
 ### Claude Code
 
 ```
-/plugin install beacon@neotherapper
+/plugin marketplace add neotherapper/claude-plugins
+/plugin install beacon@neotherapper-plugins
 ```
 
 ### Gemini CLI

@@ -14,11 +14,9 @@ namesmith is a Claude Code plugin that runs a structured naming workflow:
 
 ## Installation
 
-```bash
-# From the claude-plugins marketplace
-cc install neotherapper/namesmith
-
-# Or add to your project's .claude/plugins list
+```
+/plugin marketplace add neotherapper/claude-plugins
+/plugin install namesmith@neotherapper-plugins
 ```
 
 ## Usage
