@@ -23,7 +23,8 @@ In future sessions, ask questions about the site using `/beacon:load` and Beacon
 
 ### Claude Code
 ```
-/plugin install beacon@neotherapper
+/plugin marketplace add neotherapper/claude-plugins
+/plugin install beacon@neotherapper-plugins
 ```
 
 ### Gemini CLI

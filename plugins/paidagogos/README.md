@@ -4,8 +4,9 @@ Structured AI-powered lessons for any topic, rendered in a local browser UI.
 
 ## Install
 
-```bash
-claude plugin install paidagogos
+```
+/plugin marketplace add neotherapper/claude-plugins
+/plugin install paidagogos@neotherapper-plugins
 ```
 
 ## Usage
