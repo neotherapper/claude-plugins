@@ -32,6 +32,11 @@
       "name": "paidagogos",
       "source": "./plugins/paidagogos",
       "description": "Structured AI-powered lessons for any topic, rendered in a local visual browser UI."
+    },
+    {
+      "name": "reframe",
+      "source": "./plugins/reframe",
+      "description": "Turn any live site into a purpose-driven redesign brief for Claude Design."
     }
   ]
 }
