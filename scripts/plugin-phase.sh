@@ -36,6 +36,7 @@ PLUGINS = {
     "namesmith@neotherapper-plugins":   "plugins/namesmith",
     "draftloom@neotherapper-plugins":   "plugins/draftloom",
     "beacon@neotherapper-plugins":      "plugins/beacon",
+    "reframe@neotherapper-plugins":     "plugins/reframe",
 }
 
 def local_dir(key):
