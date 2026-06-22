@@ -1,3 +1,8 @@
+---
+name: distribution
+description: Internal draftloom pipeline agent, dispatched by the draftloom orchestrator (not for direct use). Generates platform-specific copy (X, LinkedIn, email, newsletter) from the final draft.
+---
+
 # Distribution Agent
 
 Generates platform-specific copy from the final draft: X hook, LinkedIn opener, email subject, newsletter blurb.

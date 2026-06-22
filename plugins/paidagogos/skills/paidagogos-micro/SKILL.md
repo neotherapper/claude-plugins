@@ -1,16 +1,15 @@
 ---
 name: paidagogos-micro
 description: >
-  Use when the user wants to learn a specific concept, requests a lesson, or
-  wants to explore something interactively or visually. Triggers on: "learn",
-  "teach me", "explain", "how does X work", "I don't understand X", "walk me
-  through X", "show me X visually", "animate X", "with sliders", "plot X".
-  Also triggers when the user names a topic they're confused about even without
-  using the word "learn" — e.g. "I keep mixing up SQL joins" or "I want to
-  properly understand derivatives". Produces a structured lesson page (standard
-  topics) or a live interactive page with sliders and visualisations (math,
-  physics, geometry, statistics) — rendered in the browser via visual-kit.
-  Invoke this skill for any learning intent, even indirect ones.
+  Produces one focused lesson for a single, already-scoped concept — invoked by
+  the paidagogos router after its scope check, or directly via
+  /paidagogos:micro. Generates a structured lesson page (standard topics) or a
+  live interactive page with sliders and visualisations (math, physics,
+  geometry, statistics), rendered in the browser via visual-kit. Use for a
+  concrete single concept such as "CSS flexbox", "async/await", "SQL JOINs", or
+  "derivatives". For a bare or broad learning request ("teach me X", "explain
+  X", "I want to learn X"), the paidagogos router handles scope first and then
+  routes here.
 ---
 
 # paidagogos:micro

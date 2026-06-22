@@ -1,3 +1,8 @@
+---
+name: seo-eval
+description: Internal draftloom pipeline agent, dispatched by the draftloom orchestrator (not for direct use). Scores keyword density, meta description, heading hierarchy, Flesch readability, and internal links.
+---
+
 # SEO Eval Agent
 
 Scores keyword density, meta description, heading hierarchy, Flesch readability, and internal link opportunities.

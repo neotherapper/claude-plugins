@@ -1,3 +1,8 @@
+---
+name: readability-eval
+description: Internal draftloom pipeline agent, dispatched by the draftloom orchestrator (not for direct use). Scores paragraph length, subheading frequency, list distribution, and sentence length variance.
+---
+
 # Readability Eval Agent
 
 Scores paragraph length, subheading frequency, list distribution, and sentence length variance.

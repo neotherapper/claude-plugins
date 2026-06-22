@@ -30,9 +30,9 @@ Entry point for the `paidagogos` plugin. Classify the user's learning intent and
 | "show me [thing] visually / with sliders / animated" | Scope check → route to `paidagogos:micro` (interactive mode) |
 | "/paidagogos [topic]" (bare invocation) | Scope check → route to `paidagogos:micro` |
 | "/paidagogos serve" or "start the server" | Start visual-kit: run `visual-kit serve --project-dir .` in background (`run_in_background: true`), poll `.visual-kit/server/state/server-info` until `status` is `"running"`, report the URL. Do NOT ask the user to run it. |
-| "quiz me on [thing]" | Respond: "`paidagogos:quiz` is coming in v0.2.0. Use `/paidagogos [topic]` to get a lesson with a built-in quiz." |
-| "what have I learned" / "show progress" | Respond: "Progress tracking is coming in v0.2.0." |
-| "continue my lesson on X" | Respond: "Session recall is coming in v0.2.0." |
+| "quiz me on [thing]" | Respond: "`paidagogos:quiz` is coming in v0.3.0. Use `/paidagogos [topic]` to get a lesson with a built-in quiz." |
+| "what have I learned" / "show progress" | Respond: "Progress tracking is coming in v0.3.0." |
+| "continue my lesson on X" | Respond: "Session recall is coming in v0.3.0." |
 | "I want to become [role]" / "roadmap for X" | Scope check → if broad, explain path is v0.3.0, offer first concept |
 
 ## Scope classifier
