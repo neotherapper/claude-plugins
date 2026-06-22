@@ -7,8 +7,9 @@ All notable changes to this project will be documented in this file.
 Initial release.
 
 - **9-phase pipeline:** Scaffold + tool check → Structure discovery → Render + coverage gate → Content crawl + screenshots → Content audit → IA / journey map → Intent inference → Current-design critique → Synthesize
-- **Coverage-first architecture:** Render gate escalates to headless for SPAs; content-sufficiency gate detects placeholder sites and enters greenfield mode before inferring
-- **4 initial category packs** bundled locally: `local-service`, `saas-marketing`, `ecommerce`, `portfolio-personal` — plus `generic.md` fallback; full taxonomy (`~10 categories`) to follow in subsequent releases
+- **Coverage-first architecture:** Render gate escalates JS-rendered SPAs to a markdown crawler (Jina → Firecrawl → Crawl4AI); content-sufficiency gate detects placeholder sites and enters greenfield mode before inferring
+- **Content-extraction preference:** Jina Reader → Firecrawl → Crawl4AI (Crawl4AI used only if installed); Chrome DevTools MCP reserved for authenticated/interactive flows and element screenshots, not default content extraction
+- **Category packs** bundled locally: `local-service`, `saas-marketing`, `ecommerce` — plus a `generic.md` fallback; the rest of the ~10-category taxonomy follows in subsequent releases
 - **Two-stage deliverable:** `brief.md` (Claude Design onboarding block) + `run-sheet.md` (sequenced canvas prompts)
 - **Evaluative content audit** (`content-inventory.md`) with keep / revise / consolidate / remove verdicts + ROT flags
 - **IA / journey map** (`ia-map.md`) with primary conversion path and per-page intent triplets

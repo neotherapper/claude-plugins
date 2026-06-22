@@ -70,8 +70,10 @@ Full design rationale, pipeline phases, and architecture decisions:
 
 ---
 
-## Install
+## Installation
 
-```bash
-claude plugin install https://github.com/neotherapper/claude-plugins/tree/main/plugins/reframe
+### Claude Code
+```
+/plugin marketplace add neotherapper/claude-plugins
+/plugin install reframe@neotherapper-plugins
 ```
