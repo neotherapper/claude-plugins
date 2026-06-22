@@ -1,5 +1,18 @@
 # Copied and trimmed from beacon site-recon (intentional duplication; N=2 skills, no shared lib).
 
+## Content-Extraction Preference Order
+
+For fetching a page's **rendered content** (text/markdown), especially JS-rendered SPAs, use this order:
+
+1. **Jina Reader** — `curl -s https://r.jina.ai/<FULL_URL>` — renders JS server-side, returns clean markdown, zero install, no key. **DEFAULT for SPA/empty-HTML content.**
+2. **Firecrawl** — if MCP (`firecrawl_scrape`) or CLI (`firecrawl`) is available; renders + returns markdown; bypasses many WAF configs.
+3. **Crawl4AI** — if installed (`command -v crwl` exits 0); local Playwright crawler, no key, renders SPAs.
+4. **Chrome DevTools MCP** — **RESERVED.** Use ONLY for: authenticated/interactive flows (login/session walls, clicking through gated content) and specific-element screenshots the crawlers cannot produce. Not the default for content extraction.
+
+For **screenshots** (visual track): prefer Jina pageshot (`X-Respond-With: pageshot`), Firecrawl `formats:["screenshot"]`, or Crawl4AI (Python `CrawlerRunConfig(screenshot=True)` → base64 PNG); fall back to Chrome MCP `take_screenshot` only if none available.
+
+---
+
 ## Detection Commands (run during Phase 1)
 
 Check each tool and log `[AVAILABLE]` or `[TOOL-UNAVAILABLE:{name}]` in the session brief.
@@ -15,6 +28,7 @@ Fallback: curl -s {url} for page content; /sitemap.xml for URL discovery
 - When curl 403s: `firecrawl_scrape(url, formats=["markdown"])` — bypasses many Cloudflare configs; returns clean content
 - Sitemap: `firecrawl_crawl(site, maxDepth=1)` — structured URL tree without manual XML parsing
 - JS links: `firecrawl_scrape(url, formats=["links"])` — all hrefs/scripts without browser
+- Screenshot: `firecrawl_scrape(url, formats=["screenshot"])` — page screenshot without browser
 
 ### Jina Reader
 ```
@@ -22,7 +36,7 @@ No install required. Zero-config URL-prefix API.
 Available if: HTTP 200 from https://r.jina.ai/https://httpbin.org/get
   curl -s -o /dev/null -w "%{http_code}" https://r.jina.ai/https://httpbin.org/get
 MCP: community server 'mcp-jina-reader' (check MCP tool list for 'jina_reader')
-Fallback: Firecrawl or browser fetch
+Fallback: Firecrawl or Crawl4AI
 ```
 
 **Usage pattern:**
@@ -35,10 +49,42 @@ curl -s -H "Accept: application/json" "https://r.jina.ai/{target_url}"
 
 # Force crawl past cached version:
 curl -s -H "X-No-Cache: true" "https://r.jina.ai/{target_url}"
+
+# Screenshot (pageshot):
+curl -s -H "X-Respond-With: pageshot" "https://r.jina.ai/{target_url}"
 ```
 
+- Renders JS server-side — handles SPAs; returns rendered markdown without a browser
 - Free: 1M tokens/month, no API key required for basic use
-- Limit: not a Cloudflare bypass tool — heavy bot-protected sites still block it; use Firecrawl or browser fetch for those
+- Limit: not a Cloudflare bypass tool — heavy bot-protected sites still block it; use Firecrawl for those
+
+### Crawl4AI
+```
+Local Playwright-based crawler. No API key. Renders SPAs.
+Presence test: command -v crwl >/dev/null 2>&1
+  (Note: crawl4ai-doctor is a diagnostic tool, NOT a presence test)
+One-time install is moderately heavy (~hundreds-MB Chromium download).
+Use only if already installed.
+```
+
+**Usage pattern:**
+```bash
+# Fetch rendered fit-markdown to a file:
+crwl <URL> -o md-fit -O out.md
+
+# Screenshot (Python — CLI has no screenshot flag):
+python3 -c "
+import asyncio
+from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
+async def main():
+    async with AsyncWebCrawler() as c:
+        r = await c.arun('<URL>', config=CrawlerRunConfig(screenshot=True))
+        # r.screenshot is a base64 PNG string
+        import base64, pathlib
+        pathlib.Path('screenshot.png').write_bytes(base64.b64decode(r.screenshot))
+asyncio.run(main())
+"
+```
 
 ### WebFetch
 ```
@@ -53,7 +99,7 @@ WebFetch(url="{target_url}", prompt="Return the full page content")
 ```
 
 - Use for: initial homepage fetch, robots.txt, sitemap.xml retrieval
-- Limit: may not render JavaScript — if returned body text is near-empty, escalate to Chrome DevTools MCP
+- Limit: may not render JavaScript — if returned body text is near-empty, escalate using the content-extraction preference order above (Jina → Firecrawl → Crawl4AI)
 
 ### Chrome DevTools MCP
 

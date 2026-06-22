@@ -36,37 +36,37 @@ After fetching the homepage, count visible text characters and nav links in the 
 
 **Condition:** If `body_text_chars < 200` OR `nav_link_count == 0`:
 - Log `[RENDER-ESCALATED]`
-- Re-fetch via Chrome DevTools MCP using the sequence below
+- Re-fetch using the **JS-rendering markdown crawler preference order: Jina → Firecrawl → Crawl4AI**
 
-**Chrome MCP render sequence — plugin namespace:**
-```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page
-  → returns {page_id: "..."}
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__select_page(page_id)
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page(url, type="url", timeout=10000)
-# Poll until loaded (retry 3× with 2s delay):
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__evaluate_script(() => document.readyState)
-# Capture rendered text:
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__evaluate_script(() => document.body.innerText)
-# Capture DOM/a11y tree:
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_snapshot
-```
+**Render escalation sequence:**
 
-**Chrome MCP render sequence — project namespace:**
-```
-mcp__chrome-devtools__new_page
-  → returns {page_id: "..."}
-mcp__chrome-devtools__select_page(page_id)
-mcp__chrome-devtools__navigate_page(url, type="url", timeout=10000)
-# Poll until loaded (retry 3× with 2s delay):
-mcp__chrome-devtools__evaluate_script(() => document.readyState)
-# Capture rendered text:
-mcp__chrome-devtools__evaluate_script(() => document.body.innerText)
-# Capture DOM/a11y tree:
-mcp__chrome-devtools__take_snapshot
-```
+1. **Jina Reader** (default — zero install, renders JS server-side):
+   ```bash
+   curl -s "https://r.jina.ai/{homepage_url}"
+   ```
 
-Use the namespace recorded in Phase 1 (`[CHROME-NAMESPACE:plugin]` or `[CHROME-NAMESPACE:project]`).
+2. **Firecrawl** (if MCP/CLI available — bypasses many WAF configs):
+   ```
+   firecrawl_scrape(url, formats=["markdown"])
+   ```
+
+3. **Crawl4AI** (if `crwl` is installed):
+   ```bash
+   crwl {homepage_url} -o md-fit -O out.md
+   ```
+
+4. **Chrome DevTools MCP** — use ONLY if all three markdown crawlers are unavailable OR the content is behind an auth/interactive wall (login/session gating). Use the namespace recorded in Phase 1 (`[CHROME-NAMESPACE:plugin]` or `[CHROME-NAMESPACE:project]`):
+   ```
+   # Plugin namespace:
+   mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page → {page_id}
+   mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page(url, type="url", timeout=10000)
+   mcp__plugin_chrome-devtools-mcp_chrome-devtools__evaluate_script(() => document.body.innerText)
+
+   # Project namespace:
+   mcp__chrome-devtools__new_page → {page_id}
+   mcp__chrome-devtools__navigate_page(url, type="url", timeout=10000)
+   mcp__chrome-devtools__evaluate_script(() => document.body.innerText)
+   ```
 
 ### Content-Sufficiency Gate
 
@@ -81,7 +81,7 @@ After the render attempt, evaluate the fetched content.
 
 ### Signal Emission — Render and Sufficiency
 
-- `[RENDER-ESCALATED]` — homepage body text < 200 visible chars OR 0 nav links; Chrome MCP headless render invoked.
+- `[RENDER-ESCALATED]` — homepage body text < 200 visible chars OR 0 nav links; re-fetched via JS-rendering markdown crawler (Jina → Firecrawl → Crawl4AI); Chrome MCP used only if all crawlers unavailable or content is auth-gated.
 - `[GREENFIELD-MODE]` — after render, site has < 2 unique headings AND < 150 words of non-nav prose; pipeline halts.
 
 ### Coverage Manifest
@@ -111,23 +111,20 @@ Include the coverage manifest in the session brief and surface it in `INDEX.md`.
 
 ### Screenshots
 
-- Take **one screenshot per sampled template** via Chrome MCP `take_screenshot`
-- Homepage gets two screenshots: above-fold and full-page
-- If Chrome MCP is unavailable: log `[TOOL-UNAVAILABLE:chrome-mcp]` and proceed text-only with an explicit visual-gap note in the output
+Take **one screenshot per sampled template**; homepage gets two (above-fold and full-page).
 
-**Screenshot commands:**
+Prefer screenshot sources in this order:
 
-Plugin namespace:
-```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot
-```
+1. **Jina pageshot:** `curl -s -H "X-Respond-With: pageshot" "https://r.jina.ai/{url}"`
+2. **Firecrawl:** `firecrawl_scrape(url, formats=["screenshot"])` (if MCP/CLI available)
+3. **Crawl4AI:** Python `AsyncWebCrawler` with `CrawlerRunConfig(screenshot=True)` → base64 PNG (if `crwl` installed)
+4. **Chrome MCP `take_screenshot`** (fallback — use recorded namespace):
+   - Plugin: `mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot`
+   - Project: `mcp__chrome-devtools__take_screenshot`
 
-Project namespace:
-```
-mcp__chrome-devtools__take_screenshot
-```
+If **no screenshot source** is available: log `[TOOL-UNAVAILABLE:chrome-mcp]` and proceed text-only with an explicit visual-gap note in the output.
 
 ### Signal Emission — Crawl
 
 - `[SAMPLED:n-templates]` — crawl budget exhausted before all template clusters were sampled; `n` = number of clusters actually sampled.
-- `[TOOL-UNAVAILABLE:chrome-mcp]` — Chrome DevTools MCP unavailable; no screenshots; visual gaps are explicitly noted in output files.
+- `[TOOL-UNAVAILABLE:chrome-mcp]` — no screenshot source available (Jina pageshot, Firecrawl, Crawl4AI, and Chrome MCP all unavailable); no screenshots; visual gaps are explicitly noted in output files.

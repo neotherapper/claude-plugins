@@ -54,7 +54,7 @@ Maintain a running markdown document in context throughout the run. Append after
 1. Slugify: strip `https://`, strip `www.`, replace `.` with `-`.
 2. Create output folder + empty output files using Write (not touch): `INDEX.md`, `brief.md`, `run-sheet.md`, `content-inventory.md`, `ia-map.md`, `current-critique.md` — all under `docs/redesign/{slug}/`.
 3. Write `docs/redesign/{slug}/.gitignore` containing `.crawl/`.
-4. Detect tools — log each as `[AVAILABLE]` or `[TOOL-UNAVAILABLE:{name}]`. See `references/tool-availability.md` for exact detection commands (Firecrawl, Jina, WebFetch, Chrome DevTools MCP — test both Chrome namespaces; record active one as `[CHROME-NAMESPACE:plugin|project]`).
+4. Detect tools — log each as `[AVAILABLE]` or `[TOOL-UNAVAILABLE:{name}]`. See `skills/site-redesign/references/tool-availability.md` for exact detection commands (Jina Reader, Firecrawl, Crawl4AI, WebFetch, Chrome DevTools MCP — test both Chrome namespaces; record active one as `[CHROME-NAMESPACE:plugin|project]`).
 
 **Output:** Session brief initialized with tool availability block. Phase marker `[P1✓]`.
 
@@ -83,11 +83,11 @@ Maintain a running markdown document in context throughout the run. Append after
 
 ## Phase 3 — Render gate and coverage gate
 
-**Input:** Site URL, session brief. Load `references/crawl-and-coverage.md` for thresholds and Chrome MCP call sequences.
+**Input:** Site URL, session brief. Load `skills/site-redesign/references/crawl-and-coverage.md`.
 
 **Actions:**
 1. Fetch homepage (WebFetch; WAF fallback: Firecrawl → Jina → browser-fetch if 403).
-2. **Render gate:** `body_text_chars < 200` OR `nav_link_count == 0` → emit `[RENDER-ESCALATED]`, re-fetch via Chrome DevTools MCP.
+2. **Render gate:** `body_text_chars < 200` OR `nav_link_count == 0` → emit `[RENDER-ESCALATED]`, re-fetch via Jina → Firecrawl → Crawl4AI; Chrome MCP reserved for auth/interactive walls only.
 3. **Content-sufficiency gate:** after render, `unique_headings < 2` AND `non_nav_prose_words < 150` → emit `[GREENFIELD-MODE]`, write `INDEX.md` with finding, halt pipeline.
 4. **Coverage manifest:** each URL → Reachable (200) or Gated/Blocked (401/403/challenge). Emit `[COVERAGE-PARTIAL:gated]` if any URL gated.
 5. Emit `[WAF-BLOCKED]` only if all three fallback fetchers fail; do not hard-stop.
@@ -98,16 +98,16 @@ Maintain a running markdown document in context throughout the run. Append after
 
 ## Phase 4 — Content crawl and screenshots
 
-**Input:** URL cluster map from Phase 2, session brief. Load `references/crawl-and-coverage.md`.
+**Input:** URL cluster map from Phase 2, session brief. Load `skills/site-redesign/references/crawl-and-coverage.md`.
 
 **Actions:**
 1. Sample **1–2 pages per template cluster**; floor = homepage + primary nav targets.
-2. Apply a 60,000-character clean-markdown budget — stop sampling when budget is exhausted.
-3. Log `[SAMPLED:n-templates]` where `n` = number of clusters actually sampled.
+2. Apply a 60,000-character clean-markdown budget — stop when exhausted.
+3. Log `[SAMPLED:n-templates]` where `n` = clusters actually sampled.
 4. Save per-page markdown to `.crawl/{slug-path}.md`.
-5. Take **one screenshot per sampled template** via Chrome MCP `take_screenshot` using the recorded namespace.
-   - Homepage: take two screenshots (above-fold and full-page).
-   - If Chrome MCP unavailable: log `[TOOL-UNAVAILABLE:chrome-mcp]`; proceed text-only; add explicit visual-gap note in all output files.
+5. Take **one screenshot per sampled template** (Jina pageshot → Firecrawl → Crawl4AI → Chrome MCP fallback; sequences in references/crawl-and-coverage.md).
+   - Homepage: two screenshots (above-fold and full-page).
+   - No screenshot source available: log `[TOOL-UNAVAILABLE:chrome-mcp]`; text-only; visual-gap note in all output files.
 6. Save screenshots to `.crawl/screenshots/`.
 
 **Output:** `.crawl/` populated. Phase marker `[P4✓]`.
@@ -217,7 +217,7 @@ Log these in the session brief. Surface any that fired in `INDEX.md`.
 
 | Signal | Meaning |
 |--------|---------|
-| `[RENDER-ESCALATED]` | Homepage body text < 200 chars or 0 nav links; Chrome MCP headless render invoked |
+| `[RENDER-ESCALATED]` | Homepage < 200 chars or 0 nav links; re-fetched via Jina → Firecrawl → Crawl4AI; Chrome MCP only if all crawlers unavailable or auth-gated |
 | `[GREENFIELD-MODE]` | After render: < 2 unique headings and < 150 non-nav words; pipeline halted — not a redesign target |
 | `[NO-SITEMAP]` | No `sitemap.xml` and no `Sitemap:` in `robots.txt`; fell back to homepage-nav crawl |
 | `[COVERAGE-PARTIAL:gated]` | One or more URLs returned 401/403/challenge; only public pages briefed |
@@ -225,7 +225,7 @@ Log these in the session brief. Surface any that fired in `INDEX.md`.
 | `[SAMPLED:n-templates]` | Crawl budget exhausted; `n` template clusters sampled, not all |
 | `[SINGLE-PAGE]` | ≤2 URLs discovered; section-anchor map used instead of page table |
 | `[MULTI-LOCALE:canonical=x]` | Locale branching detected; briefed canonical locale `x` only |
-| `[TOOL-UNAVAILABLE:chrome-mcp]` | Chrome DevTools MCP unavailable; text-only critique; visual gap noted |
+| `[TOOL-UNAVAILABLE:chrome-mcp]` | No screenshot source available (Jina/Firecrawl/Crawl4AI/Chrome MCP all unavailable); text-only output; visual gap noted |
 | `[PACK-LOADED:x]` | Category pack `x` loaded for Phase 8 critique and design-system seed |
 
 ---
@@ -234,10 +234,10 @@ Log these in the session brief. Surface any that fired in `INDEX.md`.
 
 Load on demand — not always necessary:
 
-- **`references/tool-availability.md`** — exact detection commands for Firecrawl, Jina, WebFetch, Chrome DevTools MCP; WAF escalation chain (Firecrawl → Jina → browser-fetch)
-- **`references/crawl-and-coverage.md`** — Phase 2/3/4 detail: render-gate thresholds, content-sufficiency thresholds, Chrome MCP call sequences, coverage manifest format, crawl budget, signal-emission conditions
-- **`references/brief-format.md`** — `brief.md` section order (a contract), per-page intent triplet format, design-system seed block format, canonical web-capture-override sentence, run-sheet ordering
-- **`categories/{detected}.md`** — matched category pack (priorities, IA conventions, design-system seed, trust signals, references/anti-references); `categories/generic.md` is the low-confidence fallback
+- **`skills/site-redesign/references/tool-availability.md`** — detection commands; content-extraction preference order (Jina → Firecrawl → Crawl4AI → Chrome MCP); WAF escalation chain
+- **`skills/site-redesign/references/crawl-and-coverage.md`** — render-gate thresholds, JS-crawler + screenshot sequences, coverage manifest, crawl budget, signal-emission conditions
+- **`skills/site-redesign/references/brief-format.md`** — `brief.md` section order, intent triplet format, design-system seed format, web-capture-override sentence, run-sheet ordering
+- **`categories/{detected}.md`** — matched category pack; `categories/generic.md` is the low-confidence fallback
 - **`templates/`** — the six `*.template` files resolved in Phase 9
 
-> `categories/`, `templates/`, and `references/` paths resolve relative to this plugin's root, not the user's project (same convention as beacon).
+> **Path note:** `categories/` and `templates/` are at the plugin root (`plugins/reframe/`). `references/` is in this skill's own directory (`plugins/reframe/skills/site-redesign/references/`). Neither resolves relative to the user's project.
