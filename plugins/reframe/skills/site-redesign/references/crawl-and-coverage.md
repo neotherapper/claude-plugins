@@ -84,9 +84,7 @@ After the render attempt, evaluate the fetched content.
 - `[RENDER-ESCALATED]` — homepage body text < 200 visible chars OR 0 nav links; Chrome MCP headless render invoked.
 - `[GREENFIELD-MODE]` — after render, site has < 2 unique headings AND < 150 words of non-nav prose; pipeline halts.
 
----
-
-## Phase 3 — Coverage Manifest
+### Coverage Manifest
 
 As pages are fetched, record their HTTP status:
 - **Reachable** — 200/30x that resolve to 200
