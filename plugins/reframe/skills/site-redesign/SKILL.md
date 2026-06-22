@@ -1,6 +1,6 @@
 ---
 name: site-redesign
-description: Use when the user wants to redesign an existing website — e.g. "redesign this site", "create a redesign brief for...", "redesign brief for Claude Design", "redesign and modernise this site". Requires an EXPLICIT redesign intent; a bare URL or an API/endpoint request with no redesign intent belongs to beacon's site-recon, not here. Extracts purpose/content/IA, critiques vs category best-practice, and writes a paste-ready Claude Design brief to docs/redesign/{slug}/.
+description: This skill should be used when the user wants to redesign an existing website — e.g. "redesign this site", "create a redesign brief for acme.com", "redesign and modernise this site", "rethink the design of this site". Requires an EXPLICIT redesign intent; a bare URL or an API/endpoint request with no redesign intent belongs to beacon's site-recon, not here. Extracts purpose/content/IA, critiques vs category best-practice, and writes a paste-ready Claude Design brief to docs/redesign/{slug}/.
 version: 0.1.0
 ---
 
@@ -201,7 +201,7 @@ If `[TOOL-UNAVAILABLE:chrome-mcp]`: no screenshots — add `[VISUAL-GAP: visual-
 4. Finalize `content-inventory.md`, `ia-map.md`, `current-critique.md` (written in phases 5/6/8; resolve any remaining tokens).
 5. Write `INDEX.md` via `templates/INDEX.md.template`.
 
-**Output:** All seven files written. Phase marker `[P9✓]`.
+**Output:** All six output files written. Phase marker `[P9✓]`.
 
 ### Phase-9 token contract
 
@@ -237,5 +237,7 @@ Load on demand — not always necessary:
 - **`references/tool-availability.md`** — exact detection commands for Firecrawl, Jina, WebFetch, Chrome DevTools MCP; WAF escalation chain (Firecrawl → Jina → browser-fetch)
 - **`references/crawl-and-coverage.md`** — Phase 2/3/4 detail: render-gate thresholds, content-sufficiency thresholds, Chrome MCP call sequences, coverage manifest format, crawl budget, signal-emission conditions
 - **`references/brief-format.md`** — `brief.md` section order (a contract), per-page intent triplet format, design-system seed block format, canonical web-capture-override sentence, run-sheet ordering
-- **`categories/{detected}.md`** — category pack loaded in Phase 7; supplies redesign priorities, conversion patterns, trust signals, IA conventions, design-system seed, reference/anti-reference sites, and emphasis guidance
+- **`categories/{detected}.md`** — matched category pack (priorities, IA conventions, design-system seed, trust signals, references/anti-references); `categories/generic.md` is the low-confidence fallback
 - **`templates/`** — the six `*.template` files resolved in Phase 9
+
+> `categories/`, `templates/`, and `references/` paths resolve relative to this plugin's root, not the user's project (same convention as beacon).
