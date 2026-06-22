@@ -1,0 +1,27 @@
+# {{SITE_NAME}} — Redesign Brief Index
+
+**Analysed:** {{DATE}}   **Target:** {{URL}}   **Category:** {{CATEGORY}} (confidence: {{CATEGORY_CONFIDENCE}})
+
+## Assumptions (edit if wrong)
+- **Inferred purpose:** {{INFERRED_PURPOSE}}
+- **Target purpose:** {{TARGET_PURPOSE}}   <!-- same as inferred, or the declared pivot -->
+- **Audience:** {{AUDIENCE}}
+- **Primary goal:** {{PRIMARY_GOAL}}
+
+## Coverage
+{{COVERAGE_MANIFEST}}
+
+## Files
+| File | Contents |
+|------|----------|
+| [brief.md](brief.md) | Paste-into-Claude-Design onboarding brief |
+| [run-sheet.md](run-sheet.md) | Sequential canvas prompts (screens/components) |
+| [content-inventory.md](content-inventory.md) | Evaluative content audit |
+| [ia-map.md](ia-map.md) | Information architecture + journeys |
+| [current-critique.md](current-critique.md) | Keep/fix findings vs category best-practice |
+
+## How to use
+1. Open [claude.ai/design](https://claude.ai/design), start a project.
+2. Paste **brief.md** as the opening message; attach the reference screenshots it names.
+3. Let Claude Design **web-capture {{URL}}** for content/brand-assets only (the brief says so).
+4. Validate the palette + one hero screen, then run **run-sheet.md** prompts in order.

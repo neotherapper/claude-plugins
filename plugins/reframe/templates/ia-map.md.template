@@ -1,0 +1,14 @@
+# {{SITE_NAME}} — Information Architecture
+
+## Navigation hierarchy
+{{NAV_HIERARCHY}}
+
+## Page purposes
+<!-- single-page sites: replace page table with section-anchor map -->
+{{PAGE_PURPOSE_TABLE}}
+
+## Journeys
+{{JOURNEYS}}
+
+## Primary conversion path
+{{PRIMARY_CONVERSION_PATH}}
