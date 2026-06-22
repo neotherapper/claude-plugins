@@ -1,7 +1,7 @@
 ---
 category: saas-marketing
 display_name: SaaS Marketing
-detect_signals: ["pricing", "signup", "sign up", "sign-up", "demo", "request a demo", "book a demo", "features", "docs", "documentation", "free trial", "start for free", "get started", "app.", "dashboard", "integrations", "changelog", "roadmap", "API", "enterprise", "per seat", "per month", "annual plan"]
+detect_signals: ["pricing", "signup", "sign up", "sign-up", "demo", "request a demo", "book a demo", "features", "docs", "documentation", "free trial", "start for free", "log in to your account", "admin.", "dashboard", "integrations", "changelog", "roadmap", "API", "enterprise", "per seat", "per month", "annual plan"]
 ---
 
 # SaaS Marketing — Redesign Pack

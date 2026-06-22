@@ -1,7 +1,7 @@
 ---
 category: local-service
 display_name: Local Service
-detect_signals: ["book", "appointment", "booking", "services", "clinic", "contact us", "call us", "location", "opening hours", "LocalBusiness", "schema.org/LocalBusiness", "tel:", "address", "physiotherapy", "physio", "dentist", "dental", "GP", "chiropractic", "osteopath", "solicitor", "plumber", "electrician", "accountant", "salon", "clinic", "practice", "NAP"]
+detect_signals: ["book appointment", "book online", "appointment", "booking", "services", "clinic", "contact us", "call us", "location", "opening hours", "LocalBusiness", "schema.org/LocalBusiness", "tel:", "address", "physiotherapy", "physio", "dentist", "dental", "GP", "chiropractic", "osteopath", "solicitor", "plumber", "electrician", "accountant", "salon", "practice", "NAP"]
 ---
 
 # Local Service — Redesign Pack
