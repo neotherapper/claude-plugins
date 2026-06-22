@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a problem with a plugin, command, skill, agent, or hook
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: plugin
+    attributes:
+      label: Which plugin?
+      options:
+        - beacon
+        - draftloom
+        - idea-forge
+        - namesmith
+        - paidagogos
+        - reframe
+        - visual-kit
+        - marketplace / repo itself
+        - not sure
+    validations:
+      required: true
+  - type: input
+    id: host
+    attributes:
+      label: AI agent / host
+      description: Which tool were you running the plugin in, and what version?
+      placeholder: "Claude Code 1.x (also: Gemini CLI, Cursor, Copilot, Windsurf, OpenCode)"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what actually happened?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Install ...
+        2. Run / invoke ...
+        3. See ...
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output / logs
+      render: shell
+    validations:
+      required: false

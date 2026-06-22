@@ -1,0 +1,34 @@
+# Normalize line endings. Text files are stored and checked out with LF so
+# shell scripts (scripts/plugin-phase.sh, scripts/validate-marketplace.sh,
+# tests/*.sh) keep working when the repo is cloned on Windows.
+* text=auto eol=lf
+
+# Shell scripts MUST stay LF — CRLF breaks the shebang/interpreter.
+*.sh    text eol=lf
+*.bash  text eol=lf
+
+# Source / config / docs — LF
+*.md    text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.js    text eol=lf
+*.mjs   text eol=lf
+*.cjs   text eol=lf
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.css   text eol=lf
+*.html  text eol=lf
+*.txt   text eol=lf
+
+# Binary assets — never normalize (prevents corruption)
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary

@@ -1,0 +1,8 @@
+# Code owners for neotherapper/claude-plugins
+#
+# Owners listed here are automatically requested for review on any PR that
+# touches a matching path. Docs:
+# https://docs.github.com/en/repositories/managing-your-repos-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+*       @neotherapper
