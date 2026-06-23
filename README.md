@@ -2,6 +2,9 @@
 
 > AI agent plugins by [@neotherapper](https://github.com/neotherapper) · [pilitsoglou.com](https://pilitsoglou.com)
 
+[![validate](https://github.com/neotherapper/claude-plugins/actions/workflows/validate.yml/badge.svg)](https://github.com/neotherapper/claude-plugins/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Works with **Claude Code**, **Gemini CLI**, **GitHub Copilot**, **Cursor**, **Windsurf**, and **OpenCode**.
 
 ---
@@ -93,6 +96,6 @@ Detailed setup instructions for each platform live inside each plugin:
 
 ## Contributing
 
-See [CONTRIBUTING.md](plugins/beacon/CONTRIBUTING.md) for how to add tech packs, improve skills, or extend the plugin.
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for how to add a plugin, run the validator, and the skill/agent conventions. For Beacon tech packs specifically, see the [Beacon contributing guide](plugins/beacon/CONTRIBUTING.md).
 
 Built by [@neotherapper](https://github.com/neotherapper) · Articles at [pilitsoglou.com](https://pilitsoglou.com)

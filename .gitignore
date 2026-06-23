@@ -12,3 +12,6 @@
 # Vendored Node dependencies (visual-kit, paidagogos build deps already
 # ignore their own; this is a repo-wide safety net so they never get committed)
 node_modules/
+
+# Tooling debris
+.orphaned_at
