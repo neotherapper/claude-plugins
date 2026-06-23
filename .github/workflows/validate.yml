@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  marketplace:
-    name: marketplace + plugin manifests
+  validate:
+    name: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
