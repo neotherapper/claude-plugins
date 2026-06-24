@@ -19,3 +19,5 @@ jobs:
           python-version: '3.x'
       - name: Validate marketplace.json and every plugin.json
         run: bash scripts/validate-marketplace.sh
+      - name: Validate canonical slug rule (drift + correctness)
+        run: bash tests/validate-slug-rule.sh
