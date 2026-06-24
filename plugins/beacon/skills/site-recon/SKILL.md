@@ -183,9 +183,14 @@ done
 # Check previous scan results
 # Inventory previously-researched sites across the new and legacy workspaces.
 # New path is scoped to */research/ so reframe's redesign/ folders are NOT picked up.
+# New path is listed first, so a migrated site present in both resolves to the new copy (dedupe by slug).
+seen=""
 { find docs/sites -path '*/research/INDEX.md' 2>/dev/null; \
-  find docs/research -maxdepth 2 -name 'INDEX.md' 2>/dev/null; } | sort -u | \
+  find docs/research -maxdepth 2 -name 'INDEX.md' 2>/dev/null; } | \
 while IFS= read -r research; do
+  slug=$(printf '%s' "$research" | sed -E 's#^docs/(sites|research)/##; s#/.*##')
+  case " $seen " in *" $slug "*) continue;; esac
+  seen="$seen $slug"
   echo "Previous scan: $research"
   grep -E 'Framework|Auth|Endpoint' "$research" | head -3
   echo "---"
@@ -353,9 +358,14 @@ done
 # Check previous scan results
 # Inventory previously-researched sites across the new and legacy workspaces.
 # New path is scoped to */research/ so reframe's redesign/ folders are NOT picked up.
+# New path is listed first, so a migrated site present in both resolves to the new copy (dedupe by slug).
+seen=""
 { find docs/sites -path '*/research/INDEX.md' -print0 2>/dev/null; \
   find docs/research -maxdepth 2 -name 'INDEX.md' -print0 2>/dev/null; } | \
 while IFS= read -r -d '' research; do
+  slug=$(printf '%s' "$research" | sed -E 's#^docs/(sites|research)/##; s#/.*##')
+  case " $seen " in *" $slug "*) continue;; esac
+  seen="$seen $slug"
   echo "Previous scan: $research"
   grep -E 'Framework|Auth|Endpoint' "$research" | head -3
   echo "---"
