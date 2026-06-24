@@ -1,8 +1,8 @@
-Feature: site-recon skill — analyse a new site and produce docs/research/{site}/
+Feature: site-recon skill — analyse a new site and produce docs/sites/{site}/research/
 
   Background:
-    Given Beacon v0.5.2 is installed in Claude Code
-    And the user's project has a docs/research/ directory
+    Given Beacon v0.7.0 is installed in Claude Code
+    And the user's project has a docs/sites/ directory
 
   # ── Zero-MCP baseline ────────────────────────────────────────────────────
 
@@ -10,11 +10,11 @@ Feature: site-recon skill — analyse a new site and produce docs/research/{site
     Given no MCP servers are configured
     When I run /beacon:analyze https://example.com
     Then phases 1 through 12 complete using curl fallbacks only
-    And docs/research/example-com/ is created
-    And docs/research/example-com/INDEX.md exists and is non-empty
-    And docs/research/example-com/tech-stack.md identifies WordPress and its version
-    And docs/research/example-com/api-surfaces/wp-rest.md documents the /wp-json/ surface
-    And docs/research/example-com/scripts/test-example-com.sh is executable
+    And docs/sites/example-com/research/ is created
+    And docs/sites/example-com/research/INDEX.md exists and is non-empty
+    And docs/sites/example-com/research/tech-stack.md identifies WordPress and its version
+    And docs/sites/example-com/research/api-surfaces/wp-rest.md documents the /wp-json/ surface
+    And docs/sites/example-com/research/scripts/test-example-com.sh is executable
     And INDEX.md contains [TOOL-UNAVAILABLE:Wappalyzer]
     And INDEX.md contains [TOOL-UNAVAILABLE:ChromeDevTools]
 
@@ -66,14 +66,14 @@ Feature: site-recon skill — analyse a new site and produce docs/research/{site
     Given the target site exposes /api/docs returning valid OpenAPI 3.1 JSON
     When Phase 8 probes the standard OpenAPI paths
     Then /api/docs is detected as returning a valid spec
-    And the spec is saved to docs/research/example-com/specs/example-com.openapi.yaml
+    And the spec is saved to docs/sites/example-com/research/specs/example-com.openapi.yaml
     And the spec contains x-beacon-source: "auto-downloaded"
     And Phase 12 skips manual OpenAPI scaffolding
 
   Scenario: No OpenAPI found — spec scaffolded from discovered endpoints
     Given no standard OpenAPI path returns a valid spec
     When Phase 12 runs
-    Then a scaffolded OpenAPI spec is written to docs/research/example-com/specs/example-com.openapi.yaml
+    Then a scaffolded OpenAPI spec is written to docs/sites/example-com/research/specs/example-com.openapi.yaml
     And it contains x-beacon-source: "scaffolded"
     And each discovered endpoint from api-surfaces/ appears as a path in the spec
 
@@ -82,7 +82,7 @@ Feature: site-recon skill — analyse a new site and produce docs/research/{site
   Scenario: OSINT phase discovers staging subdomain via crt.sh
     Given crt.sh returns staging.example.com for the target domain
     When Phase 9 processes crt.sh results
-    Then staging.example.com is added to docs/research/example-com/site-map.md
+    Then staging.example.com is added to docs/sites/example-com/research/site-map.md
     And it is flagged as [STAGING-ENV]
 
   Scenario: Google dork library is emitted for the domain
