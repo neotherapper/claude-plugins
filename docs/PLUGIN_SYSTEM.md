@@ -147,6 +147,15 @@ agents/orchestrator.md
 
 ---
 
+## Knowledge packs & site workspace
+
+Site-analysis plugins (beacon, reframe) write per-site output under a shared workspace root — `docs/sites/{slug}/{module}/` — where the slug is derived by a canonical rule shared across all plugins. Each plugin carries a library of category- or domain-specific knowledge files (knowledge packs) that sharpen its output for a detected context. Three sub-patterns exist today: beacon's fingerprint-packs, reframe's category-packs, and idea-forge's inference-lenses.
+
+See `docs/MODULAR_KNOWLEDGE_PACKS.md` for the full convention reference — sub-pattern definitions, shared selection rules, cross-module interop contract, and guidance on adding new packs or modules.
+See `docs/SLUG_RULES.md` for the canonical slug derivation rule that all site-analysis plugins must follow.
+
+---
+
 ## Adding a new plugin
 
 1. Create `plugins/{name}/` following the folder layout above
