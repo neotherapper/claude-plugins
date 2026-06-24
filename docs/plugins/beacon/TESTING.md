@@ -50,7 +50,7 @@ All scripts exit 0 on full pass, 1 on any failure. Run them in the order above �
 After a successful `/beacon:analyze` run, verify:
 
 ```
-docs/research/{site}/
+docs/sites/{site}/research/
 ├── INDEX.md               — table of contents with links to all sub-documents
 ├── tech-stack.md          — detected frameworks, versions, CDN, hosting
 ├── site-map.md            — discovered routes and URL patterns
@@ -73,7 +73,7 @@ Run `/beacon:analyze` on a known site and verify each phase produces output:
 
 | Phase | Name | Verification |
 |-------|------|-------------|
-| 1 | Scaffold | `docs/research/{slug}/` folder created with all subdirectories |
+| 1 | Scaffold | `docs/sites/{slug}/research/` folder created with all subdirectories |
 | 2 | Passive recon | `site-map.md` contains at least one URL from robots.txt or sitemap |
 | 3 | Fingerprint | `tech-stack.md` names at least one framework with a detection source |
 | 4 | Tech pack | Claude references the framework-specific guide by name in output |
@@ -110,7 +110,7 @@ Run `/beacon:analyze` on a known site and verify each phase produces output:
 
 - [ ] All validation scripts pass: `bash tests/validate-fingerprinting.sh` and others
 - [ ] `/beacon:analyze` completes all 12 phases without halting
-- [ ] Output folder created at `docs/research/{site}/` with correct subdirectory structure
+- [ ] Output folder created at `docs/sites/{site}/research/` with correct subdirectory structure
 - [ ] `api-surfaces/` contains at least one surface file
 - [ ] `/beacon:load` routes to correct research without re-running
 - [ ] Tech-pack version matched correctly for tested frameworks

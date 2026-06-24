@@ -60,5 +60,5 @@ Then Beacon can dispatch `spawn_agent` for parallel OSINT and JS analysis phases
 
 - Skills load natively in Codex — the `@` reference in AGENTS.md is sufficient
 - `spawn_agent` requires `multi_agent = true` in config
-- Output goes to `docs/research/{site-name}/` in your working directory
+- Output goes to `docs/sites/{site-name}/research/` in your working directory
 - In Codex Desktop (sandbox): branch operations may be blocked — commit work and use App UI controls

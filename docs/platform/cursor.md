@@ -30,4 +30,4 @@ cat claude-plugins/plugins/beacon/skills/site-intel/SKILL.md >> .cursorrules
 
 - `.cursor/rules/` is the cleanest approach — rules activate only when relevant
 - Keep `.cursorrules` short (2-3 skills max) to avoid bloating context
-- All output goes to `docs/research/{site-name}/` in your project
+- All output goes to `docs/sites/{site-name}/research/` in your project
