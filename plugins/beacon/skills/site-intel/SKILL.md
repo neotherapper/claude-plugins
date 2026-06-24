@@ -1,7 +1,7 @@
 ---
 name: site-intel
 description: This skill should be used when the user asks questions about a site that has already been analysed with site-recon — "what endpoints does X have?", "how do I query Y?", "what did we find on Z?", "load research for...", "tell me about [site]", "what auth does X use?", "give me the API for...". If a docs/sites/{slug}/research/ folder exists for the site (or a legacy docs/research/{slug}/), use this skill rather than re-analysing. Routes to the right pre-built file without re-running the full analysis.
-version: 0.6.0
+version: 0.7.0
 ---
 
 # site-intel — Router Mode
@@ -29,6 +29,7 @@ Resolution rules:
 - If **both** exist for the slug → prefer the one whose `INDEX.md` is newest
   (`ls -t docs/sites/{slug}/research/INDEX.md docs/research/{slug}/INDEX.md | head -1`),
   use that folder, and note that the other (older) copy also exists — do **not** merge them.
+  If the resolved (newest) folder is the legacy `docs/research/{slug}/`, also print the `[LEGACY-WORKSPACE]` hint from rule 2.
 
 If no folder matches → tell the user to run `/beacon:analyze {url}` first:
 ```
