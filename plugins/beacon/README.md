@@ -15,7 +15,7 @@ Run `/beacon:analyze https://example.com` and Beacon:
 3. Probes all known public endpoints, source maps, sitemaps, feeds, and GraphQL schemas
 4. Runs OSINT (Google dorks, certificate transparency, Wayback Machine, GitHub code search)
 5. Generates a browse plan — then executes it via browser automation
-6. Produces `docs/research/{site}/` with INDEX, tech-stack, site-map, API surfaces, and an OpenAPI spec
+6. Produces `docs/sites/{site}/research/` with INDEX, tech-stack, site-map, API surfaces, and an OpenAPI spec
 
 In future sessions, ask questions about the site using `/beacon:load` and Beacon routes directly to the right pre-built research file.
 

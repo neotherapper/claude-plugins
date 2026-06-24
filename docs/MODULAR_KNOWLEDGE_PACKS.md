@@ -65,9 +65,9 @@ Each module must run completely standalone. Cross-module reads are always option
 | Plugin | Current output path | Target output path | When |
 |--------|--------------------|--------------------|------|
 | reframe | `docs/sites/{slug}/redesign/` | (already at target) | PR-A |
-| beacon | `docs/research/{slug}/` | `docs/sites/{slug}/research/` | PR-C (v0.7.0, separate branch) |
+| beacon | `docs/sites/{slug}/research/` | (already at target) | PR-C (v0.7.0, landed) |
 
-Until PR-C ships, beacon writes to `docs/research/{slug}/`. When PR-C ships, `/beacon:load` will check the new path first and fall back to the legacy path, preferring the newest when both exist. The legacy `docs/research/` path will be deprecated in v0.7.0 and removed in v0.8.0.
+As of v0.7.0 (PR-C), beacon writes to `docs/sites/{slug}/research/`. `/beacon:load` checks the new path first and falls back to the legacy path when both exist. The legacy `docs/research/` path is deprecated in v0.7.0 and removed in v0.8.0.
 
 ---
 
@@ -197,7 +197,7 @@ A new site-analysis skill that writes per-site output should:
 
 | Sub-pattern name | Plugin | Pack location | Selection mechanism | Frontmatter | Fallback | Schema validated | Status |
 |-----------------|--------|---------------|--------------------|--------------------|----------|-----------------|--------|
-| fingerprint-pack | beacon | `plugins/beacon/technologies/{fw}/{ver}.md` | Fingerprinting signals (Phase 2) | Yes — `framework`, `version`, `last_updated`, `author`, `status` | No generic file; beacon methodology is fallback | Yes — `schemas/tech-pack.schema.json` + `tests/validate-tech-pack.sh` | Shipped (v0.6.x); path migrates to `docs/sites/{slug}/research/` in PR-C v0.7.0 |
+| fingerprint-pack | beacon | `plugins/beacon/technologies/{fw}/{ver}.md` | Fingerprinting signals (Phase 2) | Yes — `framework`, `version`, `last_updated`, `author`, `status` | No generic file; beacon methodology is fallback | Yes — `schemas/tech-pack.schema.json` + `tests/validate-tech-pack.sh` | Shipped; output at `docs/sites/{slug}/research/` (v0.7.0+); legacy `docs/research/` deprecated 0.7.0, removed 0.8.0 |
 | category-pack | reframe | `plugins/reframe/categories/{category}.md` | `detect_signals` scoring | Yes — `category`, `display_name`, `detect_signals` | `generic.md` (`detect_signals: []`) | No (template only; no automated validator yet) | Shipped in PR-A; output at `docs/sites/{slug}/redesign/` |
 | inference-lens | idea-forge | `plugins/idea-forge/skills/evaluate/references/lenses/{model}.md` | Agent inference from idea description | No — files begin with `#` heading; no YAML frontmatter | Agent proceeds with baseline criteria | No | Shipped; workspace is `ideas/{slug}/` (not `docs/sites/`); described here, not migrated |
 

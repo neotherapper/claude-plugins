@@ -59,6 +59,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.7.0] — 2026-06-24
+
+### Changed
+- **Output workspace moved** from `docs/research/{slug}/` to the unified `docs/sites/{slug}/research/`, shared with the reframe plugin (`docs/sites/{slug}/redesign/`).
+- Slug derivation now follows the repo's canonical rule (`docs/SLUG_RULES.md`): adds lowercasing and `:port` stripping so beacon and reframe resolve identical slugs.
+
+### Deprecated
+- Legacy `docs/research/{slug}/` is now a **read-only fallback**: `/beacon:load` and `site-intel` still read it, but `/beacon:analyze` only writes the new path. **Legacy reads are removed in 0.8.0.**
+
+### Migration
+- To consolidate existing research, move each folder: `mkdir -p docs/sites/{slug} && git mv docs/research/{slug} docs/sites/{slug}/research`. Until you do, beacon reads the legacy folder and prints a one-line `[LEGACY-WORKSPACE]` hint.
+
+---
+
 ## [0.6.7] — 2026-04-28
 
 ### Added

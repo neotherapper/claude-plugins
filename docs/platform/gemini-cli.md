@@ -95,4 +95,4 @@ Both are optional — Beacon degrades gracefully with `[TOOL-UNAVAILABLE:name]` 
 
 - Skills activate on-demand: no need to mention "beacon" or "site-recon" explicitly
 - Gemini doesn't support subagents — multi-phase analysis runs sequentially in one session
-- Output goes to `docs/research/{site-name}/` in your working directory
+- Output goes to `docs/sites/{site-name}/research/` in your working directory

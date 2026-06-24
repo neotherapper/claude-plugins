@@ -21,7 +21,7 @@ Run one command and Beacon:
 3. Analyses JS bundles and source maps for hidden API paths
 4. Runs OSINT (certificate transparency, Wayback Machine, GitHub code search, Google dorks)
 5. Compiles a browser visit plan — then executes it
-6. Writes `docs/research/{site}/` with INDEX, tech-stack, site-map, API surfaces, and an OpenAPI spec
+6. Writes `docs/sites/{site}/research/` with INDEX, tech-stack, site-map, API surfaces, and an OpenAPI spec
 
 In future sessions, ask questions about the site and Beacon routes directly to the pre-built research files.
 

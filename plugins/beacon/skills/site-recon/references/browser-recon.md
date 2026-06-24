@@ -145,7 +145,7 @@ cmux browser --surface $SURF get html "body"
 cmux browser --surface $SURF get html "#product-list"
 
 # Take screenshot
-cmux browser --surface $SURF screenshot --out docs/research/example-com/screenshot.png
+cmux browser --surface $SURF screenshot --out docs/sites/example-com/research/screenshot.png
 
 # List network requests captured since page load
 cmux browser --surface $SURF list network
@@ -196,7 +196,7 @@ npx har-to-openapi .beacon/capture.har \
   --infer-parameter-types \
   --guess-authentication-headers \
   --drop-paths-without-successful-response \
-  -o docs/research/{site-slug}/specs/{site-slug}.openapi.yaml
+  -o docs/sites/{site-slug}/research/specs/{site-slug}.openapi.yaml
 ```
 
 If har-to-openapi unavailable: log `[OPENAPI-SKIPPED:har-to-openapi-unavailable]`

@@ -48,7 +48,7 @@ A special agent that owns the multi-step loop within a workflow. The orchestrato
 
 ## Workspace
 
-The set of files created by a plugin for a single user session. For Draftloom: `posts/{slug}/`. For Beacon: `docs/research/{site}/`. The workspace schema (all files, owners, purpose) is documented in each plugin's architecture files.
+The set of files created by a plugin for a single user session. For Draftloom: `posts/{slug}/`. For Beacon: `docs/sites/{site}/research/`. The workspace schema (all files, owners, purpose) is documented in each plugin's architecture files.
 
 ---
 

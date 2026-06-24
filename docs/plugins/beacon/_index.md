@@ -4,9 +4,9 @@
 
 ## What this plugin does
 
-Beacon maps any website's API surface through a 12-phase systematic analysis — tech fingerprinting, passive recon, script probing, JS analysis, OSINT, browser recon, and OpenAPI spec generation. Output lands in `docs/research/{site-slug}/` as a structured, queryable research folder.
+Beacon maps any website's API surface through a 12-phase systematic analysis — tech fingerprinting, passive recon, script probing, JS analysis, OSINT, browser recon, and OpenAPI spec generation. Output lands in `docs/sites/{site-slug}/research/` as a structured, queryable research folder.
 
-**Current version:** 0.5.2
+**Current version:** 0.7.0
 
 **Commands:** `/beacon:analyze {url}` · `/beacon:load`
 
@@ -83,7 +83,7 @@ plugins/beacon/
 ## Output structure (per run)
 
 ```
-docs/research/{site-slug}/
+docs/sites/{site-slug}/research/
 ├── INDEX.md                         ← summary, infrastructure table, quick API reference
 ├── tech-stack.md                    ← framework, version, CDN, auth, hosting evidence
 ├── site-map.md                      ← all discovered URLs grouped by phase

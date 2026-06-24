@@ -130,7 +130,7 @@ Load `templates/api-surface.md.template` once per distinct API surface discovere
 | `{{EXAMPLE_REQUEST}}` | One representative `curl` command for an unauthenticated or low-risk endpoint |
 | `{{EXAMPLE_RESPONSE}}` | Truncated JSON response shape (keys only, no real data) |
 
-Write each surface file to: `docs/research/{site-slug}/api-surfaces/{surface-name}.md`
+Write each surface file to: `docs/sites/{site-slug}/research/api-surfaces/{surface-name}.md`
 
 If no distinct API surfaces were found (static site, all endpoints behind auth with no observable shape), write a single `api-surfaces/no-public-surfaces.md` noting that observation.
 
@@ -175,10 +175,10 @@ Neither signal present (Phase 11 ran and produced a spec)
 
 After writing all files, confirm:
 
-- [ ] `docs/research/{site-slug}/INDEX.md` — all tokens resolved, no `{{` remaining
-- [ ] `docs/research/{site-slug}/tech-stack.md` — infrastructure table present
-- [ ] `docs/research/{site-slug}/site-map.md` — URLs grouped by phase
-- [ ] `docs/research/{site-slug}/constants.md` — populated sections only (no empty tables)
-- [ ] `docs/research/{site-slug}/api-surfaces/` — at least one surface file (or `no-public-surfaces.md`)
-- [ ] `docs/research/{site-slug}/specs/{site-slug}.openapi.yaml` — present if Phase 8 or 11 produced one, absent otherwise
-- [ ] `docs/research/{site-slug}/scripts/test-{site-slug}.sh` — one `check()` call per endpoint
+- [ ] `docs/sites/{site-slug}/research/INDEX.md` — all tokens resolved, no `{{` remaining
+- [ ] `docs/sites/{site-slug}/research/tech-stack.md` — infrastructure table present
+- [ ] `docs/sites/{site-slug}/research/site-map.md` — URLs grouped by phase
+- [ ] `docs/sites/{site-slug}/research/constants.md` — populated sections only (no empty tables)
+- [ ] `docs/sites/{site-slug}/research/api-surfaces/` — at least one surface file (or `no-public-surfaces.md`)
+- [ ] `docs/sites/{site-slug}/research/specs/{site-slug}.openapi.yaml` — present if Phase 8 or 11 produced one, absent otherwise
+- [ ] `docs/sites/{site-slug}/research/scripts/test-{site-slug}.sh` — one `check()` call per endpoint

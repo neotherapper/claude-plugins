@@ -99,7 +99,7 @@ Each new pack triggers a failing check in `validate-fingerprinting.sh` automatic
 - New command `/beacon:export {site} {format}` — runs post-processing on `specs/{site}.openapi.yaml`
 - Formats: Postman collection (via `openapi-to-postman`), Bruno collection, Insomnia workspace
 - Falls back to manual scaffolding if spec is partial
-- Output: `docs/research/{site}/exports/{format}/`
+- Output: `docs/sites/{site}/research/exports/{format}/`
 
 ---
 

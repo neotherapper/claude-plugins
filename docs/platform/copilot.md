@@ -24,7 +24,7 @@ follow the skill in `.github/skills/site-recon/SKILL.md`.
 
 When the user asks about a previously researched site, follow `.github/skills/site-intel/SKILL.md`.
 
-All analysis output goes to `docs/research/{site-name}/`.
+All analysis output goes to `docs/sites/{site-name}/research/`.
 ```
 
 ## Invoke the site analyst agent

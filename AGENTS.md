@@ -21,7 +21,7 @@ Skills in `plugins/beacon/skills/`:
 | Skill | Path | When to activate |
 |-------|------|-----------------|
 | `site-recon` | `plugins/beacon/skills/site-recon/SKILL.md` | User asks to analyse a site, map API surfaces, research a URL, or runs `/beacon:analyze` |
-| `site-intel` | `plugins/beacon/skills/site-intel/SKILL.md` | User asks about a previously researched site, or asks questions about `docs/research/{site}/` files |
+| `site-intel` | `plugins/beacon/skills/site-intel/SKILL.md` | User asks about a previously researched site, or asks questions about `docs/sites/{site}/research/` files |
 
 ## Intent → Skill Mapping
 
@@ -58,8 +58,7 @@ When the user's request matches any of these patterns, load and follow the corre
 
 ## Output Convention
 
-All analysis output goes to `docs/research/{site-name}/` in the user's working directory.
-Never write site-specific data into the plugin directories.
+Site-analysis output goes to `docs/sites/{site-slug}/{module}/` (beacon → `research/`, reframe → `redesign/`). Never write site-specific data into the plugin directories.
 
 ## Anti-Rationalizations
 

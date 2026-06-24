@@ -24,10 +24,10 @@ in a way that future AI sessions can load and reason about.
 
 ## Output standards
 
-All output goes to `docs/research/{site-name}/` with this structure:
+All output goes to `docs/sites/{site-name}/research/` with this structure:
 
 ```
-docs/research/{site-name}/
+docs/sites/{site-name}/research/
 ├── INDEX.md                    ← Summary, quick API reference, key findings
 ├── tech-stack.md               ← Framework, version, CDN, auth, hosting signals
 ├── site-map.md                 ← All discovered URLs by category

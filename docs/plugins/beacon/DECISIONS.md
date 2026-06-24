@@ -14,7 +14,7 @@
 
 ---
 
-## D-02 — Output to `docs/research/{site-slug}/` not project root
+## D-02 — Output to `docs/research/{site-slug}/` not project root  *(superseded by D-09 in 0.7.0)*
 
 **Decision:** All research output lands in `docs/research/{site-slug}/` as a structured folder, not flat files at the project root.
 
@@ -81,3 +81,11 @@
 **Why:** GraphQL is not a framework that can be fingerprinted by directory name matching — it is a query protocol that can appear on top of any framework. Its detection signals (POST to `/graphql`, `__APOLLO_STATE__`, etc.) are already documented in the tech pack and probed when relevant, but they cannot be enforced by the same directory-count mechanism used for framework packs.
 
 **Trade-off rejected:** Including graphql in the coverage count. Would require adding a special-cased alias entry (like `nextjs`) and still wouldn't produce a meaningful "is graphql in Phase 3" check since GraphQL detection is situational, not a fingerprinting first-pass signal.
+
+---
+
+## D-09 — Unified site workspace: output to `docs/sites/{site-slug}/research/` (0.7.0)
+
+**Decision:** Beacon writes to `docs/sites/{site-slug}/research/`, sharing the per-site workspace with reframe (`docs/sites/{site-slug}/redesign/`). Supersedes D-02.
+
+**Why:** Multiple site-analysis plugins (beacon, reframe) converged on per-site output. A shared `docs/sites/{slug}/` workspace with one module subfolder per plugin lets them cross-reference (reframe reads beacon's `tech-stack.md`) without colliding. Legacy `docs/research/{slug}/` remains a read-only fallback, deprecated in 0.7.0 and removed in 0.8.0. See `docs/MODULAR_KNOWLEDGE_PACKS.md` and `docs/SLUG_RULES.md`.
