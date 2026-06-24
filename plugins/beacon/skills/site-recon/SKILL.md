@@ -1,6 +1,6 @@
 ---
 name: site-recon
-description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 16-phase systematic investigation of a website and produces a complete persistent docs/research/{site-name}/ folder.
+description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 16-phase systematic investigation of a website and produces a complete persistent docs/sites/{site-slug}/research/ folder.
 version: 0.6.0
 ---
 
@@ -13,7 +13,7 @@ Phase 12 flushes everything to disk as structured research files.
 ## Output structure
 
 ```
-docs/research/{site-slug}/
+docs/sites/{site-slug}/research/
 ├── INDEX.md                 ← Summary, infrastructure table, quick API reference
 ├── tech-stack.md            ← Framework, version, CDN, auth, hosting evidence
 ├── site-map.md              ← All discovered URLs by category
@@ -28,6 +28,7 @@ docs/research/{site-slug}/
 
 Derive `{site-slug}` from the domain: `example.com` → `example-com`, `api.example.com` → `api-example-com`.
 Strip `www.` before slugifying: `www.jetpens.com` → `jetpens-com`, not `www-jetpens-com`.
+The canonical slug rule (including lowercase + `:port` strip) is documented in `docs/SLUG_RULES.md` — use that as the single source of truth for cross-module interop with reframe and other plugins. The examples above remain valid under the canonical rule.
 
 ## The 16 phases — always in this order
 
@@ -120,7 +121,7 @@ find . -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" | while read json_f
 done
 
 # Cross-reference and deduplicate domains
-cat <(sqlite3 commands) <(grep commands) | sort | uniq > "docs/research/${SLUG}/discovered_domains.txt"
+cat <(sqlite3 commands) <(grep commands) | sort | uniq > "docs/sites/${SLUG}/research/discovered_domains.txt"
 ```
 
 Log results in the session brief:
@@ -148,7 +149,7 @@ Log results in the session brief:
    - Search for `domain` or `url` fields
 4. **Cross-reference and deduplicate domains**
 
-**Output**: Consolidated domain list saved to `docs/research/{SLUG}/discovered_domains.txt`.
+**Output**: Consolidated domain list saved to `docs/sites/{SLUG}/research/discovered_domains.txt`.
 
 ---
 
@@ -180,7 +181,11 @@ find . -name "seed*.ts" -o -name "seed*.js" | while read seed; do
 done
 
 # Check previous scan results
-find docs/research/ -name "INDEX.md" | while read research; do
+# Inventory previously-researched sites across the new and legacy workspaces.
+# New path is scoped to */research/ so reframe's redesign/ folders are NOT picked up.
+{ find docs/sites -path '*/research/INDEX.md' 2>/dev/null; \
+  find docs/research -maxdepth 2 -name 'INDEX.md' 2>/dev/null; } | sort -u | \
+while IFS= read -r research; do
   echo "Previous scan: $research"
   grep -E 'Framework|Auth|Endpoint' "$research" | head -3
   echo "---"
@@ -211,15 +216,19 @@ Log results in the session brief:
    - glob: `**/seed*.ts`, `**/seed*.js`
    - Extract `insert`/`create` patterns
 4. **Previous scan results**:
-   - glob: `docs/research/**/INDEX.md`
+   - glob: new `docs/sites/*/research/INDEX.md` (scoped — excludes `redesign/`) and legacy `docs/research/*/INDEX.md`
    - Extract framework/auth/endpoint data
 
 **Output**: Inventory of local data sources in the session brief.
 
 ```bash
-# Strip www. then slugify
-SLUG=$(echo "{url}" | sed -E 's|https?://(www\.)?||;s|/.*||;s|\.|-|g')
-mkdir -p docs/research/${SLUG}/{api-surfaces,specs,scripts}
+# Canonical slug rule (docs/SLUG_RULES.md) — must match reframe for cross-module interop
+SLUG=$(printf '%s' "{url}" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')
+mkdir -p docs/sites/${SLUG}/research/{api-surfaces,specs,scripts}
+# If a legacy research folder exists for this slug, point the user at the new path.
+if [ -d "docs/research/${SLUG}" ]; then
+  echo "[LEGACY-WORKSPACE] Found docs/research/${SLUG}/ (pre-0.7.0). New output goes to docs/sites/${SLUG}/research/. Move the old folder to consolidate; legacy is read-only and removed in 0.8.0."
+fi
 ```
 
 **New: Multi-source Domain Discovery**
@@ -245,7 +254,7 @@ find . -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" -print0 | while IFS
 done
 
 # Cross-reference and deduplicate domains
-cat <(sqlite3 commands) <(grep commands) | sort | uniq > "docs/research/${SLUG}/discovered_domains.txt"
+cat <(sqlite3 commands) <(grep commands) | sort | uniq > "docs/sites/${SLUG}/research/discovered_domains.txt"
 ```
 
 Log results in the session brief:
@@ -262,10 +271,10 @@ Log results in the session brief:
 Use `Write` directly with empty string content for each output file, or they will fail at Phase 12.
 
 ```
-Write docs/research/${SLUG}/INDEX.md        ← empty string
-Write docs/research/${SLUG}/tech-stack.md   ← empty string
-Write docs/research/${SLUG}/site-map.md     ← empty string
-Write docs/research/${SLUG}/constants.md    ← empty string
+Write docs/sites/${SLUG}/research/INDEX.md        ← empty string
+Write docs/sites/${SLUG}/research/tech-stack.md   ← empty string
+Write docs/sites/${SLUG}/research/site-map.md     ← empty string
+Write docs/sites/${SLUG}/research/constants.md    ← empty string
 ```
 
 Then check every tool in the tool availability matrix and log results in the session brief.
@@ -308,7 +317,7 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
    - Search for `domain` or `url` fields
 4. **Cross-reference and deduplicate domains**
 
-**Output**: Consolidated domain list saved to `docs/research/{SLUG}/discovered_domains.txt`.
+**Output**: Consolidated domain list saved to `docs/sites/{SLUG}/research/discovered_domains.txt`.
 
 ---
 
@@ -342,7 +351,11 @@ find . -name "seed*.ts" -o -name "seed*.js" -print0 | while IFS= read -r -d '' s
 done
 
 # Check previous scan results
-find docs/research/ -name "INDEX.md" -print0 | while IFS= read -r -d '' research; do
+# Inventory previously-researched sites across the new and legacy workspaces.
+# New path is scoped to */research/ so reframe's redesign/ folders are NOT picked up.
+{ find docs/sites -path '*/research/INDEX.md' -print0 2>/dev/null; \
+  find docs/research -maxdepth 2 -name 'INDEX.md' -print0 2>/dev/null; } | \
+while IFS= read -r -d '' research; do
   echo "Previous scan: $research"
   grep -E 'Framework|Auth|Endpoint' "$research" | head -3
   echo "---"
@@ -373,7 +386,7 @@ Log results in the session brief:
    - glob: `**/seed*.ts`, `**/seed*.js`
    - Extract `insert`/`create` patterns
 4. **Previous scan results**:
-   - glob: `docs/research/**/INDEX.md`
+   - glob: new `docs/sites/*/research/INDEX.md` (scoped — excludes `redesign/`) and legacy `docs/research/*/INDEX.md`
    - Extract framework/auth/endpoint data
 
 **Output**: Inventory of local data sources in the session brief.
