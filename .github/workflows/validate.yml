@@ -21,7 +21,5 @@ jobs:
         run: bash scripts/validate-marketplace.sh
       - name: Validate canonical slug rule (drift + correctness)
         run: bash tests/validate-slug-rule.sh
-      - name: Run reframe helper unit tests
-        run: |
-          python3 plugins/reframe/skills/site-redesign/scripts/test_coverage_metrics.py
-          python3 plugins/reframe/skills/site-redesign/scripts/test_detect_category.py
+      - name: Reframe helper contract smoke test (CLI + JSON keys + exit codes)
+        run: bash tests/validate-reframe-helpers.sh
