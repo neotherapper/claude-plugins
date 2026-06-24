@@ -234,7 +234,7 @@ cmux browser --surface $SURF get html "body"
 cmux browser --surface $SURF get html "#product-list"
 
 # Take screenshot
-cmux browser --surface $SURF screenshot --out docs/research/example-com/screenshot.png
+cmux browser --surface $SURF screenshot --out docs/sites/example-com/research/screenshot.png
 
 # List network requests captured since page load
 cmux browser --surface $SURF list network
@@ -324,7 +324,7 @@ npm install -g har-to-openapi
 har-to-openapi .beacon/capture.har \
   --include-domains example.com,api.example.com \
   --format yaml \
-  > docs/research/example-com/specs/example-com.openapi.yaml
+  > docs/sites/example-com/research/specs/example-com.openapi.yaml
 ```
 
 If Chrome DevTools MCP captured requests, reconstruct a valid HAR 1.2 using `har-reconstruct.py`:
