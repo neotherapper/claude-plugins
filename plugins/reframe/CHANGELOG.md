@@ -16,5 +16,5 @@ Initial release.
 - **Current-design critique** (`current-critique.md`) severity-rated 0–4, principle-cited, with concrete fixes
 - **WAF fallback chain:** Firecrawl → Jina → browser-fetch
 - **Graceful degradation:** 9 annotated failure modes (`[RENDER-ESCALATED]`, `[WAF-BLOCKED]`, `[GREENFIELD-MODE]`, etc.)
-- **Beacon interop:** reads `docs/research/{slug}/tech-stack.md` if present for the tech-constraint note; never requires a prior Beacon run
+- **Beacon interop:** reads `docs/sites/{slug}/research/tech-stack.md` (falls back to legacy `docs/research/{slug}/tech-stack.md`) for the tech-constraint note; never requires a prior Beacon run
 - **Output lives under the shared `docs/sites/{slug}/` workspace** (alongside beacon's `research/`)
