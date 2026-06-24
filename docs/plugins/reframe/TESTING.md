@@ -38,6 +38,25 @@ To evaluate the skill description's triggering accuracy, run **`skill-creator`**
 
 ---
 
+## Helper scripts (v0.2.0+)
+
+The skill prefers three deterministic helper scripts for its mechanical steps, falling back to inspection when `python3`/the script is unavailable. They live in `skills/site-redesign/scripts/`:
+
+| Script | Used in | CLI |
+|--------|---------|-----|
+| `coverage-metrics.py` | Phase 3 gates | `python3 …/coverage-metrics.py <markdown-file>` (or `--stdin`) → JSON `{body_text_chars, nav_link_count, unique_headings, non_nav_prose_words, signals}` |
+| `detect-category.py` | Phase 7 | `python3 …/detect-category.py --categories <dir> --corpus <file-or-dir>` → JSON `{winner, scores, tie, tied}` |
+| `check-output-complete.sh` | Phase 9 done-signal | `bash …/check-output-complete.sh docs/sites/{slug}/redesign` → exit 0 when six files exist, non-empty, no `{{token}}` |
+
+Two test layers cover them:
+
+- **Per-function unit tests** (local dev) — `python3 skills/site-redesign/scripts/test_coverage_metrics.py` and `test_detect_category.py`.
+- **CLI contract smoke test** (runs in CI) — `bash tests/validate-reframe-helpers.sh` invokes each helper the way `SKILL.md` does and asserts the JSON keys, exit codes, and one behavior each (empty shell → `[RENDER-ESCALATED]`; clinic corpus → `local-service`; zero-match → `generic`; leftover `{{token}}` → non-zero exit). This is the gate that catches a wiring/contract break, not just internal-logic regressions.
+
+The canonical slug rule has its own CI guard: `bash tests/validate-slug-rule.sh` (drift across copies + edge-case correctness). All three — marketplace, slug, helper-contract — run in `.github/workflows/validate.yml`.
+
+---
+
 ## Output folder assertions
 
 After a successful `/reframe:analyze` run, verify:
@@ -91,6 +110,8 @@ Run against `https://trustyourphysio.com/` (the canonical SPA test case):
 ## Regression checklist before any PR
 
 - [ ] `bash scripts/validate-marketplace.sh` passes
+- [ ] `bash tests/validate-slug-rule.sh` passes (slug drift + correctness)
+- [ ] `bash tests/validate-reframe-helpers.sh` passes (helper CLI contract)
 - [ ] `plugin-dev:plugin-validator` on `plugins/reframe/` reports no errors
 - [ ] `skill-creator` triggering eval: all redesign-intent prompts select `site-redesign`; bare-URL and API-intent prompts do not
 - [ ] `/reframe:analyze` completes all 9 phases without halting on a normal site
