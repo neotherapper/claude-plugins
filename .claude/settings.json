@@ -1,6 +1,10 @@
 {
   "enabledPlugins": {
     "plugin-dev@claude-plugins-official": true,
-    "agent-skills@addy-agent-skills": true
+    "agent-skills@addy-agent-skills": true,
+    "code-review@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "hookify@claude-plugins-official": true,
+    "mcp-server-dev@claude-plugins-official": true
   }
 }
