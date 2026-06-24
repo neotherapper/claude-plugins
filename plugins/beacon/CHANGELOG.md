@@ -189,7 +189,7 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Eval workspace: `skills/site-recon-workspace/` created with old-skill-snapshot (v0.5.0 baseline),
+- Eval workspace: `.evals/site-recon-workspace/` created with old-skill-snapshot (v0.5.0 baseline),
   4 eval test cases, iteration-1 results showing with-skill improvements over baseline
 - Plugin version bumped to 0.6.3
 
