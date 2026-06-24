@@ -1,8 +1,8 @@
-Feature: site-redesign skill — analyse an existing site and produce docs/redesign/{site}/
+Feature: site-redesign skill — analyse an existing site and produce docs/sites/{site}/redesign/
 
   Background:
     Given reframe v0.1.0 is installed in Claude Code
-    And the user's project has a docs/redesign/ directory
+    And the user's project has a docs/sites/ directory
 
   # ── SPA redesign run ─────────────────────────────────────────────────────
 
@@ -14,7 +14,7 @@ Feature: site-redesign skill — analyse an existing site and produce docs/redes
     And content is re-fetched via Jina Reader (markdown crawler)
     And Phase 7 selects the local-service category pack and emits [PACK-LOADED:local-service]
     And the pivot question is asked: "redesign for the same purpose, or a new one?"
-    And all six output files are written under docs/redesign/trustyourphysio-com/
+    And all six output files are written under docs/sites/trustyourphysio-com/redesign/
     And brief.md contains the verbatim web-capture-override sentence
     And no {{TOKEN}} placeholders remain in any output file
 
@@ -33,7 +33,7 @@ Feature: site-redesign skill — analyse an existing site and produce docs/redes
     When I run /reframe:analyze https://placeholder-site.example/
     Then Phase 3 emits [GREENFIELD-MODE]
     And the pipeline halts after Phase 3
-    And INDEX.md is written with the greenfield finding
+    And INDEX.md is written under docs/sites/ with the greenfield finding
     And no brief.md is produced
     And Claude does not invent a purpose or audience for the site
 
@@ -43,7 +43,7 @@ Feature: site-redesign skill — analyse an existing site and produce docs/redes
     When I run /reframe:analyze https://empty-spa.example/
     Then [RENDER-ESCALATED] fires first
     Then [GREENFIELD-MODE] fires after render
-    And the pipeline halts with only INDEX.md written
+    And the pipeline halts with only INDEX.md written under docs/sites/
 
   # ── Category fallback to generic ────────────────────────────────────────
 

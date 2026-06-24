@@ -43,7 +43,7 @@ To evaluate the skill description's triggering accuracy, run **`skill-creator`**
 After a successful `/reframe:analyze` run, verify:
 
 ```
-docs/redesign/{site}/
+docs/sites/{site}/redesign/
 ├── INDEX.md               — assumptions header, coverage manifest, file table, how-to-use
 ├── brief.md               — 10 sections present; no {{TOKEN}} remaining
 ├── run-sheet.md           — validate → key screen → remaining prompts in order
@@ -62,7 +62,7 @@ Run `/reframe:analyze` on a known site and verify each phase produces output:
 
 | Phase | Name | Verification |
 |-------|------|-------------|
-| 1 | Scaffold + tool check | `docs/redesign/{slug}/` created with all six output files (empty) + `.gitignore` containing `.crawl/`; tool availability block in session brief |
+| 1 | Scaffold + tool check | `docs/sites/{slug}/redesign/` created with all six output files (empty) + `.gitignore` containing `.crawl/`; tool availability block in session brief |
 | 2 | Structure discovery | `ia-map.md` skeleton written; URL count and cluster table in session brief |
 | 3 | Render + coverage gate | Coverage manifest in session brief; `[RENDER-ESCALATED]` logged for SPA sites; `[GREENFIELD-MODE]` halts pipeline for placeholder sites |
 | 4 | Content crawl + screenshots | `.crawl/` populated with per-page markdown; at least one screenshot or `[TOOL-UNAVAILABLE:chrome-mcp]` noted |
@@ -82,7 +82,7 @@ Run against `https://trustyourphysio.com/` (the canonical SPA test case):
 2. Verify `[RENDER-ESCALATED]` fires — homepage returns near-empty HTML; markdown crawler escalates
 3. Verify `[PACK-LOADED:local-service]` — site is a physiotherapy clinic
 4. Verify the pivot question is asked before Phase 9 finalises the brief
-5. Verify all six output files are written under `docs/redesign/trustyourphysio-com/`
+5. Verify all six output files are written under `docs/sites/trustyourphysio-com/redesign/`
 6. Verify `brief.md` contains the verbatim web-capture-override sentence
 7. Verify no `{{` tokens remain in any output file
 
@@ -94,7 +94,7 @@ Run against `https://trustyourphysio.com/` (the canonical SPA test case):
 - [ ] `plugin-dev:plugin-validator` on `plugins/reframe/` reports no errors
 - [ ] `skill-creator` triggering eval: all redesign-intent prompts select `site-redesign`; bare-URL and API-intent prompts do not
 - [ ] `/reframe:analyze` completes all 9 phases without halting on a normal site
-- [ ] Output folder created at `docs/redesign/{site}/` with correct file structure
+- [ ] Output folder created at `docs/sites/{site}/redesign/` with correct file structure
 - [ ] No unresolved `{{` tokens in any output file
 - [ ] `[RENDER-ESCALATED]` fires correctly on a JS-rendered SPA
 - [ ] `[GREENFIELD-MODE]` fires correctly on a placeholder/coming-soon page and halts pipeline

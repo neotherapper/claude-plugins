@@ -55,7 +55,7 @@ plugins/reframe/
 ## Output structure (per run)
 
 ```
-docs/redesign/{site-slug}/
+docs/sites/{site-slug}/redesign/
 ├── INDEX.md              ← summary, assumptions header, coverage manifest, how-to-use
 ├── brief.md              ← paste-ready Claude Design onboarding brief (headline deliverable)
 ├── run-sheet.md          ← sequential canvas prompts (validate → key screen → remaining)

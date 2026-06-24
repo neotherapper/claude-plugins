@@ -17,3 +17,4 @@ Initial release.
 - **WAF fallback chain:** Firecrawl → Jina → browser-fetch
 - **Graceful degradation:** 9 annotated failure modes (`[RENDER-ESCALATED]`, `[WAF-BLOCKED]`, `[GREENFIELD-MODE]`, etc.)
 - **Beacon interop:** reads `docs/research/{slug}/tech-stack.md` if present for the tech-constraint note; never requires a prior Beacon run
+- **Output lives under the shared `docs/sites/{slug}/` workspace** (alongside beacon's `research/`)

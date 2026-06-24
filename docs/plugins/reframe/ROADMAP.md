@@ -18,6 +18,7 @@ Initial release. The full 9-phase coverage-first pipeline:
 - Severity-rated current-design critique (0–4), principle-cited, with concrete fixes
 - 9 annotated graceful degradation signals
 - Beacon interop: reads `docs/research/{slug}/tech-stack.md` for the tech-constraint note if present
+- Output lives under the shared `docs/sites/{slug}/redesign/` workspace (alongside beacon's `research/`)
 
 ---
 

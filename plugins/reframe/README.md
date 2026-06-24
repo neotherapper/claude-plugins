@@ -14,14 +14,14 @@ Turn any live site into a purpose-driven redesign brief for Claude Design.
 /reframe:analyze <url>
 ```
 
-Runs the full 9-phase pipeline on the given URL and writes output to `docs/redesign/{site-slug}/`.
+Runs the full 9-phase pipeline on the given URL and writes output to `docs/sites/{site-slug}/redesign/`.
 
 ---
 
 ## Output folder layout
 
 ```
-docs/redesign/{site-slug}/
+docs/sites/{site-slug}/redesign/
 ├── INDEX.md              — summary, assumptions header, coverage manifest, how to use
 ├── brief.md             — THE Claude Design onboarding brief (the headline deliverable)
 ├── run-sheet.md         — sequential canvas prompts (screens/components)
@@ -55,7 +55,7 @@ Category is detected automatically in Phase 7. Low confidence falls back to `gen
 
 ## How to use the output
 
-1. Run `/reframe:analyze <url>` — the pipeline writes `docs/redesign/{slug}/` to your project.
+1. Run `/reframe:analyze <url>` — the pipeline writes `docs/sites/{slug}/redesign/` to your project.
 2. Open `brief.md` — read the **Assumptions header** first; correct any wrong inferences before using.
 3. In [claude.ai/design](https://claude.ai/design), paste the full contents of `brief.md` as your onboarding prompt.
 4. Enable **web-capture** on the live URL — Claude Design uses it for current content, structure, and brand assets to KEEP only. The design direction in the brief overrides all captured visual styling (this is intentional — you are redesigning, not cloning).
