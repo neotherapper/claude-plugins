@@ -97,7 +97,7 @@ Include the coverage manifest in the session brief and surface it in `INDEX.md`.
 ### Signal Emission — Coverage
 
 - `[COVERAGE-PARTIAL:gated]` — one or more URLs returned 401/403/challenge; coverage is incomplete.
-- `[WAF-BLOCKED]` — homepage returns 403/challenge from curl, Firecrawl, AND Jina (the full fallback chain); proceed with whatever partial content exists + a coverage note, do not hard-stop.
+- `[WAF-BLOCKED]` — homepage returns 403/challenge from curl, Firecrawl, Jina, AND browser-fetch (the full fallback chain); proceed with whatever partial content exists + a coverage note, do not hard-stop.
 
 ---
 

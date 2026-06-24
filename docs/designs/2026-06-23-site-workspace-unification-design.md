@@ -51,16 +51,16 @@ docs/sites/{slug}/
 
 Both plugins MUST derive an identical slug or `docs/sites/{slug}/` won't line up and interop silently misses. Canonical rule:
 
-1. Strip scheme (`https?://`).
-2. Strip leading `www.`.
-3. Strip everything from the first `/` (path).
-4. Strip a trailing `:port` (e.g. `:8080`).
-5. Lowercase.
+1. Lowercase.
+2. Strip scheme (`https?://`).
+3. Strip leading `www.`.
+4. Strip everything from the first `/` (path).
+5. Strip a trailing `:port` (e.g. `:8080`).
 6. Replace `.` with `-`.
 
 Reference implementation:
 ```bash
-SLUG=$(printf '%s' "$URL" | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//' | tr 'A-Z' 'a-z' | sed -E 's/\./-/g')
+SLUG=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')
 ```
 
 Examples (must match across both plugins):

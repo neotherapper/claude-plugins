@@ -1,17 +1,18 @@
 # Site slug derivation (canonical)
 
 All site-analysis plugins (beacon, reframe) MUST derive the same slug so their
-output lines up under `docs/sites/{slug}/`. Rule:
+output lines up under `docs/sites/{slug}/`. reframe follows this rule today;
+beacon aligns in PR-C (v0.7.0). Rule:
 
-1. Strip scheme (`https?://`)
-2. Strip leading `www.`
-3. Strip path (everything from the first `/`)
-4. Strip trailing `:port`
-5. Lowercase
+1. Lowercase
+2. Strip scheme (`https?://`)
+3. Strip leading `www.`
+4. Strip path (everything from the first `/`)
+5. Strip trailing `:port`
 6. Replace `.` with `-`
 
 ```bash
-SLUG=$(printf '%s' "$URL" | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//' | tr 'A-Z' 'a-z' | sed -E 's/\./-/g')
+SLUG=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')
 ```
 
 | Input | Slug |

@@ -51,7 +51,7 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 **Input:** URL (with explicit redesign intent).
 
 **Actions:**
-1. Derive slug (canonical — see `docs/SLUG_RULES.md`): `sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//' | tr 'A-Z' 'a-z' | sed -E 's/\./-/g'`. Examples: `www.example.com/`→`example-com`, `api.example.com/v2`→`api-example-com`, `example.com:8080`→`example-com`, `Example.COM`→`example-com`.
+1. Derive slug (canonical — see `docs/SLUG_RULES.md`): `SLUG=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')`. Examples: `www.example.com/`→`example-com`, `Example.COM`→`example-com`.
 2. Create output folder + empty output files (Write, not touch): `INDEX.md`, `brief.md`, `run-sheet.md`, `content-inventory.md`, `ia-map.md`, `current-critique.md` — all under `docs/sites/{slug}/redesign/`.
 3. Write `docs/sites/{slug}/redesign/.gitignore` containing `.crawl/`.
 4. Detect tools — log each as `[AVAILABLE]` or `[TOOL-UNAVAILABLE:{name}]`. See `references/tool-availability.md` (Jina Reader, Firecrawl, Crawl4AI, WebFetch, Chrome DevTools MCP — test both namespaces; record active one as `[CHROME-NAMESPACE:plugin|project]`).
@@ -88,7 +88,7 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 **Actions:**
 1. Fetch homepage (WebFetch; WAF fallback: Firecrawl → Jina → browser-fetch if 403).
 2. **Render gate:** `body_text_chars < 200` OR `nav_link_count == 0` → emit `[RENDER-ESCALATED]`, re-fetch via Jina → Firecrawl → Crawl4AI (Chrome MCP: auth/interactive walls only).
-3. **Content-sufficiency gate:** `unique_headings < 2` AND `non_nav_prose_words < 150` → emit `[GREENFIELD-MODE]`, write `INDEX.md`, halt pipeline.
+3. **Content-sufficiency gate:** `unique_headings < 2` AND `non_nav_prose_words < 150` → emit `[GREENFIELD-MODE]`, write `INDEX.md`, delete the five unfilled output files (every Phase-1 file except `INDEX.md`), halt pipeline.
 4. **Coverage manifest:** each URL → Reachable (200) or Gated/Blocked (401/403/challenge). Emit `[COVERAGE-PARTIAL:gated]` if any URL gated.
 5. Emit `[WAF-BLOCKED]` only if all three fallback fetchers fail; do not hard-stop.
 

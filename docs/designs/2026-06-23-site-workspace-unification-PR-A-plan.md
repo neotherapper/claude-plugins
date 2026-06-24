@@ -14,7 +14,7 @@
 - Subfolder term is **"module"**, never "lens" (avoid idea-forge collision).
 - **Canonical slug rule** (spec §4): strip scheme → strip leading `www.` → strip path (from first `/`) → strip `:port` → lowercase → `.`→`-`. Reference impl:
   ```bash
-  SLUG=$(printf '%s' "$URL" | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//' | tr 'A-Z' 'a-z' | sed -E 's/\./-/g')
+  SLUG=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')
   ```
 - Beacon-interop read order: **`docs/sites/{slug}/research/tech-stack.md` first, then legacy `docs/research/{slug}/tech-stack.md`**; if neither, emit `[TECH-STACK-ABSENT]` + a visible `brief.md` §10 note.
 - Do NOT touch beacon, idea-forge, or any `.evals/` (beacon migration is out of scope here).
@@ -72,15 +72,15 @@ Expected: the scaffold + write references now use the new path.
 All site-analysis plugins (beacon, reframe) MUST derive the same slug so their
 output lines up under `docs/sites/{slug}/`. Rule:
 
-1. Strip scheme (`https?://`)
-2. Strip leading `www.`
-3. Strip path (everything from the first `/`)
-4. Strip trailing `:port`
-5. Lowercase
+1. Lowercase
+2. Strip scheme (`https?://`)
+3. Strip leading `www.`
+4. Strip path (everything from the first `/`)
+5. Strip trailing `:port`
 6. Replace `.` with `-`
 
 ```bash
-SLUG=$(printf '%s' "$URL" | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//' | tr 'A-Z' 'a-z' | sed -E 's/\./-/g')
+SLUG=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')
 ```
 
 | Input | Slug |

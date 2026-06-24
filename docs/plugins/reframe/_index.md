@@ -65,7 +65,7 @@ docs/sites/{site-slug}/redesign/
 └── .crawl/               ← raw per-page markdown + screenshots (git-ignored)
 ```
 
-Slug derivation: strip `www.`, then `example.com → example-com`.
+Slug derivation: canonical rule in [`docs/SLUG_RULES.md`](../../SLUG_RULES.md) (lowercase → strip scheme/`www.`/path/`:port` → `.`→`-`).
 `.crawl/` is git-ignored; the five markdown files and `brief.md` are the committed artifacts.
 
 ---

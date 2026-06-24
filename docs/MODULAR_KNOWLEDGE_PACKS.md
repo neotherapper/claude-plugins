@@ -45,11 +45,11 @@ The subfolder term for each analysis type is **module** (e.g. `research/`, `rede
 
 All site-analysis plugins must derive an identical slug from the URL or `docs/sites/{slug}/` will not line up and cross-module interop will silently miss. See `docs/SLUG_RULES.md` for the canonical rule and reference implementation. Short form:
 
-1. Strip scheme (`https?://`)
-2. Strip leading `www.`
-3. Strip path (everything from the first `/`)
-4. Strip trailing `:port`
-5. Lowercase
+1. Lowercase
+2. Strip scheme (`https?://`)
+3. Strip leading `www.`
+4. Strip path (everything from the first `/`)
+5. Strip trailing `:port`
 6. Replace `.` with `-`
 
 ### Cross-module interop contract
