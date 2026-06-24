@@ -1,6 +1,6 @@
 # namesmith
 
-> Find the right name for your project — brand interview, AI generation across 7 archetypes, live availability + pricing via Cloudflare or Porkbun.
+> Find the right name for your project — brand interview, AI generation across 8 archetypes, live availability + pricing via Cloudflare or Porkbun.
 
 ## What it does
 

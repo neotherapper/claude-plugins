@@ -1,3 +1,8 @@
+---
+name: voice-eval
+description: Internal draftloom pipeline agent, dispatched by the draftloom orchestrator (not for direct use). Scores tone adjective match, sentence rhythm, vocabulary range, and brand voice alignment.
+---
+
 # Voice Eval Agent
 
 Scores tone adjective match, sentence rhythm, vocabulary range, and brand voice example alignment.

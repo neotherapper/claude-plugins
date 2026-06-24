@@ -36,9 +36,9 @@
 ### Tasks 4–8 (skill-creator eval loop)
 | File | Change |
 |------|--------|
-| `plugins/beacon/skills/site-recon-workspace/evals/evals.json` | Create — 4 eval test prompts |
-| `plugins/beacon/skills/site-recon-workspace/iteration-1/` | Create — eval run outputs |
-| `plugins/beacon/skills/site-recon-workspace/old-skill-snapshot/SKILL.md` | Snapshot from git before changes |
+| `plugins/beacon/.evals/site-recon-workspace/evals/evals.json` | Create — 4 eval test prompts |
+| `plugins/beacon/.evals/site-recon-workspace/iteration-1/` | Create — eval run outputs |
+| `plugins/beacon/.evals/site-recon-workspace/old-skill-snapshot/SKILL.md` | Snapshot from git before changes |
 
 ---
 
@@ -576,26 +576,26 @@ Before running evals, snapshot the old skill (so the baseline subagent uses pre-
 and write the test cases.
 
 **Files:**
-- Create: `plugins/beacon/skills/site-recon-workspace/evals/evals.json`
-- Create: `plugins/beacon/skills/site-recon-workspace/old-skill-snapshot/SKILL.md`
+- Create: `plugins/beacon/.evals/site-recon-workspace/evals/evals.json`
+- Create: `plugins/beacon/.evals/site-recon-workspace/old-skill-snapshot/SKILL.md`
 
 - [ ] **Step 1: Snapshot the old skill from git**
 
 ```bash
-mkdir -p plugins/beacon/skills/site-recon-workspace/old-skill-snapshot
+mkdir -p plugins/beacon/.evals/site-recon-workspace/old-skill-snapshot
 git show main:plugins/beacon/skills/site-recon/SKILL.md \
-  > plugins/beacon/skills/site-recon-workspace/old-skill-snapshot/SKILL.md
+  > plugins/beacon/.evals/site-recon-workspace/old-skill-snapshot/SKILL.md
 ```
 
 Verify the snapshot contains `version: 0.5.0` (the pre-fix version):
 ```bash
-head -5 plugins/beacon/skills/site-recon-workspace/old-skill-snapshot/SKILL.md
+head -5 plugins/beacon/.evals/site-recon-workspace/old-skill-snapshot/SKILL.md
 ```
 Expected: `version: 0.5.0`
 
 - [ ] **Step 2: Create evals.json**
 
-Create `plugins/beacon/skills/site-recon-workspace/evals/evals.json`:
+Create `plugins/beacon/.evals/site-recon-workspace/evals/evals.json`:
 
 ```json
 {
@@ -637,13 +637,13 @@ Create `plugins/beacon/skills/site-recon-workspace/evals/evals.json`:
 - [ ] **Step 3: Verify the workspace structure**
 
 ```bash
-find plugins/beacon/skills/site-recon-workspace -type f
+find plugins/beacon/.evals/site-recon-workspace -type f
 ```
 
 Expected output:
 ```
-plugins/beacon/skills/site-recon-workspace/evals/evals.json
-plugins/beacon/skills/site-recon-workspace/old-skill-snapshot/SKILL.md
+plugins/beacon/.evals/site-recon-workspace/evals/evals.json
+plugins/beacon/.evals/site-recon-workspace/old-skill-snapshot/SKILL.md
 ```
 
 ---
@@ -654,12 +654,12 @@ Spawn 8 subagents in parallel (4 with-skill, 4 baseline), all in the same turn. 
 says: **do not spawn with-skill runs first and come back for baselines later — launch everything at once.**
 
 **Files:**
-- Create: `plugins/beacon/skills/site-recon-workspace/iteration-1/eval-{1..4}-{with_skill,old_skill}/`
+- Create: `plugins/beacon/.evals/site-recon-workspace/iteration-1/eval-{1..4}-{with_skill,old_skill}/`
 
 - [ ] **Step 1: Create iteration-1 directory**
 
 ```bash
-mkdir -p plugins/beacon/skills/site-recon-workspace/iteration-1
+mkdir -p plugins/beacon/.evals/site-recon-workspace/iteration-1
 ```
 
 - [ ] **Step 2: Spawn all 8 subagents in a single message**
@@ -670,15 +670,15 @@ For each of the 4 evals, dispatch two subagents in the SAME tool-use turn:
 ```
 Skill path: plugins/beacon/skills/site-recon/SKILL.md
 Task: [eval prompt from evals.json]
-Save outputs to: plugins/beacon/skills/site-recon-workspace/iteration-1/eval-{N}-scaffold-no-touch/with_skill/outputs/
+Save outputs to: plugins/beacon/.evals/site-recon-workspace/iteration-1/eval-{N}-scaffold-no-touch/with_skill/outputs/
 Outputs to save: the session brief (markdown in context), any created docs/research/ files
 ```
 
-**Baseline runs** (use old skill snapshot at `plugins/beacon/skills/site-recon-workspace/old-skill-snapshot/SKILL.md`):
+**Baseline runs** (use old skill snapshot at `plugins/beacon/.evals/site-recon-workspace/old-skill-snapshot/SKILL.md`):
 ```
-Skill path: plugins/beacon/skills/site-recon-workspace/old-skill-snapshot/SKILL.md
+Skill path: plugins/beacon/.evals/site-recon-workspace/old-skill-snapshot/SKILL.md
 Task: [same eval prompt]
-Save outputs to: plugins/beacon/skills/site-recon-workspace/iteration-1/eval-{N}-scaffold-no-touch/old_skill/outputs/
+Save outputs to: plugins/beacon/.evals/site-recon-workspace/iteration-1/eval-{N}-scaffold-no-touch/old_skill/outputs/
 ```
 
 Also create `eval_metadata.json` in each eval directory:
@@ -759,14 +759,14 @@ Update each `eval_metadata.json` with assertions (see Task 5 Step 2 for eval-1 e
 ```bash
 SKILL_CREATOR=/Users/georgiospilitsoglou/.claude/plugins/cache/claude-plugins-official/skill-creator/unknown/skills/skill-creator
 python -m scripts.aggregate_benchmark \
-  plugins/beacon/skills/site-recon-workspace/iteration-1 \
+  plugins/beacon/.evals/site-recon-workspace/iteration-1 \
   --skill-name site-recon
 ```
 
 Run from the skill-creator directory:
 ```bash
 cd $SKILL_CREATOR && python -m scripts.aggregate_benchmark \
-  /Users/georgiospilitsoglou/Developer/projects/claude-plugins/plugins/beacon/skills/site-recon-workspace/iteration-1 \
+  /Users/georgiospilitsoglou/Developer/projects/claude-plugins/plugins/beacon/.evals/site-recon-workspace/iteration-1 \
   --skill-name site-recon
 ```
 
@@ -774,7 +774,7 @@ cd $SKILL_CREATOR && python -m scripts.aggregate_benchmark \
 
 ```bash
 SKILL_CREATOR=/Users/georgiospilitsoglou/.claude/plugins/cache/claude-plugins-official/skill-creator/unknown/skills/skill-creator
-WORKSPACE=/Users/georgiospilitsoglou/Developer/projects/claude-plugins/plugins/beacon/skills/site-recon-workspace
+WORKSPACE=/Users/georgiospilitsoglou/Developer/projects/claude-plugins/plugins/beacon/.evals/site-recon-workspace
 
 nohup python $SKILL_CREATOR/eval-viewer/generate_review.py \
   $WORKSPACE/iteration-1 \
@@ -796,7 +796,7 @@ After the user reviews outputs in the viewer and submits feedback:
 - [ ] **Step 1: Read feedback.json**
 
 ```bash
-cat plugins/beacon/skills/site-recon-workspace/iteration-1/feedback.json
+cat plugins/beacon/.evals/site-recon-workspace/iteration-1/feedback.json
 ```
 
 Focus on non-empty feedback entries — those are the test cases that need fixing.
@@ -815,7 +815,7 @@ Common expected issues based on the session analysis:
 - [ ] **Step 3: Run iteration-2 (with same baselines)**
 
 ```bash
-mkdir -p plugins/beacon/skills/site-recon-workspace/iteration-2
+mkdir -p plugins/beacon/.evals/site-recon-workspace/iteration-2
 ```
 
 Spawn 4 with-skill subagents (same prompts, updated skill) in one turn. The baseline
@@ -869,7 +869,7 @@ SKILL_CREATOR=/Users/georgiospilitsoglou/.claude/plugins/cache/claude-plugins-of
 cat $SKILL_CREATOR/assets/eval_review.html
 ```
 
-Create a JSON file at `plugins/beacon/skills/site-recon-workspace/trigger-evals.json`:
+Create a JSON file at `plugins/beacon/.evals/site-recon-workspace/trigger-evals.json`:
 
 ```json
 [
@@ -901,7 +901,7 @@ research). This tests that beacon's two skills do not cross-trigger.
 
 Replace `__EVAL_DATA_PLACEHOLDER__` and `__SKILL_NAME_PLACEHOLDER__` in the template and open:
 ```bash
-TRIGGER_EVALS=$(cat plugins/beacon/skills/site-recon-workspace/trigger-evals.json)
+TRIGGER_EVALS=$(cat plugins/beacon/.evals/site-recon-workspace/trigger-evals.json)
 sed "s/__EVAL_DATA_PLACEHOLDER__/${TRIGGER_EVALS}/g;s/__SKILL_NAME_PLACEHOLDER__/beacon:site-recon/g" \
   $SKILL_CREATOR/assets/eval_review.html > /tmp/eval_review_site-recon.html
 open /tmp/eval_review_site-recon.html
@@ -913,7 +913,7 @@ Wait for user to review and click "Export Eval Set". Check Downloads for `eval_s
 
 ```bash
 python -m scripts.run_loop \
-  --eval-set plugins/beacon/skills/site-recon-workspace/eval_set.json \
+  --eval-set plugins/beacon/.evals/site-recon-workspace/eval_set.json \
   --skill-path plugins/beacon/skills/site-recon/SKILL.md \
   --model claude-sonnet-4-6 \
   --max-iterations 5 \

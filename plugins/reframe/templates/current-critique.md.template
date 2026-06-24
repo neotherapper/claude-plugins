@@ -1,0 +1,13 @@
+# {{SITE_NAME}} — Current-Design Critique
+
+Judged against category pack: **{{CATEGORY}}**. {{VISUAL_TRACK_NOTE}}
+
+| # | Finding | Severity (0–4) | Best-practice violated | Concrete fix | Evidence |
+|---|---------|----------------|------------------------|--------------|----------|
+{{CRITIQUE_ROWS}}
+
+## Voice & messaging
+{{VOICE_FINDINGS}}
+
+## Content-side SEO/a11y signals
+{{SEO_A11Y_FINDINGS}}

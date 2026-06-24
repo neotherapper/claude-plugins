@@ -1,0 +1,31 @@
+# {{SITE_NAME}} — Redesign Brief
+
+## 1. Assumptions (edit if wrong)
+{{ASSUMPTIONS}}
+
+## 2. What the site is
+{{WHAT_IT_IS}}
+
+## 3. Target audience
+{{AUDIENCE}}
+
+## 4. Redesign goals & success criteria
+{{GOALS_SUCCESS}}
+
+## 5. KEEP / CHANGE / ADD
+{{KEEP_CHANGE_ADD}}
+
+## 6. Information architecture (proposed)
+{{IA_PROPOSED}}
+
+## 7. Design direction + design-system seed
+{{DESIGN_DIRECTION_SEED}}
+
+## 8. Reference + anti-reference sites
+{{REFERENCES_ANTI}}
+
+## 9. Web-capture instruction
+{{WEB_CAPTURE_OVERRIDE}}
+
+## 10. Tech / export target + handoff
+{{TECH_EXPORT_HANDOFF}}

@@ -1,0 +1,27 @@
+# {{SITE_NAME}} — Run Sheet
+
+Sequential canvas prompts. Paste each block into Claude Design in order. Do not skip the validate step.
+
+## Step 1 — Validate
+
+```
+{{VALIDATE_PROMPT}}
+```
+
+## Step 2 — Key screen
+
+```
+{{KEY_SCREEN_PROMPT}}
+```
+
+## Step 3 — Remaining screens
+
+```
+{{REMAINING_SCREEN_PROMPTS}}
+```
+
+## Step 4 — Components
+
+```
+{{COMPONENT_PROMPTS}}
+```

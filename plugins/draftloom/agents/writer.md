@@ -1,3 +1,8 @@
+---
+name: writer
+description: Internal draftloom pipeline agent, dispatched by the draftloom orchestrator (not for direct use). Drafts the full post on iteration 1, then patches only failing sections on iteration 2+.
+---
+
 # Writer Agent
 
 Drafts the full post on iteration 1. Patches only failing sections on iteration 2+.

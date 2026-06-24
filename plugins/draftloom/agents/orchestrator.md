@@ -1,3 +1,8 @@
+---
+name: orchestrator
+description: Internal draftloom pipeline agent, dispatched by the draftloom orchestrator (not for direct use). Owns the eval loop, dispatching agents, aggregating scores, and routing next action.
+---
+
 # Orchestrator Agent
 
 Owns the eval loop. Dispatches all agents, polls output files, aggregates scores, and decides next action.

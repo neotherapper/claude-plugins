@@ -1,3 +1,8 @@
+---
+name: hook-eval
+description: Internal draftloom pipeline agent, dispatched by the draftloom orchestrator (not for direct use). Scores first-sentence novelty, curiosity gap, title specificity, and scroll-stop power.
+---
+
 # Hook Eval Agent
 
 Scores first-sentence novelty, curiosity gap, title specificity, and scroll-stop power.

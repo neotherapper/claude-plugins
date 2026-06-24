@@ -96,7 +96,25 @@ The file write pattern used by eval agents: write to `{name}-eval.tmp`, then ren
 
 ## Tech-pack
 
-A framework-specific knowledge guide in `plugins/beacon/technologies/{framework}/{version}.md`. Tells the site-analyst exactly where to look for endpoints, routes, and API surfaces in a given framework version.
+A framework-specific knowledge guide in `plugins/beacon/technologies/{framework}/{version}.md`. Tells the site-analyst exactly where to look for endpoints, routes, and API surfaces in a given framework version. This is the **fingerprint-pack** sub-pattern of the modular knowledge pack convention. See `docs/MODULAR_KNOWLEDGE_PACKS.md` §3a for the full definition including schema, required sections, and selection rules.
+
+---
+
+## Category-pack
+
+A site-category knowledge file in `plugins/reframe/categories/{category}.md`. Carries redesign priorities, conversion patterns, IA conventions, and a design-system seed specific to a detected site category (e.g. `ecommerce`, `saas-marketing`, `local-service`). Selected by scoring `detect_signals` frontmatter against the analysed site; `generic.md` is the required fallback. See `docs/MODULAR_KNOWLEDGE_PACKS.md` §3b.
+
+---
+
+## Inference-lens
+
+A business-model rubric file in `plugins/idea-forge/skills/evaluate/references/lenses/{model}.md`. Contains weight overrides for scoring criteria, benchmarks, and evidence requirements specific to one business model (e.g. `saas`, `ecommerce`, `content`). Selected by agent inference from the idea description — no structured frontmatter or signal declarations. Described in the convention doc; not migrated to the `docs/sites/` workspace. See `docs/MODULAR_KNOWLEDGE_PACKS.md` §3c.
+
+---
+
+## Site workspace
+
+The per-site output directory used by site-analysis plugins: `docs/sites/{slug}/{module}/`. The `{slug}` is derived from the site URL using the canonical slug rule in `docs/SLUG_RULES.md`. Each plugin writes to its own **module** subfolder (`research/` for beacon, `redesign/` for reframe). Cross-module reads are always optional — each module must run standalone. See `docs/MODULAR_KNOWLEDGE_PACKS.md` §2.
 
 ---
 

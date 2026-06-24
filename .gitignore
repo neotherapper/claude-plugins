@@ -5,3 +5,23 @@
 .remember/
 .visual-kit/
 .paidagogos/
+
+# macOS
+.DS_Store
+
+# Vendored Node dependencies (visual-kit, paidagogos build deps already
+# ignore their own; this is a repo-wide safety net so they never get committed)
+node_modules/
+
+# Tooling debris
+.orphaned_at
+
+# Python bytecode (plugin helper scripts)
+__pycache__/
+*.pyc
+
+# Site-analysis working data (reframe .crawl, captured screenshots) — safety net
+docs/sites/**/redesign/.crawl/
+docs/redesign/**/.crawl/
+docs/sites/**/*.png
+docs/research/**/*.png

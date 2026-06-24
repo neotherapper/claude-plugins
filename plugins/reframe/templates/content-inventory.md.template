@@ -1,0 +1,10 @@
+# {{SITE_NAME}} — Content Inventory & Audit
+
+**Pages enumerated:** {{URL_COUNT}}   **Pages audited:** {{AUDITED_COUNT}}   ({{SAMPLING_NOTE}})
+
+| URL | Template | Page type | Purpose | Verdict | ROT/quality flags | Notes |
+|-----|----------|-----------|---------|---------|-------------------|-------|
+{{INVENTORY_ROWS}}
+
+**Verdict legend:** keep / revise / consolidate / remove — each tied to {{PRIMARY_GOAL}}.
+**Listed-not-audited:** {{UNAUDITED_LIST}}

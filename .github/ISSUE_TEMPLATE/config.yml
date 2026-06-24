@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Plugin docs & articles (pilitsoglou.com)
+    url: https://pilitsoglou.com
+    about: Documentation, setup guides, and articles
+  - name: Report a security issue (private)
+    url: https://github.com/neotherapper/claude-plugins/security/advisories/new
+    about: Please report vulnerabilities privately, not as public issues

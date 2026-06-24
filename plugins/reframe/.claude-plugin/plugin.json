@@ -1,0 +1,13 @@
+{
+  "name": "reframe",
+  "version": "0.2.0",
+  "description": "Turn any live site into a purpose-driven redesign brief for Claude Design.",
+  "author": {
+    "name": "Georgios Pilitsoglou",
+    "url": "https://pilitsoglou.com"
+  },
+  "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/reframe",
+  "repository": "https://github.com/neotherapper/claude-plugins",
+  "license": "MIT",
+  "keywords": ["site-analysis", "redesign", "claude-design", "ux", "design-brief", "information-architecture"]
+}

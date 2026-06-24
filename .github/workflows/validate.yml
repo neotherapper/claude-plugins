@@ -1,0 +1,25 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Validate marketplace.json and every plugin.json
+        run: bash scripts/validate-marketplace.sh
+      - name: Validate canonical slug rule (drift + correctness)
+        run: bash tests/validate-slug-rule.sh
+      - name: Reframe helper contract smoke test (CLI + JSON keys + exit codes)
+        run: bash tests/validate-reframe-helpers.sh

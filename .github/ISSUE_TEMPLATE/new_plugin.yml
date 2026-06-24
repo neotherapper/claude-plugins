@@ -1,0 +1,33 @@
+name: New plugin submission
+description: Propose a new plugin for this marketplace
+labels: ["new-plugin"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Plugin name
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What does it do?
+      description: One paragraph — what it does and the problem it solves.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source (repo or path)
+      placeholder: "github.com/you/your-plugin  or  plugins/your-plugin"
+    validations:
+      required: true
+  - type: checkboxes
+    id: readiness
+    attributes:
+      label: Readiness checklist
+      options:
+        - label: Has a valid `.claude-plugin/plugin.json` (name, version, description; name matches folder)
+        - label: "`bash scripts/validate-marketplace.sh` passes"
+        - label: Any agents have `name` + `description` frontmatter; any skills have a specific, trigger-friendly `description`
+        - label: Licensed under an MIT-compatible license
