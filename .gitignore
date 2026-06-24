@@ -15,3 +15,9 @@ node_modules/
 
 # Tooling debris
 .orphaned_at
+
+# Site-analysis working data (reframe .crawl, captured screenshots) — safety net
+docs/sites/**/redesign/.crawl/
+docs/redesign/**/.crawl/
+docs/sites/**/*.png
+docs/research/**/*.png
