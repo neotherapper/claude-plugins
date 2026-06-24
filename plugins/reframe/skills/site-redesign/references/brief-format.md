@@ -29,7 +29,7 @@ Sections must appear in this order. Do not reorder; Claude Design reads them top
 
 9. **Web-capture instruction (critical)** — the canonical sentence below, verbatim.
 
-10. **Tech / export target + handoff** — stack note (from Beacon `tech-stack.md` if present) + "export ZIP / Open in Claude Code".
+10. **Tech / export target + handoff** — stack note from `docs/sites/{slug}/research/tech-stack.md` (primary) or `docs/research/{slug}/tech-stack.md` (legacy fallback); if neither found, log `[TECH-STACK-ABSENT]` and write: "No beacon tech-stack found — specify the target stack manually, or run beacon first". Append "export ZIP / Open in Claude Code".
 
 ---
 
