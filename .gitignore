@@ -16,6 +16,10 @@ node_modules/
 # Tooling debris
 .orphaned_at
 
+# Python bytecode (plugin helper scripts)
+__pycache__/
+*.pyc
+
 # Site-analysis working data (reframe .crawl, captured screenshots) — safety net
 docs/sites/**/redesign/.crawl/
 docs/redesign/**/.crawl/

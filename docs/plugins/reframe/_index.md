@@ -8,7 +8,7 @@ reframe takes the URL of an existing website and produces a purpose-driven redes
 
 **The job in one line:** Claude Design captures what a site looks like; reframe argues what it should accomplish and why the current one underperforms.
 
-**Current version:** 0.1.0
+**Current version:** 0.2.0
 
 **Command:** `/reframe:analyze {url}`
 
@@ -29,10 +29,16 @@ plugins/reframe/
 ├── skills/
 │   └── site-redesign/
 │       ├── SKILL.md                   ← 9-phase coverage-first pipeline
-│       └── references/                ← on-demand detail files loaded during analysis
-│           ├── tool-availability.md   ← crawler detection, WAF fallback chain
-│           ├── crawl-and-coverage.md  ← render/coverage gate thresholds, crawl budget
-│           └── brief-format.md        ← brief.md section order, intent triplet, seed format
+│       ├── references/                ← on-demand detail files loaded during analysis
+│       │   ├── tool-availability.md   ← crawler detection, WAF fallback chain
+│       │   ├── crawl-and-coverage.md  ← render/coverage gate thresholds, crawl budget
+│       │   └── brief-format.md        ← brief.md section order, intent triplet, seed format
+│       └── scripts/                   ← deterministic helper scripts (stdlib-only, zero deps)
+│           ├── coverage-metrics.py    ← render/sufficiency gate metrics (Phase 3)
+│           ├── detect-category.py     ← category pack detection (Phase 7)
+│           ├── check-output-complete.sh ← output completeness check (Phase 9)
+│           ├── test_coverage_metrics.py ← unit tests for coverage-metrics.py
+│           └── test_detect_category.py  ← unit tests for detect-category.py
 │
 ├── categories/                        ← pluggable category best-practice packs
 │   ├── _TEMPLATE.md                   ← canonical pack structure (8 sections)

@@ -81,6 +81,8 @@ After the render attempt, evaluate the fetched content.
 
 ### Signal Emission — Render and Sufficiency
 
+> `coverage-metrics.py` computes `body_text_chars`, `nav_link_count`, `unique_headings`, and `non_nav_prose_words` deterministically against these same thresholds and emits `signals` accordingly.
+
 - `[RENDER-ESCALATED]` — homepage body text < 200 visible chars OR 0 nav links; re-fetched via JS-rendering markdown crawler (Jina → Firecrawl → Crawl4AI); Chrome MCP used only if all crawlers unavailable or content is auth-gated.
 - `[GREENFIELD-MODE]` — after render, site has < 2 unique headings AND < 150 words of non-nav prose; pipeline halts.
 

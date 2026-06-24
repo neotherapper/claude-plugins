@@ -1,7 +1,7 @@
 ---
 name: site-redesign
 description: This skill should be used when the user wants to redesign an existing website — e.g. "redesign this site", "create a redesign brief for acme.com", "redesign and modernise this site", "rethink the design of this site". Requires an EXPLICIT redesign intent; a bare URL or an API/endpoint request with no redesign intent belongs to beacon's site-recon, not here. Extracts purpose/content/IA, critiques vs category best-practice, and writes a paste-ready Claude Design brief to docs/sites/{slug}/redesign/.
-version: 0.1.0
+version: 0.2.0
 ---
 
 # site-redesign — Coverage-First Redesign Pipeline
@@ -87,10 +87,11 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 
 **Actions:**
 1. Fetch homepage (WebFetch; WAF fallback: Firecrawl → Jina → browser-fetch if 403).
-2. **Render gate:** `body_text_chars < 200` OR `nav_link_count == 0` → emit `[RENDER-ESCALATED]`, re-fetch via Jina → Firecrawl → Crawl4AI (Chrome MCP: auth/interactive walls only).
-3. **Content-sufficiency gate:** `unique_headings < 2` AND `non_nav_prose_words < 150` → emit `[GREENFIELD-MODE]`, write `INDEX.md`, delete the five unfilled output files (every Phase-1 file except `INDEX.md`), halt pipeline.
-4. **Coverage manifest:** each URL → Reachable (200) or Gated/Blocked (401/403/challenge). Emit `[COVERAGE-PARTIAL:gated]` if any URL gated.
-5. Emit `[WAF-BLOCKED]` only if all three fallback fetchers fail; do not hard-stop.
+2. **Render gate + content-sufficiency gate:** Run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/coverage-metrics.py <fetched-markdown-file>` (or `--stdin`). Read `body_text_chars`, `nav_link_count`, `unique_headings`, `non_nav_prose_words`, and `signals` from the JSON output. Fallback if python3 or the script is unavailable: estimate the four metrics by inspection against the same thresholds below.
+   - `[RENDER-ESCALATED]` — `body_text_chars < 200` OR `nav_link_count == 0` → re-fetch via Jina → Firecrawl → Crawl4AI (Chrome MCP: auth/interactive walls only).
+   - `[GREENFIELD-MODE]` — after render: `unique_headings < 2` AND `non_nav_prose_words < 150` → write `INDEX.md`, delete the five unfilled output files (every Phase-1 file except `INDEX.md`), halt pipeline.
+3. **Coverage manifest:** each URL → Reachable (200) or Gated/Blocked (401/403/challenge). Emit `[COVERAGE-PARTIAL:gated]` if any URL gated.
+4. Emit `[WAF-BLOCKED]` only if all three fallback fetchers fail; do not hard-stop.
 
 **Output:** Coverage manifest in session brief. Phase marker `[P3✓]`.
 
@@ -155,11 +156,10 @@ Write to `ia-map.md` (replacing the skeleton from Phase 2).
 
 **Actions:**
 1. **Infer:** purpose, audience, primary goal — with per-field confidence (high / medium / low).
-2. **Detect category** by scoring `detect_signals` from each category pack's YAML frontmatter against homepage + nav + crawled content. Use the matching pack at `categories/{detected}.md`.
-   - Score by counting signal matches; prefer **longer/more-specific signals** over short generic ones — do NOT use first-match.
+2. **Detect category:** Run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/detect-category.py --categories ${CLAUDE_PLUGIN_ROOT}/categories --corpus <.crawl-dir-or-file>`. Read `winner` from JSON; load `categories/{winner}.md`. Fallback if the script is unavailable: score each pack's `detect_signals` against the corpus by inspection and pick the dominant; ties and zero-match → `generic`.
    - If the top-scoring category's confidence is low, load `categories/generic.md` and note the assumption explicitly in the brief.
    - If a site scores across multiple categories, pick the **single dominant pack**, note secondaries inline (e.g. "primarily ecommerce; secondary: local-service"). **Never merge packs.**
-3. Emit `[PACK-LOADED:{category}]` once the pack is selected.
+3. Emit `[PACK-LOADED:{winner}]` once the pack is selected.
 4. **Ask the one question:** "Redesigning for the same purpose or a new one?" — record as `current purpose (inferred)` vs `target purpose (declared)`. Only human question in the pipeline.
 5. Record all inferences (purpose, audience, goal, category, confidence) in the session brief.
 
@@ -201,6 +201,8 @@ If `[TOOL-UNAVAILABLE:chrome-mcp]`: no screenshots — add `[VISUAL-GAP: visual-
 4. Finalize `content-inventory.md`, `ia-map.md`, `current-critique.md` (written in phases 5/6/8; resolve any remaining tokens).
 5. Write `INDEX.md` via `templates/INDEX.md.template`.
 6. Resolve `{{TECH_EXPORT_HANDOFF}}`: read `docs/sites/{slug}/research/tech-stack.md`; if absent, read `docs/research/{slug}/tech-stack.md` (legacy); if neither exists, log `[TECH-STACK-ABSENT]` and add to `brief.md` §10: "No beacon tech-stack found — specify the target stack manually, or run beacon first".
+
+7. **Completeness check:** Run `bash ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/check-output-complete.sh docs/sites/{slug}/redesign`. A non-zero exit means the run is not complete — resolve the named files/tokens and re-run. Fallback if unavailable: grep each output file for `{{` manually; no `{{` remaining = complete run.
 
 **Output:** All six output files written. Phase marker `[P9✓]`.
 

@@ -93,3 +93,15 @@
 **Categories and templates resolve from bare paths** (`categories/`, `templates/`) at the plugin root — this mirrors how Beacon's tech packs resolve, and avoids `${CLAUDE_PLUGIN_ROOT}` indirection for model-read files. `references/` lives under `skills/site-redesign/references/` (matching Beacon's actual layout, not the spec diagram which had it at the plugin root).
 
 **Trade-off rejected:** Build reframe as a Beacon sub-skill or extension. Saves scaffolding but couples two plugins with incompatible scopes and would route redesign requests through Beacon's site-analyst agent, which is optimised for API probing rather than content analysis.
+
+---
+
+## D-10 — Deterministic helper scripts for mechanical gates
+
+**Decision:** Three stdlib-only scripts implement the mechanical thresholds: `coverage-metrics.py` (Phase 3 render/sufficiency gate), `detect-category.py` (Phase 7 category detection), and `check-output-complete.sh` (Phase 9 completeness check). Each is the preferred path; a prose fallback covers hosts where python3 or `${CLAUDE_PLUGIN_ROOT}` is unavailable. Executed scripts are referenced via `${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/` (not bare paths) because they run from the user's cwd, not the plugin dir.
+
+**Why:** The coverage-first guarantee and category pick must not rest on the model counting words or tallying signal matches by eye. Drift and regression are now testable — each script has a corresponding unit test file. The threshold numbers in the prose (and in `references/crawl-and-coverage.md`) are the documented contract; the scripts implement that contract, not a different one.
+
+**Trade-off rejected:** Keeping everything as prose inspection. Simpler and more portable, but non-deterministic on exactly the flagship gates — the render gate and greenfield check are where a counting error matters most. Zero external dependencies (stdlib only) keeps the portability advantage while removing the estimation risk.
+
+**Note:** This supersedes the v0.1 "no scripts/" choice implicit in design §11 for these specific mechanical helpers. The broader principle — categories and templates load from bare paths as model-read files — is unchanged (see D-09).

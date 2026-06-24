@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.0 — 2026-06-24
+
+Deterministic helper scripts for the coverage gates (`coverage-metrics.py`), category detection (`detect-category.py`), and output completeness (`check-output-complete.sh`); the skill prefers them and falls back to inspection when unavailable. First plugin scripts; paths resolved via `${CLAUDE_PLUGIN_ROOT}`.
+
 ## 0.1.0 — 2026-06-22
 
 Initial release.
