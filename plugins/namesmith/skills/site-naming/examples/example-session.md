@@ -60,6 +60,12 @@ No personal brand signals detected. Proceeding to standard interview.
 
 ---
 
+**Q7 — Vocabulary mining (optional)?**
+
+> I like the word "forge" — it sounds solid and industrial.
+
+---
+
 ## Brand profile locked
 
 ```
@@ -70,6 +76,7 @@ Brand profile locked:
 - Mode: B — Balanced
 - Length: A — Short & punchy (≤6 chars)
 - Constraints: No hyphens. Prefer .io or .com. No developer jokes.
+- Vocabulary: forge (English single-word)
 ```
 
 **Applied weighting rules:**
@@ -80,7 +87,7 @@ Brand profile locked:
 
 ## Step 4: Wave 1 — Candidate generation
 
-Generated 30 candidates across 7 archetypes (weighted per profile):
+Generated 34 candidates across 7 of the 8 archetypes (Suffix Family not selected for this profile; weighted per profile):
 
 **Short & Punchy (8 candidates — ×2 weight)**
 Revio, Diffr, Revex, Prism, Merkr, Revly, Codex, Vexor

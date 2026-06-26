@@ -105,7 +105,9 @@ Determine storage path from `.draftloom/config.json` → `storage_mode`:
 
 Load `references/storage-guide.md` if the user asks about storage options.
 
-Write the profile JSON. Confirm: "Profile '{name}' saved to `.draftloom/profiles/{name}.json`."
+Write the profile JSON. Confirm using the path that matches the resolved `storage_mode` (the same location you wrote to above):
+- `"global"` → "Profile '{name}' saved to `~/.draftloom/profiles/{name}.json`."
+- `"project"` (or any other value) → "Profile '{name}' saved to `.draftloom/profiles/{name}.json`."
 
 ---
 
@@ -121,7 +123,6 @@ Profile created. Optional extras you can add later with `/draftloom:setup edit {
   • Typical post length preference
   • Writing inspiration (authors, publications)
   • CTA goal (newsletter, follow, contact)
-  • Brand voice examples (local file, URL, or inline text)
 ```
 
 ---

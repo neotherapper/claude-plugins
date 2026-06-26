@@ -56,7 +56,7 @@ One-liner to the user before generation:
 
 ## Section 2: Generation Pipeline
 
-Read `skills/generate/references/gap-patterns.md` now. Apply the pre-flight check, then work through all applicable patterns as an explicit checklist against the corpus assembled in Section 1.
+Read `${CLAUDE_PLUGIN_ROOT}/skills/generate/references/gap-patterns.md` now. Apply the pre-flight check, then work through all applicable patterns as an explicit checklist against the corpus assembled in Section 1.
 
 Apply all applicable patterns in one sequential pass. For each pattern, check whether the corpus contains signal. If it does, produce one candidate using the candidate format from gap-patterns.md. If it does not, skip the pattern and move to the next.
 

@@ -5,7 +5,7 @@ description: >
   the paidagogos router after its scope check, or directly via
   /paidagogos:micro. Generates a structured lesson page (standard topics) or a
   live interactive page with sliders and visualisations (math, physics,
-  geometry, statistics), rendered in the browser via visual-kit. Use for a
+  geometry, statistics). Use for a
   concrete single concept such as "CSS flexbox", "async/await", "SQL JOINs", or
   "derivatives". For a bare or broad learning request ("teach me X", "explain
   X", "I want to learn X"), the paidagogos router handles scope first and then
@@ -64,17 +64,17 @@ Store as `{mode}`.
 
 Read all three before generating content. Do not rely on memory from prior sessions.
 
-1. `references/lesson-schema.md` — canonical `Lesson` SurfaceSpec schema, field rules, valid example
-2. `references/teaching-guide.md` — content rules per section, level guidelines, quiz rules
-3. `references/vault-integration.md` — vault lookup contract for `resources[]`
+1. `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/lesson-schema.md` — canonical `Lesson` SurfaceSpec schema, field rules, valid example
+2. `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/teaching-guide.md` — content rules per section, level guidelines, quiz rules
+3. `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/vault-integration.md` — vault lookup contract for `resources[]`
 
 ### S2 — Vault lookup
 
-Attempt to source `resources[]` from the nikai Knowledge Vault following `references/vault-integration.md` exactly. If it fails for any reason, continue silently — see **Error handling → Vault lookup fails**.
+Attempt to source `resources[]` from the nikai Knowledge Vault following `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/vault-integration.md` exactly. If it fails for any reason, continue silently — see **Error handling → Vault lookup fails**.
 
 ### S3 — Generate lesson SurfaceSpec
 
-Generate a JSON object conforming to `vk://schemas/lesson.v1.json` and applying all rules from `references/lesson-schema.md` and `references/teaching-guide.md`. Those files are authoritative — do not improvise field shapes.
+Generate a JSON object conforming to `vk://schemas/lesson.v1.json` and applying all rules from `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/lesson-schema.md` and `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/teaching-guide.md`. Those files are authoritative — do not improvise field shapes.
 
 Minimum required sections: `concept`, `why`, `code` (or prose equivalent), `mistakes`, `generate`, `quiz`, `resources`, `next`.
 
@@ -82,6 +82,7 @@ Minimum required sections: `concept`, `why`, `code` (or prose equivalent), `mist
 
 Before writing, verify:
 - `surface` = `"lesson"`, `version` = `1`
+- All required sections present: `concept`, `why`, `code` (or prose equivalent), `mistakes`, `generate`, `quiz`, `resources`, `next`
 - `mistakes.items` has 2–3 entries
 - `quiz.items` has exactly 3 entries, one of each: `multiple_choice`, `fill_blank`, `explain`
 - `resources.items` has at least 1 entry with `type: "docs"`

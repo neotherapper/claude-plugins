@@ -10,7 +10,7 @@ Standard flow below. Triggered when the user describes one idea or asks to evalu
 ### Mode B: Family Evaluation
 Use when the user says "evaluate the [X] family", "should I pursue the [X] cluster", or "evaluate these ideas together as a group". In this case:
 1. Identify the family slug from `ideas/_registry/master-index.yaml`
-2. Read `agents/family-evaluator.md`
+2. Read `${CLAUDE_PLUGIN_ROOT}/agents/family-evaluator.md`
 3. Follow the family evaluator pipeline instead of the steps below
 4. The family evaluator produces a family scorecard saved to `ideas/_registry/families/{slug}-scorecard-v1.md`
 
@@ -51,7 +51,7 @@ Confirm these with the user before proceeding:
 
 > "I'll evaluate **{IDEA_NAME}** as a **{BUSINESS_MODEL}** idea using these search terms: {NICHE_KEYWORDS}. Does this look right, or should I use a different business model lens?"
 
-Save `BUSINESS_MODEL` for use in the scoring stage. The scoring agent will read the corresponding lens file at `skills/evaluate/references/lenses/{BUSINESS_MODEL}.md` to apply model-specific rubrics.
+Save `BUSINESS_MODEL` for use in the scoring stage. The scoring agent will read the corresponding lens file at `${CLAUDE_PLUGIN_ROOT}/skills/evaluate/references/lenses/{BUSINESS_MODEL}.md` to apply model-specific rubrics.
 
 Available lenses: `directory`, `ecommerce`, `saas`, `marketplace`, `content`, `tool-site`
 
@@ -184,7 +184,7 @@ Dispatch 4 research subagents in parallel. Each agent should:
 
 **Agent 1: Market Research**
 ```
-Read the prompt at agents/market-research.md and follow its instructions exactly.
+Read the prompt at ${CLAUDE_PLUGIN_ROOT}/agents/market-research.md and follow its instructions exactly.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
@@ -195,7 +195,7 @@ Run all the CLI commands specified in the prompt, adapting queries to this speci
 
 **Agent 2: Competition Research**
 ```
-Read the prompt at agents/competition-research.md and follow its instructions exactly.
+Read the prompt at ${CLAUDE_PLUGIN_ROOT}/agents/competition-research.md and follow its instructions exactly.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
@@ -205,7 +205,7 @@ Run all the CLI commands specified in the prompt, adapting queries to this speci
 
 **Agent 3: Data Research**
 ```
-Read the prompt at agents/data-research.md and follow its instructions exactly.
+Read the prompt at ${CLAUDE_PLUGIN_ROOT}/agents/data-research.md and follow its instructions exactly.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
@@ -216,7 +216,7 @@ Run all the CLI commands specified in the prompt, adapting queries to this speci
 
 **Agent 4: Distribution Research**
 ```
-Read the prompt at agents/distribution-research.md and follow its instructions exactly.
+Read the prompt at ${CLAUDE_PLUGIN_ROOT}/agents/distribution-research.md and follow its instructions exactly.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
@@ -227,7 +227,7 @@ Run all the CLI commands specified in the prompt, adapting queries to this speci
 
 **Agent 5: Customer Voice Research**
 ```
-Read the prompt at agents/customer-voice.md and follow its instructions exactly.
+Read the prompt at ${CLAUDE_PLUGIN_ROOT}/agents/customer-voice.md and follow its instructions exactly.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
@@ -247,7 +247,7 @@ Dispatch 1 additional agent:
 
 **Agent 6: Competitor Deep-Dive**
 ```
-Read the prompt at agents/competitor-deep-dive.md and follow its instructions exactly.
+Read the prompt at ${CLAUDE_PLUGIN_ROOT}/agents/competitor-deep-dive.md and follow its instructions exactly.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
@@ -262,7 +262,7 @@ Run all the CLI commands specified in the prompt for each competitor domain. Ret
 
 Once all 5 research reports are collected (Market, Competition, Data, Distribution, Customer Voice):
 
-1. Read `agents/scoring.md`
+1. Read `${CLAUDE_PLUGIN_ROOT}/agents/scoring.md`
 2. Follow the scoring process with these inputs:
    - IDEA_DESCRIPTION
    - MARKET_RESEARCH (from Agent 1)
@@ -280,7 +280,7 @@ Once all 5 research reports are collected (Market, Competition, Data, Distributi
 
 With the scoring report complete:
 
-1. Read `agents/critic.md`
+1. Read `${CLAUDE_PLUGIN_ROOT}/agents/critic.md`
 2. Apply the critic process with:
    - IDEA_DESCRIPTION
    - SCORING_REPORT (from Step 3)
@@ -292,7 +292,7 @@ With the scoring report complete:
 
 With the critic review complete:
 
-1. Read `agents/orchestrator.md`
+1. Read `${CLAUDE_PLUGIN_ROOT}/agents/orchestrator.md`
 2. Apply the orchestration process with:
    - IDEA_DESCRIPTION
    - IDEA_SLUG
@@ -300,7 +300,7 @@ With the critic review complete:
    - Research summaries from all 4 agents + competitor deep-dive
    - COMPETITOR_DEEP_DIVE (from Agent 5)
    - BUSINESS_MODEL (from Step 0)
-3. Calculate the weighted score using the lens-specific weights from `skills/evaluate/references/lenses/{BUSINESS_MODEL}.md`
+3. Calculate the weighted score using the lens-specific weights from `${CLAUDE_PLUGIN_ROOT}/skills/evaluate/references/lenses/{BUSINESS_MODEL}.md`
 4. Determine the verdict
 5. Generate the scored idea card
 

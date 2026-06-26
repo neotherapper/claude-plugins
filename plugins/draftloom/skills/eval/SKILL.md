@@ -1,13 +1,13 @@
 ---
 name: eval
 description: >
-  This skill should be used when the user asks to score a post, evaluate a
-  blog post, check their draft, run draftloom eval, or see how their writing
-  scores. Trigger phrases: "draftloom eval", "score my post", "evaluate this
-  draft", "check my blog post", "how does my writing score", "run eval on",
-  "/draftloom:eval". Use this skill whenever the user wants to score an
-  existing markdown file against SEO, hook, voice, and readability rubrics —
-  even if they don't use the exact command name.
+  This skill should be used when the user asks to score or evaluate a blog
+  post, check their draft, or run draftloom eval. Trigger phrases: "draftloom
+  eval", "score my post", "evaluate this draft", "check my blog post", "how
+  does my writing score", "run eval on", "/draftloom:eval". Use this skill
+  whenever the user wants to score an existing markdown file against SEO, hook,
+  voice, and readability rubrics — even if they don't use the exact command
+  name.
 version: "0.1.0"
 ---
 
@@ -54,7 +54,7 @@ Write minimal `meta.json`:
 
 ## Step 4: Dispatch orchestrator in eval-only mode
 
-Dispatch `agents/orchestrator.md` with:
+Dispatch the `draftloom:orchestrator` agent with:
 - Path: `posts/{slug}/`
 - Profile JSON path (or null)
 - Mode: "eval_only" (skip writer, skip brief, run 4 evals directly)

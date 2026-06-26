@@ -1,7 +1,7 @@
 ---
 name: generate
 version: "0.1.0"
-description: "This skill should be used when the user wants to generate, discover, or surface business ideas from domain research, accumulated data, or market knowledge. Use when the user wants to go FROM research TO ideas — not evaluate a specific idea they already have. Trigger phrases: 'find ideas in [domain]', 'find me business ideas in [space]', 'what could I build in [space]?', 'generate business ideas from [domain] research', 'what gaps exist in [market]?', 'what unexplored niches exist in [space]?', 'I've been researching [domain], what should I build?', 'given everything we know about [domain], what haven't we tried?', 'explore the [domain] opportunity space', 'surface gaps in [market]', 'what business opportunities exist in [domain]', 'what does the data suggest I should build?', 'given our research what are the gaps?', '/idea-forge:generate'. Does NOT trigger for: evaluating a specific idea the user already has in mind (→ /idea-forge:evaluate), 'should I build X?' or 'is there a market for X?' (→ /idea-forge:evaluate), general market research questions without generative intent, knowledge vault lookups about specific tools."
+description: "This skill should be used when the user wants to generate, discover, or surface business ideas FROM domain/vault research — not evaluate a specific idea they already have. Trigger phrases: 'find ideas in [domain]', 'what could I build in [space]?', 'generate business ideas from [domain] research', 'what gaps exist in [market]?', '/idea-forge:generate'. Does NOT trigger for evaluating a specific idea, 'should I build X?', or 'is there a market for X?' — those go to /idea-forge:evaluate."
 ---
 
 # Generate
@@ -37,7 +37,7 @@ Does NOT trigger for:
 Load and follow the orchestration prompt:
 
 ```
-Read skills/generate/generator.md
+Read ${CLAUDE_PLUGIN_ROOT}/skills/generate/generator.md
 ```
 
 The generator.md file contains the complete pipeline instructions for all four sections.

@@ -1,7 +1,7 @@
 ---
 name: evaluate
 version: "0.1.0"
-description: "Invoke this skill for ANY business idea validation, evaluation, or viability check. Key trigger signals: 'should I build', 'is this worth building', 'validate this', 'good idea?', 'rate my startup', 'honest feedback on my startup', 'is there market demand', 'wondering if the market is there', 'is this worth starting', 'any thoughts on viability', 'evaluate', 'got this side project idea', 'thinking about building', 'is this viable'. Also triggers for the /idea-forge:evaluate prefix and any message where someone describes a SaaS, marketplace, directory, e-commerce, content site, or free tool idea and wants to know whether it's worth pursuing. Runs 5+ research agents + scoring + critic pipeline and returns BET/BUILD/PIVOT/KILL verdict. Does NOT trigger for: writing copy/PRDs/pitch decks, filling in document sections, tech stack questions, knowledge vault lookups, general market research without a specific idea to evaluate."
+description: "This skill should be used for ANY business idea validation, evaluation, or viability check. Key trigger signals: 'should I build', 'is this worth building', 'validate this', 'good idea?', 'rate my startup', 'honest feedback on my startup', 'is there market demand', 'wondering if the market is there', 'is this worth starting', 'any thoughts on viability', 'evaluate', 'got this side project idea', 'thinking about building', 'is this viable'. Also triggers for the /idea-forge:evaluate prefix and any message where someone describes a SaaS, marketplace, directory, e-commerce, content site, or free tool idea and wants to know whether it's worth pursuing. Runs 5+ research agents + scoring + critic pipeline and returns BET/BUILD/PIVOT/KILL verdict. Does NOT trigger for: writing copy/PRDs/pitch decks, filling in document sections, tech stack questions, knowledge vault lookups, general market research without a specific idea to evaluate."
 ---
 
 # Evaluate
@@ -36,7 +36,7 @@ Trigger on any of:
 Load and follow the orchestration prompt:
 
 ```
-Read skills/evaluate/evaluator.md
+Read ${CLAUDE_PLUGIN_ROOT}/skills/evaluate/evaluator.md
 ```
 
 The evaluator.md file contains the complete pipeline instructions, agent dispatch logic, and output handling.
@@ -59,20 +59,20 @@ The evaluator.md file contains the complete pipeline instructions, agent dispatc
 
 ## Agents
 
-All agent prompts live in `agents/` at the plugin root:
+All agent prompts live in `${CLAUDE_PLUGIN_ROOT}/agents/` at the plugin root:
 
 | Agent | Purpose |
 |-------|---------|
-| `agents/market-research.md` | Stage 1: Market research agent |
-| `agents/competition-research.md` | Stage 1: Competition research agent |
-| `agents/data-research.md` | Stage 1: Data availability agent |
-| `agents/distribution-research.md` | Stage 1: Distribution opportunity agent |
-| `agents/customer-voice.md` | Stage 1: Synthetic interview — pain signals from public sources |
-| `agents/competitor-deep-dive.md` | Stage 1.5: Deep competitor profiling agent |
-| `agents/scoring.md` | Stage 2: Evidence-based scoring agent |
-| `agents/critic.md` | Stage 3: Bias detection and score adjustment |
-| `agents/orchestrator.md` | Stage 4: Final aggregation and verdict |
-| `agents/family-evaluator.md` | Family mode: evaluate a cluster of related ideas |
+| `${CLAUDE_PLUGIN_ROOT}/agents/market-research.md` | Stage 1: Market research agent |
+| `${CLAUDE_PLUGIN_ROOT}/agents/competition-research.md` | Stage 1: Competition research agent |
+| `${CLAUDE_PLUGIN_ROOT}/agents/data-research.md` | Stage 1: Data availability agent |
+| `${CLAUDE_PLUGIN_ROOT}/agents/distribution-research.md` | Stage 1: Distribution opportunity agent |
+| `${CLAUDE_PLUGIN_ROOT}/agents/customer-voice.md` | Stage 1: Synthetic interview — pain signals from public sources |
+| `${CLAUDE_PLUGIN_ROOT}/agents/competitor-deep-dive.md` | Stage 1.5: Deep competitor profiling agent |
+| `${CLAUDE_PLUGIN_ROOT}/agents/scoring.md` | Stage 2: Evidence-based scoring agent |
+| `${CLAUDE_PLUGIN_ROOT}/agents/critic.md` | Stage 3: Bias detection and score adjustment |
+| `${CLAUDE_PLUGIN_ROOT}/agents/orchestrator.md` | Stage 4: Final aggregation and verdict |
+| `${CLAUDE_PLUGIN_ROOT}/agents/family-evaluator.md` | Family mode: evaluate a cluster of related ideas |
 
 ## Output Location
 

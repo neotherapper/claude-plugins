@@ -8,7 +8,7 @@ at the start of Phase 1 and append to each section as the run progresses.
 
 **Target:** {full URL}
 **Started:** {ISO timestamp}
-**Plugin version:** {semver from .claude-plugin/plugin.json}
+**Plugin version:** {semver from ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json}
 
 ---
 

@@ -48,7 +48,7 @@ Which site are you asking about?
 ## Step 2: Open INDEX.md first
 
 Always read the resolved `{research-folder}/INDEX.md` first (new `docs/sites/{site}/research/INDEX.md`, or legacy `docs/research/{site}/INDEX.md`) — it has the infrastructure summary,
-quick API reference, and links to every other file. This gives you the framework name
+quick API reference, and links to every other file. This surfaces the framework name
 and version before routing.
 
 ## Step 3: Route to the specific file
@@ -81,18 +81,28 @@ After opening the research file, check whether the question is **framework-speci
 - "What CDN does this site use?" → tech-stack.md only
 - "Show me the site map" → site-map.md only
 
-**How to load:**
+**How to load** (same mechanism as site-recon Phase 4 — try in order):
 1. Read the framework name and major version from INDEX.md infrastructure table (e.g., `WordPress 6.5` → `wordpress`, `6.x`)
-2. Load: `technologies/{framework}/{major}.x.md`
-   - If version is missing or partial, use the nearest available major and note it in your response (e.g., "Using WordPress 6.x pack — site is on 6.5")
-   - If no tech pack exists for the detected framework, proceed with research files only and note it once in your answer: "No tech pack available for {framework} — answer based on research files only"
-3. Use the tech pack's probe checklist and known endpoint patterns to **supplement** what the research files contain — never contradict confirmed research findings with tech pack assumptions
+2. **Bundled pack** (primary — offline, always matches the running version):
+   ```
+   ${CLAUDE_PLUGIN_ROOT}/technologies/{framework}/{major}.x.md
+   ```
+   If that exact file is absent, list `${CLAUDE_PLUGIN_ROOT}/technologies/{framework}/` and load the best match — a `{N}.x.md` for the nearest major, else `current.md`, `tech-pack.md`, or a dated `{YYYY-MM}.md`. Consult `${CLAUDE_PLUGIN_ROOT}/technologies/REGISTRY.md` to confirm the framework slug and which packs exist. If the version is missing or partial, use the nearest available major and note it (e.g., "Using WordPress 6.x pack — site is on 6.5").
+3. **GitHub** (fallback — newer packs published after this install, or no bundled copy) — version-pinned raw URL:
+   ```
+   https://raw.githubusercontent.com/neotherapper/claude-plugins/v{PLUGIN_VERSION}/plugins/beacon/technologies/{framework}/{major}.x.md
+   ```
+   Read `{PLUGIN_VERSION}` from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` — never use the `main` branch. (The bundled pack above is the version-matched source; this network path only adds packs published after the install.)
+4. **context7 MCP** (if available) — ask for the framework's official API documentation
+5. **Web search fallback** — search `{framework} {major}.x API routes endpoints file structure`
+6. If no pack and no internet, proceed with research files only and note it once in the response: "No tech pack available for {framework} — answer based on research files only"
+7. Use the tech pack's probe checklist and known endpoint patterns to **supplement** what the research files contain — never contradict confirmed research findings with tech pack assumptions
 
 **Example:**
 > User: "How do I query products in WooCommerce?"
 >
 > Load: `docs/sites/example-com/research/api-surfaces/woocommerce.md` (from Step 3)
-> Also load: `technologies/wordpress/6.x.md` (from Step 3a — framework-specific query question)
+> Also load: `${CLAUDE_PLUGIN_ROOT}/technologies/wordpress/6.x.md` (from Step 3a — framework-specific query question)
 > Answer: combine what was discovered in the API surface file with the WooCommerce REST API conventions from the tech pack
 
 ## Step 4: Answer directly

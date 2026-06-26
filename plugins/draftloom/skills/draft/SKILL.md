@@ -5,8 +5,8 @@ description: >
   post, start a new post, or wants help writing content. Trigger phrases:
   "draftloom draft", "write a blog post", "start a new post", "I want to write
   a post", "help me write a blog post", "draft a blog post", "/draftloom:draft".
-  Use this skill whenever the user wants to create a new piece of written
-  content — even if they don't explicitly say "blog post".
+  Use this skill whenever the user wants to draft a blog post, article, or
+  long-form post — even if they don't use the exact phrase "blog post".
 version: "0.1.0"
 ---
 
@@ -91,7 +91,7 @@ Write `session.json` → checkpoint: `wireframe_approved`, `wireframe_approved: 
 
 ## Step 4: Delegate to orchestrator
 
-Dispatch `agents/orchestrator.md` with context:
+Dispatch the `draftloom:orchestrator` agent with context:
 - Path to `posts/{slug}/`
 - Profile JSON path
 - Mode: `"full_draft"` (writer runs first, then eval loop)
@@ -133,5 +133,6 @@ Load these files at the step indicated — do not preload all at once:
 - **`references/workspace-schema.md`** ★ — source of truth for all 13 workspace files, ownership, schemas, and the atomic write protocol (load at Step 2 before creating any workspace file)
 - **`references/layout-templates.md`** — 8 section types, 3 default wireframes by length, parse-able edit commands, word count validation (load at Step 3)
 - **`references/scoring-rubric.md`** — routing table, pass threshold (≥ 75 per dimension), escalation questions, halt phrases, per-dimension rubrics (load when orchestrator surfaces a routing decision)
+- **`references/eval-output-spec.md`** — the eval agents' output contract (the JSON each eval agent emits); not read directly by this skill — it is consumed by the eval agents and surfaced via the orchestrator at Step 4
 - **`references/distribution-guide.md`** — platform character limits, X/LinkedIn/email/newsletter copy templates, enforcement rules (load at Step 5)
 - **`references/turso-setup.md`** — optional Turso MCP analytics backend, setup steps, schema, failure handling (load only if `turso_enabled: true` in config.json)

@@ -103,19 +103,19 @@ After creating the output folder, run **Phase 1.5** to discover related domains:
 ```bash
 # Phase 1.5: Multi-source Domain Discovery
 # Check local databases for domains
-find . -name "*.db" -o -name "*.sqlite" | while read db; do
+find . \( -name "*.db" -o -name "*.sqlite" \) -print0 | while IFS= read -r -d '' db; do
   sqlite3 "$db" "SELECT DISTINCT url, domain, shopify_domain FROM stores WHERE url LIKE '%http%' LIMIT 50;" 2>/dev/null || true
   sqlite3 "$db" "SELECT DISTINCT url FROM shops LIMIT 50;" 2>/dev/null || true
   sqlite3 "$db" "SELECT DISTINCT domain FROM merchants LIMIT 50;" 2>/dev/null || true
 done
 
 # Check scraper config files
-find . -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" | while read config; do
+find . \( -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" \) -print0 | while IFS= read -r -d '' config; do
   grep -oE 'domain:\s*"[^"]+"' "$config" | awk -F'"' '{print $2}' || true
 done
 
 # Check cached/enriched data
-find . -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" | while read json_file; do
+find . \( -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" \) -print0 | while IFS= read -r -d '' json_file; do
   grep -oE '"domain"\s*:\s*"[^"]+"' "$json_file" | awk -F'"' '{print $4}' || true
   grep -oE '"url"\s*:\s*"https?://[^"]+"' "$json_file" | awk -F'"' '{print $4}' | sed -E 's|https?://||;s|/.*||' || true
 done
@@ -160,21 +160,21 @@ After passive recon, run **Phase 2.5** to inventory local data sources:
 ```bash
 # Phase 2.5: Data Source Inventory
 # Check database schema files
-find . -name "schema.prisma" -o -name "*.drizzle.ts" -o -name "*.typeorm.ts" | while read schema; do
+find . \( -name "schema.prisma" -o -name "*.drizzle.ts" -o -name "*.typeorm.ts" \) -print0 | while IFS= read -r -d '' schema; do
   echo "Database schema: $schema"
   grep -E 'model|entity|table' "$schema" | head -10
   echo "---"
 done
 
 # Check migration files
-find . -name "migrations/*.sql" -o -name "*.migration.ts" | while read migration; do
+find . \( -path "*/migrations/*.sql" -o -name "*.migration.ts" \) -print0 | while IFS= read -r -d '' migration; do
   echo "Migration: $migration"
   grep -E 'CREATE TABLE|ALTER TABLE' "$migration" | head -5
   echo "---"
 done
 
 # Check seed scripts
-find . -name "seed*.ts" -o -name "seed*.js" | while read seed; do
+find . \( -name "seed*.ts" -o -name "seed*.js" \) -print0 | while IFS= read -r -d '' seed; do
   echo "Seed script: $seed"
   grep -E 'insert|create.*store|upsert' "$seed" | head -5
   echo "---"
@@ -241,19 +241,19 @@ After creating the output folder, run **Phase 1.5** to discover related domains:
 ```bash
 # Phase 1.5: Multi-source Domain Discovery
 # Check local databases for domains
-find . -name "*.db" -o -name "*.sqlite" -print0 | while IFS= read -r -d '' db; do
+find . \( -name "*.db" -o -name "*.sqlite" \) -print0 | while IFS= read -r -d '' db; do
   sqlite3 "$db" "SELECT DISTINCT url, domain, shopify_domain FROM stores WHERE url LIKE '%http%' LIMIT 50;" 2>/dev/null || true
   sqlite3 "$db" "SELECT DISTINCT url FROM shops LIMIT 50;" 2>/dev/null || true
   sqlite3 "$db" "SELECT DISTINCT domain FROM merchants LIMIT 50;" 2>/dev/null || true
 done
 
 # Check scraper config files
-find . -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" -print0 | while IFS= read -r -d '' config; do
+find . \( -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" \) -print0 | while IFS= read -r -d '' config; do
   grep -oE 'domain:\s*"[^"]+"' "$config" | awk -F'"' '{print $2}' || true
 done
 
 # Check cached/enriched data
-find . -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" -print0 | while IFS= read -r -d '' json_file; do
+find . \( -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" \) -print0 | while IFS= read -r -d '' json_file; do
   grep -oE '"domain"\s*:\s*"[^"]+"' "$json_file" | awk -F'"' '{print $4}' || true
   grep -oE '"url"\s*:\s*"https?://[^"]+"' "$json_file" | awk -F'"' '{print $4}' | sed -E 's|https?://||;s|/.*||' || true
 done
@@ -335,21 +335,21 @@ After passive recon, run **Phase 2.5** to inventory local data sources:
 ```bash
 # Phase 2.5: Data Source Inventory
 # Check database schema files
-find . -name "schema.prisma" -o -name "*.drizzle.ts" -o -name "*.typeorm.ts" -print0 | while IFS= read -r -d '' schema; do
+find . \( -name "schema.prisma" -o -name "*.drizzle.ts" -o -name "*.typeorm.ts" \) -print0 | while IFS= read -r -d '' schema; do
   echo "Database schema: $schema"
   grep -E 'model|entity|table' "$schema" | head -10
   echo "---"
 done
 
 # Check migration files
-find . -name "migrations/*.sql" -o -name "*.migration.ts" -print0 | while IFS= read -r -d '' migration; do
+find . \( -path "*/migrations/*.sql" -o -name "*.migration.ts" \) -print0 | while IFS= read -r -d '' migration; do
   echo "Migration: $migration"
   grep -E 'CREATE TABLE|ALTER TABLE' "$migration" | head -5
   echo "---"
 done
 
 # Check seed scripts
-find . -name "seed*.ts" -o -name "seed*.js" -print0 | while IFS= read -r -d '' seed; do
+find . \( -name "seed*.ts" -o -name "seed*.js" \) -print0 | while IFS= read -r -d '' seed; do
   echo "Seed script: $seed"
   grep -E 'insert|create.*store|upsert' "$seed" | head -5
   echo "---"
@@ -517,17 +517,23 @@ Log the result: `Framework: WordPress 6.5 (source: wp-content/ in HTML + generat
 
 Once framework and major version are known, try in order:
 
-1. **GitHub** (primary) — version-pinned URL:
+1. **Bundled pack** (primary — offline, always matches the running version):
+   ```
+   ${CLAUDE_PLUGIN_ROOT}/technologies/{framework}/{major}.x.md
+   ```
+   If that exact file is absent, list `${CLAUDE_PLUGIN_ROOT}/technologies/{framework}/` and load the best match — a `{N}.x.md` for the nearest major, else `current.md`, `tech-pack.md`, or a dated `{YYYY-MM}.md`. Consult `${CLAUDE_PLUGIN_ROOT}/technologies/REGISTRY.md` to confirm the framework slug and which packs exist. This copy ships with the plugin, so it needs no network and can never 404.
+
+2. **GitHub** (fallback — newer packs published after this install, or no bundled copy) — version-pinned raw URL:
    ```
    https://raw.githubusercontent.com/neotherapper/claude-plugins/v{PLUGIN_VERSION}/plugins/beacon/technologies/{framework}/{major}.x.md
    ```
-   Read plugin version from `.claude-plugin/plugin.json` — never use `main` branch.
+   Read `{PLUGIN_VERSION}` from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` — never use the `main` branch. (The bundled pack above is the version-matched source; this network path only adds packs published after the install.)
 
-2. **context7 MCP** (if available) — ask for framework's official API documentation
+3. **context7 MCP** (if available) — ask for framework's official API documentation
 
-3. **Web search fallback** — search `{framework} {major}.x API routes endpoints file structure`
+4. **Web search fallback** — search `{framework} {major}.x API routes endpoints file structure`
 
-4. **No pack, no internet** — log `[TECH-PACK-UNAVAILABLE:{framework}:{version}]`, continue with generic probes
+5. **No pack, no internet** — log `[TECH-PACK-UNAVAILABLE:{framework}:{version}]`, continue with generic probes
 
 If web search fallback used, offer a PR at the end of Phase 12:
 > "I built a temporary tech pack for {framework} {version} from web search.
@@ -753,7 +759,7 @@ and OpenAPI generation commands.
 Summary of sub-phases:
 - **11a** — Detect Chrome MCP mode (`auto-connect` vs `new-instance`) or cmux; handle auth
 - **11b** — Execute browse plan: JS globals + network capture per URL (up to 10)
-- **11c** — Save raw captures to `.beacon/`; run `har-reconstruct.py` → `.beacon/capture.har`
+- **11c** — Save raw captures to `.beacon/`; run `${CLAUDE_PLUGIN_ROOT}/scripts/core/har-reconstruct.py` → `.beacon/capture.har`
 - **11d** — Run `npx har-to-openapi`; merge with passive spec if Phase 8 found one
 
 If neither Chrome DevTools MCP nor cmux is available: log `[PHASE-11-SKIPPED]`, proceed to Phase 12.
@@ -945,7 +951,7 @@ Summary:
 - Write `tech-stack.md`, `site-map.md`, `constants.md`, `scripts/test-{slug}.sh`
 - Write one `api-surfaces/{surface}.md` per discovered API surface (see output-synthesis.md)
 - Write `specs/{slug}.openapi.yaml` if Phase 8 or Phase 11 produced a spec
-- Resolve all tokens in `templates/INDEX.md.template` → write `INDEX.md`
+- Resolve all tokens in `${CLAUDE_PLUGIN_ROOT}/templates/INDEX.md.template` → write `INDEX.md`
 - Resolve `{{OPENAPI_STATUS}}` based on Phase 11 signals in the session brief
 
 ## Reference files
