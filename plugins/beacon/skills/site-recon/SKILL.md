@@ -103,19 +103,19 @@ After creating the output folder, run **Phase 1.5** to discover related domains:
 ```bash
 # Phase 1.5: Multi-source Domain Discovery
 # Check local databases for domains
-find . -name "*.db" -o -name "*.sqlite" | while read db; do
+find . -name "*.db" -o -name "*.sqlite" -print0 | while IFS= read -r -d '' db; do
   sqlite3 "$db" "SELECT DISTINCT url, domain, shopify_domain FROM stores WHERE url LIKE '%http%' LIMIT 50;" 2>/dev/null || true
   sqlite3 "$db" "SELECT DISTINCT url FROM shops LIMIT 50;" 2>/dev/null || true
   sqlite3 "$db" "SELECT DISTINCT domain FROM merchants LIMIT 50;" 2>/dev/null || true
 done
 
 # Check scraper config files
-find . -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" | while read config; do
+find . -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" -print0 | while IFS= read -r -d '' config; do
   grep -oE 'domain:\s*"[^"]+"' "$config" | awk -F'"' '{print $2}' || true
 done
 
 # Check cached/enriched data
-find . -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" | while read json_file; do
+find . -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" -print0 | while IFS= read -r -d '' json_file; do
   grep -oE '"domain"\s*:\s*"[^"]+"' "$json_file" | awk -F'"' '{print $4}' || true
   grep -oE '"url"\s*:\s*"https?://[^"]+"' "$json_file" | awk -F'"' '{print $4}' | sed -E 's|https?://||;s|/.*||' || true
 done
@@ -753,7 +753,7 @@ and OpenAPI generation commands.
 Summary of sub-phases:
 - **11a** — Detect Chrome MCP mode (`auto-connect` vs `new-instance`) or cmux; handle auth
 - **11b** — Execute browse plan: JS globals + network capture per URL (up to 10)
-- **11c** — Save raw captures to `.beacon/`; run `har-reconstruct.py` → `.beacon/capture.har`
+- **11c** — Save raw captures to `.beacon/`; run `${CLAUDE_PLUGIN_ROOT}/scripts/core/har-reconstruct.py` → `.beacon/capture.har`
 - **11d** — Run `npx har-to-openapi`; merge with passive spec if Phase 8 found one
 
 If neither Chrome DevTools MCP nor cmux is available: log `[PHASE-11-SKIPPED]`, proceed to Phase 12.
@@ -945,7 +945,7 @@ Summary:
 - Write `tech-stack.md`, `site-map.md`, `constants.md`, `scripts/test-{slug}.sh`
 - Write one `api-surfaces/{surface}.md` per discovered API surface (see output-synthesis.md)
 - Write `specs/{slug}.openapi.yaml` if Phase 8 or Phase 11 produced a spec
-- Resolve all tokens in `templates/INDEX.md.template` → write `INDEX.md`
+- Resolve all tokens in `${CLAUDE_PLUGIN_ROOT}/templates/INDEX.md.template` → write `INDEX.md`
 - Resolve `{{OPENAPI_STATUS}}` based on Phase 11 signals in the session brief
 
 ## Reference files

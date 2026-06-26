@@ -3,11 +3,9 @@ name: site-naming
 description: >
   This skill should be used when the user asks for help naming a site, product,
   project, startup, or personal brand — or needs to find an available domain.
-  Trigger phrases: "find me a domain", "name my project", "site name for",
-  "what should I call", "available domains for", "I have an idea, find me a name",
-  "domain for [concept]", "naming [project]", "domain for my portfolio",
-  "find me a site name", "help me name this". Also triggers when the user describes
-  a project idea and mentions needing a web presence.
+  Trigger phrases: "find me a domain", "name my project", "what should I call",
+  "available domains for", "domain for my portfolio", "I have an idea, find me a name".
+  Also triggers when the user describes a project idea and mentions needing a web presence.
 version: 0.3.0
 ---
 
@@ -32,7 +30,7 @@ You MUST create a TodoWrite task for each item and complete them in order:
 9. Post-shortlist checklist (Phase 7)
 
 <HARD-GATE>
-Do NOT generate any name candidates until all 7 interview questions have been answered and the brand profile is locked. This applies regardless of how specific or obvious the project description seems.
+In the standard project flow, do NOT generate any name candidates until all 7 interview questions have been answered and the brand profile is locked. This applies regardless of how specific or obvious the project description seems. **Exception — Personal Branding Flow:** when personal-brand signals are detected (Phase 1), follow the documented Personal Branding Flow fast path, which generates and checks name patterns *before* the interview and then offers the standard interview for additional options. The gate above governs only the standard flow; no other shortcut around the interview is permitted.
 </HARD-GATE>
 
 ## Red Flags — STOP

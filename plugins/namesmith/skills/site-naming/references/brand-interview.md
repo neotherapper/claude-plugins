@@ -22,7 +22,7 @@ Run these patterns through `check-domains.sh` following the availability check p
 
 ---
 
-## Standard Interview — 6 Questions
+## Standard Interview — 7 Questions
 
 Ask one question per message. Wait for the answer before proceeding.
 
@@ -106,4 +106,4 @@ Apply these rules to archetype generation counts in Wave 1:
 | Q4=C | Bias TLD selection to: .com primary; .io, .dev as secondary only |
 | Q5=A | Short & Punchy ×2; cap all generated names at 6 characters where possible |
 
-Default (no strong signal): distribute evenly across all 7 archetypes.
+Default (no strong signal): distribute evenly across all 8 archetypes.

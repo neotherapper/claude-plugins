@@ -330,7 +330,7 @@ har-to-openapi .beacon/capture.har \
 If Chrome DevTools MCP captured requests, reconstruct a valid HAR 1.2 using `har-reconstruct.py`:
 
 ```bash
-python3 scripts/core/har-reconstruct.py \
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/core/har-reconstruct.py \
   --input .beacon/chrome-requests.json \
   --output .beacon/capture.har \
   --domain {target-domain}

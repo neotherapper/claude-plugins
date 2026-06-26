@@ -15,7 +15,7 @@ description: >
 
 # paidagogos — Router
 
-Entry point for the `paidagogos` plugin. Classify the user's learning intent and scope, then route to the right sub-skill. Always say which sub-skill you're routing to — never silently reroute.
+Entry point for the `paidagogos` plugin. Classify the user's learning intent and scope, then route to the right sub-skill. Always state which sub-skill is being routed to — never silently reroute.
 
 ## Routing table
 

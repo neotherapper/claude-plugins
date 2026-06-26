@@ -5,7 +5,7 @@ description: >
   the paidagogos router after its scope check, or directly via
   /paidagogos:micro. Generates a structured lesson page (standard topics) or a
   live interactive page with sliders and visualisations (math, physics,
-  geometry, statistics), rendered in the browser via visual-kit. Use for a
+  geometry, statistics). Use for a
   concrete single concept such as "CSS flexbox", "async/await", "SQL JOINs", or
   "derivatives". For a bare or broad learning request ("teach me X", "explain
   X", "I want to learn X"), the paidagogos router handles scope first and then
@@ -82,6 +82,7 @@ Minimum required sections: `concept`, `why`, `code` (or prose equivalent), `mist
 
 Before writing, verify:
 - `surface` = `"lesson"`, `version` = `1`
+- All required sections present: `concept`, `why`, `code` (or prose equivalent), `mistakes`, `generate`, `quiz`, `resources`, `next`
 - `mistakes.items` has 2–3 entries
 - `quiz.items` has exactly 3 entries, one of each: `multiple_choice`, `fill_blank`, `explain`
 - `resources.items` has at least 1 entry with `type: "docs"`

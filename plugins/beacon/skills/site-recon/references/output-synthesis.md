@@ -136,7 +136,7 @@ If no distinct API surfaces were found (static site, all endpoints behind auth w
 
 ## Token Resolution
 
-Load `templates/INDEX.md.template` and resolve all tokens:
+Load `${CLAUDE_PLUGIN_ROOT}/templates/INDEX.md.template` and resolve all tokens:
 
 | Token | Resolves to |
 |-------|-------------|
