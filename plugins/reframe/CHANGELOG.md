@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.3.0 — 2026-06-26
+
+- **New category pack: `portfolio-personal`** (5th pack) — individual designer/developer/freelancer portfolios. Optimises for two co-primary goals (win the next client/role + grow an audience) with an enforced CTA hierarchy so the goals don't compete; covers creative and developer disciplines with per-type variations noted inline. Auto-detected in Phase 7 (35 detect_signals); sites that previously fell back to `generic` now get an opinionated pack. No code change needed — `detect-category.py` discovers it via the `categories/*.md` glob.
+
 ## 0.2.0 — 2026-06-24
 
 Deterministic helper scripts for the coverage gates (`coverage-metrics.py`), category detection (`detect-category.py`), and output completeness (`check-output-complete.sh`); the skill prefers them and falls back to inspection when unavailable. First plugin scripts; paths resolved via `${CLAUDE_PLUGIN_ROOT}`.

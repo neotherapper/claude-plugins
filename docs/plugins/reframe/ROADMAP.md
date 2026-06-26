@@ -26,8 +26,10 @@ Initial release. The full 9-phase coverage-first pipeline:
 
 **Goal:** Complete the ~10-category taxonomy so sites that currently fall back to `generic` get a genuinely opinionated pack.
 
+**Shipped:**
+- `portfolio-personal` — designer/developer/freelancer portfolios (v0.3.0, 2026-06-26). Dual co-primary goal (win the next client/role + grow an audience) with an enforced CTA hierarchy; covers creative and developer disciplines with per-type variations noted inline.
+
 **Planned packs (in priority order):**
-- `portfolio-personal` — designer/developer/freelancer portfolios
 - `restaurant-hospitality` — restaurants, cafés, hotels
 - `nonprofit` — cause-driven organisations, charities
 - `editorial-blog` — content-first publications
