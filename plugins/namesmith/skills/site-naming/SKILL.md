@@ -84,7 +84,7 @@ If accepted, read the file(s). Extract: project name, description, key features,
 ### Personal Brand Detection
 
 Before running the standard interview, scan the user's description for personal brand signals:
-- Keywords: "portfolio", "freelance", "my name", "personal site", "personal website", "my website", "consulting"
+- Keywords: "portfolio", "freelance", "personal site", "personal website", "my name", "my website", "my work", "consulting"
 - Pattern: a human first/last name as the primary subject
 
 If signals are detected, load `${CLAUDE_PLUGIN_ROOT}/skills/site-naming/references/brand-interview.md` and follow the **Personal Branding Flow** section in that file. Generate and check name patterns from that section, present results, then offer to continue to the standard interview for additional options.

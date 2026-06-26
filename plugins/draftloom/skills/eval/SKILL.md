@@ -54,7 +54,7 @@ Write minimal `meta.json`:
 
 ## Step 4: Dispatch orchestrator in eval-only mode
 
-Dispatch `agents/orchestrator.md` with:
+Dispatch the `draftloom:orchestrator` agent with:
 - Path: `posts/{slug}/`
 - Profile JSON path (or null)
 - Mode: "eval_only" (skip writer, skip brief, run 4 evals directly)

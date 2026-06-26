@@ -83,22 +83,26 @@ After opening the research file, check whether the question is **framework-speci
 
 **How to load** (same mechanism as site-recon Phase 4 — try in order):
 1. Read the framework name and major version from INDEX.md infrastructure table (e.g., `WordPress 6.5` → `wordpress`, `6.x`)
-2. **GitHub** (primary) — fetch the version-pinned raw URL:
+2. **Bundled pack** (primary — offline, always matches the running version):
+   ```
+   ${CLAUDE_PLUGIN_ROOT}/technologies/{framework}/{major}.x.md
+   ```
+   If that exact file is absent, list `${CLAUDE_PLUGIN_ROOT}/technologies/{framework}/` and load the best match — a `{N}.x.md` for the nearest major, else `current.md`, `tech-pack.md`, or a dated `{YYYY-MM}.md`. Consult `${CLAUDE_PLUGIN_ROOT}/technologies/REGISTRY.md` to confirm the framework slug and which packs exist. If the version is missing or partial, use the nearest available major and note it (e.g., "Using WordPress 6.x pack — site is on 6.5").
+3. **GitHub** (fallback — newer packs published after this install, or no bundled copy) — version-pinned raw URL:
    ```
    https://raw.githubusercontent.com/neotherapper/claude-plugins/v{PLUGIN_VERSION}/plugins/beacon/technologies/{framework}/{major}.x.md
    ```
-   Read `{PLUGIN_VERSION}` from `.claude-plugin/plugin.json` — never use the `main` branch.
-   - If version is missing or partial, use the nearest available major and note it in the response (e.g., "Using WordPress 6.x pack — site is on 6.5")
-3. **context7 MCP** (if available) — ask for the framework's official API documentation
-4. **Web search fallback** — search `{framework} {major}.x API routes endpoints file structure`
-5. If no pack and no internet, proceed with research files only and note it once in the response: "No tech pack available for {framework} — answer based on research files only"
-6. Use the tech pack's probe checklist and known endpoint patterns to **supplement** what the research files contain — never contradict confirmed research findings with tech pack assumptions
+   Read `{PLUGIN_VERSION}` from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` — never use the `main` branch. (The bundled pack above is the version-matched source; this network path only adds packs published after the install.)
+4. **context7 MCP** (if available) — ask for the framework's official API documentation
+5. **Web search fallback** — search `{framework} {major}.x API routes endpoints file structure`
+6. If no pack and no internet, proceed with research files only and note it once in the response: "No tech pack available for {framework} — answer based on research files only"
+7. Use the tech pack's probe checklist and known endpoint patterns to **supplement** what the research files contain — never contradict confirmed research findings with tech pack assumptions
 
 **Example:**
 > User: "How do I query products in WooCommerce?"
 >
 > Load: `docs/sites/example-com/research/api-surfaces/woocommerce.md` (from Step 3)
-> Also load: `technologies/wordpress/6.x.md` (from Step 3a — framework-specific query question)
+> Also load: `${CLAUDE_PLUGIN_ROOT}/technologies/wordpress/6.x.md` (from Step 3a — framework-specific query question)
 > Answer: combine what was discovered in the API surface file with the WooCommerce REST API conventions from the tech pack
 
 ## Step 4: Answer directly

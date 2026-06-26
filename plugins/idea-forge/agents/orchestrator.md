@@ -35,7 +35,7 @@ From the critic review, extract the 13 adjusted scores.
 
 ### Step 2: Calculate Weighted Score
 
-Use the weights from the business model lens file at `skills/evaluate/references/lenses/{BUSINESS_MODEL}.md`. Each lens has a "Weight Overrides" table with model-specific weights. If no lens is specified, use the directory (baseline) weights below:
+Use the weights from the business model lens file at `${CLAUDE_PLUGIN_ROOT}/skills/evaluate/references/lenses/{BUSINESS_MODEL}.md`. Each lens has a "Weight Overrides" table with model-specific weights. If no lens is specified, use the directory (baseline) weights below:
 
 **Directory (baseline) weights:**
 ```

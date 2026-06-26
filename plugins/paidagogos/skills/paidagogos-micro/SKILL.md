@@ -64,17 +64,17 @@ Store as `{mode}`.
 
 Read all three before generating content. Do not rely on memory from prior sessions.
 
-1. `references/lesson-schema.md` — canonical `Lesson` SurfaceSpec schema, field rules, valid example
-2. `references/teaching-guide.md` — content rules per section, level guidelines, quiz rules
-3. `references/vault-integration.md` — vault lookup contract for `resources[]`
+1. `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/lesson-schema.md` — canonical `Lesson` SurfaceSpec schema, field rules, valid example
+2. `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/teaching-guide.md` — content rules per section, level guidelines, quiz rules
+3. `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/vault-integration.md` — vault lookup contract for `resources[]`
 
 ### S2 — Vault lookup
 
-Attempt to source `resources[]` from the nikai Knowledge Vault following `references/vault-integration.md` exactly. If it fails for any reason, continue silently — see **Error handling → Vault lookup fails**.
+Attempt to source `resources[]` from the nikai Knowledge Vault following `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/vault-integration.md` exactly. If it fails for any reason, continue silently — see **Error handling → Vault lookup fails**.
 
 ### S3 — Generate lesson SurfaceSpec
 
-Generate a JSON object conforming to `vk://schemas/lesson.v1.json` and applying all rules from `references/lesson-schema.md` and `references/teaching-guide.md`. Those files are authoritative — do not improvise field shapes.
+Generate a JSON object conforming to `vk://schemas/lesson.v1.json` and applying all rules from `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/lesson-schema.md` and `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/teaching-guide.md`. Those files are authoritative — do not improvise field shapes.
 
 Minimum required sections: `concept`, `why`, `code` (or prose equivalent), `mistakes`, `generate`, `quiz`, `resources`, `next`.
 

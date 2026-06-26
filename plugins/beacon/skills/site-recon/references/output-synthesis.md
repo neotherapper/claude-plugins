@@ -85,7 +85,7 @@ Load `templates/smoke-test.sh.template`. Replace tokens:
 | Token | Value |
 |-------|-------|
 | `{{SITE_SLUG}}` | Site slug (e.g. `example-com`) |
-| `{{PLUGIN_VERSION}}` | Current plugin version from `.claude-plugin/plugin.json` |
+| `{{PLUGIN_VERSION}}` | Current plugin version from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` |
 | `{{DATE}}` | Session date |
 | `{{BASE_URL}}` | Target site root URL (e.g. `https://example.com`) |
 
@@ -143,7 +143,7 @@ Load `${CLAUDE_PLUGIN_ROOT}/templates/INDEX.md.template` and resolve all tokens:
 | `{{SITE_NAME}}` | Site name from session brief header |
 | `{{DATE}}` | Session date |
 | `{{URL}}` | Target URL |
-| `{{PLUGIN_VERSION}}` | Current plugin version from `.claude-plugin/plugin.json` |
+| `{{PLUGIN_VERSION}}` | Current plugin version from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` |
 | `{{FRAMEWORK}}` / `{{VERSION}}` | From infrastructure table |
 | `{{CDN}}` | From infrastructure table |
 | `{{AUTH}}` | From infrastructure table |

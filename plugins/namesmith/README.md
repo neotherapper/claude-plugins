@@ -6,8 +6,8 @@
 
 namesmith is a Claude Code plugin that runs a structured naming workflow:
 
-1. **Brand interview** — 6 questions to lock your tone, direction, budget mode, and constraints
-2. **Multi-archetype generation** — 25–35 candidates per wave across 7 strategies (Short & Punchy, Descriptive, Abstract/Brandable, Playful/Clever, Domain Hacks, Compound/Mashup, Thematic TLD Play)
+1. **Brand interview** — 7 questions to lock your tone, direction, budget mode, and constraints
+2. **Multi-archetype generation** — 25–35 candidates per wave across 8 strategies (Short & Punchy, Descriptive, Abstract/Brandable, Playful/Clever, Domain Hacks, Compound/Mashup, Thematic TLD Play, Suffix Family Exploration)
 3. **Live availability + pricing** — checks domains via Cloudflare Registrar API, Porkbun API, or whois fallback
 4. **Iteration** — Wave 2 refinement, Wave 3 deep TLD scan (1,441+ IANA TLDs), Track B fallback for fully-taken results
 5. **Persistence** — writes `names.md` to your project directory with shortlist, rationale, and brand profile
@@ -66,7 +66,7 @@ See `skills/site-naming/references/api-setup.md` for step-by-step setup instruct
 The core skill. Handles the full naming workflow:
 
 - Personal brand detection (portfolio, freelance, consulting patterns)
-- 6-question brand interview
+- 7-question brand interview
 - Wave 1 / Wave 2 / Wave 3 generation
 - 3-tier availability check (Cloudflare → Porkbun → whois)
 - Registration link generation per TLD
