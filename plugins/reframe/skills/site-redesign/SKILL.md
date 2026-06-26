@@ -51,7 +51,7 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 **Input:** URL (with explicit redesign intent).
 
 **Actions:**
-1. Derive slug (canonical — see `docs/SLUG_RULES.md`): `SLUG=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')`. Examples: `www.example.com/`→`example-com`, `Example.COM`→`example-com`.
+1. Derive slug (mirrors the canonical rule in `docs/SLUG_RULES.md` — that doc is authoritative; keep this one-liner in sync with it): `SLUG=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')`. Examples: `www.example.com/`→`example-com`, `Example.COM`→`example-com`.
 2. Create output folder + empty output files (Write, not touch): `INDEX.md`, `brief.md`, `run-sheet.md`, `content-inventory.md`, `ia-map.md`, `current-critique.md` — all under `docs/sites/{slug}/redesign/`.
 3. Write `docs/sites/{slug}/redesign/.gitignore` containing `.crawl/`.
 4. Detect tools — log each as `[AVAILABLE]` or `[TOOL-UNAVAILABLE:{name}]`. See `references/tool-availability.md` (Jina Reader, Firecrawl, Crawl4AI, WebFetch, Chrome DevTools MCP — test both namespaces; record active one as `[CHROME-NAMESPACE:plugin|project]`).
@@ -144,7 +144,7 @@ Write rows to `content-inventory.md` using the template in `templates/content-in
 3. Define **1 primary + 2–3 secondary journeys** keyed to entry intent. Each journey step names the decisive objection it must resolve.
 4. Trace the **primary conversion path** — the exact sequence of steps from cold visit to the primary goal, naming each page/step.
 
-Write to `ia-map.md` (replacing the skeleton from Phase 2).
+Write to `ia-map.md` using `templates/ia-map.md.template` (replacing the skeleton from Phase 2).
 
 **Output:** `ia-map.md` completed. Phase marker `[P6✓]`.
 
