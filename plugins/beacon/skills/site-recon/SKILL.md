@@ -776,3 +776,4 @@ Load these when you need detailed guidance — they are not always necessary:
 - **`references/osint-sources.md`** — Phase 9 data sources: CDX APIs, crt.sh, DNSDumpster, VirusTotal, urlscan.io, ASN, Censys, GitHub search, Google dorking, robots.txt/sitemap mining, JSON-LD extraction, S3 buckets, Paste sites, NPM/PyPI, bug bounty scopes
 - **`references/session-brief-format.md`** — Complete session brief schema with all fields
 - **`references/tool-availability.md`** — Tool detection commands, full fallback matrix, browser command reference
+- **`scripts/README.md`** — inventory of the 12 bundled helper scripts (currently reference-only, not invoked by the phase flow)
