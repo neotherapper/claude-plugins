@@ -454,6 +454,63 @@ Probe these paths in order; stop at the first 200 response that returns JSON or 
 If found: save to `specs/{slug}.openapi.yaml`, mark `source: auto-downloaded`.  
 If not found: continue — Phase 12 will scaffold a spec from all discovered endpoints.
 
+---
+
+## Phase 8.5 — PII and Payment Data Classification
+
+**Input**: All discovered endpoints, `constants.md` values, JS bundle leaks, exposed files (Phase 6b).
+
+**Actions**:
+1. **Flag Payment Endpoints**:
+   - Paths containing `/payment`, `/checkout`, `/order`, `/cart`, `/transaction`.
+   - Endpoints returning `payment_method`, `transaction_id`, `cardBin`, `lastFour`, `expiryDate`.
+
+2. **Grep for Payment Integrations**:
+   - JS bundles: `stripe|paypal|braintree|adyen|authorize\.net`.
+   - Config files: `STRIPE_KEY|PAYPAL_CLIENT_ID`.
+
+3. **Classify Leaks**:
+```bash
+# CRITICAL (PCI DSS violation)
+grep -E "\b(4[0-9]{12}|5[1-5][0-9]{14}|6(?:011|5[0-9]{2})[0-9]{12})\b" exposed_files/*
+grep -E "cardBin.*lastFour.*expiry" js_bundles/*
+
+# PII
+grep -E "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}" exposed_files/*
+grep -E "\bname.*address.*phone\b" exposed_files/*
+
+# Secrets
+grep -E "API_KEY|SECRET|PASSWORD|DB_PASSWORD" exposed_files/*
+```
+
+4. **Severity Matrix**:
+| Severity   | Criteria                                                                 | Action Required                     |
+|------------|-------------------------------------------------------------------------|--------------------------------------|
+| CRITICAL   | Card BIN + last4 + expiry, CVC/CVV                                       | Immediate disclosure                 |
+| HIGH       | Database credentials, 100+ MB logs, live payment processor keys, HMAC webhook signatures | Review within 24 hours                |
+| MEDIUM     | Server paths, plugin versions, email lists                              | Review within 7 days                  |
+| LOW        | Trivial errors, no PII                                                  | Note in findings                     |
+| MITIGATED  | File exists but returns 301/302/403/404, or empty                       | None                                 |
+
+**Output**: Append to `INDEX.md`:
+
+```markdown
+## Security Exposure
+
+| Path                     | Severity   | PII Found | Payment Data | Evidence                                  |
+|--------------------------|------------|-----------|--------------|--------------------------------------------|
+| /wp-content/debug.log    | CRITICAL   | 125 emails| Yes          | Stripe keys + card BINs in log             |
+| /api/checkout/process    | HIGH       | No        | Yes          | LastFour + expiry in response              |
+| /.env                    | HIGH       | No        | No           | DB_PASSWORD=example                        |
+```
+
+**PCI DSS Awareness**:
+- **CRITICAL**: Card BIN + last4 + expiry = **PCI DSS violation** (immediate breach reporting required).
+- **CRITICAL**: CVC/CVV match results = **PCI DSS violation** (stored in logs).
+- **HIGH**: HMAC webhook signatures = **replay attacks** (API abuse risk).
+
+---
+
 ## Bot protection handling
 
 When curl probes return 403 from Cloudflare (or similar), escalate through this chain:
@@ -673,61 +730,6 @@ cmux browser --surface surface:83 screenshot --out /tmp/page.png
 ```
 
 Surface IDs: `cmux browser open` returns a UUID. Use `cmux browser --surface {id}` for all subsequent calls on that surface. Surface IDs look like `surface:83` or a UUID string — always quote them.
-
----
-
-## Phase 8.5 — PII and Payment Data Classification
-
-**Input**: All discovered endpoints, `constants.md` values, JS bundle leaks, exposed files (Phase 6b).
-
-**Actions**:
-1. **Flag Payment Endpoints**:
-   - Paths containing `/payment`, `/checkout`, `/order`, `/cart`, `/transaction`.
-   - Endpoints returning `payment_method`, `transaction_id`, `cardBin`, `lastFour`, `expiryDate`.
-
-2. **Grep for Payment Integrations**:
-   - JS bundles: `stripe|paypal|braintree|adyen|authorize\.net`.
-   - Config files: `STRIPE_KEY|PAYPAL_CLIENT_ID`.
-
-3. **Classify Leaks**:
-```bash
-# CRITICAL (PCI DSS violation)
-grep -E "\b(4[0-9]{12}|5[1-5][0-9]{14}|6(?:011|5[0-9]{2})[0-9]{12})\b" exposed_files/*
-grep -E "cardBin.*lastFour.*expiry" js_bundles/*
-
-# PII
-grep -E "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}" exposed_files/*
-grep -E "\bname.*address.*phone\b" exposed_files/*
-
-# Secrets
-grep -E "API_KEY|SECRET|PASSWORD|DB_PASSWORD" exposed_files/*
-```
-
-4. **Severity Matrix**:
-| Severity   | Criteria                                                                 | Action Required                     |
-|------------|-------------------------------------------------------------------------|--------------------------------------|
-| CRITICAL   | Card BIN + last4 + expiry, CVC/CVV                                       | Immediate disclosure                 |
-| HIGH       | Database credentials, 100+ MB logs, live payment processor keys, HMAC webhook signatures | Review within 24 hours                |
-| MEDIUM     | Server paths, plugin versions, email lists                              | Review within 7 days                  |
-| LOW        | Trivial errors, no PII                                                  | Note in findings                     |
-| MITIGATED  | File exists but returns 301/302/403/404, or empty                       | None                                 |
-
-**Output**: Append to `INDEX.md`:
-
-```markdown
-## Security Exposure
-
-| Path                     | Severity   | PII Found | Payment Data | Evidence                                  |
-|--------------------------|------------|-----------|--------------|--------------------------------------------|
-| /wp-content/debug.log    | CRITICAL   | 125 emails| Yes          | Stripe keys + card BINs in log             |
-| /api/checkout/process    | HIGH       | No        | Yes          | LastFour + expiry in response              |
-| /.env                    | HIGH       | No        | No           | DB_PASSWORD=example                        |
-```
-
-**PCI DSS Awareness**:
-- **CRITICAL**: Card BIN + last4 + expiry = **PCI DSS violation** (immediate breach reporting required).
-- **CRITICAL**: CVC/CVV match results = **PCI DSS violation** (stored in logs).
-- **HIGH**: HMAC webhook signatures = **replay attacks** (API abuse risk).
 
 ---
 
