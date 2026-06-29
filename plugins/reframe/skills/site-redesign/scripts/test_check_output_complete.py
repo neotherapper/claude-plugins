@@ -60,3 +60,18 @@ def test_unresolved_token_still_fails(tmp_path):
     r = _run(d)
     assert r.returncode == 1
     assert "{{UNRESOLVED}}" in r.stdout
+
+def test_greenfield_token_in_prose_still_enforces(tmp_path):
+    # A complete output (all 6 files) where P5 is absent from the phase markers
+    # line, but [GREENFIELD-MODE] appears in prose on the Signals line.
+    # The gate must still catch the missing P5 — NOT flip to greenfield mode.
+    prose_runlog = (
+        "## Run log\n"
+        "**Phase markers:** [P1✓] [P2✓] [P3✓] [P4✓] "
+        "[P6✓] [P7✓] [P8✓] [P9✓]\n"
+        "**Signals fired:** [PACK-LOADED:local-service] "
+        "(note: [GREENFIELD-MODE] did not fire)\n"
+    )
+    r = _run(_make_output(tmp_path, index_extra=prose_runlog))
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "P5" in r.stdout

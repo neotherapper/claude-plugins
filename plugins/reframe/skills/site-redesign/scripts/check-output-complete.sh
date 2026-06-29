@@ -58,8 +58,11 @@ fi
 FAILED=0
 
 # Greenfield runs halt after writing only INDEX.md (SKILL.md Phase 3).
+# Detect greenfield by anchoring to the Phase markers LINE only — a whole-file
+# grep is fail-open: any prose mention of [GREENFIELD-MODE] (e.g. in the
+# Signals line) would incorrectly suppress the 5-file and marker checks.
 GREENFIELD=0
-if [[ -f "$OUTPUT_DIR/INDEX.md" ]] && grep -q '\[GREENFIELD-MODE\]' "$OUTPUT_DIR/INDEX.md"; then
+if [[ -f "$OUTPUT_DIR/INDEX.md" ]] && grep -qE '^\*\*Phase markers:\*\*[[:space:]]*\[GREENFIELD-MODE\][[:space:]]*$' "$OUTPUT_DIR/INDEX.md"; then
   GREENFIELD=1
 fi
 

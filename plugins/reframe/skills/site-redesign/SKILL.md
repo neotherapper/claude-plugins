@@ -92,7 +92,7 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 1. Fetch homepage (WebFetch; WAF fallback: Firecrawl → Jina → browser-fetch if 403).
 2. **Render gate + content-sufficiency gate:** Run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/coverage-metrics.py <fetched-markdown-file>` (or `--stdin`). Read `body_text_chars`, `nav_link_count`, `unique_headings`, `non_nav_prose_words`, and `signals` from the JSON output. Fallback if python3 or the script is unavailable: estimate the four metrics by inspection against the same thresholds below.
    - `[RENDER-ESCALATED]` — `body_text_chars < 200` OR `nav_link_count == 0` → re-fetch via Jina → Firecrawl → Crawl4AI (Chrome MCP: auth/interactive walls only).
-   - `[GREENFIELD-MODE]` — after render: `unique_headings < 2` AND `non_nav_prose_words < 150` → write `INDEX.md`, delete the five unfilled output files (every Phase-1 file except `INDEX.md`), halt pipeline.
+   - `[GREENFIELD-MODE]` — after render: `unique_headings < 2` AND `non_nav_prose_words < 150` → write `INDEX.md` with `{{PHASE_MARKERS}}` set to `[GREENFIELD-MODE]` and `{{SIGNALS_FIRED}}` set to `[GREENFIELD-MODE]` (so no token is left unresolved and the gate detects the halt correctly), delete the five unfilled output files (every Phase-1 file except `INDEX.md`), halt pipeline.
 3. **Coverage manifest:** each URL → Reachable (200) or Gated/Blocked (401/403/challenge). Emit `[COVERAGE-PARTIAL:gated]` if any URL gated.
    - **Per-route render check:** for each sampled route, record whether it renders real content or only an app shell (a client-side 404 returns a 200 shell). Flag shell-only routes as findings. See `references/crawl-and-coverage.md` → "Per-route render check".
 4. Emit `[WAF-BLOCKED]` only if all three fallback fetchers fail; do not hard-stop.
@@ -110,7 +110,7 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 2. Apply a 60,000-character clean-markdown budget — stop when exhausted.
 3. Log `[SAMPLED:n-templates]` where `n` = clusters actually sampled.
 4. Save per-page markdown to `.crawl/{slug-path}.md`.
-5. Take **one screenshot per sampled template** (Jina pageshot → Firecrawl → Crawl4AI → Chrome MCP fallback; sequences in references/crawl-and-coverage.md).
+5. Take **one screenshot per sampled template** (Jina pageshot → Firecrawl → Crawl4AI → Chrome MCP → local Playwright fallback; sequences in references/crawl-and-coverage.md).
    - Homepage: two screenshots (above-fold and full-page).
    - No screenshot source available: log `[TOOL-UNAVAILABLE:chrome-mcp]`; text-only; visual-gap note in all output files.
 6. Save screenshots to `.crawl/screenshots/`.
@@ -206,7 +206,7 @@ If `[TOOL-UNAVAILABLE:chrome-mcp]`: no screenshots — add `[VISUAL-GAP: visual-
 3. Write `run-sheet.md` via `templates/run-sheet.md.template`. Order: validate → key screen → remaining screens (severity order, not nav order) → components.
 4. Finalize `content-inventory.md`, `ia-map.md`, `current-critique.md` (written in phases 5/6/8; resolve any remaining tokens).
    - **If `[RECON-REUSE]` fired:** `{{SAMPLING_NOTE}}` must state plainly that the audit reused a prior beacon recon and live-re-verified only the homepage + key routes (e.g. "re-verified recon synthesis, not a fresh crawl of all N URLs"); `{{AUDITED_COUNT}}` counts only pages actually (re-)read this run. Do not imply a full fresh crawl.
-5. Write `INDEX.md` via `templates/INDEX.md.template`. Populate `{{PHASE_MARKERS}}` with the emitted `[P1✓]`…`[P9✓]` (or `[GREENFIELD-MODE]`) and `{{SIGNALS_FIRED}}` with every degradation signal that fired this run, including the `[PACK-LOADED:<cat>]` from Phase 7.
+5. Write `INDEX.md` via `templates/INDEX.md.template`. Populate `{{PHASE_MARKERS}}` with the emitted markers (or `[GREENFIELD-MODE]`): list each one explicitly — `[P1✓] [P2✓] [P3✓] [P4✓] [P5✓] [P6✓] [P7✓] [P8✓] [P9✓]` — a literal range/ellipsis like `[P1✓]–[P9✓]` will fail the gate's per-marker check. Populate `{{SIGNALS_FIRED}}` with every degradation signal that fired this run, including the `[PACK-LOADED:<cat>]` from Phase 7.
 6. Resolve `{{TECH_EXPORT_HANDOFF}}`: read `docs/sites/{slug}/research/tech-stack.md`; if absent, read `docs/research/{slug}/tech-stack.md` (legacy); if neither exists, log `[TECH-STACK-ABSENT]` and add to `brief.md` §10: "No beacon tech-stack found — specify the target stack manually, or run beacon first".
 
 7. **Completeness check:** Run `bash ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/check-output-complete.sh docs/sites/{slug}/redesign`. A non-zero exit means the run is not complete — resolve the named files/tokens and re-run. Fallback if unavailable: grep each output file for `{{` manually; no `{{` remaining = complete run. The gate now also fails if `INDEX.md` is missing any phase marker or the `[PACK-LOADED:<cat>]` token; resolve by recording the genuine run log (do not fabricate markers for phases you skipped — run them).
@@ -238,7 +238,7 @@ Log these in the session brief. Surface any that fired in `INDEX.md`.
 | `[TOOL-UNAVAILABLE:chrome-mcp]` | No screenshot source available (Jina/Firecrawl/Crawl4AI/Chrome MCP all unavailable); text-only output; visual gap noted |
 | `[PACK-LOADED:x]` | Category pack `x` loaded for Phase 8 critique and design-system seed |
 | `[TECH-STACK-ABSENT]` | No beacon tech-stack found at new or legacy path; §10 note added — specify stack manually or run beacon first |
-| `[RECON-REUSE]` | A prior beacon recon exists at `docs/sites|research/{slug}/research/`; its files were read as a content source and the homepage live-re-verified. Provenance recorded in `{{SAMPLING_NOTE}}`. |
+| `[RECON-REUSE]` | A prior beacon recon exists at `docs/sites/{slug}/research/` (or legacy `docs/research/{slug}/`); its files were read as a content source and the homepage live-re-verified. Provenance recorded in `{{SAMPLING_NOTE}}`. |
 
 ---
 
