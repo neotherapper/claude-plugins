@@ -310,5 +310,41 @@ class TestFrontmatterParsing(unittest.TestCase):
         self.assertEqual(signals, [])
 
 
+# ---------------------------------------------------------------------------
+# Integration test — intentionally NON-hermetic; validates the REAL shipped
+# b2b-industrial.md pack file against a realistic B2B distributor corpus.
+# Unlike the hermetic tests above (which build their own temp categories dirs),
+# this test loads the actual plugins/reframe/categories/ directory so it also
+# catches regressions from accidental pack edits.  Future tests of new real
+# packs should follow this class's pattern (one method per pack).
+# ---------------------------------------------------------------------------
+
+class TestRealPackIntegration(unittest.TestCase):
+
+    def test_b2b_industrial_wins_on_distributor_corpus(self):
+        """
+        A realistic B2B marine-parts distributor corpus must map to b2b-industrial.
+
+        NON-HERMETIC: loads the real plugins/reframe/categories/ directory so
+        it validates the actual shipped pack, not a synthetic stub.
+        TDD RED until b2b-industrial.md exists; GREEN after creation.
+        """
+        real_cats = Path(__file__).parent.parent.parent.parent / "categories"
+        corpus = (
+            "Request a quote for our industrial valves and marine spare parts. "
+            "We are an authorized distributor and OEM supplier. Datasheet PDF, "
+            "MOQ, lead time, bulk pricing, RFQ. Wholesale B2B. Ship spares, "
+            "on-board repair, technical specifications."
+        )
+        packs = dc.load_packs(real_cats)
+        scores = dc.score_packs(packs, corpus)
+        winner, tie, tied = dc.pick_winner(scores)
+        self.assertEqual(
+            winner,
+            "b2b-industrial",
+            f"Expected b2b-industrial but got winner={winner!r}; scores={scores}",
+        )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
