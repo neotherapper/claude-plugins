@@ -25,3 +25,7 @@
 2. Paste **brief.md** as the opening message; attach the reference screenshots it names.
 3. Let Claude Design **web-capture {{URL}}** for content/brand-assets only (the brief says so).
 4. Validate the palette + one hero screen, then run **run-sheet.md** prompts in order.
+
+## Run log
+**Phase markers:** {{PHASE_MARKERS}}
+**Signals fired:** {{SIGNALS_FIRED}}

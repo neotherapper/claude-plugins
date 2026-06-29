@@ -194,23 +194,23 @@ If `[TOOL-UNAVAILABLE:chrome-mcp]`: no screenshots — add `[VISUAL-GAP: visual-
 **Input:** All prior phase outputs and the session brief. Load `references/brief-format.md`.
 
 **Actions:**
-1. Resolve all 36 `{{TOKEN}}`s (listed below) from the session brief and phase outputs.
+1. Resolve all **38** `{{TOKEN}}`s (listed below) from the session brief and phase outputs.
 2. Write `brief.md` via `templates/brief.md.template`. Section order is a contract — do not reorder; see `references/brief-format.md` for the full contract including the per-page intent triplet format and design-system seed block format.
    - §9 web-capture instruction must include verbatim: _"Capture the live URL for content, structure, and brand assets to KEEP (logo, brand color, product photography) only. The design direction above OVERRIDES all captured visual styling."_
 3. Write `run-sheet.md` via `templates/run-sheet.md.template`. Order: validate → key screen → remaining screens (severity order, not nav order) → components.
 4. Finalize `content-inventory.md`, `ia-map.md`, `current-critique.md` (written in phases 5/6/8; resolve any remaining tokens).
-5. Write `INDEX.md` via `templates/INDEX.md.template`.
+5. Write `INDEX.md` via `templates/INDEX.md.template`. Populate `{{PHASE_MARKERS}}` with the emitted `[P1✓]`…`[P9✓]` (or `[GREENFIELD-MODE]`) and `{{SIGNALS_FIRED}}` with every degradation signal that fired this run, including the `[PACK-LOADED:<cat>]` from Phase 7.
 6. Resolve `{{TECH_EXPORT_HANDOFF}}`: read `docs/sites/{slug}/research/tech-stack.md`; if absent, read `docs/research/{slug}/tech-stack.md` (legacy); if neither exists, log `[TECH-STACK-ABSENT]` and add to `brief.md` §10: "No beacon tech-stack found — specify the target stack manually, or run beacon first".
 
-7. **Completeness check:** Run `bash ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/check-output-complete.sh docs/sites/{slug}/redesign`. A non-zero exit means the run is not complete — resolve the named files/tokens and re-run. Fallback if unavailable: grep each output file for `{{` manually; no `{{` remaining = complete run.
+7. **Completeness check:** Run `bash ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/check-output-complete.sh docs/sites/{slug}/redesign`. A non-zero exit means the run is not complete — resolve the named files/tokens and re-run. Fallback if unavailable: grep each output file for `{{` manually; no `{{` remaining = complete run. The gate now also fails if `INDEX.md` is missing any phase marker or the `[PACK-LOADED:<cat>]` token; resolve by recording the genuine run log (do not fabricate markers for phases you skipped — run them).
 
 **Output:** All six output files written. Phase marker `[P9✓]`.
 
 ### Phase-9 token contract
 
-Phase 9 MUST resolve every one of these 36 tokens — the deduplicated union across all six templates. Do not add or rename tokens.
+Phase 9 MUST resolve every one of these **38** tokens — the deduplicated union across all six templates. Do not add or rename tokens.
 
-`{{SITE_NAME}}` `{{DATE}}` `{{URL}}` `{{CATEGORY}}` `{{CATEGORY_CONFIDENCE}}` `{{INFERRED_PURPOSE}}` `{{TARGET_PURPOSE}}` `{{AUDIENCE}}` `{{PRIMARY_GOAL}}` `{{COVERAGE_MANIFEST}}` `{{ASSUMPTIONS}}` `{{WHAT_IT_IS}}` `{{GOALS_SUCCESS}}` `{{KEEP_CHANGE_ADD}}` `{{IA_PROPOSED}}` `{{DESIGN_DIRECTION_SEED}}` `{{REFERENCES_ANTI}}` `{{WEB_CAPTURE_OVERRIDE}}` `{{TECH_EXPORT_HANDOFF}}` `{{VALIDATE_PROMPT}}` `{{KEY_SCREEN_PROMPT}}` `{{REMAINING_SCREEN_PROMPTS}}` `{{COMPONENT_PROMPTS}}` `{{URL_COUNT}}` `{{AUDITED_COUNT}}` `{{SAMPLING_NOTE}}` `{{INVENTORY_ROWS}}` `{{UNAUDITED_LIST}}` `{{NAV_HIERARCHY}}` `{{PAGE_PURPOSE_TABLE}}` `{{JOURNEYS}}` `{{PRIMARY_CONVERSION_PATH}}` `{{VISUAL_TRACK_NOTE}}` `{{CRITIQUE_ROWS}}` `{{VOICE_FINDINGS}}` `{{SEO_A11Y_FINDINGS}}`
+`{{SITE_NAME}}` `{{DATE}}` `{{URL}}` `{{CATEGORY}}` `{{CATEGORY_CONFIDENCE}}` `{{INFERRED_PURPOSE}}` `{{TARGET_PURPOSE}}` `{{AUDIENCE}}` `{{PRIMARY_GOAL}}` `{{COVERAGE_MANIFEST}}` `{{ASSUMPTIONS}}` `{{WHAT_IT_IS}}` `{{GOALS_SUCCESS}}` `{{KEEP_CHANGE_ADD}}` `{{IA_PROPOSED}}` `{{DESIGN_DIRECTION_SEED}}` `{{REFERENCES_ANTI}}` `{{WEB_CAPTURE_OVERRIDE}}` `{{TECH_EXPORT_HANDOFF}}` `{{VALIDATE_PROMPT}}` `{{KEY_SCREEN_PROMPT}}` `{{REMAINING_SCREEN_PROMPTS}}` `{{COMPONENT_PROMPTS}}` `{{URL_COUNT}}` `{{AUDITED_COUNT}}` `{{SAMPLING_NOTE}}` `{{INVENTORY_ROWS}}` `{{UNAUDITED_LIST}}` `{{NAV_HIERARCHY}}` `{{PAGE_PURPOSE_TABLE}}` `{{JOURNEYS}}` `{{PRIMARY_CONVERSION_PATH}}` `{{VISUAL_TRACK_NOTE}}` `{{CRITIQUE_ROWS}}` `{{VOICE_FINDINGS}}` `{{SEO_A11Y_FINDINGS}}` `{{PHASE_MARKERS}}` `{{SIGNALS_FIRED}}`
 
 ---
 
