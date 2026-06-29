@@ -114,6 +114,7 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
    - Homepage: two screenshots (above-fold and full-page).
    - No screenshot source available: log `[TOOL-UNAVAILABLE:chrome-mcp]`; text-only; visual-gap note in all output files.
 6. Save screenshots to `.crawl/screenshots/`.
+7. **Sample brand colours (best-effort):** extract the dominant brand hex values from the homepage — grep the page CSS/inline styles for `#rrggbb`/`rgb()` on the logo/header/primary-CTA, or sample the homepage screenshot. Record the measured values for the §7 seed's KEEP palette. If unsampleable, mark the seed palette "(approximate — sample on capture)" so it is not presented as measured.
 
 **Output:** `.crawl/` populated. Phase marker `[P4✓]`.
 
