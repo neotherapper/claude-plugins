@@ -40,9 +40,11 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 | 4 | Content crawl + screenshots | `.crawl/` |
 | 5 | Content audit | `content-inventory.md` |
 | 6 | IA / journey map | `ia-map.md` |
-| 7 | Intent inference | session brief |
+| 7 | Intent inference + category detect (+ strategic question) | session brief |
 | 8 | Current-design critique | `current-critique.md` |
 | 9 | Synthesize | `brief.md`, `run-sheet.md`, `INDEX.md` |
+
+> **Ordering note (the one allowed flex):** the *strategic question* (P7 step 4) may be asked any time after Phase 4 (crawl) and **must** be asked before writing the deliverable files (P5/P6/P8) — its answer reframes them. **Category detection (P7 step 2) is never skipped or deferred**: it must run and emit `[PACK-LOADED:<cat>]` before Phase 8's pack-cited critique. Asking the question early does NOT license skipping detection.
 
 ---
 
@@ -160,7 +162,7 @@ Write to `ia-map.md` using `templates/ia-map.md.template` (replacing the skeleto
    - If the top-scoring category's confidence is low, load `categories/generic.md` and note the assumption explicitly in the brief.
    - If a site scores across multiple categories, pick the **single dominant pack**, note secondaries inline (e.g. "primarily ecommerce; secondary: local-service"). **Never merge packs.**
 3. Emit `[PACK-LOADED:{winner}]` once the pack is selected.
-4. **Ask the one question:** "Redesigning for the same purpose or a new one?" — record as `current purpose (inferred)` vs `target purpose (declared)`. Only human question in the pipeline.
+4. **Ask the one question** (may be asked any time after Phase 4; MUST precede writing `content-inventory.md`/`ia-map.md`/`current-critique.md`): "Redesigning for the same purpose or a new one?" — record as `current purpose (inferred)` vs `target purpose (declared)`. Only human question in the pipeline. **Asking this early does not permit skipping steps 1–3 above** — category detection and `[PACK-LOADED:<cat>]` are mandatory and gate-enforced (see Phase 9).
 5. Record all inferences (purpose, audience, goal, category, confidence) in the session brief.
 
 **Output:** Session brief updated with intent block. Phase marker `[P7✓]`.
