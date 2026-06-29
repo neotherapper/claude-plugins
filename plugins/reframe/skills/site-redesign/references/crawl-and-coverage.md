@@ -67,6 +67,7 @@ After fetching the homepage, count visible text characters and nav links in the 
    mcp__chrome-devtools__navigate_page(url, type="url", timeout=10000)
    mcp__chrome-devtools__evaluate_script(() => document.body.innerText)
    ```
+   If Chrome MCP is locked, fall through to a local Playwright render (see Screenshots rung 5).
 
 ### Content-Sufficiency Gate
 
@@ -133,6 +134,14 @@ Prefer screenshot sources in this order:
 4. **Chrome MCP `take_screenshot`** (fallback — use recorded namespace):
    - Plugin: `mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot`
    - Project: `mcp__chrome-devtools__take_screenshot`
+
+5. **Local headless browser (Playwright/Puppeteer)** — if the repo has `node_modules/playwright` or `npx playwright` is available, render and screenshot locally:
+   ```bash
+   npx -y playwright screenshot --full-page "{url}" .crawl/screenshots/{slug-path}.png
+   ```
+   This is the most reliable rung when Chrome DevTools MCP is locked by another session.
+
+**Chrome MCP "browser is already running / use --isolated" lock:** the MCP profile is single-instance. If `new_page`/`list_pages` errors with a lock message, do NOT retry-loop — either reuse the existing page via `list_pages` → `select_page`, or fall straight through to rung 5 (local Playwright). Only ask the user to `pkill -f chrome-devtools-mcp` as a last resort.
 
 If **no screenshot source** is available: log `[TOOL-UNAVAILABLE:chrome-mcp]` and proceed text-only with an explicit visual-gap note in the output.
 

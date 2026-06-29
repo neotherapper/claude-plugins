@@ -50,13 +50,15 @@ curl -s -H "Accept: application/json" "https://r.jina.ai/{target_url}"
 # Force crawl past cached version:
 curl -s -H "X-No-Cache: true" "https://r.jina.ai/{target_url}"
 
-# Screenshot (pageshot):
-curl -s -H "X-Respond-With: pageshot" "https://r.jina.ai/{target_url}"
+# Screenshot (pageshot) — returns a SIGNED URL (text), not image bytes; download it:
+PAGESHOT_URL=$(curl -s -H "X-Respond-With: pageshot" "https://r.jina.ai/{target_url}")
+curl -sL "$PAGESHOT_URL" -o .crawl/screenshots/{slug-path}.png
 ```
 
 - Renders JS server-side — handles SPAs; returns rendered markdown without a browser
 - Free: 1M tokens/month, no API key required for basic use
 - Limit: not a Cloudflare bypass tool — heavy bot-protected sites still block it; use Firecrawl for those
+- HTTP 451 from `r.jina.ai` = geo/legal block on the target (seen on some EU/Greek sites); treat Jina as unavailable for that target and fall through the chain (Firecrawl → Crawl4AI → local Playwright). Not a transient error — do not retry.
 
 ### Crawl4AI
 ```
