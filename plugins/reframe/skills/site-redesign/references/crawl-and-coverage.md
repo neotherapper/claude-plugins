@@ -101,6 +101,16 @@ Include the coverage manifest in the session brief and surface it in `INDEX.md`.
 - `[COVERAGE-PARTIAL:gated]` — one or more URLs returned 401/403/challenge; coverage is incomplete.
 - `[WAF-BLOCKED]` — homepage returns 403/challenge from curl, Firecrawl, Jina, AND browser-fetch (the full fallback chain); proceed with whatever partial content exists + a coverage note, do not hard-stop.
 
+### Render fidelity — do not infer absence from a lossy render
+
+Markdown crawlers (especially Jina Reader) silently drop content on scroll-reveal / JS-hydrated SPAs: they can under-report nav links and omit whole populated sections. **A markdown crawl is evidence of presence, never evidence of absence.**
+
+Rule `[INFER-GUARD]`: before asserting in any output file that a section/page is *empty, missing, broken, or absent*, cross-check against a second source — a JS render (Chrome MCP / local Playwright render, Phase 4) or the raw HTML (`curl -s -H "X-Return-Format: html" "https://r.jina.ai/{url}"`). If the two disagree, trust the JS render and downgrade the claim. Never ship an "empty section" finding verified by markdown alone.
+
+### Per-route render check
+
+A `200` status on a route is not proof it renders content — client-rendered apps return a `200` shell then 404 in JS. For each sampled route in the coverage manifest, record **renders-content: yes/no** (does the rendered body contain the route's expected headings/prose, or only the app shell?). Flag any sitemap-listed route that returns a content-less shell as a finding, not as a healthy page.
+
 ---
 
 ## Phase 4 — Content Crawl and Screenshots

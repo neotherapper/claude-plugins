@@ -93,6 +93,7 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
    - `[RENDER-ESCALATED]` — `body_text_chars < 200` OR `nav_link_count == 0` → re-fetch via Jina → Firecrawl → Crawl4AI (Chrome MCP: auth/interactive walls only).
    - `[GREENFIELD-MODE]` — after render: `unique_headings < 2` AND `non_nav_prose_words < 150` → write `INDEX.md`, delete the five unfilled output files (every Phase-1 file except `INDEX.md`), halt pipeline.
 3. **Coverage manifest:** each URL → Reachable (200) or Gated/Blocked (401/403/challenge). Emit `[COVERAGE-PARTIAL:gated]` if any URL gated.
+   - **Per-route render check:** for each sampled route, record whether it renders real content or only an app shell (a client-side 404 returns a 200 shell). Flag shell-only routes as findings. See `references/crawl-and-coverage.md` → "Per-route render check".
 4. Emit `[WAF-BLOCKED]` only if all three fallback fetchers fail; do not hard-stop.
 
 **Output:** Coverage manifest in session brief. Phase marker `[P3✓]`.
@@ -181,6 +182,7 @@ Write to `ia-map.md` using `templates/ia-map.md.template` (replacing the skeleto
    - **Best-practice violated** — cite the named principle from the category pack
    - **Concrete fix** — one actionable sentence; no design theory
    - **Evidence** — screenshot filename or quoted text excerpt
+   - **`[INFER-GUARD]`:** do NOT record a "section empty / content missing / link broken" finding unless it is verified against a JS render or raw HTML — not markdown alone (markdown crawlers drop JS-revealed content). See `references/crawl-and-coverage.md` → "Render fidelity".
 3. **Voice/messaging pass** — flag vague adjectives ("innovative", "world-class"); identify three vaguest claims, propose replacements.
 4. **SEO/a11y pass** — heading structure, metadata completeness, schema/NAP presence, alt-text coverage.
 5. Write `current-critique.md` using `templates/current-critique.md.template`.
