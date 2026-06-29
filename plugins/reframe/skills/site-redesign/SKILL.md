@@ -54,9 +54,10 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 
 **Actions:**
 1. Derive slug (mirrors the canonical rule in `docs/SLUG_RULES.md` — that doc is authoritative; keep this one-liner in sync with it): `SLUG=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')`. Examples: `www.example.com/`→`example-com`, `Example.COM`→`example-com`.
-2. Create output folder + empty output files (Write, not touch): `INDEX.md`, `brief.md`, `run-sheet.md`, `content-inventory.md`, `ia-map.md`, `current-critique.md` — all under `docs/sites/{slug}/redesign/`.
+2. Create output folder + empty output files (Write, not touch — create each file with the **Write tool**, never `touch`/Bash heredoc/`>`-redirect. Bash-created files are untracked by the harness and force a redundant Read before every later Write (observed cost: 6 wasted Reads in a prior run)): `INDEX.md`, `brief.md`, `run-sheet.md`, `content-inventory.md`, `ia-map.md`, `current-critique.md` — all under `docs/sites/{slug}/redesign/`.
 3. Write `docs/sites/{slug}/redesign/.gitignore` containing `.crawl/`.
 4. Detect tools — log each as `[AVAILABLE]` or `[TOOL-UNAVAILABLE:{name}]`. See `references/tool-availability.md` (Jina Reader, Firecrawl, Crawl4AI, WebFetch, Chrome DevTools MCP — test both namespaces; record active one as `[CHROME-NAMESPACE:plugin|project]`).
+5. **Check for prior beacon recon:** if `docs/sites/{slug}/research/` (or legacy `docs/research/{slug}/`) exists, log `[RECON-REUSE]` and read **every** file in it (not just `site-map.md`/`tech-stack.md` — include `osint.md`, `INDEX.md`, any `claude-design-inputs`/competitive/performance files). The recon corpus becomes a content source for Phases 3–5; still **live-re-verify the homepage** (render gate) and spot-check 1–2 key routes. Never treat recon as a substitute for the render gate.
 
 **Output:** Session brief initialized with tool availability block. Phase marker `[P1✓]`.
 
@@ -203,6 +204,7 @@ If `[TOOL-UNAVAILABLE:chrome-mcp]`: no screenshots — add `[VISUAL-GAP: visual-
    - §9 web-capture instruction must include verbatim: _"Capture the live URL for content, structure, and brand assets to KEEP (logo, brand color, product photography) only. The design direction above OVERRIDES all captured visual styling."_
 3. Write `run-sheet.md` via `templates/run-sheet.md.template`. Order: validate → key screen → remaining screens (severity order, not nav order) → components.
 4. Finalize `content-inventory.md`, `ia-map.md`, `current-critique.md` (written in phases 5/6/8; resolve any remaining tokens).
+   - **If `[RECON-REUSE]` fired:** `{{SAMPLING_NOTE}}` must state plainly that the audit reused a prior beacon recon and live-re-verified only the homepage + key routes (e.g. "re-verified recon synthesis, not a fresh crawl of all N URLs"); `{{AUDITED_COUNT}}` counts only pages actually (re-)read this run. Do not imply a full fresh crawl.
 5. Write `INDEX.md` via `templates/INDEX.md.template`. Populate `{{PHASE_MARKERS}}` with the emitted `[P1✓]`…`[P9✓]` (or `[GREENFIELD-MODE]`) and `{{SIGNALS_FIRED}}` with every degradation signal that fired this run, including the `[PACK-LOADED:<cat>]` from Phase 7.
 6. Resolve `{{TECH_EXPORT_HANDOFF}}`: read `docs/sites/{slug}/research/tech-stack.md`; if absent, read `docs/research/{slug}/tech-stack.md` (legacy); if neither exists, log `[TECH-STACK-ABSENT]` and add to `brief.md` §10: "No beacon tech-stack found — specify the target stack manually, or run beacon first".
 
@@ -235,6 +237,7 @@ Log these in the session brief. Surface any that fired in `INDEX.md`.
 | `[TOOL-UNAVAILABLE:chrome-mcp]` | No screenshot source available (Jina/Firecrawl/Crawl4AI/Chrome MCP all unavailable); text-only output; visual gap noted |
 | `[PACK-LOADED:x]` | Category pack `x` loaded for Phase 8 critique and design-system seed |
 | `[TECH-STACK-ABSENT]` | No beacon tech-stack found at new or legacy path; §10 note added — specify stack manually or run beacon first |
+| `[RECON-REUSE]` | A prior beacon recon exists at `docs/sites|research/{slug}/research/`; its files were read as a content source and the homepage live-re-verified. Provenance recorded in `{{SAMPLING_NOTE}}`. |
 
 ---
 
