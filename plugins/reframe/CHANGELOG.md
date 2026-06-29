@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.4.0 — 2026-06-27
+
+Hardening from two real redesign sessions (`amarsolutions.gr`, `trustyourphysio.com`) — see `docs/research/reframe-session-analysis/`. The driving finding: clean output depended on the harness `advisor()` rescuing both runs; these changes move those rescues into the skill.
+
+- **Substance gate** — `check-output-complete.sh` now fails closed unless `INDEX.md`'s new `## Run log` lists all phase markers `[P1✓]`–`[P9✓]` and a `[PACK-LOADED:<cat>]` (greenfield-aware). Two new tokens `{{PHASE_MARKERS}}`/`{{SIGNALS_FIRED}}` (contract 36→38).
+- **`[INFER-GUARD]`** — never assert a section is empty/missing/broken from a lossy markdown crawl; cross-check a JS render or raw HTML first. Plus a per-route render check (catches client-side 404 shells).
+- **Phase 7 split** — the strategic question is relocatable (after crawl, before deliverables) but category detection is mandatory and gate-enforced.
+- **`[RECON-REUSE]` branch** — explicit path for reusing a prior beacon recon (read ALL recon files; live-re-verify homepage; honest provenance tokens).
+- **Tool rungs** — local Playwright screenshot/render fallback + Chrome-MCP `--isolated`/lock recovery; Jina pageshot two-step (signed URL → download); Jina HTTP 451 = geo-block note.
+- **New `b2b-industrial` category pack** (6th) — quote/RFQ-driven distributors that previously mis-detected as `ecommerce` on dead store pages.
+- **Brand-colour sampling** step so seed palettes are measured, not guessed. Reinforced "Write tool, not touch" in Phase 1.
+
 ## 0.3.0 — 2026-06-26
 
 - **New category pack: `portfolio-personal`** (5th pack) — individual designer/developer/freelancer portfolios. Optimises for two co-primary goals (win the next client/role + grow an audience) with an enforced CTA hierarchy so the goals don't compete; covers creative and developer disciplines with per-type variations noted inline. Auto-detected in Phase 7 (38 detect_signals); sites that previously fell back to `generic` now get an opinionated pack. No code change needed — `detect-category.py` discovers it via the `categories/*.md` glob.
