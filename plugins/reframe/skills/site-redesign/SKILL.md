@@ -40,9 +40,11 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 | 4 | Content crawl + screenshots | `.crawl/` |
 | 5 | Content audit | `content-inventory.md` |
 | 6 | IA / journey map | `ia-map.md` |
-| 7 | Intent inference | session brief |
+| 7 | Intent inference + category detect (+ strategic question) | session brief |
 | 8 | Current-design critique | `current-critique.md` |
 | 9 | Synthesize | `brief.md`, `run-sheet.md`, `INDEX.md` |
+
+> **Ordering note (the one allowed flex):** the *strategic question* (P7 step 4) may be asked any time after Phase 4 (crawl) and **must** be asked before writing the deliverable files (P5/P6/P8) — its answer reframes them. **Category detection (P7 step 2) is never skipped or deferred**: it must run and emit `[PACK-LOADED:<cat>]` before Phase 8's pack-cited critique. Asking the question early does NOT license skipping detection.
 
 ---
 
@@ -52,9 +54,10 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 
 **Actions:**
 1. Derive slug (mirrors the canonical rule in `docs/SLUG_RULES.md` — that doc is authoritative; keep this one-liner in sync with it): `SLUG=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')`. Examples: `www.example.com/`→`example-com`, `Example.COM`→`example-com`.
-2. Create output folder + empty output files (Write, not touch): `INDEX.md`, `brief.md`, `run-sheet.md`, `content-inventory.md`, `ia-map.md`, `current-critique.md` — all under `docs/sites/{slug}/redesign/`.
+2. Create output folder + empty output files (Write, not touch — create each file with the **Write tool**, never `touch`/Bash heredoc/`>`-redirect. Bash-created files are untracked by the harness and force a redundant Read before every later Write (observed cost: 6 wasted Reads in a prior run)): `INDEX.md`, `brief.md`, `run-sheet.md`, `content-inventory.md`, `ia-map.md`, `current-critique.md` — all under `docs/sites/{slug}/redesign/`.
 3. Write `docs/sites/{slug}/redesign/.gitignore` containing `.crawl/`.
 4. Detect tools — log each as `[AVAILABLE]` or `[TOOL-UNAVAILABLE:{name}]`. See `references/tool-availability.md` (Jina Reader, Firecrawl, Crawl4AI, WebFetch, Chrome DevTools MCP — test both namespaces; record active one as `[CHROME-NAMESPACE:plugin|project]`).
+5. **Check for prior beacon recon:** if `docs/sites/{slug}/research/` (or legacy `docs/research/{slug}/`) exists, log `[RECON-REUSE]` and read **every** file in it (not just `site-map.md`/`tech-stack.md` — include `osint.md`, `INDEX.md`, any `claude-design-inputs`/competitive/performance files). The recon corpus becomes a content source for Phases 3–5; still **live-re-verify the homepage** (render gate) and spot-check 1–2 key routes. Never treat recon as a substitute for the render gate.
 
 **Output:** Session brief initialized with tool availability block. Phase marker `[P1✓]`.
 
@@ -89,8 +92,9 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 1. Fetch homepage (WebFetch; WAF fallback: Firecrawl → Jina → browser-fetch if 403).
 2. **Render gate + content-sufficiency gate:** Run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/coverage-metrics.py <fetched-markdown-file>` (or `--stdin`). Read `body_text_chars`, `nav_link_count`, `unique_headings`, `non_nav_prose_words`, and `signals` from the JSON output. Fallback if python3 or the script is unavailable: estimate the four metrics by inspection against the same thresholds below.
    - `[RENDER-ESCALATED]` — `body_text_chars < 200` OR `nav_link_count == 0` → re-fetch via Jina → Firecrawl → Crawl4AI (Chrome MCP: auth/interactive walls only).
-   - `[GREENFIELD-MODE]` — after render: `unique_headings < 2` AND `non_nav_prose_words < 150` → write `INDEX.md`, delete the five unfilled output files (every Phase-1 file except `INDEX.md`), halt pipeline.
+   - `[GREENFIELD-MODE]` — after render: `unique_headings < 2` AND `non_nav_prose_words < 150` → write `INDEX.md` with `{{PHASE_MARKERS}}` set to `[GREENFIELD-MODE]` and `{{SIGNALS_FIRED}}` set to `[GREENFIELD-MODE]` (so no token is left unresolved and the gate detects the halt correctly), delete the five unfilled output files (every Phase-1 file except `INDEX.md`), halt pipeline.
 3. **Coverage manifest:** each URL → Reachable (200) or Gated/Blocked (401/403/challenge). Emit `[COVERAGE-PARTIAL:gated]` if any URL gated.
+   - **Per-route render check:** for each sampled route, record whether it renders real content or only an app shell (a client-side 404 returns a 200 shell). Flag shell-only routes as findings. See `references/crawl-and-coverage.md` → "Per-route render check".
 4. Emit `[WAF-BLOCKED]` only if all three fallback fetchers fail; do not hard-stop.
 
 **Output:** Coverage manifest in session brief. Phase marker `[P3✓]`.
@@ -106,10 +110,11 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 2. Apply a 60,000-character clean-markdown budget — stop when exhausted.
 3. Log `[SAMPLED:n-templates]` where `n` = clusters actually sampled.
 4. Save per-page markdown to `.crawl/{slug-path}.md`.
-5. Take **one screenshot per sampled template** (Jina pageshot → Firecrawl → Crawl4AI → Chrome MCP fallback; sequences in references/crawl-and-coverage.md).
+5. Take **one screenshot per sampled template** (Jina pageshot → Firecrawl → Crawl4AI → Chrome MCP → local Playwright fallback; sequences in references/crawl-and-coverage.md).
    - Homepage: two screenshots (above-fold and full-page).
    - No screenshot source available: log `[TOOL-UNAVAILABLE:chrome-mcp]`; text-only; visual-gap note in all output files.
 6. Save screenshots to `.crawl/screenshots/`.
+7. **Sample brand colours (best-effort):** extract the dominant brand hex values from the homepage — grep the page CSS/inline styles for `#rrggbb`/`rgb()` on the logo/header/primary-CTA, or sample the homepage screenshot. Record the measured values for the §7 seed's KEEP palette. If unsampleable, mark the seed palette "(approximate — sample on capture)" so it is not presented as measured.
 
 **Output:** `.crawl/` populated. Phase marker `[P4✓]`.
 
@@ -160,7 +165,7 @@ Write to `ia-map.md` using `templates/ia-map.md.template` (replacing the skeleto
    - If the top-scoring category's confidence is low, load `categories/generic.md` and note the assumption explicitly in the brief.
    - If a site scores across multiple categories, pick the **single dominant pack**, note secondaries inline (e.g. "primarily ecommerce; secondary: local-service"). **Never merge packs.**
 3. Emit `[PACK-LOADED:{winner}]` once the pack is selected.
-4. **Ask the one question:** "Redesigning for the same purpose or a new one?" — record as `current purpose (inferred)` vs `target purpose (declared)`. Only human question in the pipeline.
+4. **Ask the one question** (may be asked any time after Phase 4; MUST precede writing `content-inventory.md`/`ia-map.md`/`current-critique.md`): "Redesigning for the same purpose or a new one?" — record as `current purpose (inferred)` vs `target purpose (declared)`. Only human question in the pipeline. **Asking this early does not permit skipping steps 1–3 above** — category detection and `[PACK-LOADED:<cat>]` are mandatory and gate-enforced (see Phase 9).
 5. Record all inferences (purpose, audience, goal, category, confidence) in the session brief.
 
 **Output:** Session brief updated with intent block. Phase marker `[P7✓]`.
@@ -179,6 +184,7 @@ Write to `ia-map.md` using `templates/ia-map.md.template` (replacing the skeleto
    - **Best-practice violated** — cite the named principle from the category pack
    - **Concrete fix** — one actionable sentence; no design theory
    - **Evidence** — screenshot filename or quoted text excerpt
+   - **`[INFER-GUARD]`:** do NOT record a "section empty / content missing / link broken" finding unless it is verified against a JS render or raw HTML — not markdown alone (markdown crawlers drop JS-revealed content). See `references/crawl-and-coverage.md` → "Render fidelity".
 3. **Voice/messaging pass** — flag vague adjectives ("innovative", "world-class"); identify three vaguest claims, propose replacements.
 4. **SEO/a11y pass** — heading structure, metadata completeness, schema/NAP presence, alt-text coverage.
 5. Write `current-critique.md` using `templates/current-critique.md.template`.
@@ -194,23 +200,24 @@ If `[TOOL-UNAVAILABLE:chrome-mcp]`: no screenshots — add `[VISUAL-GAP: visual-
 **Input:** All prior phase outputs and the session brief. Load `references/brief-format.md`.
 
 **Actions:**
-1. Resolve all 36 `{{TOKEN}}`s (listed below) from the session brief and phase outputs.
+1. Resolve all **38** `{{TOKEN}}`s (listed below) from the session brief and phase outputs.
 2. Write `brief.md` via `templates/brief.md.template`. Section order is a contract — do not reorder; see `references/brief-format.md` for the full contract including the per-page intent triplet format and design-system seed block format.
    - §9 web-capture instruction must include verbatim: _"Capture the live URL for content, structure, and brand assets to KEEP (logo, brand color, product photography) only. The design direction above OVERRIDES all captured visual styling."_
 3. Write `run-sheet.md` via `templates/run-sheet.md.template`. Order: validate → key screen → remaining screens (severity order, not nav order) → components.
 4. Finalize `content-inventory.md`, `ia-map.md`, `current-critique.md` (written in phases 5/6/8; resolve any remaining tokens).
-5. Write `INDEX.md` via `templates/INDEX.md.template`.
+   - **If `[RECON-REUSE]` fired:** `{{SAMPLING_NOTE}}` must state plainly that the audit reused a prior beacon recon and live-re-verified only the homepage + key routes (e.g. "re-verified recon synthesis, not a fresh crawl of all N URLs"); `{{AUDITED_COUNT}}` counts only pages actually (re-)read this run. Do not imply a full fresh crawl.
+5. Write `INDEX.md` via `templates/INDEX.md.template`. Populate `{{PHASE_MARKERS}}` with the emitted markers (or `[GREENFIELD-MODE]`): list each one explicitly — `[P1✓] [P2✓] [P3✓] [P4✓] [P5✓] [P6✓] [P7✓] [P8✓] [P9✓]` — a literal range/ellipsis like `[P1✓]–[P9✓]` will fail the gate's per-marker check. Populate `{{SIGNALS_FIRED}}` with every degradation signal that fired this run, including the `[PACK-LOADED:<cat>]` from Phase 7.
 6. Resolve `{{TECH_EXPORT_HANDOFF}}`: read `docs/sites/{slug}/research/tech-stack.md`; if absent, read `docs/research/{slug}/tech-stack.md` (legacy); if neither exists, log `[TECH-STACK-ABSENT]` and add to `brief.md` §10: "No beacon tech-stack found — specify the target stack manually, or run beacon first".
 
-7. **Completeness check:** Run `bash ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/check-output-complete.sh docs/sites/{slug}/redesign`. A non-zero exit means the run is not complete — resolve the named files/tokens and re-run. Fallback if unavailable: grep each output file for `{{` manually; no `{{` remaining = complete run.
+7. **Completeness check:** Run `bash ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/check-output-complete.sh docs/sites/{slug}/redesign`. A non-zero exit means the run is not complete — resolve the named files/tokens and re-run. Fallback if unavailable: grep each output file for `{{` manually; no `{{` remaining = complete run. The gate now also fails if `INDEX.md` is missing any phase marker or the `[PACK-LOADED:<cat>]` token; resolve by recording the genuine run log (do not fabricate markers for phases you skipped — run them).
 
 **Output:** All six output files written. Phase marker `[P9✓]`.
 
 ### Phase-9 token contract
 
-Phase 9 MUST resolve every one of these 36 tokens — the deduplicated union across all six templates. Do not add or rename tokens.
+Phase 9 MUST resolve every one of these **38** tokens — the deduplicated union across all six templates. Do not add or rename tokens.
 
-`{{SITE_NAME}}` `{{DATE}}` `{{URL}}` `{{CATEGORY}}` `{{CATEGORY_CONFIDENCE}}` `{{INFERRED_PURPOSE}}` `{{TARGET_PURPOSE}}` `{{AUDIENCE}}` `{{PRIMARY_GOAL}}` `{{COVERAGE_MANIFEST}}` `{{ASSUMPTIONS}}` `{{WHAT_IT_IS}}` `{{GOALS_SUCCESS}}` `{{KEEP_CHANGE_ADD}}` `{{IA_PROPOSED}}` `{{DESIGN_DIRECTION_SEED}}` `{{REFERENCES_ANTI}}` `{{WEB_CAPTURE_OVERRIDE}}` `{{TECH_EXPORT_HANDOFF}}` `{{VALIDATE_PROMPT}}` `{{KEY_SCREEN_PROMPT}}` `{{REMAINING_SCREEN_PROMPTS}}` `{{COMPONENT_PROMPTS}}` `{{URL_COUNT}}` `{{AUDITED_COUNT}}` `{{SAMPLING_NOTE}}` `{{INVENTORY_ROWS}}` `{{UNAUDITED_LIST}}` `{{NAV_HIERARCHY}}` `{{PAGE_PURPOSE_TABLE}}` `{{JOURNEYS}}` `{{PRIMARY_CONVERSION_PATH}}` `{{VISUAL_TRACK_NOTE}}` `{{CRITIQUE_ROWS}}` `{{VOICE_FINDINGS}}` `{{SEO_A11Y_FINDINGS}}`
+`{{SITE_NAME}}` `{{DATE}}` `{{URL}}` `{{CATEGORY}}` `{{CATEGORY_CONFIDENCE}}` `{{INFERRED_PURPOSE}}` `{{TARGET_PURPOSE}}` `{{AUDIENCE}}` `{{PRIMARY_GOAL}}` `{{COVERAGE_MANIFEST}}` `{{ASSUMPTIONS}}` `{{WHAT_IT_IS}}` `{{GOALS_SUCCESS}}` `{{KEEP_CHANGE_ADD}}` `{{IA_PROPOSED}}` `{{DESIGN_DIRECTION_SEED}}` `{{REFERENCES_ANTI}}` `{{WEB_CAPTURE_OVERRIDE}}` `{{TECH_EXPORT_HANDOFF}}` `{{VALIDATE_PROMPT}}` `{{KEY_SCREEN_PROMPT}}` `{{REMAINING_SCREEN_PROMPTS}}` `{{COMPONENT_PROMPTS}}` `{{URL_COUNT}}` `{{AUDITED_COUNT}}` `{{SAMPLING_NOTE}}` `{{INVENTORY_ROWS}}` `{{UNAUDITED_LIST}}` `{{NAV_HIERARCHY}}` `{{PAGE_PURPOSE_TABLE}}` `{{JOURNEYS}}` `{{PRIMARY_CONVERSION_PATH}}` `{{VISUAL_TRACK_NOTE}}` `{{CRITIQUE_ROWS}}` `{{VOICE_FINDINGS}}` `{{SEO_A11Y_FINDINGS}}` `{{PHASE_MARKERS}}` `{{SIGNALS_FIRED}}`
 
 ---
 
@@ -231,6 +238,7 @@ Log these in the session brief. Surface any that fired in `INDEX.md`.
 | `[TOOL-UNAVAILABLE:chrome-mcp]` | No screenshot source available (Jina/Firecrawl/Crawl4AI/Chrome MCP all unavailable); text-only output; visual gap noted |
 | `[PACK-LOADED:x]` | Category pack `x` loaded for Phase 8 critique and design-system seed |
 | `[TECH-STACK-ABSENT]` | No beacon tech-stack found at new or legacy path; §10 note added — specify stack manually or run beacon first |
+| `[RECON-REUSE]` | A prior beacon recon exists at `docs/sites/{slug}/research/` (or legacy `docs/research/{slug}/`); its files were read as a content source and the homepage live-re-verified. Provenance recorded in `{{SAMPLING_NOTE}}`. |
 
 ---
 
