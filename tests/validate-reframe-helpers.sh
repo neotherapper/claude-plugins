@@ -86,6 +86,13 @@ good="$tmp/good"; mkdir -p "$good"
 for f in INDEX brief run-sheet content-inventory ia-map current-critique; do
   printf '# %s\nresolved content, no tokens.\n' "$f" > "$good/$f.md"
 done
+# INDEX.md must carry the run log the substance gate (Check 3) asserts:
+# every phase marker [P1✓]–[P9✓] plus a [PACK-LOADED:<cat>] token.
+{
+  printf '\n## Run log\n'
+  printf '**Phase markers:** [P1✓] [P2✓] [P3✓] [P4✓] [P5✓] [P6✓] [P7✓] [P8✓] [P9✓]\n'
+  printf '**Signals fired:** [PACK-LOADED:local-service]\n'
+} >> "$good/INDEX.md"
 if bash "$SCRIPTS/check-output-complete.sh" "$good" >/dev/null 2>&1
 then green "check-output-complete.sh: exit 0 on complete output dir"
 else red "check-output-complete.sh: should exit 0 on a complete dir"; fi
