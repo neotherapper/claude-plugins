@@ -345,6 +345,33 @@ class TestRealPackIntegration(unittest.TestCase):
             f"Expected b2b-industrial but got winner={winner!r}; scores={scores}",
         )
 
+    def test_quote_cta_local_service_does_not_win_b2b(self):
+        """
+        Bare-token regression guard: a sparse local-service page whose only
+        B2B-ish content is a generic "quote" CTA ("get a free quote") must NOT
+        be classified as b2b-industrial.
+
+        Before the bare `"quote"` token was dropped from b2b-industrial's
+        detect_signals, this corpus matched b2b-industrial=1 (via substring
+        "quote") while every other pack scored 0, flipping a thin local-service
+        page from the safe `generic` fallback to a confidently-wrong B2B pack.
+        """
+        real_cats = Path(__file__).parent.parent.parent.parent / "categories"
+        corpus = (
+            "Acme Plumbing. Emergency plumbing repair near you. "
+            "Get a free quote today. Book a call. Licensed and insured. "
+            "Serving your local area. Read customer reviews."
+        )
+        packs = dc.load_packs(real_cats)
+        scores = dc.score_packs(packs, corpus)
+        winner, tie, tied = dc.pick_winner(scores)
+        self.assertNotEqual(
+            winner,
+            "b2b-industrial",
+            f"sparse 'get a quote' local-service page mis-detected as "
+            f"b2b-industrial; scores={scores}",
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

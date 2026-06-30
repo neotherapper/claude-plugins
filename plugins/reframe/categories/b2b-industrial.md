@@ -1,7 +1,7 @@
 ---
 category: b2b-industrial
 display_name: B2B / Industrial Distributor
-detect_signals: ["request a quote", "request quote", "RFQ", "get a quote", "quote", "datasheet", "data sheet", "spec sheet", "technical specifications", "MOQ", "minimum order", "lead time", "bulk pricing", "wholesale", "distributor", "authorized distributor", "OEM", "supplier", "spare parts", "spares", "industrial", "manufacturer", "catalogue", "catalog", "part number", "SKU", "marine", "valves", "bearings", "on-board repair", "after-sales", "B2B"]
+detect_signals: ["request a quote", "request quote", "RFQ", "get a quote", "datasheet", "data sheet", "spec sheet", "technical specifications", "MOQ", "minimum order", "lead time", "bulk pricing", "wholesale", "distributor", "authorized distributor", "OEM", "supplier", "spare parts", "spares", "industrial", "catalogue", "catalog", "part number", "SKU", "marine", "valves", "bearings", "on-board repair", "after-sales", "B2B"]
 ---
 
 # B2B / Industrial Distributor — Redesign Pack

@@ -11,7 +11,7 @@ Hardening from two real redesign sessions (`amarsolutions.gr`, `trustyourphysio.
 - **Phase 7 split** — the strategic question is relocatable (after crawl, before deliverables) but category detection is mandatory and gate-enforced.
 - **`[RECON-REUSE]` branch** — explicit path for reusing a prior beacon recon (read ALL recon files; live-re-verify homepage; honest provenance tokens).
 - **Tool rungs** — local Playwright screenshot/render fallback + Chrome-MCP `--isolated`/lock recovery; Jina pageshot two-step (signed URL → download); Jina HTTP 451 = geo-block note.
-- **New `b2b-industrial` category pack** (6th) — quote/RFQ-driven distributors that previously mis-detected as `ecommerce` on dead store pages.
+- **New `b2b-industrial` category pack** (6th) — quote/RFQ-driven distributors that previously mis-detected as `ecommerce` on dead store pages. `detect_signals` exclude bare ambiguous tokens (`quote`, `manufacturer`) so a thin local-service "get a quote" page is no longer mis-classified as B2B (regression-tested).
 - **Brand-colour sampling** step so seed palettes are measured, not guessed. Reinforced "Write tool, not touch" in Phase 1.
 
 ## 0.3.0 — 2026-06-26
