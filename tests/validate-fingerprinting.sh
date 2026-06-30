@@ -125,7 +125,9 @@ for dir in "$TECH_DIR"/*/; do
   # Alias: directory name differs from how the framework appears in docs
   search="$framework"
   case "$framework" in
-    nextjs) search='Next\.js|__NEXT_DATA__' ;;
+    nextjs)         search='Next\.js|__NEXT_DATA__' ;;
+    zend-framework) search='[Zz]end' ;;
+    aspnet)         search='ASP\.NET|__VIEWSTATE|\.aspx' ;;
   esac
   if grep -qiE "$search" "$UNION_FILE"; then
     pass "Coverage: '$framework' has a Phase 3 fingerprint signal"
