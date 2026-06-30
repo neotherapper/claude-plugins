@@ -25,3 +25,5 @@ jobs:
         run: bash tests/validate-slug-rule.sh
       - name: Reframe helper contract smoke test (CLI + JSON keys + exit codes)
         run: bash tests/validate-reframe-helpers.sh
+      - name: Fingerprint coverage (Phase 3 + reference)
+        run: bash tests/validate-fingerprinting.sh
