@@ -119,14 +119,20 @@ if [[ ! -f "$INDEX" ]]; then
 elif [[ $GREENFIELD -eq 1 ]]; then
   printf "  ${GREEN}ok${RESET}    greenfield halt recorded\n"
 else
+  # Anchor to the run-log LINES, not the whole file. A whole-file grep is
+  # fail-open: a marker or [PACK-LOADED:] mentioned anywhere in prose would
+  # satisfy the gate even when the run-log line itself is incomplete. Mirrors
+  # the greenfield line-anchoring above.
+  PHASE_LINE=$(grep -E '^\*\*Phase markers:\*\*' "$INDEX" || true)
+  SIGNALS_LINE=$(grep -E '^\*\*Signals fired:\*\*' "$INDEX" || true)
   for n in 1 2 3 4 5 6 7 8 9; do
-    if ! grep -q "\[P${n}✓\]" "$INDEX"; then
-      printf "  ${RED}FAIL${RESET}  Phase marker [P${n}✓] not found in INDEX.md run log\n"
+    if [[ "$PHASE_LINE" != *"[P${n}✓]"* ]]; then
+      printf "  ${RED}FAIL${RESET}  Phase marker [P${n}✓] not found on INDEX.md '**Phase markers:**' line\n"
       FAILED=1
     fi
   done
-  if ! grep -q '\[PACK-LOADED:' "$INDEX"; then
-    printf "  ${RED}FAIL${RESET}  No [PACK-LOADED:<cat>] in INDEX.md — category detection did not run\n"
+  if [[ "$SIGNALS_LINE" != *"[PACK-LOADED:"* ]]; then
+    printf "  ${RED}FAIL${RESET}  No [PACK-LOADED:<cat>] on INDEX.md '**Signals fired:**' line — category detection did not run\n"
     FAILED=1
   fi
   if [[ $FAILED -eq 0 ]]; then

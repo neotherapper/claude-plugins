@@ -75,3 +75,34 @@ def test_greenfield_token_in_prose_still_enforces(tmp_path):
     r = _run(_make_output(tmp_path, index_extra=prose_runlog))
     assert r.returncode == 1, r.stdout + r.stderr
     assert "P5" in r.stdout
+
+
+def test_phase_marker_only_in_prose_fails(tmp_path):
+    # Fail-open guard: a marker present in INDEX.md prose but ABSENT from the
+    # '**Phase markers:**' run-log line must NOT satisfy the gate. The run-log
+    # line is the contract; a whole-file grep would pass this incorrectly.
+    runlog = (
+        "Earlier we noted phase five [P5✓] completed.\n\n"
+        "## Run log\n"
+        "**Phase markers:** [P1✓] [P2✓] [P3✓] [P4✓] "
+        "[P6✓] [P7✓] [P8✓] [P9✓]\n"  # P5 missing from the actual run-log line
+        "**Signals fired:** [PACK-LOADED:local-service]\n"
+    )
+    r = _run(_make_output(tmp_path, index_extra=runlog))
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "P5" in r.stdout
+
+
+def test_pack_loaded_only_in_prose_fails(tmp_path):
+    # Fail-open guard: [PACK-LOADED:] mentioned in prose but ABSENT from the
+    # '**Signals fired:**' run-log line must NOT satisfy the gate.
+    runlog = (
+        "We considered [PACK-LOADED:ecommerce] but it never fired.\n\n"
+        "## Run log\n"
+        "**Phase markers:** [P1✓] [P2✓] [P3✓] [P4✓] [P5✓] "
+        "[P6✓] [P7✓] [P8✓] [P9✓]\n"
+        "**Signals fired:** none\n"  # no PACK-LOADED on the actual line
+    )
+    r = _run(_make_output(tmp_path, index_extra=runlog))
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "PACK-LOADED" in r.stdout
