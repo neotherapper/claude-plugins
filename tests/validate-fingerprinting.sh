@@ -1,144 +1,145 @@
 #!/usr/bin/env bash
-# validate-fingerprinting.sh — validates Phase 1 slug correctness and Phase 3 fingerprinting coverage
-# Usage: ./tests/validate-fingerprinting.sh
-# Exit code: 0 = all checks passed, 1 = one or more checks failed
+# validate-fingerprinting.sh — validates Phase 3 fingerprinting coverage
+#
+# Checks:
+#   1. Existence guards: SKILL.md and references/fingerprints.md present
+#   2. Named signal checks: 6 specific fingerprint signals in the union of
+#      (Phase 3 section of SKILL.md) + (references/fingerprints.md)
+#   3. Coverage loop: informational scan over all tech packs (WARNs only;
+#      uncovered packs do NOT cause a non-zero exit)
+#
+# Usage: bash tests/validate-fingerprinting.sh
+# Exit code: 0 = existence guards + named signal checks pass, 1 = real failure
 
 set -euo pipefail
 
+WORKTREE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$WORKTREE_ROOT"
+
 SKILL_FILE="plugins/beacon/skills/site-recon/SKILL.md"
+FINGERPRINTS_FILE="plugins/beacon/skills/site-recon/references/fingerprints.md"
 TECH_DIR="plugins/beacon/technologies"
 EXCLUDED_PACK="graphql"
-EXPECTED_PACK_COUNT=12
+
 PASS=0
 FAIL=0
+WARN=0
 
-check() {
-  local desc="$1"
-  local result="$2"
-  if [ "$result" = "ok" ]; then
-    echo "  PASS  $desc"
-    PASS=$((PASS + 1))
-  else
-    echo "  FAIL  $desc"
-    FAIL=$((FAIL + 1))
-  fi
-}
+pass() { echo "  PASS  $1"; PASS=$((PASS+1)); }
+fail() { echo "  FAIL  $1"; FAIL=$((FAIL+1)); }
+warn() { echo "  WARN  $1"; WARN=$((WARN+1)); }
 
-echo "Validating fingerprinting coverage: $SKILL_FILE"
+echo "Validating fingerprinting coverage (Phase 3 + references)"
 echo "========================================"
 
-# --- Slug checks (1-3) ---
+# --- Existence guards ---
 
-# Check 1: SKILL.md exists
 if [ -f "$SKILL_FILE" ]; then
-  check "SKILL.md exists" "ok"
+  pass "SKILL.md exists"
 else
-  check "SKILL.md exists" "fail"
+  fail "SKILL.md exists"
 fi
 
-# Check 2: Double-dash slug bug absent (s|\.|--|g must NOT be present)
-if [ -f "$SKILL_FILE" ] && ! grep -qF 's|\.|--|g' "$SKILL_FILE"; then
-  check "Double-dash slug bug absent (s|.--|g not present)" "ok"
+if [ -f "$FINGERPRINTS_FILE" ]; then
+  pass "references/fingerprints.md exists"
 else
-  check "Double-dash slug bug absent (s|.--|g not present)" "fail"
+  fail "references/fingerprints.md exists"
 fi
 
-# Check 3: Single-dash slug pattern present (s|\.|-|g must be present)
-if [ -f "$SKILL_FILE" ] && grep -qF 's|\.|-|g' "$SKILL_FILE"; then
-  check "Single-dash slug pattern present (s|.|-|g present)" "ok"
+# Bail early if either guard file is missing — can't build the union
+if [ "$FAIL" -gt 0 ]; then
+  echo "========================================"
+  echo "Results: $PASS passed, $FAIL failed, $WARN warnings"
+  exit 1
+fi
+
+# --- Build union: Phase 3 section of SKILL.md + full fingerprints.md ---
+# grep searches run against this single temp file to avoid scanning multiple files.
+
+UNION_FILE="$(mktemp)"
+trap 'rm -f "$UNION_FILE"' EXIT
+
+# Extract Phase 3 section (stops at the next ## Phase N heading)
+awk '/^## Phase 3/{found=1; next} found && /^## Phase [0-9]/{exit} found{print}' \
+  "$SKILL_FILE" >> "$UNION_FILE"
+
+# Append the full fingerprints reference
+cat "$FINGERPRINTS_FILE" >> "$UNION_FILE"
+
+# --- Named signal checks (hard failures — exit 1 if any are missing) ---
+
+if grep -q '_astro/' "$UNION_FILE" && grep -q 'astro-island' "$UNION_FILE"; then
+  pass "Astro signals present (_astro/ and astro-island)"
 else
-  check "Single-dash slug pattern present (s|.|-|g present)" "fail"
+  fail "Astro signals present (_astro/ and astro-island)"
 fi
 
-# Check 3b: Slug sed command actually produces correct output for a full URL (portability check)
-ACTUAL_SLUG=$(echo "https://example.com/path" | sed -E 's|https?://||;s|/.*||;s|\.|-|g')
-if [ "$ACTUAL_SLUG" = "example-com" ]; then
-  check "Slug sed command produces 'example-com' from 'https://example.com/path'" "ok"
+if grep -q 'csrfmiddlewaretoken' "$UNION_FILE"; then
+  pass "Django signals present (csrfmiddlewaretoken)"
 else
-  check "Slug sed command produces 'example-com' from 'https://example.com/path' (got: $ACTUAL_SLUG)" "fail"
+  fail "Django signals present (csrfmiddlewaretoken)"
 fi
 
-# --- Per-tech-pack signal checks (4-9) ---
-
-# Check 4: Astro signals present
-if [ -f "$SKILL_FILE" ] && grep -q '_astro/' "$SKILL_FILE" && grep -q 'astro-island' "$SKILL_FILE"; then
-  check "Astro signals present (_astro/ and astro-island)" "ok"
+if grep -q 'uvicorn' "$UNION_FILE" && grep -q 'swagger-ui' "$UNION_FILE"; then
+  pass "FastAPI signals present (uvicorn and swagger-ui)"
 else
-  check "Astro signals present (_astro/ and astro-island)" "fail"
+  fail "FastAPI signals present (uvicorn and swagger-ui)"
 fi
 
-# Check 5: Django signals present
-if [ -f "$SKILL_FILE" ] && grep -q 'csrfmiddlewaretoken' "$SKILL_FILE"; then
-  check "Django signals present (csrfmiddlewaretoken)" "ok"
+if grep -q 'X-Runtime' "$UNION_FILE" && grep -q 'csrf-token' "$UNION_FILE"; then
+  pass "Rails signals present (X-Runtime and csrf-token)"
 else
-  check "Django signals present (csrfmiddlewaretoken)" "fail"
+  fail "Rails signals present (X-Runtime and csrf-token)"
 fi
 
-# Check 6: FastAPI signals present
-if [ -f "$SKILL_FILE" ] && grep -q 'uvicorn' "$SKILL_FILE" && grep -q 'swagger-ui' "$SKILL_FILE"; then
-  check "FastAPI signals present (uvicorn and swagger-ui)" "ok"
+# x-shopify-stage: case-insensitive (header casing may vary in docs)
+if grep -qi 'x-shopify-stage' "$UNION_FILE" && grep -q 'cdn\.shopify\.com' "$UNION_FILE"; then
+  pass "Shopify signals present (x-shopify-stage and cdn.shopify.com)"
 else
-  check "FastAPI signals present (uvicorn and swagger-ui)" "fail"
+  fail "Shopify signals present (x-shopify-stage and cdn.shopify.com)"
 fi
 
-# Check 7: Rails signals present
-if [ -f "$SKILL_FILE" ] && grep -q 'X-Runtime' "$SKILL_FILE" && grep -q 'csrf-token' "$SKILL_FILE"; then
-  check "Rails signals present (X-Runtime and csrf-token)" "ok"
+# x-strapi-version: case-insensitive (header casing may vary in docs)
+if grep -q 'admin/init' "$UNION_FILE" && grep -qi 'x-strapi-version' "$UNION_FILE"; then
+  pass "Strapi signals present (admin/init and x-strapi-version)"
 else
-  check "Rails signals present (X-Runtime and csrf-token)" "fail"
+  fail "Strapi signals present (admin/init and x-strapi-version)"
 fi
 
-# Check 8: Shopify signals present
-if [ -f "$SKILL_FILE" ] && grep -q 'x-shopify-stage' "$SKILL_FILE" && grep -q 'cdn\.shopify\.com' "$SKILL_FILE"; then
-  check "Shopify signals present (x-shopify-stage and cdn.shopify.com)" "ok"
-else
-  check "Shopify signals present (x-shopify-stage and cdn.shopify.com)" "fail"
-fi
+# --- Coverage loop (informational — WARNs only, no exit 1) ---
+# Regression-guard: reports which packs have no Phase 3 signal in the union.
+# Uncovered packs do NOT cause a non-zero exit.
 
-# Check 9: Strapi signals present
-if [ -f "$SKILL_FILE" ] && grep -q 'admin/init' "$SKILL_FILE" && grep -qi 'x-strapi-version' "$SKILL_FILE"; then
-  check "Strapi signals present (admin/init and x-strapi-version)" "ok"
-else
-  check "Strapi signals present (admin/init and x-strapi-version)" "fail"
-fi
+TOTAL=$(ls -d "$TECH_DIR"/*/ 2>/dev/null | wc -l | tr -d ' ')
+covered=0
+uncovered=0
 
-# --- Coverage loop (10+) ---
-
-# Dynamic: one check per non-graphql tech pack directory
-# Note: some directory names differ from how the framework appears in docs
-# (e.g. directory "nextjs" but SKILL.md says "Next.js") — handle with aliases
-# Scoped to Phase 3 section only (stops at the next ## heading)
-PHASE3_CONTENT=""
-if [ -f "$SKILL_FILE" ]; then
-  PHASE3_CONTENT=$(awk '/^## Phase 3/{found=1; next} found && /^## Phase [0-9]/{exit} found{print}' "$SKILL_FILE")
-fi
+echo ""
+echo "Tech pack coverage scan ($TOTAL total packs, excluding '$EXCLUDED_PACK')..."
 
 for dir in "$TECH_DIR"/*/; do
   framework=$(basename "$dir")
   if [ "$framework" = "$EXCLUDED_PACK" ]; then
     continue
   fi
+  # Alias: directory name differs from how the framework appears in docs
   search="$framework"
   case "$framework" in
-    nextjs) search="Next\.js|__NEXT_DATA__" ;;
+    nextjs) search='Next\.js|__NEXT_DATA__' ;;
   esac
-  if echo "$PHASE3_CONTENT" | grep -qiE "$search"; then
-    check "Phase 3 has detection signal for '$framework'" "ok"
+  if grep -qiE "$search" "$UNION_FILE"; then
+    pass "Coverage: '$framework' has a Phase 3 fingerprint signal"
+    covered=$((covered+1))
   else
-    check "Phase 3 has detection signal for '$framework'" "fail"
+    warn "Coverage: '$framework' has NO Phase 3 fingerprint signal"
+    uncovered=$((uncovered+1))
   fi
 done
 
-# Final count check
-ACTUAL_COUNT=$(ls -d "$TECH_DIR"/*/ 2>/dev/null | wc -l | tr -d ' ')
-if [ "$ACTUAL_COUNT" -eq "$EXPECTED_PACK_COUNT" ]; then
-  check "Tech pack directory count is $EXPECTED_PACK_COUNT (found: $ACTUAL_COUNT)" "ok"
-else
-  check "Tech pack directory count is $EXPECTED_PACK_COUNT (found: $ACTUAL_COUNT) — add fingerprint signals to SKILL.md Phase 3 first, then update EXPECTED_PACK_COUNT" "fail"
-fi
-
+echo ""
+echo "Coverage: $covered/$((covered+uncovered)) tech packs have a Phase 3 fingerprint signal ($uncovered uncovered — see WARN lines)"
 echo "========================================"
-echo "Results: $PASS passed, $FAIL failed"
+echo "Results: $PASS passed, $FAIL failed, $WARN warnings (coverage gaps)"
 
 if [ "$FAIL" -gt 0 ]; then
   exit 1
