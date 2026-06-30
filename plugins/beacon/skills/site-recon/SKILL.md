@@ -157,8 +157,6 @@ Log results in the session brief:
 | example.com | local database | Active store |
 ```
 
----
-
 **Input**: Base domain or project name.
 **Actions**:
 1. **Check local SQLite/SQL databases**:
