@@ -40,11 +40,15 @@ def _run_script(script: Path, target: str) -> Dict[str, str]:
     included for diagnostics.
     """
     try:
+        # The Bash helpers read the target from the TARGET environment variable
+        # (not $1), so it must be exported here or every script exits early with
+        # "TARGET environment variable not set".
         result = subprocess.run(
             [str(script), target],
             capture_output=True,
             text=True,
             check=False,
+            env={**os.environ, "TARGET": target},
         )
         return {
             "stdout": result.stdout.strip(),
@@ -67,6 +71,8 @@ def run_all(target: str) -> str:
     for script in sorted(SCRIPT_DIR.iterdir()):
         if script.name.startswith("__") or not script.is_file():
             continue
+        if "test" in script.name:  # skip test-harness helpers (e.g. run_osint_tests.sh)
+            continue
         if _is_executable(script):
             name = script.stem
             results[name] = _run_script(script, target)
@@ -74,7 +80,7 @@ def run_all(target: str) -> str:
 
 def list_scripts() -> List[str]:
     """Return the list of available Bash helpers (names without extension)."""
-    return [p.stem for p in SCRIPT_DIR.iterdir() if _is_executable(p)]
+    return [p.stem for p in SCRIPT_DIR.iterdir() if _is_executable(p) and "test" not in p.name]
 
 if __name__ == "__main__":
     fire.Fire({

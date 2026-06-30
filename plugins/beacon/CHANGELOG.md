@@ -53,9 +53,11 @@ Versions follow [Semantic Versioning](https://semver.org/).
 ### Changed
 - Expand Phase 9 Session Brief Format with new OSINT sources
 - Update `osint-sources.md` with comprehensive tool coverage (707 lines)
+- **Bundled OSINT scripts wired into the phase sequence** (previously referenced nowhere): Phase 9 now runs `osint.py run_all`, executing the 9 `.sh` helpers (`passive_dns`, `sublist3r`, `tls_fingerprint`, `cloud-enum`, `container-scan`, `cicd-scan`, `graphql_introspect`, `openapi_detect`, `config_leakage`), with a script-loop fallback; Phase 6b and Phase 8 now point at `config_leakage.sh` and `openapi_detect.sh`. Added a bundled-scripts table to `SKILL.md`.
+- **Two reference-only methods promoted to executable phases**: CSP/CORS `connect-src` API-domain extraction (Phase 2) and third-party-key harvest from JS bundles (Phase 9).
 
 ### Fixed
-- None
+- `scripts/osint.py` `run_all` invoked each helper with the target as a positional argument, but every `.sh` helper reads the `TARGET` environment variable — so all helpers exited early with "TARGET environment variable not set" and `run_all` returned only errors. `run_all`/`list` now export `TARGET` and exclude the `run_osint_tests.sh` harness from the sweep.
 
 ---
 
