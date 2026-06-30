@@ -4,6 +4,34 @@ Load this file when you need exact probe URLs, bash commands, or grep patterns f
 
 ---
 
+## Phase 1.5 — Multi-source Domain Discovery
+
+```bash
+# Phase 1.5: Multi-source Domain Discovery
+# Check local databases for domains
+find . \( -name "*.db" -o -name "*.sqlite" \) -print0 | while IFS= read -r -d '' db; do
+  sqlite3 "$db" "SELECT DISTINCT url, domain, shopify_domain FROM stores WHERE url LIKE '%http%' LIMIT 50;" 2>/dev/null || true
+  sqlite3 "$db" "SELECT DISTINCT url FROM shops LIMIT 50;" 2>/dev/null || true
+  sqlite3 "$db" "SELECT DISTINCT domain FROM merchants LIMIT 50;" 2>/dev/null || true
+done
+
+# Check scraper config files
+find . \( -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" \) -print0 | while IFS= read -r -d '' config; do
+  grep -oE 'domain:\s*"[^"]+"' "$config" | awk -F'"' '{print $2}' || true
+done
+
+# Check cached/enriched data
+find . \( -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" \) -print0 | while IFS= read -r -d '' json_file; do
+  grep -oE '"domain"\s*:\s*"[^"]+"' "$json_file" | awk -F'"' '{print $4}' || true
+  grep -oE '"url"\s*:\s*"https?://[^"]+"' "$json_file" | awk -F'"' '{print $4}' | sed -E 's|https?://||;s|/.*||' || true
+done
+
+# Cross-reference and deduplicate domains
+cat <(sqlite3 commands) <(grep commands) | sort | uniq > "docs/sites/${SLUG}/research/discovered_domains.txt"
+```
+
+---
+
 ## Phase 2 — Passive Recon
 
 Run all of these on every site. They use only curl — no tools required.
@@ -54,6 +82,50 @@ Look for: `api.`, `staging.`, `dev.`, `admin.`, `app.`, `beta.` subdomains.
 - JWKS found? → confirms JWT auth
 - security.txt contact email (useful for scoping)
 - Rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After)
+
+---
+
+## Phase 2.5 — Data Source Inventory
+
+```bash
+# Phase 2.5: Data Source Inventory
+# Check database schema files
+find . \( -name "schema.prisma" -o -name "*.drizzle.ts" -o -name "*.typeorm.ts" \) -print0 | while IFS= read -r -d '' schema; do
+  echo "Database schema: $schema"
+  grep -E 'model|entity|table' "$schema" | head -10
+  echo "---"
+done
+
+# Check migration files
+find . \( -path "*/migrations/*.sql" -o -name "*.migration.ts" \) -print0 | while IFS= read -r -d '' migration; do
+  echo "Migration: $migration"
+  grep -E 'CREATE TABLE|ALTER TABLE' "$migration" | head -5
+  echo "---"
+done
+
+# Check seed scripts
+find . \( -name "seed*.ts" -o -name "seed*.js" \) -print0 | while IFS= read -r -d '' seed; do
+  echo "Seed script: $seed"
+  grep -E 'insert|create.*store|upsert' "$seed" | head -5
+  echo "---"
+done
+
+# Check previous scan results
+# Inventory previously-researched sites across the new and legacy workspaces.
+# New path is scoped to */research/ so reframe's redesign/ folders are NOT picked up.
+# New path is listed first, so a migrated site present in both resolves to the new copy (dedupe by slug).
+seen=""
+{ find docs/sites -path '*/research/INDEX.md' -print0 2>/dev/null; \
+  find docs/research -maxdepth 2 -name 'INDEX.md' -print0 2>/dev/null; } | \
+while IFS= read -r -d '' research; do
+  slug=$(printf '%s' "$research" | sed -E 's#^docs/(sites|research)/##; s#/.*##')
+  case " $seen " in *" $slug "*) continue;; esac
+  seen="$seen $slug"
+  echo "Previous scan: $research"
+  grep -E 'Framework|Auth|Endpoint' "$research" | head -3
+  echo "---"
+done
+```
 
 ---
 
