@@ -1,43 +1,56 @@
 # site-recon bundled helper scripts
 
-This directory contains 12 helper scripts that ship alongside the site-recon skill.
+This directory contains 12 files: 9 OSINT helper scripts, the `osint.py` orchestrator, and a
+two-file test harness (`test_osint.py`, `run_osint_tests.sh`).
 
-## IMPORTANT: reference-only — NOT invoked by the phase flow
+## Invoked by the phase flow (Phase 9 — OSINT)
 
-**All 12 scripts are currently orphaned.** The skill's 16-phase flow does not call any of them; they exist as standalone helpers that an operator can run manually or wire in later. Only `osint.py` (exercised by `test_osint.py` and `run_osint_tests.sh`) has any automated test coverage. The remaining 9 scripts are **untested**.
+The 9 `.sh` helpers are run in **Phase 9** by `osint.py run_all --target <domain>`, which invokes
+each via `bash` (the executable bit is not required) and returns a JSON document mapping
+script-stem → `{stdout, stderr, exit_code}`. A shell-loop fallback in the skill runs the same
+helpers directly if `osint.py` / `fire` is unavailable. `config_leakage.sh` and `openapi_detect.sh`
+are additionally pointed at from Phases 6b and 8.
+
+Only `osint.py` has automated test coverage (via `test_osint.py` / `run_osint_tests.sh`); the 9
+`.sh` helpers are exercised end-to-end by the sweep but have no unit tests. The test harness itself
+is **not** a phase helper and is skipped by `run_all`.
 
 ---
 
 ## Script inventory (read-verified)
 
-| Script | Serves (phase) | What it does (verified) | Status |
+| Script | Serves | What it does (verified) | Status |
 |---|---|---|---|
-| `osint.py` | Phase 9 — OSINT | Python CLI orchestrator (uses `google-fire`). Discovers all executable `*.sh` scripts in this directory, runs each one with TARGET as its first argument, and returns a JSON document mapping script-stem → `{stdout, stderr, exit_code}`. Entry points: `run_all --target <domain>` and `list`. | orphaned; has test coverage (see below) |
-| `test_osint.py` | Test harness for `osint.py` | Python unit test: invokes `osint.py run_all --target example.com` as a subprocess, asserts exit 0, and validates the JSON output shape (dict with `stdout`/`stderr`/`exit_code` per script). Not a phase helper — a correctness test for the orchestrator. | orphaned; automated test |
-| `run_osint_tests.sh` | Test harness for `osint.py` | Thin shell wrapper that calls `osint.py run_all --target example.com` and checks for exit 0. Minimal CI-style smoke test for the Python orchestrator. | orphaned; automated test |
-| `sublist3r.sh` | Phase 9 — OSINT / Phase 1.5 — Domain Discovery | Subdomain enumeration via Sublist3r (gracefully skips if not installed). Reads `TARGET` env var; saves results to `sublist3r.txt`. | orphaned; untested |
-| `passive_dns.sh` | Phase 9 — OSINT / Phase 1.5 — Domain Discovery | Passive DNS lookups from two sources: VirusTotal public domain-reports API (no key required, prints up to 100 subdomains) and DNSDB (requires `$DNSDB_API_KEY`; skipped if unset). | orphaned; untested |
-| `tls_fingerprint.sh` | Phase 3 — Fingerprinting | TLS/SSL analysis using whichever of `testssl.sh`, `sslyze`, or `tls-scan` is installed. Reads `TARGET` env var; each tool is tried in sequence and skipped if absent. | orphaned; untested |
-| `graphql_introspect.sh` | Phase 8 — OpenAPI / API Surface Detection | Sends a GraphQL introspection query (`__schema { types { name fields { name } } }`) to `https://${TARGET}/graphql` and pretty-prints the result via `jq`. | orphaned; untested |
-| `openapi_detect.sh` | Phase 8 — OpenAPI / API Surface Detection | HTTP-probes five common OpenAPI/Swagger spec paths (`/swagger.json`, `/swagger.yaml`, `/openapi.json`, `/openapi.yaml`, `/v1/api-docs`) and prints `FOUND:` for any that return HTTP 200. | orphaned; untested |
-| `config_leakage.sh` | Phase 6b — Security Exposure Scan | Probes for publicly accessible configuration and secret files (`.env`, `config.yml`, `settings.json`, `.gitlab-ci.yml`, `.github/workflows/*.yml`) and prints the first 20 lines of any that respond with 2xx. | orphaned; untested |
-| `cloud-enum.sh` | Phase 6b — Security Exposure Scan / Phase 9 — OSINT | Enumerates cloud storage buckets using naming patterns derived from TARGET: AWS S3 (both path-style and virtual-hosted), Azure Blob Storage, Google Cloud Storage, and Cloudflare R2. Reports any that return 2xx. | orphaned; untested |
-| `container-scan.sh` | Phase 6b — Security Exposure Scan | Checks for exposed Docker Registry API endpoints (`/v2/_catalog`, `/v2/`), Kubernetes API server ports (6443, 8443, 8080, 443), and container orchestration dashboards (`/dashboard`, `/rancher`, `/portainer`, etc.). | orphaned; untested |
-| `cicd-scan.sh` | Phase 6b — Security Exposure Scan | Probes for exposed CI/CD pipeline configs (GitHub Actions workflows, `.gitlab-ci.yml`, Jenkins dashboard + API, Travis CI, Azure Pipelines, CircleCI, Jenkinsfile) and build/webhook endpoints (`/build`, `/ci`, `/pipeline`, `/deploy`, `/webhook`, `/hooks`). | orphaned; untested |
+| `osint.py` | Phase 9 orchestrator | Python CLI (uses `fire`, Google Python Fire). Discovers the `.sh` helpers in this directory (excluding the `*_tests.sh` harness), runs each via `bash` with `TARGET` in the environment (per-helper timeout), and returns JSON mapping script-stem → `{stdout, stderr, exit_code}`. Entry points: `run_all --target <domain> [--exclude a,b]` and `list`. | invoked (Phase 9); has test coverage |
+| `test_osint.py` | Test harness | Python unit test: runs `osint.py run_all --target example.com`, asserts exit 0 and validates the JSON shape. Not a phase helper. | test harness (skipped by sweep) |
+| `run_osint_tests.sh` | Test harness | Shell wrapper that runs `osint.py run_all --target example.com` and checks exit 0. | test harness (skipped by sweep) |
+| `sublist3r.sh` | Phase 9 (also seeds 1.5) | Subdomain enumeration via Sublist3r (gracefully skips if not installed). Reads `TARGET`; saves results to `sublist3r.txt`. | invoked (Phase 9); untested |
+| `passive_dns.sh` | Phase 9 (also seeds 1.5) | Passive DNS from VirusTotal's public domain-reports API (no key, up to 100 subdomains) + DNSDB (needs `$DNSDB_API_KEY`; skipped if unset). | invoked (Phase 9); untested |
+| `tls_fingerprint.sh` | Phase 9 (informs Phase 3) | TLS/SSL analysis using whichever of `testssl.sh`, `sslyze`, or `tls-scan` is installed. Reads `TARGET`. | invoked (Phase 9); untested |
+| `graphql_introspect.sh` | Phase 9 (reinforces Phase 6) | Sends a GraphQL introspection query (`__schema { types { name fields { name } } }`) to `https://${TARGET}/graphql` and pretty-prints via `jq`. | invoked (Phase 9); untested |
+| `openapi_detect.sh` | Phase 9 (reinforces Phase 8) | HTTP-probes five common OpenAPI/Swagger spec paths and prints `FOUND:` for any that return HTTP 200. | invoked (Phase 9); untested |
+| `config_leakage.sh` | Phase 9 (reinforces Phase 6b) | Probes for public config/secret files (`.env`, `config.yml`, `settings.json`, `.gitlab-ci.yml`, `.github/workflows/*.yml`) and prints the first 20 lines of any 2xx. | invoked (Phase 9); untested |
+| `cloud-enum.sh` | Phase 9 (active infra probe) | Enumerates cloud buckets from TARGET-derived names: AWS S3 (path + virtual-hosted), Azure Blob, GCS, Cloudflare R2. Reports any 2xx. | invoked (Phase 9, scope-gated); untested |
+| `container-scan.sh` | Phase 9 (active infra probe) | Checks Docker Registry (`/v2/_catalog`, `/v2/`), Kubernetes API ports (6443/8443/8080/443), and orchestration dashboards. | invoked (Phase 9, scope-gated); untested |
+| `cicd-scan.sh` | Phase 9 | Probes exposed CI/CD configs (GitHub Actions, `.gitlab-ci.yml`, Jenkins, Travis, Azure Pipelines, CircleCI, Jenkinsfile) and build/webhook endpoints. | invoked (Phase 9); untested |
 
 ---
 
-## Drift risk
+## Intentional reinforcement (not accidental duplication)
 
-Several scripts duplicate logic that the skill already performs inline:
+Some helpers deliberately re-cover checks the skill also performs inline — defense-in-depth so the
+method still runs even if the inline prose step is skipped under synthesis pressure:
 
-- **`openapi_detect.sh`** probes the same Swagger/OpenAPI paths that Phase 8 checks inline — two sources of truth that can diverge independently.
-- **`osint.py`** and its shell helpers cover subdomain and OSINT enumeration that Phase 9 also handles with inline `curl`/CDX commands.
-- **`config_leakage.sh`** checks for `.env`, `.gitlab-ci.yml`, and GitHub Actions files — paths that Phase 6b's inline security scan also covers.
-- **`cicd-scan.sh`** overlaps with `config_leakage.sh` on `.gitlab-ci.yml` and `.github/workflows` paths, creating a second intra-scripts duplication.
+- **`openapi_detect.sh`** ↔ Phase 8's inline Swagger/OpenAPI path probes.
+- **`config_leakage.sh`** ↔ Phase 6b's inline `.env` / config / CI checks.
+- **`graphql_introspect.sh`** ↔ Phase 6's inline GraphQL introspection.
 
-Any change to the inline phase commands should be checked against the corresponding script, and vice versa.
+`cicd-scan.sh` and `config_leakage.sh` also overlap on `.gitlab-ci.yml` / `.github/workflows`. When
+changing an inline phase command, check the corresponding helper (and vice versa) so the two do not
+drift.
 
----
+## Scope note
 
-**Follow-up: wire-or-delete — decide per script whether to invoke it from its phase or remove it.**
+`cloud-enum.sh` and `container-scan.sh` actively probe third-party and infrastructure hosts. The
+Phase 9 sweep supports `run_all --target <domain> --exclude cloud-enum,container-scan` for
+engagements that do not authorise infrastructure enumeration.

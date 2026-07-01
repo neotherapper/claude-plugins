@@ -178,14 +178,15 @@ Log results in the session brief:
 
 See `references/phase-detail.md` for detailed probe commands, grep patterns, and API parameters.
 
-**API-domain extraction from CSP/CORS headers (promoted from `references/osint-sources.md`).** The
+**API-domain extraction from CSP/CORS headers.** The
 `connect-src` directive lists every origin the front-end is allowed to call — often the clearest
-single signal of the backend/API hosts. Run it on the homepage fetch and any framed app shell:
+single signal of the backend/API hosts, including WebSocket (`wss://`) backends. Run it on the
+homepage fetch and any framed app shell:
 ```bash
 # CSP response header + <meta> CSP → connect-src origins (candidate API/backend hosts)
 { curl -sI "{url}"; curl -s "{url}"; } \
   | grep -oiE "connect-src[^;\"]*" \
-  | grep -oE "https?://[a-z0-9.*-]+" | sort -u
+  | grep -oiE "(https?|wss?)://[a-z0-9.*-]+(:[0-9]+)?" | sort -u
 ```
 Record each distinct origin as a candidate API host in the Discovered Endpoints table and seed it
 into the Phase 10 browse plan. Log `[CSP-API-DOMAINS:{n}]`.
@@ -621,56 +622,58 @@ Run the bundled OSINT sweep first, then mine the additional sources in
 `references/osint-sources.md`. The sweep is a single deterministic call so these methods actually
 execute rather than living only in a reference file that gets skipped under synthesis pressure.
 
-**1 — Bundled script sweep (primary).** `osint.py run_all` orchestrates every executable `*.sh`
-helper in `${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/` and returns one JSON document keyed by
-step:
+**1 — Bundled script sweep (primary).** `osint.py run_all` orchestrates every bundled `*.sh`
+helper in `${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/` (via `bash`, so the executable bit does
+not matter) and returns one JSON document keyed by step:
 ```bash
-DOMAIN=$(printf '%s' "{url}" | sed -E 's#^https?://##; s#/.*$##; s/:[0-9]+$//')
+DOMAIN=$(printf '%s' "{url}" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s#/.*$##; s/:[0-9]+$//')
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/osint.py" run_all --target "$DOMAIN"
 ```
-For `$DOMAIN` this runs:
-- `passive_dns.sh` — VirusTotal / DNSDB subdomain history
-- `sublist3r.sh` — subdomain brute-force (skips cleanly if `sublist3r` is not installed)
-- `tls_fingerprint.sh` — testssl.sh / sslyze / tls-scan cert + cipher fingerprint
-- `cloud-enum.sh` — AWS S3 / Azure Blob / GCS / Cloudflare R2 bucket enumeration
-- `container-scan.sh` — Docker Registry `/v2/_catalog`, Kubernetes API endpoints
-- `cicd-scan.sh` — exposed `.github/workflows/`, `.gitlab-ci.yml`, Jenkins, CircleCI
-- `graphql_introspect.sh` — `/graphql` introspection schema dump (reinforces Phase 6)
-- `openapi_detect.sh` — Swagger / OpenAPI path probe (reinforces Phase 8)
-- `config_leakage.sh` — exposed `.env` / config file probe (reinforces Phase 6b)
+This runs the 9 bundled helpers — `passive_dns`, `sublist3r`, `tls_fingerprint`, `cloud-enum`,
+`container-scan`, `cicd-scan`, `graphql_introspect`, `openapi_detect`, `config_leakage` (purposes in
+the **Bundled scripts** table below; the last three reinforce Phases 6, 8, and 6b).
 
-Log `[OSINT-SWEEP:run_all]`. If `osint.py` errors (most commonly `python-fire` not installed),
-fall back to running each helper directly and log
-`[TOOL-UNAVAILABLE:osint-orchestrator:fell-back-to-loop]`:
+Log `[OSINT-SWEEP:run_all]` **only if the returned JSON is non-empty**. If `osint.py` errors or
+returns `{}` (most commonly `fire` — Google Python Fire — not installed), fall back to running each
+helper directly and log `[TOOL-UNAVAILABLE:osint-orchestrator:fell-back-to-loop]`:
 ```bash
+DOMAIN=$(printf '%s' "{url}" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s#/.*$##; s/:[0-9]+$//')
 for s in "${CLAUDE_PLUGIN_ROOT}"/skills/site-recon/scripts/*.sh; do
-  case "$s" in *test*) continue;; esac   # skip the test harness
+  case "$(basename "$s")" in *_tests.sh) continue;; esac   # skip the test harness
   echo "=== $(basename "$s") ==="; TARGET="$DOMAIN" bash "$s" || true
 done
 ```
 
 > **Scope:** `cloud-enum.sh` (S3/blob bucket name-guessing) and `container-scan.sh` (Kubernetes /
 > registry) actively probe third-party and infrastructure hosts. Run the full sweep only when the
-> engagement authorises infrastructure enumeration; otherwise drop those two and run the rest. The
-> other helpers stay within the target's own web surface, consistent with Phases 6b/8.
+> engagement authorises infrastructure enumeration; otherwise exclude them —
+> `… run_all --target "$DOMAIN" --exclude cloud-enum,container-scan` (or, in the fallback loop, add
+> `cloud-enum.sh|container-scan.sh) continue;;` to the `case`). The other helpers stay within the
+> target's own web surface, consistent with Phases 6b/8.
 
 **2 — Historical & search OSINT.** Wayback CDX, CommonCrawl CDX, crt.sh certificate transparency,
 GitHub code search, and Google dorks — full query patterns in `references/osint-sources.md`. Also
 mine the favicon-hash, SPF/DKIM/DMARC, and WAF-fingerprint sections documented there.
 
-**3 — Third-party key harvest (promoted from `references/osint-sources.md`).** Re-list the JS
-bundles (Phase 7 writes each to `/tmp/bundle.js`, overwriting per file, and `.beacon/` does not exist
-until Phase 11 — so re-fetch here rather than relying on a saved copy) and grep each for live keys
-that expose backend services:
+**3 — Third-party key harvest.** Re-list the JS bundles (Phase 7 writes each to `/tmp/bundle.js`,
+overwriting per file, and `.beacon/` does not exist until Phase 11 — so re-fetch here rather than
+relying on a saved copy) and grep each for live keys that expose backend services:
 ```bash
-# Stripe pk_live, Google/Firebase AIza, Mapbox pk., Sentry DSN, Algolia app IDs
-curl -s "{url}" | grep -oE 'src="[^"]+\.js[^"?#]*' | sed 's/^src="//' | while read -r b; do
-  case "$b" in http*) ;; /*) b="{url}$b";; *) b="{url}/$b";; esac
+# Stripe pk_live, Google/Firebase AIza, Mapbox pk., Sentry DSN
+curl -s --max-time 10 "{url}" \
+  | grep -oE "src=['\"][^'\"]+\.js[^'\"?#]*" | sed -E "s/^src=['\"]//" | while read -r b; do
+  case "$b" in
+    http*) ;;                # absolute
+    //*)   b="https:$b" ;;   # protocol-relative
+    /*)    b="{url}$b" ;;    # root-relative
+    *)     b="{url}/$b" ;;   # document-relative
+  esac
   curl -s --max-time 10 "$b"
-done | grep -oE 'pk_live_[0-9A-Za-z]+|AIza[0-9A-Za-z_-]{35}|pk\.[A-Za-z0-9._-]{20,}|https://[0-9a-f]{32}@[a-z0-9.]+/[0-9]+' | sort -u
+done | grep -oE 'pk_live_[0-9A-Za-z]+|AIza[0-9A-Za-z_-]{35}|pk\.[A-Za-z0-9._-]{20,}|https://[0-9a-f]{32}@[a-z0-9.-]+/[0-9]+' | sort -u
 ```
 Record each key and the service it reveals as an integration in the session brief, and log
-`[THIRD-PARTY-KEYS:{n} found]`.
+`[THIRD-PARTY-KEYS:{n} found]`. For additional services (reCAPTCHA, Algolia, Intercom), apply the
+extended pattern catalogue in `references/osint-sources.md`.
 
 Feed every discovered subdomain, bucket, registry, spec path, and key into the **Discovered
 Endpoints** table before compiling the Phase 10 browse plan.
@@ -779,12 +782,11 @@ Log these in the session brief and repeat in the generated INDEX.md:
 | `[TECH-PACK-RELOAD:{framework}]` | Tech pack updated externally; re-run Phase 5 probes |
 | `[CF-BYPASS:brand-subpage]` | Category page blocked; brand/manufacturer sub-page used as alternate |
 | `[PRODUCT-SITEMAP-SEED:{count} URLs]` | Product sitemap used as enumeration fallback |
-| `[PHASE-6B-FALSE-POSITIVE:{path}]` | Cloudflare challenge page misidentified as `.env`/`.git/config` |
 | `[PCI-DSS-VIOLATION:CRITICAL]` | Card BIN + last4 + expiry or CVC/CVV found; immediate disclosure required |
 | `[OSINT-SWEEP:run_all]` | Phase 9 bundled-script sweep ran via `osint.py run_all` |
-| `[TOOL-UNAVAILABLE:osint-orchestrator:fell-back-to-loop]` | `osint.py` unavailable (e.g. python-fire missing); ran `scripts/*.sh` in a loop instead |
+| `[TOOL-UNAVAILABLE:osint-orchestrator:fell-back-to-loop]` | `osint.py` unavailable (e.g. `fire` / Google Python Fire missing) or returned `{}`; ran `scripts/*.sh` in a loop instead |
 | `[CSP-API-DOMAINS:{n}]` | `n` candidate API/backend hosts extracted from CSP `connect-src` (Phase 2) |
-| `[THIRD-PARTY-KEYS:{n} found]` | `n` live third-party keys (Stripe/Firebase/Mapbox/Sentry/Algolia) harvested from JS bundles (Phase 9) |
+| `[THIRD-PARTY-KEYS:{n} found]` | `n` live third-party keys (Stripe/Firebase/Mapbox/Sentry) harvested from JS bundles (Phase 9) |
 
 ## Phase 11 — cmux usage guide
 
@@ -838,6 +840,12 @@ Before executing Phase 12, check the session brief for completion markers:
 If any phase marker is absent from the session brief, run that phase now before writing output.
 Log: `[PHASE-GATE: P{N} missing — running now]`. Do not skip phases to save time.
 
+`[P9✓]` additionally requires the OSINT sweep to have actually run and its promoted methods to have
+executed: the brief must carry `[OSINT-SWEEP:run_all]` **or**
+`[TOOL-UNAVAILABLE:osint-orchestrator:fell-back-to-loop]`, plus `[CSP-API-DOMAINS:{n}]` (Phase 2)
+and `[THIRD-PARTY-KEYS:{n} found]` (Phase 9). A bare `[P9✓]` with none of these tokens means the
+deterministic sweep was skipped — run it now before writing output.
+
 **Load `references/output-synthesis.md` before executing this phase** — it contains
 the full instructions for reading the session brief and writing all output files.
 
@@ -857,16 +865,18 @@ Load these when you need detailed guidance — they are not always necessary:
 - **`references/osint-sources.md`** — Phase 9 data sources: CDX APIs, crt.sh, DNSDumpster, VirusTotal, urlscan.io, ASN, Censys, GitHub search, Google dorking, robots.txt/sitemap mining, JSON-LD extraction, S3 buckets, Paste sites, NPM/PyPI, bug bounty scopes
 - **`references/session-brief-format.md`** — Complete session brief schema with all fields
 - **`references/tool-availability.md`** — Tool detection commands, full fallback matrix, browser command reference
+- **`scripts/README.md`** — inventory and status of the bundled helper scripts
 
 ## Bundled scripts
 
-Deterministic helpers in `scripts/` — invoked by the phases above, not just documentation. All `.sh`
-helpers take a `TARGET={domain}` environment variable; `osint.py run_all --target {domain}`
-orchestrates every executable `.sh` helper in one call (Phase 9).
+Deterministic helpers under `skills/site-recon/scripts/` — invoked by the phases above, not just
+documentation. Every `.sh` helper reads a `TARGET={domain}` environment variable;
+`osint.py run_all --target {domain}` runs all of them in one call via `bash` (Phase 9) and accepts
+`--exclude name1,name2` to skip helpers.
 
 | Script | Phase | Purpose |
 |--------|-------|---------|
-| `scripts/osint.py` | 9 | Orchestrator — runs all `*.sh` helpers, returns JSON per step (needs `python-fire`) |
+| `scripts/osint.py` | 9 | Orchestrator — runs all `.sh` helpers via `bash`, returns JSON per step (needs `fire`, Google Python Fire) |
 | `scripts/passive_dns.sh` | 9 | VirusTotal / DNSDB subdomain history |
 | `scripts/sublist3r.sh` | 9 | Subdomain brute-force (optional `sublist3r` binary) |
 | `scripts/tls_fingerprint.sh` | 9 | TLS cert + cipher fingerprint (testssl.sh / sslyze / tls-scan) |
@@ -876,5 +886,7 @@ orchestrates every executable `.sh` helper in one call (Phase 9).
 | `scripts/graphql_introspect.sh` | 6 / 9 | `/graphql` introspection schema dump |
 | `scripts/openapi_detect.sh` | 8 / 9 | Swagger / OpenAPI path probe |
 | `scripts/config_leakage.sh` | 6b / 9 | Exposed `.env` / config file probe |
-| `scripts/core/har-reconstruct.py` | 11 | Rebuild `.beacon/capture.har` from raw network captures |
-- **`scripts/README.md`** — inventory of the 12 bundled helper scripts (currently reference-only, not invoked by the phase flow)
+| `${CLAUDE_PLUGIN_ROOT}/scripts/core/har-reconstruct.py` | 11 | Rebuild `.beacon/capture.har` from raw captures (plugin-root `scripts/`, not this dir) |
+
+The test harness (`run_osint_tests.sh`, `test_osint.py`) is not part of the phase flow and is
+skipped by `run_all`.
