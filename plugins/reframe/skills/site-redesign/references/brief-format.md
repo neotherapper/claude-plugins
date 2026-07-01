@@ -82,6 +82,8 @@ Borders vs shadows: which dominates and when
 
 Do not emit "modern/clean/trustworthy" prose in this block. If the category pack does not supply values, use the `generic.md` pack defaults. Seed values must be numbers and hex codes.
 
+**Brand-KEEP hex must be measured, not guessed, when possible** — use the Phase-4 colour-sampling step (homepage CSS/screenshot). If a value is an unverified target rather than a sampled brand colour, label it "(approx — sample on capture)". Do not present guessed hex as the site's actual brand colour.
+
 ---
 
 ## Canonical Web-Capture-Override Sentence

@@ -98,134 +98,6 @@ See `references/session-brief-format.md` for the complete schema.
 
 ## Phase 1 — Scaffold and tool check
 
-**New: Multi-source Domain Discovery**
-After creating the output folder, run **Phase 1.5** to discover related domains:
-```bash
-# Phase 1.5: Multi-source Domain Discovery
-# Check local databases for domains
-find . \( -name "*.db" -o -name "*.sqlite" \) -print0 | while IFS= read -r -d '' db; do
-  sqlite3 "$db" "SELECT DISTINCT url, domain, shopify_domain FROM stores WHERE url LIKE '%http%' LIMIT 50;" 2>/dev/null || true
-  sqlite3 "$db" "SELECT DISTINCT url FROM shops LIMIT 50;" 2>/dev/null || true
-  sqlite3 "$db" "SELECT DISTINCT domain FROM merchants LIMIT 50;" 2>/dev/null || true
-done
-
-# Check scraper config files
-find . \( -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" \) -print0 | while IFS= read -r -d '' config; do
-  grep -oE 'domain:\s*"[^"]+"' "$config" | awk -F'"' '{print $2}' || true
-done
-
-# Check cached/enriched data
-find . \( -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" \) -print0 | while IFS= read -r -d '' json_file; do
-  grep -oE '"domain"\s*:\s*"[^"]+"' "$json_file" | awk -F'"' '{print $4}' || true
-  grep -oE '"url"\s*:\s*"https?://[^"]+"' "$json_file" | awk -F'"' '{print $4}' | sed -E 's|https?://||;s|/.*||' || true
-done
-
-# Cross-reference and deduplicate domains
-cat <(sqlite3 commands) <(grep commands) | sort | uniq > "docs/sites/${SLUG}/research/discovered_domains.txt"
-```
-
-Log results in the session brief:
-```markdown
-### Discovered Domains
-| Domain | Source | Notes |
-|--------|--------|-------|
-| example.com | local database | Active store |
-```
-
----
-
-## Phase 1.5 — Multi-source Domain Discovery
-
-**Input**: Base domain or project name.
-**Actions**:
-1. **Check local SQLite/SQL databases**:
-   - glob: `**/*.db`, `**/*.sqlite`
-   - Query columns: `url`, `domain`, `shopify_domain`
-2. **Check scraper config files**:
-   - glob: `**/stores/*.config.mjs`, `**/scrapers/*.config.*`
-   - Extract `domain:` field from each
-3. **Check cached/enriched data**:
-   - glob: `**/*.json`, `**/*.jsonl`, `**/*.ndjson`
-   - Search for `domain` or `url` fields
-4. **Cross-reference and deduplicate domains**
-
-**Output**: Consolidated domain list saved to `docs/sites/{SLUG}/research/discovered_domains.txt`.
-
----
-
-## Phase 2 — Passive recon
-
-**New: Data Source Inventory**
-After passive recon, run **Phase 2.5** to inventory local data sources:
-```bash
-# Phase 2.5: Data Source Inventory
-# Check database schema files
-find . \( -name "schema.prisma" -o -name "*.drizzle.ts" -o -name "*.typeorm.ts" \) -print0 | while IFS= read -r -d '' schema; do
-  echo "Database schema: $schema"
-  grep -E 'model|entity|table' "$schema" | head -10
-  echo "---"
-done
-
-# Check migration files
-find . \( -path "*/migrations/*.sql" -o -name "*.migration.ts" \) -print0 | while IFS= read -r -d '' migration; do
-  echo "Migration: $migration"
-  grep -E 'CREATE TABLE|ALTER TABLE' "$migration" | head -5
-  echo "---"
-done
-
-# Check seed scripts
-find . \( -name "seed*.ts" -o -name "seed*.js" \) -print0 | while IFS= read -r -d '' seed; do
-  echo "Seed script: $seed"
-  grep -E 'insert|create.*store|upsert' "$seed" | head -5
-  echo "---"
-done
-
-# Check previous scan results
-# Inventory previously-researched sites across the new and legacy workspaces.
-# New path is scoped to */research/ so reframe's redesign/ folders are NOT picked up.
-# New path is listed first, so a migrated site present in both resolves to the new copy (dedupe by slug).
-seen=""
-{ find docs/sites -path '*/research/INDEX.md' 2>/dev/null; \
-  find docs/research -maxdepth 2 -name 'INDEX.md' 2>/dev/null; } | \
-while IFS= read -r research; do
-  slug=$(printf '%s' "$research" | sed -E 's#^docs/(sites|research)/##; s#/.*##')
-  case " $seen " in *" $slug "*) continue;; esac
-  seen="$seen $slug"
-  echo "Previous scan: $research"
-  grep -E 'Framework|Auth|Endpoint' "$research" | head -3
-  echo "---"
-done
-```
-
-Log results in the session brief:
-```markdown
-### Data Sources
-| Type | Source Path | Record Count |
-|------|-------------|--------------|
-| Database | data/stores.db | 9621 |
-```
-
----
-
-## Phase 2.5 — Data Source Inventory
-
-**Input**: Project directory.
-**Actions**:
-1. **Database schema files**:
-   - glob: `**/schema.prisma`, `**/*.drizzle.ts`, `**/*.typeorm.ts`
-   - Extract table structures
-2. **Migration files**:
-   - glob: `**/migrations/*.sql`, `**/*.migration.ts`
-   - Extract `CREATE TABLE`/`ALTER TABLE` statements
-3. **Seed scripts**:
-   - glob: `**/seed*.ts`, `**/seed*.js`
-   - Extract `insert`/`create` patterns
-4. **Previous scan results**:
-   - glob: new `docs/sites/*/research/INDEX.md` (scoped — excludes `redesign/`) and legacy `docs/research/*/INDEX.md`
-   - Extract framework/auth/endpoint data
-
-**Output**: Inventory of local data sources in the session brief.
-
 ```bash
 # Canonical slug rule (docs/SLUG_RULES.md) — must match reframe for cross-module interop
 SLUG=$(printf '%s' "{url}" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')
@@ -235,42 +107,6 @@ if [ -d "docs/research/${SLUG}" ]; then
   echo "[LEGACY-WORKSPACE] Found docs/research/${SLUG}/ (pre-0.7.0). New output goes to docs/sites/${SLUG}/research/. Move the old folder to consolidate; legacy is read-only and removed in 0.8.0."
 fi
 ```
-
-**New: Multi-source Domain Discovery**
-After creating the output folder, run **Phase 1.5** to discover related domains:
-```bash
-# Phase 1.5: Multi-source Domain Discovery
-# Check local databases for domains
-find . \( -name "*.db" -o -name "*.sqlite" \) -print0 | while IFS= read -r -d '' db; do
-  sqlite3 "$db" "SELECT DISTINCT url, domain, shopify_domain FROM stores WHERE url LIKE '%http%' LIMIT 50;" 2>/dev/null || true
-  sqlite3 "$db" "SELECT DISTINCT url FROM shops LIMIT 50;" 2>/dev/null || true
-  sqlite3 "$db" "SELECT DISTINCT domain FROM merchants LIMIT 50;" 2>/dev/null || true
-done
-
-# Check scraper config files
-find . \( -name "*.config.mjs" -o -name "*.config.js" -o -name "*.config.json" \) -print0 | while IFS= read -r -d '' config; do
-  grep -oE 'domain:\s*"[^"]+"' "$config" | awk -F'"' '{print $2}' || true
-done
-
-# Check cached/enriched data
-find . \( -name "*.json" -o -name "*.jsonl" -o -name "*.ndjson" \) -print0 | while IFS= read -r -d '' json_file; do
-  grep -oE '"domain"\s*:\s*"[^"]+"' "$json_file" | awk -F'"' '{print $4}' || true
-  grep -oE '"url"\s*:\s*"https?://[^"]+"' "$json_file" | awk -F'"' '{print $4}' | sed -E 's|https?://||;s|/.*||' || true
-done
-
-# Cross-reference and deduplicate domains
-cat <(sqlite3 commands) <(grep commands) | sort | uniq > "docs/sites/${SLUG}/research/discovered_domains.txt"
-```
-
-Log results in the session brief:
-```markdown
-### Discovered Domains
-| Domain | Source | Notes |
-|--------|--------|-------|
-| example.com | local database | Active store |
-```
-
----
 
 **Critical:** Do NOT use `touch` to create output files — the Write tool requires a prior Read.
 Use `Write` directly with empty string content for each output file, or they will fail at Phase 12.
@@ -309,6 +145,18 @@ If the output contains `git` output, log `[TOOL-UNAVAILABLE:gau:aliased]`.
 
 ## Phase 1.5 — Multi-source Domain Discovery
 
+**New: Multi-source Domain Discovery**
+After creating the output folder, run **Phase 1.5** to discover related domains:
+**Load `references/phase-detail.md` (Phase 1.5 commands) before executing this phase.**
+
+Log results in the session brief:
+```markdown
+### Discovered Domains
+| Domain | Source | Notes |
+|--------|--------|-------|
+| example.com | local database | Active store |
+```
+
 **Input**: Base domain or project name.
 **Actions**:
 1. **Check local SQLite/SQL databases**:
@@ -332,45 +180,7 @@ See `references/phase-detail.md` for detailed probe commands, grep patterns, and
 
 **New: Data Source Inventory**
 After passive recon, run **Phase 2.5** to inventory local data sources:
-```bash
-# Phase 2.5: Data Source Inventory
-# Check database schema files
-find . \( -name "schema.prisma" -o -name "*.drizzle.ts" -o -name "*.typeorm.ts" \) -print0 | while IFS= read -r -d '' schema; do
-  echo "Database schema: $schema"
-  grep -E 'model|entity|table' "$schema" | head -10
-  echo "---"
-done
-
-# Check migration files
-find . \( -path "*/migrations/*.sql" -o -name "*.migration.ts" \) -print0 | while IFS= read -r -d '' migration; do
-  echo "Migration: $migration"
-  grep -E 'CREATE TABLE|ALTER TABLE' "$migration" | head -5
-  echo "---"
-done
-
-# Check seed scripts
-find . \( -name "seed*.ts" -o -name "seed*.js" \) -print0 | while IFS= read -r -d '' seed; do
-  echo "Seed script: $seed"
-  grep -E 'insert|create.*store|upsert' "$seed" | head -5
-  echo "---"
-done
-
-# Check previous scan results
-# Inventory previously-researched sites across the new and legacy workspaces.
-# New path is scoped to */research/ so reframe's redesign/ folders are NOT picked up.
-# New path is listed first, so a migrated site present in both resolves to the new copy (dedupe by slug).
-seen=""
-{ find docs/sites -path '*/research/INDEX.md' -print0 2>/dev/null; \
-  find docs/research -maxdepth 2 -name 'INDEX.md' -print0 2>/dev/null; } | \
-while IFS= read -r -d '' research; do
-  slug=$(printf '%s' "$research" | sed -E 's#^docs/(sites|research)/##; s#/.*##')
-  case " $seen " in *" $slug "*) continue;; esac
-  seen="$seen $slug"
-  echo "Previous scan: $research"
-  grep -E 'Framework|Auth|Endpoint' "$research" | head -3
-  echo "---"
-done
-```
+**Load `references/phase-detail.md` (Phase 2.5 commands) before executing this phase.**
 
 Log results in the session brief:
 ```markdown
@@ -642,6 +452,63 @@ Probe these paths in order; stop at the first 200 response that returns JSON or 
 If found: save to `specs/{slug}.openapi.yaml`, mark `source: auto-downloaded`.  
 If not found: continue — Phase 12 will scaffold a spec from all discovered endpoints.
 
+---
+
+## Phase 8.5 — PII and Payment Data Classification
+
+**Input**: All discovered endpoints, `constants.md` values, JS bundle leaks, exposed files (Phase 6b).
+
+**Actions**:
+1. **Flag Payment Endpoints**:
+   - Paths containing `/payment`, `/checkout`, `/order`, `/cart`, `/transaction`.
+   - Endpoints returning `payment_method`, `transaction_id`, `cardBin`, `lastFour`, `expiryDate`.
+
+2. **Grep for Payment Integrations**:
+   - JS bundles: `stripe|paypal|braintree|adyen|authorize\.net`.
+   - Config files: `STRIPE_KEY|PAYPAL_CLIENT_ID`.
+
+3. **Classify Leaks**:
+```bash
+# CRITICAL (PCI DSS violation)
+grep -E "\b(4[0-9]{12}|5[1-5][0-9]{14}|6(?:011|5[0-9]{2})[0-9]{12})\b" exposed_files/*
+grep -E "cardBin.*lastFour.*expiry" js_bundles/*
+
+# PII
+grep -E "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}" exposed_files/*
+grep -E "\bname.*address.*phone\b" exposed_files/*
+
+# Secrets
+grep -E "API_KEY|SECRET|PASSWORD|DB_PASSWORD" exposed_files/*
+```
+
+4. **Severity Matrix**:
+| Severity   | Criteria                                                                 | Action Required                     |
+|------------|-------------------------------------------------------------------------|--------------------------------------|
+| CRITICAL   | Card BIN + last4 + expiry, CVC/CVV                                       | Immediate disclosure                 |
+| HIGH       | Database credentials, 100+ MB logs, live payment processor keys, HMAC webhook signatures | Review within 24 hours                |
+| MEDIUM     | Server paths, plugin versions, email lists                              | Review within 7 days                  |
+| LOW        | Trivial errors, no PII                                                  | Note in findings                     |
+| MITIGATED  | File exists but returns 301/302/403/404, or empty                       | None                                 |
+
+**Output**: Append to `INDEX.md`:
+
+```markdown
+## Security Exposure
+
+| Path                     | Severity   | PII Found | Payment Data | Evidence                                  |
+|--------------------------|------------|-----------|--------------|--------------------------------------------|
+| /wp-content/debug.log    | CRITICAL   | 125 emails| Yes          | Stripe keys + card BINs in log             |
+| /api/checkout/process    | HIGH       | No        | Yes          | LastFour + expiry in response              |
+| /.env                    | HIGH       | No        | No           | DB_PASSWORD=example                        |
+```
+
+**PCI DSS Awareness**:
+- **CRITICAL**: Card BIN + last4 + expiry = **PCI DSS violation** (immediate breach reporting required).
+- **CRITICAL**: CVC/CVV match results = **PCI DSS violation** (stored in logs).
+- **HIGH**: HMAC webhook signatures = **replay attacks** (API abuse risk).
+
+---
+
 ## Bot protection handling
 
 When curl probes return 403 from Cloudflare (or similar), escalate through this chain:
@@ -864,61 +731,6 @@ Surface IDs: `cmux browser open` returns a UUID. Use `cmux browser --surface {id
 
 ---
 
-## Phase 8.5 — PII and Payment Data Classification
-
-**Input**: All discovered endpoints, `constants.md` values, JS bundle leaks, exposed files (Phase 6b).
-
-**Actions**:
-1. **Flag Payment Endpoints**:
-   - Paths containing `/payment`, `/checkout`, `/order`, `/cart`, `/transaction`.
-   - Endpoints returning `payment_method`, `transaction_id`, `cardBin`, `lastFour`, `expiryDate`.
-
-2. **Grep for Payment Integrations**:
-   - JS bundles: `stripe|paypal|braintree|adyen|authorize\.net`.
-   - Config files: `STRIPE_KEY|PAYPAL_CLIENT_ID`.
-
-3. **Classify Leaks**:
-```bash
-# CRITICAL (PCI DSS violation)
-grep -E "\b(4[0-9]{12}|5[1-5][0-9]{14}|6(?:011|5[0-9]{2})[0-9]{12})\b" exposed_files/*
-grep -E "cardBin.*lastFour.*expiry" js_bundles/*
-
-# PII
-grep -E "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}" exposed_files/*
-grep -E "\bname.*address.*phone\b" exposed_files/*
-
-# Secrets
-grep -E "API_KEY|SECRET|PASSWORD|DB_PASSWORD" exposed_files/*
-```
-
-4. **Severity Matrix**:
-| Severity   | Criteria                                                                 | Action Required                     |
-|------------|-------------------------------------------------------------------------|--------------------------------------|
-| CRITICAL   | Card BIN + last4 + expiry, CVC/CVV                                       | Immediate disclosure                 |
-| HIGH       | Database credentials, 100+ MB logs, live payment processor keys, HMAC webhook signatures | Review within 24 hours                |
-| MEDIUM     | Server paths, plugin versions, email lists                              | Review within 7 days                  |
-| LOW        | Trivial errors, no PII                                                  | Note in findings                     |
-| MITIGATED  | File exists but returns 301/302/403/404, or empty                       | None                                 |
-
-**Output**: Append to `INDEX.md`:
-
-```markdown
-## Security Exposure
-
-| Path                     | Severity   | PII Found | Payment Data | Evidence                                  |
-|--------------------------|------------|-----------|--------------|--------------------------------------------|
-| /wp-content/debug.log    | CRITICAL   | 125 emails| Yes          | Stripe keys + card BINs in log             |
-| /api/checkout/process    | HIGH       | No        | Yes          | LastFour + expiry in response              |
-| /.env                    | HIGH       | No        | No           | DB_PASSWORD=example                        |
-```
-
-**PCI DSS Awareness**:
-- **CRITICAL**: Card BIN + last4 + expiry = **PCI DSS violation** (immediate breach reporting required).
-- **CRITICAL**: CVC/CVV match results = **PCI DSS violation** (stored in logs).
-- **HIGH**: HMAC webhook signatures = **replay attacks** (API abuse risk).
-
----
-
 ## Phase 12 — Output synthesis
 
 **Phase completion gate — verify before writing:**
@@ -958,7 +770,8 @@ Summary:
 
 Load these when you need detailed guidance — they are not always necessary:
 
-- **`references/phase-detail.md`** — Every probe URL, bash command, grep pattern, and CDX API parameter for phases 2, 5, 6, 7, and 9
+- **`references/phase-detail.md`** — Every probe URL, bash command, grep pattern, and CDX API parameter for phases 1.5, 2, 2.5, 5, 6, 7, and 9
 - **`references/osint-sources.md`** — Phase 9 data sources: CDX APIs, crt.sh, DNSDumpster, VirusTotal, urlscan.io, ASN, Censys, GitHub search, Google dorking, robots.txt/sitemap mining, JSON-LD extraction, S3 buckets, Paste sites, NPM/PyPI, bug bounty scopes
 - **`references/session-brief-format.md`** — Complete session brief schema with all fields
 - **`references/tool-availability.md`** — Tool detection commands, full fallback matrix, browser command reference
+- **`scripts/README.md`** — inventory of the 12 bundled helper scripts (currently reference-only, not invoked by the phase flow)

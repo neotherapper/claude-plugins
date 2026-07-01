@@ -67,6 +67,7 @@ After fetching the homepage, count visible text characters and nav links in the 
    mcp__chrome-devtools__navigate_page(url, type="url", timeout=10000)
    mcp__chrome-devtools__evaluate_script(() => document.body.innerText)
    ```
+   If Chrome MCP is locked, fall through to a local Playwright render (see Screenshots rung 5).
 
 ### Content-Sufficiency Gate
 
@@ -101,6 +102,16 @@ Include the coverage manifest in the session brief and surface it in `INDEX.md`.
 - `[COVERAGE-PARTIAL:gated]` — one or more URLs returned 401/403/challenge; coverage is incomplete.
 - `[WAF-BLOCKED]` — homepage returns 403/challenge from curl, Firecrawl, Jina, AND browser-fetch (the full fallback chain); proceed with whatever partial content exists + a coverage note, do not hard-stop.
 
+### Render fidelity — do not infer absence from a lossy render
+
+Markdown crawlers (especially Jina Reader) silently drop content on scroll-reveal / JS-hydrated SPAs: they can under-report nav links and omit whole populated sections. **A markdown crawl is evidence of presence, never evidence of absence.**
+
+Rule `[INFER-GUARD]`: before asserting in any output file that a section/page is *empty, missing, broken, or absent*, cross-check against a second source — a JS render (Chrome MCP / local Playwright render, Phase 4) or the raw HTML (`curl -s -H "X-Return-Format: html" "https://r.jina.ai/{url}"`). If the two disagree, trust the JS render and downgrade the claim. Never ship an "empty section" finding verified by markdown alone.
+
+### Per-route render check
+
+A `200` status on a route is not proof it renders content — client-rendered apps return a `200` shell then 404 in JS. For each sampled route in the coverage manifest, record **renders-content: yes/no** (does the rendered body contain the route's expected headings/prose, or only the app shell?). Flag any sitemap-listed route that returns a content-less shell as a finding, not as a healthy page.
+
 ---
 
 ## Phase 4 — Content Crawl and Screenshots
@@ -123,6 +134,14 @@ Prefer screenshot sources in this order:
 4. **Chrome MCP `take_screenshot`** (fallback — use recorded namespace):
    - Plugin: `mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot`
    - Project: `mcp__chrome-devtools__take_screenshot`
+
+5. **Local headless browser (Playwright/Puppeteer)** — if the repo has `node_modules/playwright` or `npx playwright` is available, render and screenshot locally:
+   ```bash
+   npx -y playwright screenshot --full-page "{url}" .crawl/screenshots/{slug-path}.png
+   ```
+   This is the most reliable rung when Chrome DevTools MCP is locked by another session.
+
+**Chrome MCP "browser is already running / use --isolated" lock:** the MCP profile is single-instance. If `new_page`/`list_pages` errors with a lock message, do NOT retry-loop — either reuse the existing page via `list_pages` → `select_page`, or fall straight through to rung 5 (local Playwright). Only ask the user to `pkill -f chrome-devtools-mcp` as a last resort.
 
 If **no screenshot source** is available: log `[TOOL-UNAVAILABLE:chrome-mcp]` and proceed text-only with an explicit visual-gap note in the output.
 

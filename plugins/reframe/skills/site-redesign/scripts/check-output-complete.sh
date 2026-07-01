@@ -12,6 +12,7 @@
 # Checks:
 #   1. Each of the six expected files exists and is non-empty
 #   2. No *.md file in the dir contains an unresolved {{...}} token
+#   3. INDEX.md run log lists all phase markers [P1✓]–[P9✓] and a [PACK-LOADED:<cat>] (unless [GREENFIELD-MODE])
 #
 # Exit codes:
 #   0 - All checks pass
@@ -56,16 +57,27 @@ fi
 # Track failures
 FAILED=0
 
+# Greenfield runs halt after writing only INDEX.md (SKILL.md Phase 3).
+# Detect greenfield by anchoring to the Phase markers LINE only — a whole-file
+# grep is fail-open: any prose mention of [GREENFIELD-MODE] (e.g. in the
+# Signals line) would incorrectly suppress the 5-file and marker checks.
+GREENFIELD=0
+if [[ -f "$OUTPUT_DIR/INDEX.md" ]] && grep -qE '^\*\*Phase markers:\*\*[[:space:]]*\[GREENFIELD-MODE\][[:space:]]*$' "$OUTPUT_DIR/INDEX.md"; then
+  GREENFIELD=1
+fi
+
 # Check 1: Each expected file exists and is non-empty
 echo "Checking file completeness..."
 for file in "${EXPECTED_FILES[@]}"; do
   filepath="$OUTPUT_DIR/$file"
+  if [[ $GREENFIELD -eq 1 && "$file" != "INDEX.md" ]]; then
+    printf "  ${GREEN}ok${RESET}    $file skipped (greenfield)\n"
+    continue
+  fi
   if [[ ! -f "$filepath" ]]; then
-    printf "  ${RED}FAIL${RESET}  Missing: $file\n"
-    FAILED=1
+    printf "  ${RED}FAIL${RESET}  Missing: $file\n"; FAILED=1
   elif [[ ! -s "$filepath" ]]; then
-    printf "  ${RED}FAIL${RESET}  Empty: $file\n"
-    FAILED=1
+    printf "  ${RED}FAIL${RESET}  Empty: $file\n"; FAILED=1
   else
     printf "  ${GREEN}ok${RESET}    $file exists and is non-empty\n"
   fi
@@ -96,6 +108,36 @@ if [[ $TOKENS_FOUND -eq 0 ]]; then
   # Count how many .md files we checked (excluding .crawl/)
   md_count=$(find "$OUTPUT_DIR" -maxdepth 1 -name "*.md" -type f | wc -l)
   printf "  ${GREEN}ok${RESET}    No unresolved tokens in $md_count file(s)\n"
+fi
+
+# Check 3: Run-log substance assertions in INDEX.md
+echo ""
+echo "Checking run-log (phase markers + pack)..."
+INDEX="$OUTPUT_DIR/INDEX.md"
+if [[ ! -f "$INDEX" ]]; then
+  printf "  ${RED}FAIL${RESET}  INDEX.md missing — cannot verify run log\n"; FAILED=1
+elif [[ $GREENFIELD -eq 1 ]]; then
+  printf "  ${GREEN}ok${RESET}    greenfield halt recorded\n"
+else
+  # Anchor to the run-log LINES, not the whole file. A whole-file grep is
+  # fail-open: a marker or [PACK-LOADED:] mentioned anywhere in prose would
+  # satisfy the gate even when the run-log line itself is incomplete. Mirrors
+  # the greenfield line-anchoring above.
+  PHASE_LINE=$(grep -E '^\*\*Phase markers:\*\*' "$INDEX" || true)
+  SIGNALS_LINE=$(grep -E '^\*\*Signals fired:\*\*' "$INDEX" || true)
+  for n in 1 2 3 4 5 6 7 8 9; do
+    if [[ "$PHASE_LINE" != *"[P${n}✓]"* ]]; then
+      printf "  ${RED}FAIL${RESET}  Phase marker [P${n}✓] not found on INDEX.md '**Phase markers:**' line\n"
+      FAILED=1
+    fi
+  done
+  if [[ "$SIGNALS_LINE" != *"[PACK-LOADED:"* ]]; then
+    printf "  ${RED}FAIL${RESET}  No [PACK-LOADED:<cat>] on INDEX.md '**Signals fired:**' line — category detection did not run\n"
+    FAILED=1
+  fi
+  if [[ $FAILED -eq 0 ]]; then
+    printf "  ${GREEN}ok${RESET}    all phase markers + pack present\n"
+  fi
 fi
 
 # Summary
