@@ -244,3 +244,18 @@ A follow-on spec. A `/beacon:fleet` command (or companion skill) that:
 | No typed/enum output schema; no licensing capture | Component 1 (profile) |
 | Bundled scripts never run / deterministic gate absent | Components 3–4 |
 | Generic agents, lost batch, rate limits, Chrome collision | Subsystem B (deferred) |
+
+## Implementation outcome + follow-ups (final whole-branch review, 2026-07-03)
+
+Implemented on branch `worktree-beacon-okf-impl` as 12 commits (`052fea3`..`d13898d`), ships as beacon **v0.7.1**. All tests green: 17 `test_okf_validate.py`, `test_scaffold.sh`, `test_okf_gate.sh`, 7/7 template validations. The final review verdict was "ready to merge with fixes"; the must-fixes were applied in `d13898d`.
+
+**Design trade to sign off (Option A gate semantics).** The `Stop`/`SubagentStop` hook enforces **only when `INDEX.md` is `status: complete`** — the recon's own claim of completion, which the validator's parser reads (quoted or unquoted). On a draft/absent INDEX it is a silent no-op. Consequence: the *deterministic hook* no longer catches an **abandoned / zero-output** recon (the original `emsa-emcip` case); that catch now rests on the **Phase-12 self-gate** (the skill runs `okf_validate.py` and flips `status: complete` as its last step) plus the deferred **Subsystem-B orchestrator sweep**. This is coherent and fully documented, but it is a genuine reduction versus the original "the hook catches EMSA" intent — and the repo's own memory warns prose steps are skippable, so the Phase-12 self-gate is the weaker link. Accept, or strengthen (e.g. an orchestrator-level per-source completeness sweep in Subsystem B).
+
+**Deferred findings (post-merge, non-blocking):**
+- **T5-m1 / marker-JSON quoting:** `okf-gate.sh` and `scaffold.sh` interpolate the marker path / `OUTPUT_ROOT` into inline `python3 -c` / `printf` without escaping; a path containing a quote/backslash fails open (gate no-ops). Pass values via argv/env.
+- **T2-m1:** `validate_bundle`'s second `read_text` is not `OSError`-wrapped (TOCTOU) — fails *closed* in the hook, cosmetic in the CLI.
+- **T4-m2:** `OUTPUT_ROOT_OVERRIDDEN` gates only the `[OUTPUT-OVERRIDE]` echo and fires on any non-empty value.
+- **T6-m1:** the Phase-1 `[LEGACY-WORKSPACE]` detection is now prose (was a bash conditional) — restore it deterministically inside `scaffold.sh` (~3 lines) to match the "gate what matters deterministically" principle.
+- **T6-m2:** the pre-write `okf_validate.py` call sits under a "verify before writing" heading though the load-bearing run is the post-flip one (documented correctly in `output-synthesis.md`).
+- **Gate block-reason UX:** the validator prints violations to stdout; the hook blocks on stderr with "see errors above" — capture and re-emit the validator output on stderr so the model sees specifics.
+- **Component-4 floor (by design):** the gate requires `INDEX.md` complete + internally filled + links resolving, but does **not** require every linked concept (`tech-stack.md`, etc.) to be `status: complete`. Accepted floor; tighten later if desired.
