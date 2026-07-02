@@ -84,7 +84,7 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 | Payload CMS | 3.x | `/api/{collection}`, `/api/globals/{slug}`, REST + GraphQL dual surface | Version-specific admin paths |
 | Directus | 11.x | `/items/{collection}`, `/system/` prefix, `/server/info` | REST + GraphQL; system collections enumerable |
 
-Each new pack triggers a failing check in `validate-fingerprinting.sh` automatically (self-healing coverage loop).
+`validate-fingerprinting.sh` scans each new pack automatically, but coverage gaps are reported as informational WARNs, not CI failures — only the 6 named regression checks (Astro, Django, FastAPI, Rails, Shopify, Strapi) hard-fail. Adding a new pack does not self-enforce a Phase 3 signal; treat the WARN count as a backlog, not a gate.
 
 **Domain-specific packs** (no framework fingerprint — grouped by site type):
 

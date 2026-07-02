@@ -31,7 +31,7 @@ Beacon has no runtime application code — it is an AI agent system. "Testing" m
 Run these before any PR from the repo root:
 
 ```bash
-bash tests/validate-fingerprinting.sh       # slug correctness + Phase 3 coverage
+bash tests/validate-fingerprinting.sh       # 6 named Phase 3 signal regressions + coverage scan (WARN-only)
 bash tests/validate-tech-pack.sh <file>     # validate a single tech pack file
 bash tests/validate-browser-recon.sh        # browser-recon.md content checks
 bash tests/validate-output-synthesis.sh     # output-synthesis.md content checks

@@ -71,19 +71,19 @@ Load this file before Phase 3 fingerprinting. It contains the full signal tables
 
 ## JS globals & cookies
 
-   - `__NEXT_DATA__` → Next.js
-   - `window.__nuxt` → Nuxt
-   - `_shopify_y` or `_shopify_s` cookies → Shopify
-   - `_[a-z0-9_]+_session` cookie pattern → Rails
-   - `X-Magento-Tags` or `X-Magento-Cache-Id` response headers → Magento 2 (Definitive)
-   - `mage-cache-sessid` cookie → Magento 2 (High)
-   - `data-mage-init` attribute in HTML → Magento 2 (High)
-   - `window.woocommerce_params` or `wc-cart-hash` cookie → WooCommerce (Definitive)
-   - `window.wc` JS global present → WooCommerce (High)
-   - `__VIEWSTATE` hidden input field → ASP.NET WebForms (Definitive)
-   - `.aspx` in URL paths → ASP.NET (High)
-   - `ASP.NET_SessionId` cookie → ASP.NET (High)
-   - `X-Powered-By: ASP.NET` header → ASP.NET (Definitive)
-   - Atom/RSS feed `<generator>` tag → check for framework signal:
-     `Zend_Feed_Writer` → Zend Framework 1, `Ghost` → Ghost, etc.
-   - `csrfmiddlewaretoken` hidden input → Django (High)
+- `__NEXT_DATA__` → Next.js
+- `window.__nuxt` → Nuxt
+- `_shopify_y` or `_shopify_s` cookies → Shopify
+- `_[a-z0-9_]+_session` cookie pattern → Rails
+- `X-Magento-Tags` or `X-Magento-Cache-Id` response headers → Magento 2 (Definitive)
+- `mage-cache-sessid` cookie → Magento 2 (High)
+- `data-mage-init` attribute in HTML → Magento 2 (High)
+- `window.woocommerce_params` or `wc-cart-hash` cookie → WooCommerce (Definitive)
+- `window.wc` JS global present → WooCommerce (High)
+- `__VIEWSTATE` hidden input field → ASP.NET WebForms (Definitive)
+- `.aspx` in URL paths → ASP.NET (High)
+- `ASP.NET_SessionId` cookie → ASP.NET (High)
+- `X-Powered-By: ASP.NET` header → ASP.NET (Definitive)
+- Atom/RSS feed `<generator>` tag → check for framework signal:
+  `Zend_Feed_Writer` → Zend Framework 1, `Ghost` → Ghost, etc.
+- `csrfmiddlewaretoken` hidden input → Django (High)

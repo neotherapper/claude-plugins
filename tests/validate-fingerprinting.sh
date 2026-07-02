@@ -86,7 +86,10 @@ else
   fail "FastAPI signals present (uvicorn and swagger-ui)"
 fi
 
-if grep -q 'X-Runtime' "$UNION_FILE" && grep -q 'csrf-token' "$UNION_FILE"; then
+# X-Runtime: case-insensitive (header casing may vary in docs — same rationale as
+# the Shopify/Strapi checks below; fingerprints.md already mixes X-Strapi-Version
+# and lowercased header mentions, so this isn't hypothetical)
+if grep -qi 'X-Runtime' "$UNION_FILE" && grep -q 'csrf-token' "$UNION_FILE"; then
   pass "Rails signals present (X-Runtime and csrf-token)"
 else
   fail "Rails signals present (X-Runtime and csrf-token)"
@@ -111,6 +114,18 @@ fi
 # Uncovered packs do NOT cause a non-zero exit.
 
 TOTAL=$(ls -d "$TECH_DIR"/*/ 2>/dev/null | wc -l | tr -d ' ')
+
+# Regression guard: TECH_DIR going empty/missing (deleted, wrong path, broken
+# checkout) would otherwise abort here silently under `set -e` (the glob fails,
+# pipefail propagates through wc/tr) with no FAIL line and no summary — report
+# it like the other structural guards above instead.
+if [ "$TOTAL" -eq 0 ]; then
+  fail "Tech pack directory scan ($TECH_DIR is empty or missing)"
+  echo "========================================"
+  echo "Results: $PASS passed, $FAIL failed, $WARN warnings"
+  exit 1
+fi
+
 covered=0
 uncovered=0
 
@@ -125,9 +140,9 @@ for dir in "$TECH_DIR"/*/; do
   # Alias: directory name differs from how the framework appears in docs
   search="$framework"
   case "$framework" in
-    nextjs)         search='Next\.js|__NEXT_DATA__' ;;
-    zend-framework) search='[Zz]end' ;;
-    aspnet)         search='ASP\.NET|__VIEWSTATE|\.aspx' ;;
+    nextjs)             search='Next\.js|__NEXT_DATA__' ;;
+    zend-framework)     search='[Zz]end' ;;
+    aspnet|aspnet-core) search='ASP\.NET|__VIEWSTATE|\.aspx' ;;
   esac
   if grep -qiE "$search" "$UNION_FILE"; then
     pass "Coverage: '$framework' has a Phase 3 fingerprint signal"

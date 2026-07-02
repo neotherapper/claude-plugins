@@ -104,7 +104,7 @@ All in `tests/`. Run before any PR:
 
 | Script | What it checks |
 |--------|---------------|
-| `validate-fingerprinting.sh` | Phase 1 slug correctness + Phase 3 coverage for all 12 tech packs |
+| `validate-fingerprinting.sh` | 6 named Phase 3 signal regressions (hard-fail) + informational coverage scan across all tech packs (WARN-only; slug correctness lives in `validate-slug-rule.sh`) |
 | `validate-tech-pack.sh <file>` | 12 checks: frontmatter fields, 10 sections, ≥5 probe items |
 | `validate-browser-recon.sh` | 15 checks on browser-recon.md content and tool signatures |
 | `validate-output-synthesis.sh` | 11 checks on output-synthesis.md content and token references |
