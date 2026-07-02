@@ -45,4 +45,5 @@ status: draft
 {{API_SURFACE_FILE_ROWS}}
 <!-- OPENAPI_STATUS: Phase 12 resolves to one of: link row, HAR row, or "" (omit when Phase 11 skipped) -->
 {{OPENAPI_STATUS}}
-| [scripts/test-{{SITE_SLUG}}.sh](scripts/test-{{SITE_SLUG}}.sh) | Smoke tests |
+<!-- SMOKE_TEST_ROW: Phase 12 resolves to the smoke-test link row AFTER writing scripts/test-{slug}.sh -->
+{{SMOKE_TEST_ROW}}

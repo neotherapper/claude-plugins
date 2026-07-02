@@ -210,7 +210,7 @@ Resolve all tokens:
 | `{{API_SURFACE_FILE_ROWS}}` | One `\| [api-surfaces/{name}.md](...) \| {description} \|` row per surface file written in Phase 12 (omit row if none) |
 | `{{KEY_FINDINGS}}` | 3–5 bullet points summarising the most important discoveries |
 | `{{OPENAPI_STATUS}}` | See OPENAPI_STATUS Resolution below |
-| `{{SITE_SLUG}}` | Slug form of site name (already resolved by `scaffold.sh` in the smoke-test row) |
+| `{{SMOKE_TEST_ROW}}` | See SMOKE_TEST_ROW Resolution below |
 
 ## OPENAPI_STATUS Resolution
 
@@ -225,6 +225,19 @@ Inspect the session brief for Phase 11 signals and resolve the `{{OPENAPI_STATUS
 
 Neither signal present (Phase 11 ran and produced a spec)
   → {{OPENAPI_STATUS}} = "| [specs/{site-slug}.openapi.yaml](specs/{site-slug}.openapi.yaml) | OpenAPI spec (observed traffic) |"
+```
+
+## SMOKE_TEST_ROW Resolution
+
+The scaffolded `INDEX.md` stub carries `{{SMOKE_TEST_ROW}}` as an inert placeholder — not a live
+link — because `scripts/test-{site-slug}.sh` does not exist yet at scaffold time (Phase 1), and
+`okf_validate.py`'s link-resolution check would fail a literal `[text](path)` link to a file that
+doesn't exist. Only resolve this token to a real link AFTER Phase 12 has written
+`scripts/test-{site-slug}.sh` (see "scripts/test-{site-slug}.sh" above), so the link target already
+exists on disk by the time the token becomes a link:
+
+```
+{{SMOKE_TEST_ROW}} = "| [scripts/test-{site-slug}.sh](scripts/test-{site-slug}.sh) | Smoke tests |"
 ```
 
 ## Flip to status: complete (final Phase 12 action)
