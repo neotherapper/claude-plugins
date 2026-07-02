@@ -188,8 +188,9 @@ actually document the fields it claims?) may layer on top later, but it is never
 Phase 1   scaffold.sh → OKF stub files + .beacon/{session-brief,phase-checklist,output-root}
 Phase 2-11 append to session-brief; each phase Edits the relevant OKF file (fills enums + body);
            tick phase-checklist
-Phase 12  fill INDEX.md (entrypoint) + log.md → run okf_validate.py
-Stop      hook re-runs okf_validate.py → blocks on any violation
+Phase 12  edit every scaffolded OKF file in place (fill body/tokens) → run okf_validate.py →
+          flip status:draft→complete per file, INDEX.md last → run okf_validate.py again
+Stop      hook re-runs okf_validate.py (only once INDEX.md is status:complete) → blocks on any violation
 ```
 
 ## Isolation / interfaces
@@ -206,8 +207,19 @@ Each unit is independently testable; the profile doc is the contract between the
 1. **Hook ↔ output-root discovery** — marker file vs directory scan (Component 4).
 2. **`depends_on`/`feeds_to` frontmatter vs markdown-links-only** for edges — start links-only (OKF
    minimum), add explicit edges only if the validator needs them.
-3. **Existing `templates/` reuse** — evolve in place vs new `templates/okf/`. Prefer evolving to avoid
-   two template sets.
+3. **RESOLVED (Task 6).** ~~Existing `templates/` reuse — evolve in place vs new `templates/okf/`.
+   Prefer evolving to avoid two template sets.~~ Kept both sets, but scoped their roles instead of
+   merging them: `templates/okf/*.md` (Task 3) are the canonical OKF-frontmatter stubs for every
+   markdown output concept (`INDEX.md`, `tech-stack.md`, `site-map.md`, `constants.md`,
+   `api-surface.md`, `session-brief.md`, `phase-checklist.md`); `scaffold.sh` copies them into
+   `OUTPUT_ROOT` in Phase 1, and Phase 12 **edits those scaffolded files in place** rather than
+   re-rendering them. The legacy `templates/*.md.template` files (no frontmatter) are superseded
+   for every markdown OKF concept — Phase 12 no longer loads them (see
+   `skills/site-recon/references/output-synthesis.md`); doing so would drop the scaffolded
+   frontmatter, failing `okf_validate.py` and, for `INDEX.md`, permanently disarming the
+   `Stop`-hook gate. The one legacy template still in active use is `templates/smoke-test.sh.template`,
+   which produces `scripts/test-{slug}.sh` — a shell script, not an OKF markdown concept, so it sits
+   outside this profile and is unaffected.
 4. **`.beacon/` placement under a caller override** — keep `.beacon/` beside the output root.
 
 ## Subsystem B — Fleet orchestration (deferred; sketch only)
