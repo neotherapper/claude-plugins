@@ -35,6 +35,32 @@ bash "$HOOKS/okf-gate.sh" || { echo "FAIL: case2 gate rejected a valid complete 
 test -f "$T2/out/.beacon/recon-active.json" && { echo "FAIL: case2 marker not deleted on success"; exit 1; }
 echo "case2 OK: complete+valid -> pass, marker deleted"
 
+# ---- Case 2b: complete (QUOTED status) + valid -> pass, marker deleted ----
+# Regression coverage for FIX 1: the gate's completion check must use the validator's
+# quote-normalizing frontmatter parser, not a `grep '^status: complete$'` that misses
+# `status: "complete"`.
+T2B=$(mktemp -d); cd "$T2B"
+mkdir -p "$T2B/out/.beacon"
+cat > "$T2B/out/INDEX.md" <<'EOF'
+---
+type: site-index
+title: "Example — Research Index"
+resource: "https://example.com"
+tags: []
+timestamp: "2026-07-02T00:00:00Z"
+status: "complete"
+---
+
+# Example — Research Index
+
+Minimal valid complete bundle, quoted status. No links, no unfilled tokens.
+EOF
+printf '{"output_root":"%s","retries":0}\n' "$T2B/out" > "$T2B/out/.beacon/recon-active.json"
+python3 "$HOOKS/../skills/site-recon/scripts/okf_validate.py" "$T2B/out" || { echo "FAIL: case2b fixture is not actually valid — fix the fixture"; exit 1; }
+bash "$HOOKS/okf-gate.sh" || { echo "FAIL: case2b gate rejected a valid complete bundle with quoted status"; exit 1; }
+test -f "$T2B/out/.beacon/recon-active.json" && { echo "FAIL: case2b marker not deleted (quoted status not recognised as complete)"; exit 1; }
+echo "case2b OK: complete (quoted status)+valid -> pass, marker deleted"
+
 # ---- Case 3: complete + invalid -> block, retries increment, then release ----
 T3=$(mktemp -d); cd "$T3"
 mkdir -p "$T3/out/.beacon"

@@ -46,6 +46,19 @@ def parse_frontmatter(text: str):
         fm[k.strip()] = v.strip().strip("'\"")
     return fm
 
+def is_complete(path: Path) -> bool:
+    """True iff path's frontmatter has status: complete (quote-normalizing,
+    frontmatter-anchored — same parser validate_node/validate_bundle use).
+    Any read/parse failure fails closed to False."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False
+    fm = parse_frontmatter(text)
+    if fm is None:
+        return False
+    return fm.get("status") == "complete"
+
 def validate_node(path: Path) -> list[str]:
     try:
         text = path.read_text(encoding="utf-8")
@@ -106,8 +119,16 @@ def validate_bundle(root: Path) -> dict[str, list[str]]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Beacon OKF validator (fail-closed)")
-    ap.add_argument("root", help="output bundle root (e.g. docs/sites/<slug>/research)")
+    ap.add_argument("root", nargs="?", default=None,
+                     help="output bundle root (e.g. docs/sites/<slug>/research)")
+    ap.add_argument("--is-complete", metavar="FILE", default=None,
+                     help="check a single file's frontmatter status:complete and exit "
+                          "0 (complete) or 1 (not complete/unreadable); no bundle validation")
     args = ap.parse_args()
+    if args.is_complete is not None:
+        return 0 if is_complete(Path(args.is_complete)) else 1
+    if not args.root:
+        ap.error("root is required unless --is-complete is given")
     results = validate_bundle(Path(args.root))
     for path, errs in results.items():
         print(f"\n{path}:")

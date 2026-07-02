@@ -34,7 +34,10 @@ ROOT=$(python3 -c "import json; print(json.load(open('$MARK'))['output_root'])" 
 
 INDEX="$ROOT/INDEX.md"
 [ -f "$INDEX" ] || exit 0   # no INDEX yet → mid-run, silent no-op
-grep -Eq '^status:[[:space:]]*complete[[:space:]]*$' "$INDEX" || exit 0   # not claimed complete → silent no-op
+# Completion check reuses the validator's own frontmatter parser (quote-normalizing,
+# frontmatter-anchored) instead of a standalone grep, so status: "complete" (quoted)
+# is recognised identically to status: complete, and a body line can never false-arm this.
+python3 "$VALIDATE" --is-complete "$INDEX" >/dev/null 2>&1 || exit 0   # not claimed complete → silent no-op
 
 if python3 "$VALIDATE" "$ROOT"; then
   rm -f "$MARK"

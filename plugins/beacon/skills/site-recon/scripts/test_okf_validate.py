@@ -136,3 +136,29 @@ def test_empty_bundle_fails_closed():
     with tempfile.TemporaryDirectory() as t:
         res = V.validate_bundle(pathlib.Path(t))
         assert res != {}
+
+
+def test_is_complete_unquoted_status_true():
+    with tempfile.TemporaryDirectory() as t:
+        p = _write(t, "INDEX.md", "---\ntype: site-index\nstatus: complete\n---\nbody\n")
+        assert V.is_complete(p) is True
+
+
+def test_is_complete_quoted_status_true():
+    with tempfile.TemporaryDirectory() as t:
+        p = _write(t, "INDEX.md", '---\ntype: site-index\nstatus: "complete"\n---\nbody\n')
+        assert V.is_complete(p) is True
+
+
+def test_is_complete_draft_status_false():
+    with tempfile.TemporaryDirectory() as t:
+        p = _write(t, "INDEX.md", "---\ntype: site-index\nstatus: draft\n---\nbody\n")
+        assert V.is_complete(p) is False
+
+
+def test_is_complete_ignores_body_line_status():
+    # frontmatter says draft; a body line that merely reads "status: complete"
+    # must not be picked up (parser is frontmatter-anchored, not whole-file grep)
+    with tempfile.TemporaryDirectory() as t:
+        p = _write(t, "INDEX.md", "---\ntype: site-index\nstatus: draft\n---\nstatus: complete\n")
+        assert V.is_complete(p) is False

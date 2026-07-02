@@ -1,7 +1,7 @@
 ---
 name: site-recon
 description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 16-phase systematic investigation of a website and produces a complete persistent docs/sites/{site-slug}/research/ folder.
-version: 0.7.0
+version: 0.7.1
 ---
 
 # site-recon — Research Mode
