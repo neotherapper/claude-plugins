@@ -151,14 +151,20 @@ Ships with a test (`test_okf_validate.py`) like ai-sdlc's `test_okf_validate.py`
 
 ### Component 4 — Deterministic gate (hook)
 
-New beacon plugin hook (`plugins/beacon/hooks/`), `SubagentStop` + `Stop`: when a beacon recon
-session/subagent stops, run `okf_validate.py` against the output root. On failure, surface the
-violations and block/flag completion. This is what turns "please write the files" into an actual gate
-— and is the piece that would have caught `emsa-emcip` (zero files) and the phase-discipline drop.
+New beacon plugin hook (`plugins/beacon/hooks/`), `SubagentStop` + `Stop`. **Option A semantics:**
+the hook is a silent no-op until the recon *claims completion* — signalled by `INDEX.md`
+frontmatter being `status: complete` (Phase 12 flips it as its last step). Only then does it run
+`okf_validate.py` against the output root and block/flag on failure. This catches the
+"claimed-done-but-invalid" case deterministically without false-triggering on normal mid-run
+Stop/SubagentStop events (a fresh scaffold is all `status: draft`, which is valid but unfinished —
+gating on that would block/delete-the-marker on every routine subagent handoff). The
+abandoned/no-output case (`emsa-emcip`/`lloyds-sab`-style: recon started, nothing ever written) is
+caught upstream instead — by the Phase-12 self-gate (Component 5) and, longer-term, the deferred
+Subsystem-B orchestrator sweep — not by this hook.
 
-A hook cannot know the output root without a hint; the scaffold writes a `.beacon/output-root` marker
-(or the hook scans `docs/sites/*/research` + any logged `[OUTPUT-OVERRIDE]`). Mechanism finalised at
-plan time.
+A hook cannot know the output root without a hint; the scaffold writes a `.beacon/recon-active.json`
+marker (`output_root` + `retries`) that the hook reads and deletes on success/give-up. Mechanism
+finalised at plan time.
 
 ### Component 5 — SKILL.md wiring
 
@@ -221,7 +227,7 @@ A follow-on spec. A `/beacon:fleet` command (or companion skill) that:
 | Finding | Fixed by |
 |---------|----------|
 | Phase discipline 0/11; session brief never maintained | Components 2, 4, 5 |
-| `emsa-emcip`/`lloyds-sab` produced no output | Components 2 (scaffold), 4 (stop gate) |
+| `emsa-emcip`/`lloyds-sab` produced no output | Components 2 (scaffold), 5 (Phase-12 self-gate); stop gate (Component 4) only enforces on claimed-complete bundles |
 | Output-path landmine (`docs/research` vs `docs/sites`) | Component 2 (`OUTPUT_ROOT`) |
 | No typed/enum output schema; no licensing capture | Component 1 (profile) |
 | Bundled scripts never run / deterministic gate absent | Components 3–4 |

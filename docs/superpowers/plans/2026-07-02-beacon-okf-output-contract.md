@@ -521,7 +521,12 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 **Interfaces:**
 - Consumes: validator (Task 2), the `.beacon/recon-active.json` marker (Task 4).
-- Produces: a hook that, on stop, validates the active output root; on failure prints violations and exits non-zero (deterministic gate); after 2 failed retries it lets the stop through with a persistent `[OKF-GATE-FAILED]` log so it can't loop forever.
+- Produces: a hook that is a **silent no-op unless `INDEX.md` is `status: complete`** (Option A —
+  a fresh/mid-run `status: draft` bundle passes through untouched: no validation, no block, no
+  marker deletion). Only once completion is claimed does it validate the output root; on failure
+  it prints violations and exits non-zero (deterministic gate); after 2 failed retries it lets the
+  stop through with a persistent `[OKF-GATE-FAILED]` log so it can't loop forever. This supersedes
+  the always-validate draft below — see `plugins/beacon/hooks/okf-gate.sh` for the shipped logic.
 
 - [ ] **Step 1: Write the failing test**
 
