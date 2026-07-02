@@ -10,7 +10,7 @@ fi
 
 for path in "/swagger.json" "/swagger.yaml" "/openapi.json" "/openapi.yaml" "/v1/api-docs"; do
   url="https://${TARGET}${path}"
-  status=$(curl -sf -o /dev/null -w "%{http_code}" "$url")
+  status=$(curl -sf -o /dev/null -w "%{http_code}" "$url" || true)
   if [[ "$status" == "200" ]]; then
     echo "FOUND: $url"
   fi

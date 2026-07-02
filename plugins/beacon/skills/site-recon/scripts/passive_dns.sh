@@ -10,13 +10,15 @@ fi
 
 echo "--- VirusTotal (no API key) ---"
 curl -sf --max-time 10 "https://www.virustotal.com/ui/domain_reports/${TARGET}" \
-  | python3 -c "import sys, json; j=json.load(sys.stdin); subs=j.get('data',{}).get('attributes',{}).get('subdomains',[]); print('\n'.join(subs[:100]))"
+  | python3 -c "import sys, json; j=json.load(sys.stdin); subs=j.get('data',{}).get('attributes',{}).get('subdomains',[]); print('\n'.join(subs[:100]))" \
+  || echo "VirusTotal lookup failed or returned no data"
 
 if [[ -n "${DNSDB_API_KEY:-}" ]]; then
   echo "--- DNSDB ---"
   curl -sf --max-time 10 "https://api.dnsdb.info/lookup/rrset/name/${TARGET}/ANY" \
     -H "X-API-Key: ${DNSDB_API_KEY}" \
-    | jq -r '.[].rrname' | sort -u
+    | jq -r '.[].rrname' | sort -u \
+    || echo "DNSDB lookup failed or returned no data"
 else
   echo "DNSDB API key not set – skipping DNSDB lookup"
 fi

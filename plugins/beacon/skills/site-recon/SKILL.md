@@ -627,29 +627,33 @@ helper in `${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/` (via `bash`, so the
 not matter) and returns one JSON document keyed by step:
 ```bash
 DOMAIN=$(printf '%s' "{url}" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s#/.*$##; s/:[0-9]+$//')
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/osint.py" run_all --target "$DOMAIN"
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/osint.py" run_all --target "$DOMAIN" --exclude cloud-enum,container-scan
 ```
-This runs the 9 bundled helpers — `passive_dns`, `sublist3r`, `tls_fingerprint`, `cloud-enum`,
-`container-scan`, `cicd-scan`, `graphql_introspect`, `openapi_detect`, `config_leakage` (purposes in
-the **Bundled scripts** table below; the last three reinforce Phases 6, 8, and 6b).
+This runs 7 of the 9 bundled helpers — `passive_dns`, `sublist3r`, `tls_fingerprint`, `cicd-scan`,
+`graphql_introspect`, `openapi_detect`, `config_leakage` (purposes in the **Bundled scripts** table
+below; the last three reinforce Phases 6, 8, and 6b). `cloud-enum` and `container-scan` are excluded
+by default — see **Scope** below.
 
-Log `[OSINT-SWEEP:run_all]` **only if the returned JSON is non-empty**. If `osint.py` errors or
-returns `{}` (most commonly `fire` — Google Python Fire — not installed), fall back to running each
-helper directly and log `[TOOL-UNAVAILABLE:osint-orchestrator:fell-back-to-loop]`:
+Log `[OSINT-SWEEP:run_all]` **only if the returned JSON contains at least one step with
+`"exit_code": 0`** — every discovered helper is always present in the JSON regardless of outcome, so
+a non-empty document alone does not mean anything actually succeeded. If `osint.py` errors, returns
+`{}` (most commonly `fire` — Google Python Fire — not installed), or every step's `exit_code` is
+non-zero, fall back to running each helper directly and log
+`[TOOL-UNAVAILABLE:osint-orchestrator:fell-back-to-loop]`:
 ```bash
 DOMAIN=$(printf '%s' "{url}" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s#/.*$##; s/:[0-9]+$//')
 for s in "${CLAUDE_PLUGIN_ROOT}"/skills/site-recon/scripts/*.sh; do
-  case "$(basename "$s")" in *_tests.sh) continue;; esac   # skip the test harness
+  case "$(basename "$s")" in *_tests.sh|cloud-enum.sh|container-scan.sh) continue;; esac   # skip test harness + active infra probes (see Scope note)
   echo "=== $(basename "$s") ==="; TARGET="$DOMAIN" bash "$s" || true
 done
 ```
 
 > **Scope:** `cloud-enum.sh` (S3/blob bucket name-guessing) and `container-scan.sh` (Kubernetes /
-> registry) actively probe third-party and infrastructure hosts. Run the full sweep only when the
-> engagement authorises infrastructure enumeration; otherwise exclude them —
-> `… run_all --target "$DOMAIN" --exclude cloud-enum,container-scan` (or, in the fallback loop, add
-> `cloud-enum.sh|container-scan.sh) continue;;` to the `case`). The other helpers stay within the
-> target's own web surface, consistent with Phases 6b/8.
+> registry) actively probe third-party and infrastructure hosts, so both invocations above exclude
+> them by default. Only include them when the engagement explicitly authorises infrastructure
+> enumeration — drop `--exclude cloud-enum,container-scan` from the `run_all` call (or, in the
+> fallback loop, remove `cloud-enum.sh|container-scan.sh` from the `case`). The other helpers stay
+> within the target's own web surface, consistent with Phases 6b/8.
 
 **2 — Historical & search OSINT.** Wayback CDX, CommonCrawl CDX, crt.sh certificate transparency,
 GitHub code search, and Google dorks — full query patterns in `references/osint-sources.md`. Also
@@ -660,13 +664,25 @@ overwriting per file, and `.beacon/` does not exist until Phase 11 — so re-fet
 relying on a saved copy) and grep each for live keys that expose backend services:
 ```bash
 # Stripe pk_live, Google/Firebase AIza, Mapbox pk., Sentry DSN
-curl -s --max-time 10 "{url}" \
+base="{url}"
+curl -s --max-time 10 "$base" \
   | grep -oE "src=['\"][^'\"]+\.js[^'\"?#]*" | sed -E "s/^src=['\"]//" | while read -r b; do
   case "$b" in
     http*) ;;                # absolute
     //*)   b="https:$b" ;;   # protocol-relative
-    /*)    b="{url}$b" ;;    # root-relative
-    *)     b="{url}/$b" ;;   # document-relative
+    /*)    b="${base%/}$b" ;;   # root-relative
+    *)
+      case "$base" in
+        */) b="${base}$b" ;;                          # base is already a directory (trailing slash)
+        *)
+          if [[ "$base" =~ ^[a-zA-Z]+://[^/]+/.+$ ]]; then
+            b="${base%/*}/$b"   # document-relative: strip base's last (file-like) segment
+          else
+            b="${base}/$b"      # base is a bare origin — no path segment to strip
+          fi
+          ;;
+      esac
+      ;;
   esac
   curl -s --max-time 10 "$b"
 done | grep -oE 'pk_live_[0-9A-Za-z]+|AIza[0-9A-Za-z_-]{35}|pk\.[A-Za-z0-9._-]{20,}|https://[0-9a-f]{32}@[a-z0-9.-]+/[0-9]+' | sort -u

@@ -30,7 +30,13 @@ from typing import Dict, List
 import fire
 
 SCRIPT_DIR = Path(__file__).parent
-SWEEP_TIMEOUT = 60  # seconds per helper — testssl.sh/sublist3r have no wall-clock cap of their own
+SWEEP_TIMEOUT = 60  # default seconds per helper
+# testssl.sh/sslyze/tls-scan and sublist3r have no wall-clock cap of their own and routinely run
+# past the default on a real target — give them more room before declaring a timeout.
+SWEEP_TIMEOUT_OVERRIDES = {
+    "tls_fingerprint": 180,
+    "sublist3r": 180,
+}
 
 def _is_helper(path: Path) -> bool:
     """A bundled OSINT helper: a ``*.sh`` file that is not the test harness.
@@ -45,17 +51,18 @@ def _is_helper(path: Path) -> bool:
 
 def _run_script(script: Path, target: str) -> Dict[str, str]:
     """Execute a Bash helper. Returns stdout/stderr/exit_code for diagnostics."""
+    timeout = SWEEP_TIMEOUT_OVERRIDES.get(script.stem, SWEEP_TIMEOUT)
     try:
         # Helpers read the target from the TARGET env var (not $1); invoke via
         # `bash` so the exec bit is irrelevant. `timeout` caps unbounded helpers
-        # (tls_fingerprint.sh, sublist3r.sh) so one hang can't stall the sweep.
+        # so one hang can't stall the sweep indefinitely.
         result = subprocess.run(
             ["bash", str(script)],
             capture_output=True,
             text=True,
             check=False,
             env={**os.environ, "TARGET": target},
-            timeout=SWEEP_TIMEOUT,
+            timeout=timeout,
         )
         return {
             "stdout": result.stdout.strip(),
@@ -63,7 +70,7 @@ def _run_script(script: Path, target: str) -> Dict[str, str]:
             "exit_code": result.returncode,
         }
     except subprocess.TimeoutExpired:
-        return {"stdout": "", "stderr": f"timed out after {SWEEP_TIMEOUT}s", "exit_code": -1}
+        return {"stdout": "", "stderr": f"timed out after {timeout}s", "exit_code": -1}
     except Exception as exc:  # pragma: no cover – defensive
         return {"stdout": "", "stderr": str(exc), "exit_code": -1}
 

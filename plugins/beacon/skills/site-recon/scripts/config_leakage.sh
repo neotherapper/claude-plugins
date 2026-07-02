@@ -8,7 +8,7 @@ if [[ -z "${TARGET:-}" ]]; then
   exit 1
 fi
 
-files=( .env config.yml settings.json .gitlab-ci.yml .github/workflows/*.yml )
+files=( .env config.yml settings.json .gitlab-ci.yml ".github/workflows/ci.yml" ".github/workflows/main.yml" ".github/workflows/deploy.yml" )
 for f in "${files[@]}"; do
   url="https://${TARGET}/${f}"
   status=$(curl -sf -o /dev/null -w "%{http_code}" "$url" || true)

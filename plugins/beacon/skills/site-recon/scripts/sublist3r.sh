@@ -10,8 +10,10 @@ fi
 
 if command -v sublist3r >/dev/null 2>&1; then
   echo "Running Sublist3r for ${TARGET}..."
-  sublist3r -d "${TARGET}" -o sublist3r.txt
-  echo "Sublist3r results saved to sublist3r.txt"
+  out="$(mktemp)"
+  trap 'rm -f "$out"' EXIT
+  sublist3r -d "${TARGET}" -o "$out"
+  cat "$out"
 else
   echo "sublist3r not installed – skipping subdomain enumeration"
 fi

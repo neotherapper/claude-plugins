@@ -29,7 +29,7 @@ is **not** a phase helper and is skipped by `run_all`.
 | `tls_fingerprint.sh` | Phase 9 (informs Phase 3) | TLS/SSL analysis using whichever of `testssl.sh`, `sslyze`, or `tls-scan` is installed. Reads `TARGET`. | invoked (Phase 9); untested |
 | `graphql_introspect.sh` | Phase 9 (reinforces Phase 6) | Sends a GraphQL introspection query (`__schema { types { name fields { name } } }`) to `https://${TARGET}/graphql` and pretty-prints via `jq`. | invoked (Phase 9); untested |
 | `openapi_detect.sh` | Phase 9 (reinforces Phase 8) | HTTP-probes five common OpenAPI/Swagger spec paths and prints `FOUND:` for any that return HTTP 200. | invoked (Phase 9); untested |
-| `config_leakage.sh` | Phase 9 (reinforces Phase 6b) | Probes for public config/secret files (`.env`, `config.yml`, `settings.json`, `.gitlab-ci.yml`, `.github/workflows/*.yml`) and prints the first 20 lines of any 2xx. | invoked (Phase 9); untested |
+| `config_leakage.sh` | Phase 9 (reinforces Phase 6b) | Probes for public config/secret files (`.env`, `config.yml`, `settings.json`, `.gitlab-ci.yml`, `.github/workflows/ci.yml`, `.github/workflows/main.yml`, `.github/workflows/deploy.yml`) and prints the first 20 lines of any 2xx. | invoked (Phase 9); untested |
 | `cloud-enum.sh` | Phase 9 (active infra probe) | Enumerates cloud buckets from TARGET-derived names: AWS S3 (path + virtual-hosted), Azure Blob, GCS, Cloudflare R2. Reports any 2xx. | invoked (Phase 9, scope-gated); untested |
 | `container-scan.sh` | Phase 9 (active infra probe) | Checks Docker Registry (`/v2/_catalog`, `/v2/`), Kubernetes API ports (6443/8443/8080/443), and orchestration dashboards. | invoked (Phase 9, scope-gated); untested |
 | `cicd-scan.sh` | Phase 9 | Probes exposed CI/CD configs (GitHub Actions, `.gitlab-ci.yml`, Jenkins, Travis, Azure Pipelines, CircleCI, Jenkinsfile) and build/webhook endpoints. | invoked (Phase 9); untested |
@@ -51,6 +51,7 @@ drift.
 
 ## Scope note
 
-`cloud-enum.sh` and `container-scan.sh` actively probe third-party and infrastructure hosts. The
-Phase 9 sweep supports `run_all --target <domain> --exclude cloud-enum,container-scan` for
-engagements that do not authorise infrastructure enumeration.
+`cloud-enum.sh` and `container-scan.sh` actively probe third-party and infrastructure hosts, so the
+Phase 9 sweep **excludes them by default** (`run_all --target <domain> --exclude cloud-enum,container-scan`).
+Only drop that flag — re-including them — once the engagement explicitly authorises infrastructure
+enumeration.
