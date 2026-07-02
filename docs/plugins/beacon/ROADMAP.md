@@ -2,9 +2,24 @@
 
 Planned features and capabilities in priority order. Each version ships as a complete, tested unit.
 
+> **Status legend:** ✅ shipped · 🔜 next · 📋 planned. The version numbers below were reconciled
+> against what actually shipped on 2026-06-30 — read **Shipped** first. Planned numbers (v0.8.0+)
+> are indicative and assigned at release, since the sequence already slipped once.
+
 ---
 
-## v0.6.0 — site-intel: Tech Pack Cross-Referencing
+## Shipped
+
+| Version | What actually shipped | Notes |
+|---------|----------------------|-------|
+| ✅ v0.6.0 | site-intel tech-pack cross-referencing (Step 3a) | Matches the v0.6.0 plan below |
+| ✅ v0.7.0 | **Workspace restructure** → `docs/sites/{slug}/research/` with dual-path fallback (PR #27) | ⚠️ This consumed the v0.7.0 number; the planned "Query Proof Scripts" did **not** ship and is renumbered 🔜 below |
+| ✅ #31 | site-recon `SKILL.md` de-dup + phase reorder (Phase 1–2.5 reconcile, Phase 8.5 restored after Phase 8) | Landed on `main` before this work; the OSINT wiring below builds on it |
+| ✅ site-recon OSINT wiring (2026-06-30) | On top of #31: Phase 9 OSINT sweep wired via `osint.py run_all` (fixed its `TARGET` env-var bug so the 9 `.sh` helpers actually run); CSP/CORS `connect-src` API-domain extraction (Phase 2) and third-party-key harvest (Phase 9) promoted from `references/`; bundled-scripts table added to `SKILL.md` | Closes the "catalogued-but-unwired" gap for the OSINT helpers |
+
+---
+
+## v0.6.0 — site-intel: Tech Pack Cross-Referencing ✅ SHIPPED
 
 **Goal:** When the user asks a *how-do-I* or framework-specific question, site-intel loads the relevant tech pack alongside the research file — so answers draw on both what was discovered *and* framework conventions.
 
@@ -16,7 +31,10 @@ Planned features and capabilities in priority order. Each version ships as a com
 
 ---
 
-## v0.7.0 — Query Proof Scripts
+## Query Proof Scripts — 🔜 next (was mislabeled v0.7.0)
+
+> **Reconciled 2026-06-30:** v0.7.0 actually shipped as the `docs/sites/{slug}/research/` workspace
+> restructure (see **Shipped**). This feature did not ship; it is the next planned increment.
 
 **Goal:** Give site-intel the ability to optionally generate and run simple data-fetching scripts that prove discovered endpoints return real, useful data — showing the user the actual output, not just the status code.
 
@@ -145,6 +163,13 @@ Bundle grep patterns to add:
 - Tech pack sections should document known webhook paths (Stripe, GitHub, Shopify)
 
 ### Phase 9 — OSINT
+
+> ✅ **Done (2026-06-30 hardening pass):** the bundled OSINT scripts — `passive_dns.sh`,
+> `sublist3r.sh`, `tls_fingerprint.sh`, `cloud-enum.sh`, `container-scan.sh`, `cicd-scan.sh` — are
+> now executed in Phase 9 via `osint.py run_all`, and CSP `connect-src` API-domain extraction
+> (Phase 2) plus third-party-key harvest (Phase 9) were promoted from `references/osint-sources.md`
+> into the executable phases. Still open below: Shodan/SecurityTrails (API-key-gated) and the
+> expanded dork patterns.
 
 **Expand Google dorking patterns** (add to phase-detail.md):
 ```

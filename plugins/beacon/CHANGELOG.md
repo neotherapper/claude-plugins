@@ -53,9 +53,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 ### Changed
 - Expand Phase 9 Session Brief Format with new OSINT sources
 - Update `osint-sources.md` with comprehensive tool coverage (707 lines)
+- **Bundled OSINT scripts wired into the phase sequence** (previously referenced nowhere): Phase 9 now runs `osint.py run_all`, executing the 9 `.sh` helpers (`passive_dns`, `sublist3r`, `tls_fingerprint`, `cloud-enum`, `container-scan`, `cicd-scan`, `graphql_introspect`, `openapi_detect`, `config_leakage`), with a script-loop fallback; Phase 6b and Phase 8 now point at `config_leakage.sh` and `openapi_detect.sh`. Added a bundled-scripts table to `SKILL.md`.
+- **Two reference-only methods promoted to executable phases**: CSP/CORS `connect-src` API-domain extraction (Phase 2) and third-party-key harvest from JS bundles (Phase 9).
 
 ### Fixed
-- None
+- `scripts/osint.py` `run_all` invoked each helper with the target as a positional argument, but every `.sh` helper reads the `TARGET` environment variable — so all helpers exited early with "TARGET environment variable not set" and `run_all` returned only errors. `run_all`/`list` now export `TARGET` and exclude the `run_osint_tests.sh` harness from the sweep.
+- Now that the `TARGET` fix lets the bundled helpers actually run, a follow-up review surfaced bugs the earlier "always fails immediately" behaviour had been masking, plus two issues in the new Phase 9 wiring:
+  - `openapi_detect.sh` / `passive_dns.sh` ran under `set -euo pipefail` with no `|| true` guard on their `curl` calls, so the first non-2xx response aborted the whole script (`openapi_detect.sh` in practice checked only its first probe path; `passive_dns.sh`'s DNSDB lookup never ran once VirusTotal's anonymous endpoint failed). Both now degrade per-probe instead of aborting.
+  - `config_leakage.sh`'s file list contained an unquoted `.github/workflows/*.yml` glob that bash expanded against the *local* filesystem (the orchestrator's cwd) instead of the remote target. Replaced with quoted, literal common workflow filenames.
+  - `sublist3r.sh` wrote results to a relative `sublist3r.txt` that `osint.py` never captured or set a `cwd` for. It now writes to a temp file and prints the contents to stdout so the orchestrator's JSON captures them.
+  - Phase 9's default `run_all` invocation ran the active infrastructure probes (`cloud-enum`, `container-scan`) against every target with no opt-in; they are now excluded by default and must be explicitly re-included once the engagement authorises infrastructure enumeration.
+  - The `[OSINT-SWEEP:run_all]` logging condition ("JSON is non-empty") was nearly always true regardless of whether any helper succeeded, since `run_all` always returns one entry per helper. It now requires at least one step to report `exit_code: 0`.
+  - The third-party key harvest's document-relative URL branch didn't resolve against the fetched page's directory, producing 404s for any non-root `{url}` (e.g. a framed app shell). Fixed to resolve relative to the base URL's directory.
+  - `osint.py`'s single 60s sweep timeout could silently truncate `tls_fingerprint.sh`/`sublist3r.sh`, which wrap tools with no cap of their own; they now get a 180s allowance via a per-helper override.
 
 ---
 
