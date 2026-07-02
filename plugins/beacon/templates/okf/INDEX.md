@@ -9,14 +9,40 @@ status: draft
 
 # {{SITE_NAME}} — Research Index
 
+**Plugin version:** {{PLUGIN_VERSION}}
+
 ## Infrastructure
+
 | Property | Value |
 |----------|-------|
-| Framework | {{FRAMEWORK}} |
+| Framework | {{FRAMEWORK}} {{VERSION}} |
+| CDN | {{CDN}} |
+| Auth | {{AUTH}} |
+| Bot protection | {{BOT_PROTECTION}} |
+| Hosting | {{HOSTING}} |
+
+## Tool Availability
+
+{{TOOL_AVAILABILITY_BLOCK}}
+
+## Quick API Reference
+
+| Surface | Base path | Auth required | Source |
+|---------|-----------|--------------|--------|
+{{API_SURFACE_ROWS}}
+
+## Key Findings
+
+{{KEY_FINDINGS}}
 
 ## Research Files
+
 | File | Contents |
 |------|----------|
-| [tech-stack.md](tech-stack.md) | Framework, CDN, auth, hosting |
-| [site-map.md](site-map.md) | Discovered URLs |
-| [constants.md](constants.md) | IDs, nonces, enums |
+| [tech-stack.md](tech-stack.md) | Framework, CDN, auth, hosting details |
+| [site-map.md](site-map.md) | All discovered URLs |
+| [constants.md](constants.md) | Taxonomy IDs, nonces, enums |
+{{API_SURFACE_FILE_ROWS}}
+<!-- OPENAPI_STATUS: Phase 12 resolves to one of: link row, HAR row, or "" (omit when Phase 11 skipped) -->
+{{OPENAPI_STATUS}}
+| [scripts/test-{{SITE_SLUG}}.sh](scripts/test-{{SITE_SLUG}}.sh) | Smoke tests |

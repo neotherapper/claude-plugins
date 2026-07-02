@@ -175,15 +175,18 @@ Write each surface file to: `docs/sites/{site-slug}/research/api-surfaces/{surfa
 
 If no distinct API surfaces were found (static site, all endpoints behind auth with no observable shape), write a single `api-surfaces/no-public-surfaces.md` — still based on `templates/okf/api-surface.md` so it carries valid frontmatter — noting that observation.
 
-## Token Resolution — edit the scaffolded INDEX.md in place
+## Token Resolution — fill the sections in the scaffolded INDEX.md
 
 `INDEX.md` already exists (scaffolded from `templates/okf/INDEX.md` in Phase 1, with valid OKF
-frontmatter and `status: draft`). **Edit it in place** — keep the frontmatter block (`type:
-site-index`, `tags`); `scaffold.sh` already resolved `{{SITE_NAME}}`, `{{URL}}`, and `{{TIMESTAMP}}`
-at scaffold time, so only re-resolve `title`/`resource`/`timestamp` if a caller-supplied
-`OUTPUT_ROOT` bypassed `scaffold.sh` entirely. Replace the body (everything below the closing
-`---`) with the fully resolved sections below, resolving every token listed in the table —
-including `{{FRAMEWORK}}`, which `scaffold.sh` leaves templated in the scaffolded body.
+frontmatter, the full body section skeleton — Infrastructure, Tool Availability, Quick API
+Reference, Key Findings, Research Files — and `status: draft`). **Edit it in place** — keep the
+frontmatter block (`type: site-index`, `tags`); `scaffold.sh` already resolved `{{SITE_NAME}}`,
+`{{URL}}`, `{{TIMESTAMP}}`, and `{{SITE_SLUG}}` at scaffold time, so only re-resolve
+`title`/`resource`/`timestamp` if a caller-supplied `OUTPUT_ROOT` bypassed `scaffold.sh` entirely.
+**Fill in the sections already present** in the body below the closing `---` — resolve every
+remaining token listed in the table below, including `{{FRAMEWORK}}`, which `scaffold.sh` leaves
+templated in the scaffolded body. Do not add or remove sections; the skeleton already matches this
+table.
 
 **Never** render `INDEX.md` fresh from `${CLAUDE_PLUGIN_ROOT}/templates/INDEX.md.template` — that
 legacy template has no frontmatter, so writing it as the whole file would drop the frontmatter
@@ -194,9 +197,8 @@ Resolve all tokens:
 
 | Token | Resolves to |
 |-------|-------------|
-| `{{SITE_NAME}}` | Site name from session brief header |
-| `{{DATE}}` | Session date |
-| `{{URL}}` | Target URL |
+| `{{SITE_NAME}}` | Site name from session brief header (already resolved by `scaffold.sh`; re-resolve only if `OUTPUT_ROOT` bypassed it) |
+| `{{URL}}` | Target URL (already resolved by `scaffold.sh`) |
 | `{{PLUGIN_VERSION}}` | Current plugin version from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` |
 | `{{FRAMEWORK}}` / `{{VERSION}}` | From infrastructure table |
 | `{{CDN}}` | From infrastructure table |
@@ -208,7 +210,7 @@ Resolve all tokens:
 | `{{API_SURFACE_FILE_ROWS}}` | One `\| [api-surfaces/{name}.md](...) \| {description} \|` row per surface file written in Phase 12 (omit row if none) |
 | `{{KEY_FINDINGS}}` | 3–5 bullet points summarising the most important discoveries |
 | `{{OPENAPI_STATUS}}` | See OPENAPI_STATUS Resolution below |
-| `{{SITE_SLUG}}` | Slug form of site name |
+| `{{SITE_SLUG}}` | Slug form of site name (already resolved by `scaffold.sh` in the smoke-test row) |
 
 ## OPENAPI_STATUS Resolution
 
@@ -228,8 +230,11 @@ Neither signal present (Phase 11 ran and produced a spec)
 ## Flip to status: complete (final Phase 12 action)
 
 Once every output file's body is fully resolved (no `{{TOKEN}}` left anywhere) and
-`okf_validate.py "$OUTPUT_ROOT"` passes while every file is still `status: draft`, flip each
-finished file's frontmatter `status:` field from `draft` to `complete`:
+`okf_validate.py "{OUTPUT_ROOT}"` passes while every file is still `status: draft`, flip each
+finished file's frontmatter `status:` field from `draft` to `complete`. `{OUTPUT_ROOT}` is the
+scaffolded path Phase 1's `scaffold.sh` created/printed — not a persisted shell variable, so
+substitute the actual path each time; `$OUTPUT_ROOT` does not survive across separate command
+invocations:
 
 1. Flip `tech-stack.md`, `site-map.md`, `constants.md`, and every `api-surfaces/*.md` first.
 2. Flip `INDEX.md` **last** — this is the final action of Phase 12. Write the line unquoted and
@@ -237,7 +242,7 @@ finished file's frontmatter `status:` field from `draft` to `complete`:
    (`hooks/okf-gate.sh`) matches `^status:[[:space:]]*complete[[:space:]]*$` on `INDEX.md`; anything
    else (`status: "complete"`, `Status: Complete`, a trailing `# done` comment) will not match, and
    the gate stays a silent no-op forever.
-3. Re-run `python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "$OUTPUT_ROOT"`
+3. Re-run `python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "{OUTPUT_ROOT}"`
    once more after the flip. Flipping to `status: complete` activates the validator's
    unfilled-token check on every file that just changed — this final run is what actually proves
    the bundle is complete, not just draft-valid. Fix any reported violation before ending the run;
@@ -258,4 +263,4 @@ After writing all files, confirm:
 - [ ] `docs/sites/{site-slug}/research/specs/{site-slug}.openapi.yaml` — present if Phase 8 or 11 produced one, absent otherwise
 - [ ] `docs/sites/{site-slug}/research/scripts/test-{site-slug}.sh` — one `check()` call per endpoint
 - [ ] Every finished file's `status:` flipped `draft → complete`, `INDEX.md` last, unquoted and lowercase
-- [ ] `python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "$OUTPUT_ROOT"` exits 0 after the flip
+- [ ] `python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "{OUTPUT_ROOT}"` exits 0 after the flip (substitute the actual scaffolded path — not a persisted `$OUTPUT_ROOT` shell variable)

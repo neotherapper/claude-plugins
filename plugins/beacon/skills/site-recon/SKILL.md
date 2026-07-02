@@ -127,8 +127,12 @@ set both `OUTPUT_ROOT` and `OUTPUT_ROOT_OVERRIDDEN=1`:
 OUTPUT_ROOT="docs/research/{slug}" OUTPUT_ROOT_OVERRIDDEN=1 URL="{url}" bash "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/scaffold.sh"
 ```
 
-Record `$OUTPUT_ROOT` (scaffold.sh echoes `[SCAFFOLD:${OUTPUT_ROOT}]` on success) — every later
-phase and the Phase 12 gate refer back to it. If `OUTPUT_ROOT` used the default form and a legacy
+Record the printed path as `{OUTPUT_ROOT}` (scaffold.sh echoes `[SCAFFOLD:${OUTPUT_ROOT}]` on
+success) — every later phase and the Phase 12 gate refer back to it as `{OUTPUT_ROOT}`. Note:
+`{OUTPUT_ROOT}` is the scaffolded path itself (a placeholder you substitute, like `{url}`/`{slug}`),
+not a persisted shell variable — `$OUTPUT_ROOT` does not survive across separate command
+invocations, so re-substitute the actual path each time you run a command that needs it. If
+`OUTPUT_ROOT` used the default form and a legacy
 `docs/research/{slug}/` folder also exists for this slug, point the user at the new path:
 `[LEGACY-WORKSPACE] Found docs/research/{slug}/ (pre-0.7.0). New output goes to
 docs/sites/{slug}/research/. Move the old folder to consolidate; legacy is read-only and removed
@@ -776,8 +780,10 @@ If any phase marker is absent from the session brief, run that phase now before 
 Log: `[PHASE-GATE: P{N} missing — running now]`. Do not skip phases to save time.
 
 Then run the deterministic OKF gate before declaring done:
-`python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "$OUTPUT_ROOT"`
-Fix every reported violation; the `Stop` hook runs the same check and will block otherwise.
+`python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "{OUTPUT_ROOT}"`
+(substitute the actual scaffolded path recorded in Phase 1 — `$OUTPUT_ROOT` is not a persisted
+shell variable across separate commands). Fix every reported violation; the `Stop` hook runs the
+same check and will block otherwise.
 
 **Load `references/output-synthesis.md` before executing this phase** — it contains
 the full instructions for reading the session brief and editing every output file in place.
@@ -800,7 +806,7 @@ Summary:
   each finished file's frontmatter `status:` from `draft` to `complete` — **`INDEX.md` last, as the
   final Phase 12 action**. Write it unquoted and lowercase: `status: complete` (the gate matches
   `^status:[[:space:]]*complete[[:space:]]*$`; `status: "complete"` or a trailing comment will not
-  match). Re-run `okf_validate.py "$OUTPUT_ROOT"` once more after the final flip to confirm the
+  match). Re-run `okf_validate.py "{OUTPUT_ROOT}"` once more after the final flip to confirm the
   fully-complete bundle is still valid before ending the run.
 
 ## Reference files
