@@ -49,3 +49,90 @@ def test_api_surface_missing_required_field_fails():
     with tempfile.TemporaryDirectory() as t:
         p = _write(t, "s.md", "---\ntype: api-surface\ntitle: X\nstatus: draft\n---\n")
         assert any("access_mode" in e for e in V.validate_node(p))
+
+
+def test_bad_utf8_file_produces_error_not_exception():
+    with tempfile.TemporaryDirectory() as t:
+        p = pathlib.Path(t) / "bad.md"
+        p.write_bytes(b"---\ntype: api-surface\ntitle: X\n---\n\xff\xfe bad bytes\n")
+        errs = V.validate_node(p)
+        assert errs != []
+
+
+def test_list_valued_enum_field_produces_error_not_exception():
+    with tempfile.TemporaryDirectory() as t:
+        p = _write(t, "s.md", """\
+            ---
+            type: api-surface
+            title: X
+            access_mode: [open-api]
+            auth: none
+            verification: live-verified
+            status: complete
+            ---
+            """)
+        errs = V.validate_node(p)
+        assert any("invalid access_mode" in e for e in errs)
+
+
+def test_regex_fallback_parser_passes_and_fails_correctly():
+    orig = V._YAML
+    V._YAML = False
+    try:
+        with tempfile.TemporaryDirectory() as t:
+            good = _write(t, "good.md", """\
+                ---
+                type: api-surface
+                title: X
+                access_mode: open-api
+                auth: none
+                verification: live-verified
+                status: complete
+                ---
+                body
+                """)
+            assert V.validate_node(good) == []
+
+            bad = _write(t, "bad.md", """\
+                ---
+                type: api-surface
+                title: X
+                access_mode: telepathy
+                auth: none
+                verification: live-verified
+                status: complete
+                ---
+                """)
+            assert any("access_mode" in e for e in V.validate_node(bad))
+    finally:
+        V._YAML = orig
+
+
+def test_dangling_link_fails():
+    with tempfile.TemporaryDirectory() as t:
+        _write(t, "INDEX.md", "---\ntype: site-index\ntitle: X\nstatus: complete\n---\nsee [x](missing.md)\n")
+        res = V.validate_bundle(pathlib.Path(t))
+        assert any("does not resolve" in e for errs in res.values() for e in errs)
+
+def test_bundle_requires_index_entrypoint():
+    with tempfile.TemporaryDirectory() as t:
+        _write(t, "tech-stack.md", "---\ntype: tech-stack\ntitle: X\nstatus: complete\n---\n")
+        res = V.validate_bundle(pathlib.Path(t))
+        assert any("no INDEX.md entrypoint" in e for errs in res.values() for e in errs)
+
+def test_complete_status_with_unfilled_token_fails():
+    with tempfile.TemporaryDirectory() as t:
+        _write(t, "INDEX.md", "---\ntype: site-index\ntitle: X\nstatus: complete\n---\nvalue {{FRAMEWORK}}\n")
+        res = V.validate_bundle(pathlib.Path(t))
+        assert any("unfilled template token" in e for errs in res.values() for e in errs)
+
+def test_draft_stub_with_token_passes():
+    with tempfile.TemporaryDirectory() as t:
+        _write(t, "INDEX.md", "---\ntype: site-index\ntitle: X\nstatus: draft\n---\nvalue {{FRAMEWORK}}\n")
+        res = V.validate_bundle(pathlib.Path(t))
+        assert res == {}
+
+def test_empty_bundle_fails_closed():
+    with tempfile.TemporaryDirectory() as t:
+        res = V.validate_bundle(pathlib.Path(t))
+        assert res != {}

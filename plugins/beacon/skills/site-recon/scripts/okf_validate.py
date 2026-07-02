@@ -49,6 +49,8 @@ def parse_frontmatter(text: str):
 def validate_node(path: Path) -> list[str]:
     try:
         text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as e:
+        return [f"cannot read: invalid UTF-8: {e}"]
     except OSError as e:
         return [f"cannot read: {e}"]
     fm = parse_frontmatter(text)
@@ -62,6 +64,57 @@ def validate_node(path: Path) -> list[str]:
         if not fm.get(f):
             errs.append(f"missing/empty required field: {f}")
     for field, allowed in ENUM_FIELDS.items():
-        if field in fm and fm[field] not in allowed:
-            errs.append(f"invalid {field} '{fm[field]}' (not in enum)")
+        if field not in fm:
+            continue
+        val = fm[field]
+        if not isinstance(val, str) or val not in allowed:
+            errs.append(f"invalid {field} '{val}' (not in enum)")
     return errs
+
+_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+_TOKEN = re.compile(r"\{\{[^}]+\}\}")
+
+def _body(text: str) -> str:
+    m = re.match(r"^---\s*\n.*?\n---\s*\n", text, re.DOTALL)
+    return text[m.end():] if m else text
+
+def validate_bundle(root: Path) -> dict[str, list[str]]:
+    results: dict[str, list[str]] = {}
+    md = [p for p in root.rglob("*.md") if ".beacon" not in p.parts]
+    if not md:
+        return {str(root): ["empty bundle: no OKF concept files (fail-closed)"]}
+    has_index = False
+    for p in md:
+        errs = validate_node(p)
+        text = p.read_text(encoding="utf-8", errors="ignore")
+        fm = parse_frontmatter(text) or {}
+        if fm.get("type") in ("site-index", "data-source-index"):
+            has_index = True
+        for tgt in _LINK.findall(_body(text)):
+            tgt = tgt.split("#", 1)[0].strip()
+            if not tgt or tgt.startswith(("http://", "https://", "mailto:")):
+                continue
+            if not (p.parent / tgt).exists():
+                errs.append(f"link target does not resolve: {tgt}")
+        if fm.get("status") == "complete" and _TOKEN.search(_body(text)):
+            errs.append("unfilled template token in a status:complete file")
+        if errs:
+            results[str(p)] = errs
+    if not has_index:
+        results[str(root)] = results.get(str(root), []) + ["no INDEX.md entrypoint (type site-index/data-source-index)"]
+    return results
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Beacon OKF validator (fail-closed)")
+    ap.add_argument("root", help="output bundle root (e.g. docs/sites/<slug>/research)")
+    args = ap.parse_args()
+    results = validate_bundle(Path(args.root))
+    for path, errs in results.items():
+        print(f"\n{path}:")
+        for e in errs:
+            print(f"  - {e}")
+    print(f"\nbeacon-okf-validate: {len(results)} file(s)/root with failures.")
+    return 1 if results else 0
+
+if __name__ == "__main__":
+    sys.exit(main())
