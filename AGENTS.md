@@ -1,7 +1,19 @@
 # neotherapper/claude-plugins — Agent Instructions
 
-This repository contains AI agent plugins that work across Claude Code, Gemini CLI,
-GitHub Copilot, Cursor, Windsurf, and OpenCode.
+This repository contains AI agent plugins that work across Claude Code, OpenAI Codex, OpenCode,
+Google Antigravity, and AWS Kiro (plus Gemini CLI, GitHub Copilot, Cursor, and Windsurf).
+
+## Where your skills are (by tool)
+
+The canonical skills live under `plugins/<plugin>/skills/<skill>/SKILL.md`. Each tool also sees
+them at the top-level path it scans (via symlinks kept in sync by `scripts/sync-skills.sh`):
+
+- **Claude Code** — auto-discovered from each plugin via the marketplace.
+- **Codex, OpenCode, Antigravity** — `.agents/skills/<skill>/SKILL.md`.
+- **Kiro** — `.kiro/skills/<skill>/SKILL.md`.
+
+Match a skill by its `description` and follow it when it applies. Full settings/files matrix:
+`docs/platform/multi-tool-support.md`.
 
 ## Available Plugins
 
