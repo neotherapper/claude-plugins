@@ -55,8 +55,9 @@ Skills, commands, agents, and hooks are auto-discovered per plugin. Install any 
 ### OpenAI Codex CLI
 
 Codex reads this repo's root `AGENTS.md` automatically. The skills are exposed at `.agents/skills/`
-(one of Codex's documented scan roots). Clone the repo and work inside it, or copy `AGENTS.md` +
-`.agents/skills/` into your project. MCP servers go in `~/.codex/config.toml`.
+(one of Codex's documented scan roots) as symlinks back into `plugins/` — clone the repo and work
+inside it (or add it as a git submodule), rather than copying files out: `.agents/skills/` entries
+only resolve when `plugins/` is present alongside them. MCP servers go in `~/.codex/config.toml`.
 
 ### OpenCode
 
@@ -78,12 +79,12 @@ workspace, or import a skill folder via Kiro's "Agent Steering & Skills" panel.
 <details>
 <summary><b>Other tools — Gemini CLI, GitHub Copilot, Cursor, Windsurf</b></summary>
 
-**Gemini CLI**
+**Gemini CLI** — full guide: [docs/platform/gemini-cli.md](docs/platform/gemini-cli.md)
 ```bash
 gemini skills install https://github.com/neotherapper/claude-plugins.git --path plugins/beacon/skills
 ```
 
-**GitHub Copilot**
+**GitHub Copilot** — full guide: [docs/platform/copilot.md](docs/platform/copilot.md)
 ```bash
 git clone https://github.com/neotherapper/claude-plugins.git
 cp -r claude-plugins/plugins/beacon/skills/* .github/skills/
@@ -91,7 +92,7 @@ cp -r claude-plugins/plugins/beacon/agents/* .github/agents/
 ```
 Then in `.github/copilot-instructions.md`: `Skills are available in .github/skills/. Follow them when they match the task.`
 
-**Cursor**
+**Cursor** — full guide: [docs/platform/cursor.md](docs/platform/cursor.md)
 ```bash
 git clone https://github.com/neotherapper/claude-plugins.git
 cp -r claude-plugins/plugins/beacon/skills/* .cursor/rules/

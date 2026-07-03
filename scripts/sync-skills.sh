@@ -25,6 +25,8 @@ exec python3 - "$ROOT" "$MODE" <<'PY'
 import os, re, sys
 
 root, mode = sys.argv[1], sys.argv[2]
+sys.path.insert(0, os.path.join(root, "scripts", "lib"))
+from skill_frontmatter import discover_skills, parse_frontmatter
 
 # Each entry is a top-level dir whose <skill> symlinks point at ../../plugins/<plugin>/skills/<skill>
 LINK_DIRS = [".agents/skills", ".kiro/skills"]
@@ -42,53 +44,18 @@ def ok(m):
 print(f"Syncing skill symlink farm ({mode})...\n")
 
 # 1. Discover canonical skills: plugins/<plugin>/skills/<skill>/SKILL.md (nested .evals/ etc. excluded)
-plugins_dir = os.path.join(root, "plugins")
-skills = {}          # skill-name -> "plugins/<plugin>/skills/<skill>"
-dupes = {}
-if os.path.isdir(plugins_dir):
-    for plugin in sorted(os.listdir(plugins_dir)):
-        sdir = os.path.join(plugins_dir, plugin, "skills")
-        if not os.path.isdir(sdir):
-            continue
-        for skill in sorted(os.listdir(sdir)):
-            if not os.path.isfile(os.path.join(sdir, skill, "SKILL.md")):
-                continue
-            rel = f"plugins/{plugin}/skills/{skill}"
-            if skill in skills:
-                dupes.setdefault(skill, [skills[skill]]).append(rel)
-            else:
-                skills[skill] = rel
+skills, dupes = discover_skills(root)
 
-# 2. Name collisions are fatal — a flat mirror namespace can't hold two skills with the same folder name
+# 2. Name collisions are fatal — a flat mirror namespace can't hold two skills with the same folder
+# name. Drop the colliding name from `skills` entirely so neither plugin's skill is exposed under
+# it: exposing an arbitrary winner would silently serve the wrong plugin's content to every tool.
 for name, paths in dupes.items():
     err(f"skill-name collision '{name}': {', '.join(paths)} — rename one; flat mirror dirs need unique names")
+    del skills[name]
 
 # 3. Frontmatter validation — Kiro's stricter limits gate the whole farm
-def frontmatter(path):
-    txt = open(path, encoding="utf-8").read()
-    m = re.match(r"^---\n(.*?)\n---", txt, re.S)
-    if not m:
-        return None
-    lines = m.group(1).split("\n")
-    out = {}
-    for i, ln in enumerate(lines):
-        mm = re.match(r"^([A-Za-z_][\w-]*):\s*(.*)$", ln)
-        if not mm:
-            continue
-        key, val = mm.group(1), mm.group(2).strip()
-        if val in (">", "|", ">-", "|-", ">+", "|+"):        # folded/block scalar
-            buf = []
-            for nxt in lines[i + 1:]:
-                if re.match(r"^\s+", nxt) or nxt.strip() == "":
-                    buf.append(nxt.strip())
-                else:
-                    break
-            val = " ".join(x for x in buf if x)
-        out.setdefault(key, val.strip("\"'"))
-    return out
-
 for name, rel in skills.items():
-    fm = frontmatter(os.path.join(root, rel, "SKILL.md")) or {}
+    fm = parse_frontmatter(os.path.join(root, rel, "SKILL.md")) or {}
     if fm.get("name", "") != name:
         warn(f"{rel}/SKILL.md name '{fm.get('name','')}' != folder '{name}'")
     if not KIRO_NAME_RE.match(name):
@@ -100,33 +67,41 @@ for name, rel in skills.items():
 def want_target(rel):        # resolved relative to <linkdir>/: up 2 levels to repo root, then rel
     return os.path.join("..", "..", rel)
 
+expected = {name: want_target(rel) for name, rel in skills.items()}  # same for every LINK_DIRS entry
+
 changed = 0
 for ld in LINK_DIRS:
     absld = os.path.join(root, ld)
     if mode == "sync":
         os.makedirs(absld, exist_ok=True)
-    expected = {name: want_target(rel) for name, rel in skills.items()}
-    existing = {}
+    all_entries = set()
+    existing_links = {}
     if os.path.isdir(absld):
         for e in sorted(os.listdir(absld)):
             p = os.path.join(absld, e)
+            all_entries.add(e)
             if os.path.islink(p):
-                existing[e] = os.readlink(p)
+                existing_links[e] = os.readlink(p)
 
-    # stale: a symlink with no matching skill
-    for e in list(existing):
-        if e not in expected:
+    # stale: any entry (symlink or not) with no matching skill. Non-symlink stale content is
+    # flagged but never auto-deleted in sync mode — we only clean up what we created ourselves.
+    for e in sorted(all_entries):
+        if e in expected:
+            continue
+        if e in existing_links:
             if mode == "check":
                 err(f"{ld}/{e} is a stale symlink (no matching skill)")
             else:
                 os.unlink(os.path.join(absld, e)); changed += 1
                 ok(f"removed stale {ld}/{e}")
+        else:
+            err(f"{ld}/{e} is unexpected content (no matching skill) — not a symlink, refusing to delete automatically")
 
     # missing / wrong / broken
     for name, want in expected.items():
         p = os.path.join(absld, name)
-        cur = existing.get(name)
-        resolves = os.path.islink(p) and os.path.exists(os.path.join(absld, os.readlink(p)))
+        cur = existing_links.get(name)
+        resolves = cur is not None and os.path.exists(os.path.join(absld, cur))
         if cur == want and resolves:
             continue
         if mode == "check":
