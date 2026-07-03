@@ -1,0 +1,49 @@
+---
+type: site-index
+title: "{{SITE_NAME}} — Research Index"
+resource: "{{URL}}"
+tags: []
+timestamp: "{{TIMESTAMP}}"
+status: draft
+---
+
+# {{SITE_NAME}} — Research Index
+
+**Plugin version:** {{PLUGIN_VERSION}}
+
+## Infrastructure
+
+| Property | Value |
+|----------|-------|
+| Framework | {{FRAMEWORK}} {{VERSION}} |
+| CDN | {{CDN}} |
+| Auth | {{AUTH}} |
+| Bot protection | {{BOT_PROTECTION}} |
+| Hosting | {{HOSTING}} |
+
+## Tool Availability
+
+{{TOOL_AVAILABILITY_BLOCK}}
+
+## Quick API Reference
+
+| Surface | Base path | Auth required | Source |
+|---------|-----------|--------------|--------|
+{{API_SURFACE_ROWS}}
+
+## Key Findings
+
+{{KEY_FINDINGS}}
+
+## Research Files
+
+| File | Contents |
+|------|----------|
+| [tech-stack.md](tech-stack.md) | Framework, CDN, auth, hosting details |
+| [site-map.md](site-map.md) | All discovered URLs |
+| [constants.md](constants.md) | Taxonomy IDs, nonces, enums |
+{{API_SURFACE_FILE_ROWS}}
+<!-- OPENAPI_STATUS: Phase 12 resolves to one of: link row, HAR row, or "" (omit when Phase 11 skipped) -->
+{{OPENAPI_STATUS}}
+<!-- SMOKE_TEST_ROW: Phase 12 resolves to the smoke-test link row AFTER writing scripts/test-{slug}.sh -->
+{{SMOKE_TEST_ROW}}

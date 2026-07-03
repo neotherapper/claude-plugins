@@ -69,6 +69,68 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.7.1] — 2026-07-03
+
+### Added
+- **OKF output contract** for site-recon: every research bundle now conforms to Google OKF
+  v0.1 (see `skills/site-recon/references/okf-profile.md`).
+  - `scripts/scaffold.sh` writes every output file as a valid OKF stub (`status: draft`)
+    before Phase 12 begins; Phase 12 now **edits those stubs in place** (instead of writing
+    from the legacy `templates/*.template` set), flipping `status: draft → complete` as each
+    file is finished (`INDEX.md` last).
+  - `scripts/okf_validate.py` — fail-closed validator: frontmatter presence/type/enum/
+    required-field checks, dangling-link detection, unfilled-template-token detection on
+    `status: complete` files, and empty-bundle/missing-INDEX detection.
+  - `hooks/okf-gate.sh` — a `Stop`/`SubagentStop` hook that engages only once `INDEX.md`
+    claims `status: complete`: validates the bundle, blocks with a retry cap on failure, and
+    deletes the active-recon marker on success or once the retry cap is exhausted.
+  - `agents/site-analyst.md` — "Output standards" now documents the scaffold → edit →
+    conform → flip-status → Stop-hook-validate flow; role broadened to cover a full
+    end-to-end per-source recon (with a documented Phase 10–11 background-dispatch caveat).
+
+### Fixed
+- **Gate/validator completion-signal mismatch**: `okf-gate.sh` detected `status: complete`
+  with a standalone `grep`, which missed the validator's own quoted form
+  (`status: "complete"`) and could false-arm on a matching body line. The gate's completion
+  check now calls a new `okf_validate.py --is-complete <FILE>` mode, which reuses the
+  validator's frontmatter-anchored, quote-normalizing parser — so the gate and the validator
+  agree on what "complete" means.
+- **Scaffold render URL corruption**: `scripts/scaffold.sh`'s `render()` interpolated `$URL`
+  into a `sed` replacement, so a URL containing `&`, `#`, or `\` could corrupt the
+  `resource:` field or abort the substitution mid-write (truncating the output file) under
+  `set -euo pipefail`. `render()` now does literal Python string substitution, which cannot
+  be corrupted by URL metacharacters.
+- **Gate marker discovery under concurrent recons**: `okf-gate.sh` picked one arbitrary
+  active-recon marker (`find ... | head -1`), so under multiple in-flight site-recons a
+  Stop/SubagentStop event could validate/clean up the wrong bundle and orphan the marker
+  belonging to the recon that actually finished. The gate now evaluates every marker under
+  the tree independently in a single run — each is validated, cleaned up, blocked, or left
+  alone on its own merits, and the hook blocks the stop if any one of them is invalid.
+- **Non-atomic retry-count update**: the marker's `retries` field was read and rewritten via
+  two separate, unlocked `python3` calls, so two hook invocations racing on the same marker
+  could both read the same count and both increment it (a lost update). A new
+  `scripts/okf_marker_retry.py` helper performs the read-check-increment under an `flock`.
+- **`.beacon/` concepts silently unvalidated**: `okf_validate.py`'s bundle scan excluded
+  everything under `.beacon/`, even though `okf-profile.md` declares `session-brief` and
+  `phase-checklist` as first-class OKF types requiring `type`+`status` like any other
+  concept. A malformed `.beacon/session-brief.md` or `.beacon/phase-checklist.md` now fails
+  the validator instead of shipping unnoticed.
+- **Doc/implementation mismatch on completion detection**: `SKILL.md` and
+  `output-synthesis.md` told the model the gate matches `INDEX.md`'s `status:` via a literal
+  regex that rejects a quoted value (`status: "complete"`), which no longer describes the
+  actual quote-normalizing `okf_validate.py --is-complete` check the gate uses. Both docs now
+  describe the real behavior.
+
+### Changed
+- `okf_validate.py`'s `validate_bundle()` no longer reads each file from disk twice per
+  validation pass (previously once inside `validate_node()`, once again directly for the
+  link/token scan).
+- `tests/validate-slug-rule.sh`'s drift check now also scans `.sh` files (previously
+  `*.md` only), which is what let `scripts/scaffold.sh` ship its own undetected copy of the
+  canonical slug rule.
+
+---
+
 ## [0.7.0] — 2026-06-24
 
 ### Changed

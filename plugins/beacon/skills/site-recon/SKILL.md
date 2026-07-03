@@ -1,7 +1,7 @@
 ---
 name: site-recon
 description: This skill should be used when the user asks to "analyse a site", "research https://...", "map the API surface of", "find endpoints for", "what APIs does X have", "document how to extract data from", or runs /beacon:analyze. Use it even when the user just pastes a URL and says "check this out" or "look into this". Runs a 16-phase systematic investigation of a website and produces a complete persistent docs/sites/{site-slug}/research/ folder.
-version: 0.7.0
+version: 0.7.1
 ---
 
 # site-recon — Research Mode
@@ -9,6 +9,20 @@ version: 0.7.0
 Systematically analyse a target website across 16 ordered phases. Each phase writes
 findings to an in-memory **session brief** (a running markdown document in context).
 Phase 12 flushes everything to disk as structured research files.
+
+## Quickstart — do this first (deterministic floor)
+
+Before reading the phase detail below, run the scaffold so every output file exists as a valid
+OKF stub, then edit into those files as you go:
+
+```bash
+URL="{url}" bash "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/scaffold.sh"
+# honour a caller-supplied path: OUTPUT_ROOT="docs/research/{slug}" OUTPUT_ROOT_OVERRIDDEN=1 URL="{url}" bash .../scaffold.sh
+```
+
+Output conforms to `references/okf-profile.md` (Google OKF v0.1 + beacon types/enums). Never
+create output files by hand — edit the scaffolded stubs and flip `status: draft → complete` as
+each is finished. A `Stop` hook validates the bundle and blocks an unfinished/invalid run.
 
 ## Output structure
 
@@ -98,25 +112,35 @@ See `references/session-brief-format.md` for the complete schema.
 
 ## Phase 1 — Scaffold and tool check
 
+Run the scaffolder — it resolves the canonical slug (`docs/SLUG_RULES.md`), creates the output
+tree, and writes every output file as a valid OKF stub (`status: draft`) plus the `.beacon/`
+working files:
+
 ```bash
-# Canonical slug rule (docs/SLUG_RULES.md) — must match reframe for cross-module interop
-SLUG=$(printf '%s' "{url}" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')
-mkdir -p docs/sites/${SLUG}/research/{api-surfaces,specs,scripts}
-# If a legacy research folder exists for this slug, point the user at the new path.
-if [ -d "docs/research/${SLUG}" ]; then
-  echo "[LEGACY-WORKSPACE] Found docs/research/${SLUG}/ (pre-0.7.0). New output goes to docs/sites/${SLUG}/research/. Move the old folder to consolidate; legacy is read-only and removed in 0.8.0."
-fi
+URL="{url}" bash "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/scaffold.sh"
 ```
 
-**Critical:** Do NOT use `touch` to create output files — the Write tool requires a prior Read.
-Use `Write` directly with empty string content for each output file, or they will fail at Phase 12.
+`OUTPUT_ROOT` defaults to `docs/sites/{slug}/research`. To honour a caller-supplied path instead,
+set both `OUTPUT_ROOT` and `OUTPUT_ROOT_OVERRIDDEN=1`:
 
+```bash
+OUTPUT_ROOT="docs/research/{slug}" OUTPUT_ROOT_OVERRIDDEN=1 URL="{url}" bash "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/scaffold.sh"
 ```
-Write docs/sites/${SLUG}/research/INDEX.md        ← empty string
-Write docs/sites/${SLUG}/research/tech-stack.md   ← empty string
-Write docs/sites/${SLUG}/research/site-map.md     ← empty string
-Write docs/sites/${SLUG}/research/constants.md    ← empty string
-```
+
+Record the printed path as `{OUTPUT_ROOT}` (scaffold.sh echoes `[SCAFFOLD:${OUTPUT_ROOT}]` on
+success) — every later phase and the Phase 12 gate refer back to it as `{OUTPUT_ROOT}`. Note:
+`{OUTPUT_ROOT}` is the scaffolded path itself (a placeholder you substitute, like `{url}`/`{slug}`),
+not a persisted shell variable — `$OUTPUT_ROOT` does not survive across separate command
+invocations, so re-substitute the actual path each time you run a command that needs it. If
+`OUTPUT_ROOT` used the default form and a legacy
+`docs/research/{slug}/` folder also exists for this slug, point the user at the new path:
+`[LEGACY-WORKSPACE] Found docs/research/{slug}/ (pre-0.7.0). New output goes to
+docs/sites/{slug}/research/. Move the old folder to consolidate; legacy is read-only and removed
+in 0.8.0.`
+
+**Critical:** Every output file now exists on disk with valid OKF frontmatter — never create
+output files by hand with `Write`/`touch`. All subsequent phases (including Phase 12) `Edit` into
+the scaffolded stubs in place.
 
 Then check every tool in the tool availability matrix and log results in the session brief.
 See `references/tool-availability.md` for exact detection commands.
@@ -862,16 +886,37 @@ executed: the brief must carry `[OSINT-SWEEP:run_all]` **or**
 and `[THIRD-PARTY-KEYS:{n} found]` (Phase 9). A bare `[P9✓]` with none of these tokens means the
 deterministic sweep was skipped — run it now before writing output.
 
+Then run the deterministic OKF gate before declaring done:
+`python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "{OUTPUT_ROOT}"`
+(substitute the actual scaffolded path recorded in Phase 1 — `$OUTPUT_ROOT` is not a persisted
+shell variable across separate commands). Fix every reported violation; the `Stop` hook runs the
+same check and will block otherwise.
+
 **Load `references/output-synthesis.md` before executing this phase** — it contains
-the full instructions for reading the session brief and writing all output files.
+the full instructions for reading the session brief and editing every output file in place.
 
 Summary:
 - Read the completed session brief once
-- Write `tech-stack.md`, `site-map.md`, `constants.md`, `scripts/test-{slug}.sh`
-- Write one `api-surfaces/{surface}.md` per discovered API surface (see output-synthesis.md)
-- Write `specs/{slug}.openapi.yaml` if Phase 8 or Phase 11 produced a spec
-- Resolve all tokens in `${CLAUDE_PLUGIN_ROOT}/templates/INDEX.md.template` → write `INDEX.md`
+- **Edit** the already-scaffolded `INDEX.md`, `tech-stack.md`, `site-map.md`, `constants.md` in
+  place — they exist from Phase 1 with valid OKF frontmatter and `status: draft`. Never overwrite
+  them by re-rendering a template from scratch: the legacy `templates/*.md.template` files carry
+  no frontmatter and are superseded for this flow — resolving `INDEX.md` from
+  `templates/INDEX.md.template` would drop the scaffolded frontmatter and permanently disarm the
+  completion gate.
+- Write one `api-surfaces/{surface}.md` per discovered API surface, based on
+  `templates/okf/api-surface.md` (not the legacy `templates/api-surface.md.template`) so each
+  surface file carries valid OKF frontmatter — see output-synthesis.md
+- Write `scripts/test-{slug}.sh` (from `templates/smoke-test.sh.template` — not an OKF concept,
+  unaffected by this change) and `specs/{slug}.openapi.yaml` if Phase 8 or Phase 11 produced a spec
 - Resolve `{{OPENAPI_STATUS}}` based on Phase 11 signals in the session brief
+- Once every file's body is fully resolved (no `{{TOKEN}}` left) and `okf_validate.py` passes, flip
+  each finished file's frontmatter `status:` from `draft` to `complete` — **`INDEX.md` last, as the
+  final Phase 12 action**. Write it unquoted and lowercase: `status: complete` (the gate parses
+  `INDEX.md`'s frontmatter the same way `okf_validate.py` does — quote-normalizing, so `status:
+  "complete"` is also recognised as complete — but a trailing comment or a body line that merely
+  reads `status: complete` is not, since the parser is frontmatter-anchored). Re-run
+  `okf_validate.py "{OUTPUT_ROOT}"` once more after the final flip to confirm the fully-complete
+  bundle is still valid before ending the run.
 
 ## Reference files
 
