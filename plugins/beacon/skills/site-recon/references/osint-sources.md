@@ -595,14 +595,12 @@ curl -I --max-time 5 "https://${TARGET}" | grep -i "server" | grep -E "(workers|
 
 `Content-Security-Policy` and `Access-Control-Allow-Origin` headers directly enumerate allowed API origins and internal domains — one of the highest-signal sources for API surface mapping.
 
+> **CSP `connect-src` extraction runs inline in Phase 2** (`SKILL.md`) — that version also parses the `<meta>` CSP and captures `wss://` origins and ports. Use it as the single source; the CORS-across-paths probe below is complementary and not duplicated there.
+
 ```bash
 TARGET="example.com"
 
-# Extract CSP connect-src to find allowed API domains
-curl -sI "https://${TARGET}" | grep -i "content-security-policy" | \
-  grep -oE "connect-src[^;]*" || echo "No CSP header"
-
-# Check CORS headers across multiple paths
+# Check CORS headers across multiple paths (complements the Phase 2 CSP connect-src extraction)
 for path in "/api" "/api/products" "/graphql" "/admin"; do
   curl -sI -H "Origin: https://example.com" "https://${TARGET}${path}" | \
     grep -i "access-control"
@@ -700,34 +698,27 @@ curl -sf --max-time 10 "https://${TARGET}" | grep -oE "GTM-[A-Z0-9]{4,7}" | sort
 
 ## Third-Party API Key Extraction from Page Source
 
-Stripe publishable keys, reCAPTCHA site keys, Mapbox tokens, Algolia app IDs, Intercom app IDs, and similar third-party API credentials are almost always embedded in the page source.
+Third-party API keys embedded in page/bundle source confirm integrations in use and reveal backend services.
+
+> **The core key sweep — Stripe `pk_live_`, Google/Firebase `AIza`, Mapbox `pk.`, Sentry DSN — runs in Phase 9** (`SKILL.md`) over *all* JS bundles. The patterns below extend it with services the core sweep omits (reCAPTCHA, Algolia, Intercom); apply them to the homepage/bundle source when broader coverage is needed.
 
 ```bash
 TARGET="example.com"
 
-# Stripe publishable key
-curl -sf "https://${TARGET}" | grep -oE "pk_live_[A-Za-z0-9]{24}" | head -1
-
 # reCAPTCHA site key
 curl -sf "https://${TARGET}" | grep -oE "6L[A-Za-z0-9_-]{35,45}" | head -1
 
-# Algolia
+# Algolia application ID
 curl -sf "https://${TARGET}" | grep -oE "appId['\"]?\s*:\s*['\"][A-Za-z0-9]{10,20}" | head -1
 
-# Intercom
+# Intercom app ID
 curl -sf "https://${TARGET}" | grep -oE "app_id['\"]?\s*:\s*['\"][0-9]{5,10}" | head -1
-
-# Mapbox
-curl -sf "https://${TARGET}" | grep -oE "pk\.[A-Za-z0-9.-]{20,}" | head -1
-
-# Sentry DSN
-curl -sf "https://${TARGET}" | grep -oE "https://[a-f0-9]+@sentry\.io/[0-9]+" | head -1
 ```
 
 **What it reveals:**
 - Confirms third-party integrations in use
-- Key prefixes identify exact service
-- Stripe `pk_live_` = live payments enabled
+- Key prefixes identify the exact service
+- Stripe `pk_live_` (see the Phase 9 sweep) = live payments enabled
 - Key can be tested (not exploited) to confirm validity
 
 ---

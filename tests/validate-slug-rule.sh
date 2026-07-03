@@ -39,9 +39,14 @@ echo "Validating canonical slug rule..."
 echo
 
 # --- Check 1: no drift across committed copies ----------------------------
-# Every Markdown *and* shell line that pipes through `tr 'A-Z' 'a-z'` is a
-# slug-rule copy; each must carry the canonical sed program verbatim. Scans
-# .sh too (not just .md) — a prior gap let scaffold.sh ship its own
+# A line is a slug-rule copy if it assigns a `SLUG` variable through
+# `tr 'A-Z' 'a-z'` — that pairing is specific to the filesystem-safe slug used
+# for `docs/sites/{slug}/`. Other lowercase-then-sed one-liners exist for
+# unrelated purposes (e.g. beacon's Phase 9 `DOMAIN=` derivation, which feeds
+# a live network target into curl/TARGET and must NOT strip `www.` or turn
+# `.` into `-` — doing so would probe the wrong host or an unresolvable one);
+# those are intentionally different rules and must not be flagged as drift.
+# Scans .sh too (not just .md) — a prior gap let scaffold.sh ship its own
 # undetected copy; this file is excluded since it's the checker, not a copy
 # (its own slugify() reference implementation spans multiple lines).
 copies=0
@@ -54,7 +59,7 @@ while IFS= read -r line; do
   if [[ "$line" != *"$CANON_SED"* ]]; then
     red "drifted slug copy at ${file}:${lineno} — does not match canonical sed"
   fi
-done < <(git grep -n "tr 'A-Z' 'a-z'" -- '*.md' '*.sh' ':!tests/validate-slug-rule.sh' 2>/dev/null || true)
+done < <(git grep -n "SLUG=.*tr 'A-Z' 'a-z'" -- '*.md' '*.sh' ':!tests/validate-slug-rule.sh' 2>/dev/null || true)
 
 if [ "$copies" -eq 0 ]; then
   red "found no slug-rule copies to check — did the grep pattern or file layout change?"
