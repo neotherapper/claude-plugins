@@ -59,14 +59,7 @@ def is_complete(path: Path) -> bool:
         return False
     return fm.get("status") == "complete"
 
-def validate_node(path: Path) -> list[str]:
-    try:
-        text = path.read_text(encoding="utf-8")
-    except UnicodeDecodeError as e:
-        return [f"cannot read: invalid UTF-8: {e}"]
-    except OSError as e:
-        return [f"cannot read: {e}"]
-    fm = parse_frontmatter(text)
+def _validate_frontmatter(fm: dict | None) -> list[str]:
     if fm is None:
         return ["missing or unparseable YAML frontmatter (fail-closed)"]
     t = fm.get("type")
@@ -84,6 +77,15 @@ def validate_node(path: Path) -> list[str]:
             errs.append(f"invalid {field} '{val}' (not in enum)")
     return errs
 
+def validate_node(path: Path) -> list[str]:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as e:
+        return [f"cannot read: invalid UTF-8: {e}"]
+    except OSError as e:
+        return [f"cannot read: {e}"]
+    return _validate_frontmatter(parse_frontmatter(text))
+
 _LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 _TOKEN = re.compile(r"\{\{[^}]+\}\}")
 
@@ -93,14 +95,22 @@ def _body(text: str) -> str:
 
 def validate_bundle(root: Path) -> dict[str, list[str]]:
     results: dict[str, list[str]] = {}
-    md = [p for p in root.rglob("*.md") if ".beacon" not in p.parts]
+    # .beacon/ is not excluded: session-brief and phase-checklist are declared
+    # OKF types (type+status required) in okf-profile.md just like every other
+    # concept, so they get the same fail-closed treatment.
+    md = list(root.rglob("*.md"))
     if not md:
         return {str(root): ["empty bundle: no OKF concept files (fail-closed)"]}
     has_index = False
     for p in md:
-        errs = validate_node(p)
-        text = p.read_text(encoding="utf-8", errors="ignore")
-        fm = parse_frontmatter(text) or {}
+        try:
+            text = p.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as e:
+            results[str(p)] = [f"cannot read: {e}"]
+            continue
+        fm = parse_frontmatter(text)
+        errs = _validate_frontmatter(fm)
+        fm = fm or {}
         if fm.get("type") in ("site-index", "data-source-index"):
             has_index = True
         for tgt in _LINK.findall(_body(text)):

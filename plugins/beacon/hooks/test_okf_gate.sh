@@ -83,6 +83,75 @@ grep -q 'OKF-GATE-FAILED' "$T3/okf-gate-failed.stderr" || { echo "FAIL: case3 no
 test -f "$T3/out/.beacon/recon-active.json" && { echo "FAIL: case3 marker not cleared after retry cap"; exit 1; }
 echo "case3 OK: complete+invalid -> block (retries 1, 2), then release with OKF-GATE-FAILED"
 
+# ---- Case 4: two concurrent recons under one cwd -> each marker evaluated
+# independently, not just the first one `find` happens to return. Regression
+# coverage for the unscoped `find | head -1` marker-discovery bug: site-a is
+# complete+valid (should be cleaned up), site-b is still mid-run/draft (must
+# be left untouched) — both must be handled correctly in the SAME gate run. ----
+T4=$(mktemp -d); cd "$T4"
+mkdir -p "$T4/site-a/research/.beacon" "$T4/site-b/research/.beacon"
+cat > "$T4/site-a/research/INDEX.md" <<'EOF'
+---
+type: site-index
+title: "Site A — Research Index"
+resource: "https://a.example.com"
+tags: []
+timestamp: "2026-07-02T00:00:00Z"
+status: complete
+---
+
+# Site A — Research Index
+
+Minimal valid complete bundle. No links, no unfilled tokens.
+EOF
+printf '{"output_root":"%s","retries":0}\n' "$T4/site-a/research" > "$T4/site-a/research/.beacon/recon-active.json"
+cat > "$T4/site-b/research/INDEX.md" <<'EOF'
+---
+type: site-index
+title: "Site B — Research Index"
+resource: "https://b.example.com"
+tags: []
+timestamp: "2026-07-02T00:00:00Z"
+status: draft
+---
+
+# Site B — Research Index
+
+Still mid-run.
+EOF
+printf '{"output_root":"%s","retries":0}\n' "$T4/site-b/research" > "$T4/site-b/research/.beacon/recon-active.json"
+bash "$HOOKS/okf-gate.sh" || { echo "FAIL: case4 gate should not block (only site-a is complete, and it's valid)"; exit 1; }
+test -f "$T4/site-a/research/.beacon/recon-active.json" && { echo "FAIL: case4 site-a (complete+valid) marker not deleted"; exit 1; }
+test -f "$T4/site-b/research/.beacon/recon-active.json" || { echo "FAIL: case4 site-b (draft) marker deleted — must be left alone"; exit 1; }
+echo "case4 OK: two concurrent recons -> each marker evaluated independently (complete+valid cleaned, draft untouched)"
+
+# ---- Case 5: two concurrent recons, one complete+invalid -> gate blocks
+# overall (exit 2) while STILL cleaning up the other, unrelated complete+valid
+# bundle in the same run. ----
+T5=$(mktemp -d); cd "$T5"
+mkdir -p "$T5/site-a/research/.beacon" "$T5/site-c/research/.beacon"
+cat > "$T5/site-a/research/INDEX.md" <<'EOF'
+---
+type: site-index
+title: "Site A — Research Index"
+resource: "https://a.example.com"
+tags: []
+timestamp: "2026-07-02T00:00:00Z"
+status: complete
+---
+
+# Site A — Research Index
+
+Minimal valid complete bundle. No links, no unfilled tokens.
+EOF
+printf '{"output_root":"%s","retries":0}\n' "$T5/site-a/research" > "$T5/site-a/research/.beacon/recon-active.json"
+printf -- '---\ntype: site-index\ntitle: X\nstatus: complete\n---\n{{FRAMEWORK}}\n' > "$T5/site-c/research/INDEX.md"
+printf '{"output_root":"%s","retries":0}\n' "$T5/site-c/research" > "$T5/site-c/research/.beacon/recon-active.json"
+if bash "$HOOKS/okf-gate.sh"; then echo "FAIL: case5 gate should block — site-c is complete+invalid"; exit 1; fi
+test -f "$T5/site-a/research/.beacon/recon-active.json" && { echo "FAIL: case5 site-a (complete+valid) marker not deleted despite site-c blocking"; exit 1; }
+test -f "$T5/site-c/research/.beacon/recon-active.json" || { echo "FAIL: case5 site-c (complete+invalid) marker deleted — should be blocked, not consumed"; exit 1; }
+echo "case5 OK: one recon blocks overall exit while an unrelated complete+valid recon still gets cleaned up"
+
 # ---- hooks.json parses ----
 python3 -c "import json; json.load(open('$HOOKS/hooks.json'))" || { echo "FAIL: hooks.json invalid JSON"; exit 1; }
 echo "hooks.json OK: valid JSON"

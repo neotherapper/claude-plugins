@@ -252,9 +252,12 @@ invocations:
 1. Flip `tech-stack.md`, `site-map.md`, `constants.md`, and every `api-surfaces/*.md` first.
 2. Flip `INDEX.md` **last** — this is the final action of Phase 12. Write the line unquoted and
    lowercase: `status: complete` (no quotes, no trailing comment). The `Stop`-hook gate
-   (`hooks/okf-gate.sh`) matches `^status:[[:space:]]*complete[[:space:]]*$` on `INDEX.md`; anything
-   else (`status: "complete"`, `Status: Complete`, a trailing `# done` comment) will not match, and
-   the gate stays a silent no-op forever.
+   (`hooks/okf-gate.sh`) checks completion via `okf_validate.py --is-complete`, which parses
+   `INDEX.md`'s frontmatter the same quote-normalizing way the bundle validator does — so
+   `status: "complete"` (quoted) is also recognised. What it will *not* recognise is a
+   differently-cased key (`Status: Complete`) or a body line that merely reads `status: complete`,
+   since the parser is frontmatter-anchored, not a whole-file grep — get the frontmatter field
+   itself right and the gate will engage.
 3. Re-run `python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "{OUTPUT_ROOT}"`
    once more after the flip. Flipping to `status: complete` activates the validator's
    unfilled-token check on every file that just changed — this final run is what actually proves

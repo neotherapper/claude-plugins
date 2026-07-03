@@ -162,3 +162,28 @@ def test_is_complete_ignores_body_line_status():
     with tempfile.TemporaryDirectory() as t:
         p = _write(t, "INDEX.md", "---\ntype: site-index\nstatus: draft\n---\nstatus: complete\n")
         assert V.is_complete(p) is False
+
+
+def test_beacon_dir_malformed_file_fails_bundle():
+    # session-brief/phase-checklist are declared OKF types (okf-profile.md) requiring
+    # type+status just like every other concept — a malformed one under .beacon/ must
+    # not be silently skipped by the bundle scan.
+    with tempfile.TemporaryDirectory() as t:
+        _write(t, "INDEX.md", "---\ntype: site-index\ntitle: X\nstatus: complete\n---\nbody\n")
+        (pathlib.Path(t) / ".beacon").mkdir()
+        _write(t, ".beacon/phase-checklist.md", "---\ntype: bogus\nstatus: draft\n---\n")
+        res = V.validate_bundle(pathlib.Path(t))
+        assert any("unknown type" in e for errs in res.values() for e in errs)
+
+
+def test_beacon_dir_valid_draft_files_pass():
+    # A fresh scaffold's .beacon/session-brief.md and .beacon/phase-checklist.md carry
+    # valid type+status:draft frontmatter — including them in the scan must not
+    # introduce false-positive failures on an otherwise-valid bundle.
+    with tempfile.TemporaryDirectory() as t:
+        _write(t, "INDEX.md", "---\ntype: site-index\ntitle: X\nstatus: complete\n---\nbody\n")
+        (pathlib.Path(t) / ".beacon").mkdir()
+        _write(t, ".beacon/session-brief.md", "---\ntype: session-brief\nstatus: draft\n---\n")
+        _write(t, ".beacon/phase-checklist.md", "---\ntype: phase-checklist\nstatus: draft\n---\n")
+        res = V.validate_bundle(pathlib.Path(t))
+        assert res == {}

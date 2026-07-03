@@ -804,10 +804,12 @@ Summary:
 - Resolve `{{OPENAPI_STATUS}}` based on Phase 11 signals in the session brief
 - Once every file's body is fully resolved (no `{{TOKEN}}` left) and `okf_validate.py` passes, flip
   each finished file's frontmatter `status:` from `draft` to `complete` — **`INDEX.md` last, as the
-  final Phase 12 action**. Write it unquoted and lowercase: `status: complete` (the gate matches
-  `^status:[[:space:]]*complete[[:space:]]*$`; `status: "complete"` or a trailing comment will not
-  match). Re-run `okf_validate.py "{OUTPUT_ROOT}"` once more after the final flip to confirm the
-  fully-complete bundle is still valid before ending the run.
+  final Phase 12 action**. Write it unquoted and lowercase: `status: complete` (the gate parses
+  `INDEX.md`'s frontmatter the same way `okf_validate.py` does — quote-normalizing, so `status:
+  "complete"` is also recognised as complete — but a trailing comment or a body line that merely
+  reads `status: complete` is not, since the parser is frontmatter-anchored). Re-run
+  `okf_validate.py "{OUTPUT_ROOT}"` once more after the final flip to confirm the fully-complete
+  bundle is still valid before ending the run.
 
 ## Reference files
 
