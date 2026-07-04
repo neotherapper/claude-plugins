@@ -1,6 +1,13 @@
 # Beacon — OpenCode / Codex Setup
 
-## Setup
+> **Superseded.** OpenCode and Codex are now documented as primary tools alongside Claude Code,
+> Antigravity, and Kiro — see the root [README.md](../../README.md#installation) and
+> **[docs/platform/multi-tool-support.md](multi-tool-support.md)** for the current setup: a
+> generated `.agents/skills/` symlink farm (kept in sync by `scripts/sync-skills.sh`), not the
+> manual `AGENTS.md` copy + `@`-import steps below. This page is kept for historical reference only
+> — do not follow it for a fresh setup.
+
+## Legacy setup (superseded — see notice above)
 
 OpenCode and Codex use `AGENTS.md` as their system prompt and activate skills via intent matching.
 

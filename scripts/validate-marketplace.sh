@@ -23,9 +23,12 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 exec python3 - "$ROOT" <<'PY'
-import json, os, re, sys
+import json, os, sys
 
 root = sys.argv[1]
+sys.path.insert(0, os.path.join(root, "scripts", "lib"))
+from skill_frontmatter import parse_frontmatter
+
 fails = 0
 warns = 0
 
@@ -104,20 +107,6 @@ if os.path.isfile(os.path.join(root, "marketplace.json")):
     warn("a second manifest exists at the repo root (./marketplace.json); Claude Code reads .claude-plugin/marketplace.json — delete the root copy if stale to avoid drift")
 
 # 5. Agent + skill frontmatter across all plugins (regression guard)
-def frontmatter_keys(path):
-    text = open(path, encoding="utf-8").read()
-    if not text.startswith("---"):
-        return None
-    parts = text.split("---", 2)
-    if len(parts) < 3:
-        return None
-    keys = {}
-    for line in parts[1].splitlines():
-        m = re.match(r"^([A-Za-z_][\w-]*):\s*(.*)$", line)
-        if m:
-            keys[m.group(1)] = m.group(2).strip()
-    return keys
-
 if os.path.isdir(plugins_dir):
     for folder in sorted(os.listdir(plugins_dir)):
         adir = os.path.join(plugins_dir, folder, "agents")
@@ -126,7 +115,7 @@ if os.path.isdir(plugins_dir):
                 if not fn.endswith(".md") or fn.lower() == "readme.md":
                     continue
                 rel = f"plugins/{folder}/agents/{fn}"
-                fm = frontmatter_keys(os.path.join(adir, fn))
+                fm = parse_frontmatter(os.path.join(adir, fn))
                 if fm is None:
                     err(f"{rel}: agent file has no YAML frontmatter (needs name + description)")
                 else:
@@ -141,7 +130,7 @@ if os.path.isdir(plugins_dir):
                 if not os.path.isfile(skill_md):
                     continue
                 rel = f"plugins/{folder}/skills/{sk}/SKILL.md"
-                fm = frontmatter_keys(skill_md)
+                fm = parse_frontmatter(skill_md)
                 if fm is None:
                     err(f"{rel}: SKILL.md has no YAML frontmatter")
                 else:
@@ -153,6 +142,50 @@ if os.path.isdir(plugins_dir):
                     if not fm.get("description"):
                         err(f"{rel}: SKILL.md frontmatter missing 'description'")
     ok("checked agent + skill frontmatter across all plugins")
+
+# 6. MCP server config mirrors must agree with the canonical .mcp.json on command/args — the repo
+# ships per-tool mirrors (.agents/mcp_config.json for Codex/Antigravity/OpenCode, .kiro/settings/mcp.json
+# for Kiro) since each tool uses different top-level keys, but the server definitions themselves
+# must stay identical or non-Claude tools silently run a stale/different MCP server.
+def load_mcp_servers(rel):
+    data, e = load(os.path.join(root, rel))
+    if e:
+        return None, e
+    return data.get("mcpServers", {}), None
+
+canonical_rel = ".mcp.json"
+mirrors = [
+    (os.path.join(".agents", "mcp_config.json"), "Codex/Antigravity/OpenCode mirror"),
+    (os.path.join(".kiro", "settings", "mcp.json"), "Kiro mirror"),
+]
+if os.path.isfile(os.path.join(root, canonical_rel)):
+    canonical, e = load_mcp_servers(canonical_rel)
+    if e:
+        err(f"{canonical_rel} {e}")
+    else:
+        checked_any = False
+        for rel, label in mirrors:
+            if not os.path.isfile(os.path.join(root, rel)):
+                continue
+            checked_any = True
+            servers, e = load_mcp_servers(rel)
+            if e:
+                err(f"{rel} {e}")
+                continue
+            for name, spec in canonical.items():
+                mirror_spec = servers.get(name)
+                if mirror_spec is None:
+                    warn(f"{rel} ({label}): missing mcpServer '{name}' present in {canonical_rel}")
+                    continue
+                for key in ("command", "args"):
+                    if key in spec and spec.get(key) != mirror_spec.get(key):
+                        err(f"{rel} ({label}): mcpServers.{name}.{key} drifted from {canonical_rel} "
+                            f"({mirror_spec.get(key)!r} != {spec.get(key)!r})")
+            for name in servers:
+                if name not in canonical:
+                    warn(f"{rel} ({label}): mcpServer '{name}' not present in canonical {canonical_rel}")
+        if checked_any:
+            ok(f"checked MCP config mirrors against {canonical_rel}")
 
 print(f"\n{fails} error(s), {warns} warning(s)")
 sys.exit(1 if fails else 0)
