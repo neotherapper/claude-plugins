@@ -11,3 +11,5 @@ def test_run_all_outputs_json():
     for name, info in data.items():
         assert isinstance(info, dict)
         assert 'stdout' in info and 'stderr' in info and 'exit_code' in info
+        # validate that exit_code is an integer (could be non-zero if tool not installed or target rejects request)
+        assert isinstance(info['exit_code'], int), f"Script {name} exit_code is not an integer: {info['exit_code']!r}"
