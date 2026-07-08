@@ -91,7 +91,7 @@ curl -fsS --max-time 15 "{SURFACE_BASE_URL}{PATH}?per_page=3&page=1" \
 
 ### Authed first record
 ```bash
-: "${{TOKEN:?set TOKEN to the framework-specific credential (API key, OAuth bearer, etc.)}}"
+: "${TOKEN:?set TOKEN to the framework-specific credential (API key, OAuth bearer, etc.)}"
 curl -fsS --max-time 15 -H "Authorization: Bearer $TOKEN" "{SURFACE_BASE_URL}{PATH}?per_page=3" \
   | (command -v jq >/dev/null && jq '.[] | {id, name, slug}' || python3 -m json.tool) \
   | head -n 60
