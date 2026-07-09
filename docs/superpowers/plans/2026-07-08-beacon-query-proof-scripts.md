@@ -178,9 +178,15 @@ PUB="$TMP/site/research/api-surfaces/store-api.md"
   printf '%s\n' '| GET    | /wp-json/wc/store/v1/cart | session | current cart |'
 } > "$PUB"
 
-# Fixture 2: legacy (pre-0.7.1) api-surface with auth: oauth and two endpoint rows.
+# Fixture 2: legacy (pre-0.7.1) style api-surface WITH minimal frontmatter so the
+# renderer can read auth=. Real pre-0.7.1 surfaces had no frontmatter at all (and
+# the renderer then defaults auth=none); this fixture adds the auth header on top
+# of the legacy ## Base URL: layout to exercise the auth-driven snippet path too.
 LEG="$TMP/site/research/api-surfaces/authed.md"
 {
+  printf '%s\n' '---'
+  printf '%s\n' 'auth: oauth'
+  printf '%s\n' '---'
   printf '%s\n' '# Authed Surface'
   printf '%s\n' ''
   printf '%s\n' '**Base URL:** https://auth.example.com'
@@ -196,9 +202,17 @@ PACK="$TMP/packs/pack.md"
 {
   printf '%s\n' '## Query Templates'
   printf '%s\n' '### First record'
+  printf '%s\n' '```bash'
+  printf '%s\n' '```bash'
   printf '%s\n' '# body A'
+  printf '%s\n' '```'
+  printf '%s\n' '```'
   printf '%s\n' '### Authed first record'
+  printf '%s\n' '```bash'
+  printf '%s\n' '```bash'
   printf '%s\n' '# body B'
+  printf '%s\n' '```'
+  printf '%s\n' '```'
 } > "$PACK"
 
 # 1) Public surface: emits 3 scripts, picks First record, substitutes {SURFACE_BASE_URL}/{PATH}
@@ -279,8 +293,12 @@ Write `plugins/beacon/skills/site-intel/scripts/render_query.sh` with this exact
 set -euo pipefail
 
 DIR=$(cd "$(dirname "$0")" && pwd)
-PLUGIN_ROOT=$(cd "$DIR/../../../.." && pwd)
-DEFAULT_TEMPLATE="$PLUGIN_ROOT/templates/query-templates.md"
+# Renderer lives at <repo>/plugins/beacon/skills/site-intel/scripts/.
+# Default template lives at <repo>/plugins/beacon/templates/query-templates.md.
+# Steps up from $DIR: ../ = site-intel/  ../../ = skills/  ../../../ = beacon/
+# ../../../../ = plugins/  ../../../../../ = repo root (5 levels up).
+PLUGIN_ROOT=$(cd "$DIR/../../../../.." && pwd)
+DEFAULT_TEMPLATE="$PLUGIN_ROOT/plugins/beacon/templates/query-templates.md"
 
 SURFACE=""; SITE=""; PACK=""; OUT_DIR=""; AUTHOR="site-intel"; FIRST=0
 while [ $# -gt 0 ]; do
@@ -331,6 +349,12 @@ mkdir -p "$OUT_DIR"
 
 slug_surf=$(basename "$SURFACE" .md)
 
+# When --first is set, a previous non-first run may have left row-indexed variants
+# in OUT_DIR (e.g. ...-1.sh ...-2.sh). Prune them so the dir reflects the chosen mode.
+if [ "$FIRST" -eq 1 ]; then
+  rm -f "$OUT_DIR/query-${slug_surf}-${SITE}"-*.sh 2>/dev/null || true
+fi
+
 # --- Iterate endpoint rows under "## Endpoints" ---
 # Match lines like '| GET    | /wp-json/... | none | note |'.
 COUNT=0
@@ -347,11 +371,14 @@ while IFS= read -r ROW; do
 
   if [ "$FIRST" -eq 1 ] && [ "$COUNT" -gt 1 ]; then break; fi
 
-  # Extract the named snippet body
+  # Extract the named snippet body. Three-state machine: state 0 = before the
+  # heading (skip), state 1 = inside the heading's opening fence (skip the
+  # first fence), state 2 = inside the body (capture), state 0 = past the closer.
   BODY=$(awk -v want="$SNIPPET" '
     $0 ~ "^### " want "$"          { in_block=1; next }
-    in_block && /^```/             { in_block=0; print body; exit }
-    in_block                       { body = body "\n" $0 }
+    in_block==1 && /^```/          { in_block=2; next }
+    in_block==2 && /^```/          { in_block=0; print body; exit }
+    in_block==2                    { body = body "\n" $0 }
   ' "$SRC")
   if [ -z "$BODY" ]; then
     echo "render_query: snippet not found: $SNIPPET in $SRC" >&2
@@ -814,14 +841,14 @@ git commit -m "$(printf 'docs(beacon): site-recon Phase 5 requires resource: fro
 | New output file type: `scripts/query-{surface}-{site}.sh` — one file per API surface, generated on demand (not auto-generated during Phase 12) | Task 2 (renderer writes canonical path + rowidx suffix); Global Constraint "No runtime generation in Phase 12"; renderer lives under site-intel, never invoked by site-recon | ✅ with refinement: filename now `query-{surface-slug}-{site-slug}-{rowidx}.sh` (one per endpoint row), and `--first` produces the no-suffix variant |
 | Templates cover: pagination, listing resources, introspection (GraphQL), schema inspection (OpenAPI, Strapi), authenticated fetch | Task 1 fragment has the three required snippets; per-pack override is the documented extension point. `Pagination` covers paginated listing; `First record` covers listing-resources per record; `Authed first record` covers authenticated fetch. **Note:** the roadmap lists "introspection (GraphQL)" and "schema inspection (OpenAPI, Strapi)" as separate categories; the default fragment does not ship those. **Acknowledged gap** — they are reachable per-framework overrides (`## Query Templates` block in any pack can add `### Introspection`). The default is the minimum viable; service-specific overrides land when their frameworks are touched. | ⚠️ recorded |
 
-**2. Plan-Quality findings acknowledged and resolved**
+**2. Plan-Purity findings acknowledged and resolved**
 
 The pre-revision plan was reviewed by two parallel subagents before landing. Their Critical and Important findings were incorporated as follows:
 
 | Reviewer finding | How addressed in the revised plan |
 |---|---|
 | **CQ1**: renderer `awk` regex targets legacy `**Base URL:**` — but 0.7.1 replaced that with `resource:` frontmatter | Renderer now tries `resource:` first, falls back to `**Base URL:**`. Two-step parser in Task 2, awk logic in file `render_query.sh`. |
-| **CQ2**: `--no --tech-pack` path resolves to `plugins/beacon/skills/templates/...` (off-by-two `..`) | Renderer computes `PLUGIN_ROOT=$(cd "$DIR/../../../.." && pwd)` and uses absolute paths — no relative `..` confusion. |
+| **CQ2**: `--no --tech-pack` path resolves to `plugins/beacon/skills/templates/...` (off-by-two `..`) | Renderer computes `PLUGIN_ROOT=$(cd "$DIR/../../../../.." && pwd)` (5 dots up to repo root) and resolves default template as `<repo>/plugins/beacon/templates/query-templates.md` — absolute, no relative `..` confusion. |
 | **CQ3**: migration loop appends to `README.md`, `fingerprinting.md`, non-conformant `tech-pack.md` | Migration narrows via `case "$base" in *.x.md|current.md)` and SKIPS `README.md`, `fingerprinting.md`, `tech-pack.md`. Task 3 step 4 includes a spot-check. |
 | **GV-C1**: bundled `### Pagination` snippet emits `list 3` — not "real data" | Snippets now print per-record fields (`{id, name, slug, title}`) via `jq`/`python3 -m json.tool` + `head -n 60`. Matches the roadmap example at `docs/plugins/beacon/ROADMAP.md:48-52`. |
 | **GV-C2/C3**: snippet choice gated on trigger phrasing, not `auth:` | Renderer reads `auth:` from YAML frontmatter and picks `First record` vs `Authed first record` itself. Step 5 prose explains the renderer decides, not the phrasing. |
@@ -832,6 +859,18 @@ The pre-revision plan was reviewed by two parallel subagents before landing. The
 | **Reviewer minor: `tests/validate-site-intel.sh` version drift silently bundled** | Task 5 Step 2 includes an explicit `### Fixed:` line for `validate-site-intel.sh` version drift, and Step 5 fixes it standalone. |
 | **Reviewer minor: default-snippet output is `list 3` rather than product data** | Already addressed via `jq` formatter + per-record `{id, name, slug, title}` projection. |
 | **Reviewer minor: site-analyst agent contract** | Step 5 is owned by site-intel; site-analyst remains unchanged. No agent mismatch. |
+
+**2a. Task-2 implementation fixes (post-plan, applied during row-1 implementation)**
+
+Discovered while the implementer subagent ran the new test against the renderer on 2026-07-08. Landed as fixture-only or renderer+test patches; plan body updated to match what shipped:
+
+| Defect | Fix |
+|---|---|
+| Renderer's snippet `awk` fires on the FIRST fence after `### Heading` (which is the opener, not the closer) — captured body was always empty against both test fixture AND bundled template | Replaced 2-state awk with a 3-state machine: state 1 (`seen heading`) swallows the opener, state 2 captures body, transitions back to 0 on the closer |
+| Test fixture `pack.md` had unfenced bodies — passing the renderer's contract only against the broken 2-state awk | Test fixture wraps each `### Heading` body in a real `````bash`...```` fence |
+| Test fixture 2 (authed) had no frontmatter, so `auth: oauth` was never read by the renderer | Fixture 2 now carries minimal `---\nauth: oauth\n---\n` frontmatter above the legacy `**Base URL:**` so the auth-driven snippet path is actually exercised by the test |
+| `PLUGIN_ROOT` `cd $DIR/../../../..` (4 dots up) reached `plugins/`, defaulted template to `<repo>/plugins/templates/...` (missing `/beacon/`) | Corrected to `cd $DIR/../../../../..` (5 dots up) → repo root, default template resolves to `<repo>/plugins/beacon/templates/query-templates.md` |
+| `--first` mode left sibling row-indexed files in OUT_DIR from a previous full run | Renderer prunes `query-<slug>-<site>-*.sh` once before iterating when `--first` is set |
 
 **3. Placeholder scan**
 
