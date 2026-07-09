@@ -119,6 +119,22 @@ else
   check "At least 5 probe checklist items in section 9 (found: 0)" "fail"
 fi
 
+# Check 13: Query Templates section + 3 snippet headings present
+QT_OK=1
+if grep -q '^## Query Templates$' "$FILE" \
+   && grep -q '^### First record$' "$FILE" \
+   && grep -q '^### Pagination$'   "$FILE" \
+   && grep -q '^### Authed first record$' "$FILE"; then
+  : # all snippet headings present
+else
+  QT_OK=0
+fi
+if [ "$QT_OK" = "1" ]; then
+  check "## Query Templates + 3 snippet headings present" "ok"
+else
+  check "## Query Templates + 3 snippet headings present" "fail"
+fi
+
 echo "========================================"
 echo "Results: $PASS passed, $FAIL failed"
 
