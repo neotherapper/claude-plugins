@@ -396,7 +396,6 @@ Extract emails from theHarvester/GitHub results to predict internal subdomains:
 
 **Add to Phase 9 session brief:** Note email patterns and predicted subdomains.
 
-
 ## Query Templates
 
 > Consumed by `plugins/beacon/skills/site-intel/scripts/render_query.sh`. Snippets are
