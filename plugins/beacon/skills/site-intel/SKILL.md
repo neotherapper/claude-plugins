@@ -1,7 +1,7 @@
 ---
 name: site-intel
 description: This skill should be used when the user asks questions about a site that has already been analysed with site-recon — "what endpoints does X have?", "how do I query Y?", "what did we find on Z?", "load research for...", "tell me about [site]", "what auth does X use?", "give me the API for...". If a docs/sites/{slug}/research/ folder exists for the site (or a legacy docs/research/{slug}/), use this skill rather than re-analysing. Routes to the right pre-built file without re-running the full analysis.
-version: 0.7.0
+version: 0.8.0
 ---
 
 # site-intel — Router Mode
@@ -133,3 +133,51 @@ Do not guess or fabricate endpoint details. Only report what the research files 
 If the tech pack suggests an endpoint conventionally exists but the research didn't confirm it,
 say so explicitly: "The WordPress tech pack suggests `GET /wp-json/wc/v3/products` exists,
 but this was not confirmed in the Phase 5 probes for this site."
+
+## Step 5: Generate a query proof-of-life script (on demand, network-checked)
+
+When the user asks for **real output** — phrasing like "show me what this returns",
+"give me a sample", "fetch a real ...", "what does the API look like in practice",
+"query it", "prove it works" — generate and (when network is reachable) run a query
+script that proves the endpoint returns a few concrete records.
+
+Factual and how-do-I questions ("what endpoints?", "how does auth work?") stay on
+Step 4 and never enter Step 5.
+
+**How to run:**
+
+1. Resolve the surface file from Steps 2 / 3 (e.g. `api-surfaces/store-api.md`).
+2. Resolve the tech pack from Step 3a (e.g. `${CLAUDE_PLUGIN_ROOT}/technologies/wordpress/6.x.md`).
+   Fall back to `plugins/beacon/templates/query-templates.md` when no bundled pack matches.
+3. Run the renderer:
+   ```bash
+   bash "${CLAUDE_PLUGIN_ROOT}/skills/site-intel/scripts/render_query.sh" \
+     --surface "${research_folder}/api-surfaces/${surface}.md" \
+     --site "${site_slug}" \
+     --tech-pack "${CLAUDE_PLUGIN_ROOT}/technologies/${framework}/${major}.x.md" \
+     --out-dir "${research_folder}/scripts"
+   ```
+   The renderer logs `[SNIPPET-PICK:...]` to stderr with the chosen snippet +
+   the surface's auth field — useful for audit. Pass `--first` to emit only the
+   first row's script when the surface has many endpoints; default behaviour
+   produces one script per endpoint row.
+4. **Network probe** — non-skippable. Before running any generated script, do:
+   ```bash
+   curl -sI --max-time 3 "${BASE_URL}" >/dev/null 2>&1 || { echo "[OFFLINE]"; }
+   ```
+   If the probe returns non-2xx / non-resolving / empty, do NOT run the script.
+   Cite the script path and tell the user the surface was unreachable from this session.
+5. **Run the script** with a 30-second timeout (use `timeout 30 bash query-*.sh`;
+   fall back to `gtimeout` on macOS hosts where `timeout` is not in PATH). Capture
+   only stdout. Truncate output at 20 lines max, 512 bytes per line. **Never echo
+   $TOKEN / $COOKIE env-var values** in the answer.
+6. Cite the generated script in the answer:
+   ```
+   Source: docs/sites/${site}/research/scripts/query-${surface}-${site_slug}-${rowidx}.sh
+   Snippet picked: <First record | Authed first record> (auth: <frontmatter value>)
+   Regenerate with: render_query.sh --surface ... --site ... --out-dir ...
+   ```
+
+**Important:** Step 5 does NOT decide which snippet to run — the renderer reads the
+surface's YAML `auth:` field. Auth-aware snippet selection happens in `render_query.sh`,
+not in user phrasing.
