@@ -7,39 +7,6 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [0.8.0] — 2026-07-08
-
-### Added
-- `site-intel` Step 5: on-demand query proof-of-life scripts. Trigger phrases
-  ("show me what this returns", "give me a sample", "what does the API look like
-  in practice") cause site-intel to render recordings via
-  `skills/site-intel/scripts/render_query.sh`, save them under
-  `docs/sites/{slug}/research/scripts/query-{surface}-{slug}-{rowidx}.sh`, and
-  (when a 3-second network probe succeeds) execute one with a 30-second cap.
-- `plugins/beacon/templates/query-templates.md`: canonical `## Query Templates`
-  fragment with three record-printing snippets: `### First record`,
-  `### Pagination`, `### Authed first record`. Per-pack overrides permitted.
-- `plugins/beacon/skills/site-intel/scripts/render_query.sh`: parser-tolerant
-  renderer. Reads base URL from YAML frontmatter `resource:` (OKF 0.7.1+),
-  falls back to `**Base URL:**` (legacy). Chooses snippet by `auth:` field, NOT
-  by user phrasing. One script per endpoint row; `--first` emits only row 1.
-  Idempotent, offline, fail-closed.
-- `tests/validate-query-proof.sh`: 8-check wiring test.
-
-### Changed
-- All canonical tech packs (`{major}.x.md` and `current.md` only) gain the
-  `## Query Templates` section. Auxiliary files (`README.md`, `fingerprinting.md`,
-  `tech-pack.md`) are explicitly skipped. `tests/validate-tech-pack.sh` enforces
-  it on the same scope.
-- `site-recon` Phase 5 call: api-surface files written after v0.8.0 must carry
-  the OKF `resource:` frontmatter field so the renderer can parse them.
-
-### Fixed
-- `tests/validate-site-intel.sh` version assertion was stale at `0.6.0` while
-  the actual `SKILL.md` has been at `0.7.0`/`0.8.0` for some releases. Aligned
-  to `0.8.0`. Unrelated to the Query Proof Scripts feature; recorded here so
-  bisect does not misattribute it.
-
 ## [Unreleased]
 
 ### Added
@@ -99,6 +66,41 @@ Versions follow [Semantic Versioning](https://semver.org/).
   - The `[OSINT-SWEEP:run_all]` logging condition ("JSON is non-empty") was nearly always true regardless of whether any helper succeeded, since `run_all` always returns one entry per helper. It now requires at least one step to report `exit_code: 0`.
   - The third-party key harvest's document-relative URL branch didn't resolve against the fetched page's directory, producing 404s for any non-root `{url}` (e.g. a framed app shell). Fixed to resolve relative to the base URL's directory.
   - `osint.py`'s single 60s sweep timeout could silently truncate `tls_fingerprint.sh`/`sublist3r.sh`, which wrap tools with no cap of their own; they now get a 180s allowance via a per-helper override.
+
+---
+
+## [0.8.0] — 2026-07-08
+
+### Added
+- `site-intel` Step 5: on-demand query proof-of-life scripts. Trigger phrases
+  ("show me what this returns", "give me a sample", "what does the API look like
+  in practice") cause site-intel to render recordings via
+  `skills/site-intel/scripts/render_query.sh`, save them under
+  `docs/sites/{slug}/research/scripts/query-{surface}-{slug}-{rowidx}.sh`, and
+  (when a 3-second network probe succeeds) execute one with a 30-second cap.
+- `plugins/beacon/templates/query-templates.md`: canonical `## Query Templates`
+  fragment with three record-printing snippets: `### First record`,
+  `### Pagination`, `### Authed first record`. Per-pack overrides permitted.
+- `plugins/beacon/skills/site-intel/scripts/render_query.sh`: parser-tolerant
+  renderer. Reads base URL from YAML frontmatter `resource:` (OKF 0.7.1+),
+  falls back to `**Base URL:**` (legacy). Chooses snippet by `auth:` field, NOT
+  by user phrasing. One script per endpoint row; `--first` emits only row 1.
+  Idempotent, offline, fail-closed.
+- `tests/validate-query-proof.sh`: 8-check wiring test.
+
+### Changed
+- All canonical tech packs (`{major}.x.md` and `current.md` only) gain the
+  `## Query Templates` section. Auxiliary files (`README.md`, `fingerprinting.md`,
+  `tech-pack.md`) are explicitly skipped. `tests/validate-tech-pack.sh` enforces
+  it on the same scope.
+- `site-recon` Phase 5 call: api-surface files written after v0.8.0 must carry
+  the OKF `resource:` frontmatter field so the renderer can parse them.
+
+### Fixed
+- `tests/validate-site-intel.sh` version assertion was stale at `0.6.0` while
+  the actual `SKILL.md` has been at `0.7.0`/`0.8.0` for some releases. Aligned
+  to `0.8.0`. Unrelated to the Query Proof Scripts feature; recorded here so
+  bisect does not misattribute it.
 
 ---
 
