@@ -3,8 +3,9 @@
 Planned features and capabilities in priority order. Each version ships as a complete, tested unit.
 
 > **Status legend:** ✅ shipped · 🔜 next · 📋 planned. The version numbers below were reconciled
-> against what actually shipped on 2026-06-30 — read **Shipped** first. Planned numbers (v0.8.0+)
-> are indicative and assigned at release, since the sequence already slipped once.
+> against what actually shipped, most recently on 2026-07-08 — read **Shipped** first. Planned
+> numbers (v0.9.0+) are indicative and assigned at release, since the sequence has already
+> slipped twice.
 
 ---
 
