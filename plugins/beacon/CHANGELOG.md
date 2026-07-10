@@ -93,7 +93,7 @@ Versions follow [Semantic Versioning](https://semver.org/).
   `## Query Templates` section. Auxiliary files (`README.md`, `fingerprinting.md`,
   `tech-pack.md`) are explicitly skipped. `tests/validate-tech-pack.sh` enforces
   it on the same scope.
-- `site-recon` Phase 5 call: api-surface files written after v0.8.0 must carry
+- `site-recon` Phase 12 call: api-surface files written after v0.8.0 must carry
   the OKF `resource:` frontmatter field so the renderer can parse them.
 
 ### Fixed

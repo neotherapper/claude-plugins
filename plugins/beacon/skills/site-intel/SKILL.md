@@ -161,7 +161,9 @@ Step 4 and never enter Step 5.
    the surface's auth field — useful for audit. Pass `--first` to emit only the
    first row's script when the surface has many endpoints; default behaviour
    produces one script per endpoint row.
-4. **Network probe** — non-skippable. Before running any generated script, do:
+4. **Network probe** — non-skippable. `${BASE_URL}` here is the surface's OKF
+   `resource:` frontmatter value — the same field `render_query.sh` reads in step 3.
+   Before running any generated script, do:
    ```bash
    status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "${BASE_URL}")
    [[ "$status" == 2* ]] || echo "[OFFLINE]"
