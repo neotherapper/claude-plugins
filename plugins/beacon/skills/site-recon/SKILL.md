@@ -840,6 +840,14 @@ Summary:
 - Write one `api-surfaces/{surface}.md` per discovered API surface, based on
   `templates/okf/api-surface.md` (not the legacy `templates/api-surface.md.template`) so each
   surface file carries valid OKF frontmatter — see output-synthesis.md
+
+> **v0.8.0 contract:** every api-surface file written under `${research_folder}/api-surfaces/`
+> MUST carry the OKF `resource:` frontmatter field (the surface's base URL). The
+> site-intel query-proof renderer (`skills/site-intel/scripts/render_query.sh`) reads
+> `resource:` as the base URL when present and falls back to `**Base URL:**` only for
+> legacy pre-0.7.1 surfaces. The scaffold script copies `templates/okf/api-surface.md`
+> with `{{BASE_URL}}` already wired to `resource:` — leave the field alone.
+
 - Write `scripts/test-{slug}.sh` (from `templates/smoke-test.sh.template` — not an OKF concept,
   unaffected by this change) and `specs/{slug}.openapi.yaml` if Phase 8 or Phase 11 produced a spec
 - Resolve `{{OPENAPI_STATUS}}` based on Phase 11 signals in the session brief
