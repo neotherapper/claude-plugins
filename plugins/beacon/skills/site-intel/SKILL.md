@@ -163,7 +163,8 @@ Step 4 and never enter Step 5.
    produces one script per endpoint row.
 4. **Network probe** — non-skippable. Before running any generated script, do:
    ```bash
-   curl -sI --max-time 3 "${BASE_URL}" >/dev/null 2>&1 || { echo "[OFFLINE]"; }
+   status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "${BASE_URL}")
+   [[ "$status" == 2* ]] || echo "[OFFLINE]"
    ```
    If the probe returns non-2xx / non-resolving / empty, do NOT run the script.
    Cite the script path and tell the user the surface was unreachable from this session.
