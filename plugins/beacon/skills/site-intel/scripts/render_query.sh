@@ -50,15 +50,33 @@ else
   exit 66
 fi
 
+# Strip one surrounding matching pair of single or double quotes from a YAML
+# scalar value, e.g. `"https://example.com"` -> `https://example.com`,
+# `'none'` -> `none`. Already-unquoted values (`none`) pass through unchanged.
+# The canonical OKF template quotes `resource:` (plugins/beacon/templates/okf/
+# api-surface.md:4, `resource: "{{BASE_URL}}"`), and agent-authored surfaces
+# routinely quote `auth:` too, so both extractions need this normalization.
+strip_quotes() {
+  local s=$1
+  if [ "${#s}" -ge 2 ]; then
+    case "$s" in
+      \"*\") s=${s#\"}; s=${s%\"} ;;
+      \'*\') s=${s#\'}; s=${s%\'} ;;
+    esac
+  fi
+  printf '%s' "$s"
+}
+
 # --- Parse the surface ---
 # 1) YAML frontmatter `resource:` (OKF 0.7.1+ surfaces)
 FRONTMATTER=$(awk 'BEGIN{fm=0} /^---[[:space:]]*$/ { fm++; next } fm==1 && /^resource:[[:space:]]*/ { sub(/^resource:[[:space:]]*/, ""); print; exit } fm>=2 { exit }' "$SURFACE")
 # 2) Legacy markdown ## Base URL: line
 [ -z "$FRONTMATTER" ] && FRONTMATTER=$(awk '/^\*\*Base URL:\*\*/ { sub(/^\*\*Base URL:\*\*[[:space:]]*/, ""); print; exit }' "$SURFACE")
 [ -n "$FRONTMATTER" ] || { echo "render_query: no resource: / ## Base URL: in $SURFACE" >&2; exit 65; }
-BASE_URL="$FRONTMATTER"
+BASE_URL=$(strip_quotes "$FRONTMATTER")
 
 AUTH=$(awk 'BEGIN{fm=0} /^---[[:space:]]*$/ { fm++; next } fm==1 && /^auth:[[:space:]]*/ { sub(/^auth:[[:space:]]*/, ""); print; exit } fm>=2 { exit }' "$SURFACE")
+AUTH=$(strip_quotes "$AUTH")
 AUTH=$(printf '%s' "${AUTH:-none}" | tr 'A-Z' 'a-z')
 SNIPPET="First record"
 [ "$AUTH" != "none" ] && SNIPPET="Authed first record"

@@ -29,10 +29,12 @@ PUB="$TMP/site/research/api-surfaces/store-api.md"
 # renderer can read auth=. Real pre-0.7.1 surfaces had no frontmatter at all (and
 # the renderer then defaults auth=none); this fixture adds the auth header on top
 # of the legacy ## Base URL: layout to exercise the auth-driven snippet path too.
+# `auth:` is QUOTED here (matching how agent-authored surfaces commonly emit YAML
+# string scalars) to exercise the quote-stripping path on the authed/oauth branch.
 LEG="$TMP/site/research/api-surfaces/authed.md"
 {
   printf '%s\n' '---'
-  printf '%s\n' 'auth: oauth'
+  printf '%s\n' 'auth: "oauth"'
   printf '%s\n' '---'
   printf '%s\n' '# Authed Surface'
   printf '%s\n' ''
@@ -43,6 +45,29 @@ LEG="$TMP/site/research/api-surfaces/authed.md"
   printf '%s\n' '| GET    | /v2/orders | oauth | order list |'
   printf '%s\n' '| GET    | /v2/customers/me | oauth | current user |'
 } > "$LEG"
+
+# Fixture 3: OKF-canonical quoted style — `resource:` and `auth:` both quoted,
+# exactly as plugins/beacon/templates/okf/api-surface.md:4,8 render them for a
+# real (post-0.7.1) public surface (`resource: "{{BASE_URL}}"`, `auth: "none"`).
+# This is the case Finding 1 reproduced: unstripped quotes on a quoted `auth:
+# "none"` were misclassified as needing an authed snippet, and unstripped quotes
+# on `resource:` embedded literal quote characters inside the generated URL.
+QUOTED="$TMP/site/research/api-surfaces/quoted-okf.md"
+{
+  printf '%s\n' '---'
+  printf '%s\n' 'type: api-surface'
+  printf '%s\n' 'title: "Quoted OKF Surface"'
+  printf '%s\n' 'resource: "https://quoted.example.com"'
+  printf '%s\n' 'auth: "none"'
+  printf '%s\n' '---'
+  printf '%s\n' ''
+  printf '%s\n' '# Quoted OKF Surface'
+  printf '%s\n' ''
+  printf '%s\n' '## Endpoints'
+  printf '%s\n' '| Method | Path | Auth | Notes |'
+  printf '%s\n' '|--------|------|------|-------|'
+  printf '%s\n' '| GET    | /wp-json/wp/v2/posts | none | post list |'
+} > "$QUOTED"
 
 # A minimal tech pack carrying the three required snippets (mirrors query-templates.md).
 PACK="$TMP/packs/pack.md"
@@ -82,6 +107,28 @@ OUT_AUT=$("$DIR/render_query.sh" --surface "$LEG" --site "auth-example-com" --te
 [[ "$OUT_AUT" == *"[QUERY-DONE:2]"* ]] || { echo "FAIL: authed run should emit 2"; exit 1; }
 grep -q "https://auth.example.com/v2/orders" "$TMP/site/research/scripts/query-authed-auth-example-com-1.sh" \
   || { echo "FAIL: authed row 1 not interpolated"; exit 1; }
+grep -q "# authed surface snippet" "$TMP/site/research/scripts/query-authed-auth-example-com-1.sh" \
+  || { echo "FAIL: quoted auth: \"oauth\" should still pick Authed first record after quote-stripping"; exit 1; }
+
+# 2b) Quoted OKF-canonical surface (Finding 1 regression): resource: "..." and
+#     auth: "none" both quoted, exactly as plugins/beacon/templates/okf/api-surface.md
+#     renders them. Before the fix, unstripped quotes on auth: "none" picked the
+#     Authed snippet instead of First record, and unstripped quotes on resource:
+#     embedded literal quote characters inside the generated URL.
+OUT_QUOTED=$("$DIR/render_query.sh" --surface "$QUOTED" --site "quoted-example-com" --tech-pack "$PACK" --out-dir "$TMP/site/research/scripts" 2>&1)
+[[ "$OUT_QUOTED" == *"[QUERY-DONE:1]"* ]] || { echo "FAIL: quoted-okf surface should emit 1 script"; exit 1; }
+[[ "$OUT_QUOTED" == *"auth=none"* ]] || { echo "FAIL: quoted auth: \"none\" was not normalized to auth=none"; exit 1; }
+[[ "$OUT_QUOTED" != *"snippet=Authed first record"* ]] \
+  || { echo "FAIL: quoted auth: \"none\" misclassified as needing Authed snippet"; exit 1; }
+QOUT="$TMP/site/research/scripts/query-quoted-okf-quoted-example-com-1.sh"
+grep -q "# public surface snippet" "$QOUT" \
+  || { echo "FAIL: quoted auth: \"none\" should pick First record, not Authed"; exit 1; }
+grep -q 'https://quoted.example.com/wp-json/wp/v2/posts' "$QOUT" \
+  || { echo "FAIL: quoted resource: URL not interpolated correctly"; exit 1; }
+if grep -q '""' "$QOUT"; then
+  echo "FAIL: literal doubled-quote characters leaked into generated script (resource: quotes not stripped)"
+  exit 1
+fi
 
 # 3) --first: emits only row 1, no rowidx suffix
 "$DIR/render_query.sh" --first --surface "$PUB" --site "example-com" --tech-pack "$PACK" --out-dir "$TMP/site/research/scripts" >/dev/null
