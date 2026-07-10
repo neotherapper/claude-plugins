@@ -845,8 +845,11 @@ Summary:
 > MUST carry the OKF `resource:` frontmatter field (the surface's base URL). The
 > site-intel query-proof renderer (`skills/site-intel/scripts/render_query.sh`) reads
 > `resource:` as the base URL when present and falls back to `**Base URL:**` only for
-> legacy pre-0.7.1 surfaces. The scaffold script copies `templates/okf/api-surface.md`
-> with `{{BASE_URL}}` already wired to `resource:` — leave the field alone.
+> legacy pre-0.7.1 surfaces. Phase 12 writes each surface file from
+> `templates/okf/api-surface.md`, whose `resource:` field already carries the
+> `{{BASE_URL}}` placeholder — substitute it with the surface's real base URL; do not
+> rename or drop the field. (`scaffold.sh` only pre-creates the empty `api-surfaces/`
+> directory in Phase 1 — it does not render this template or fill in `{{BASE_URL}}`.)
 
 - Write `scripts/test-{slug}.sh` (from `templates/smoke-test.sh.template` — not an OKF concept,
   unaffected by this change) and `specs/{slug}.openapi.yaml` if Phase 8 or Phase 11 produced a spec
