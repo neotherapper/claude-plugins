@@ -131,6 +131,14 @@ def test_close_removes_active(tmp_path):
     assert not (tmp_path / "docs/sites/.fleet/active.json").exists()
 
 
+def test_sweep_treats_blocked_as_resolved(tmp_path):
+    run(["init", "https://a.com"], tmp_path)
+    run(["waive", "a-com", "--reason", "auth-gated"], tmp_path)  # ledger status -> blocked
+    r = run(["sweep"], tmp_path)
+    assert "[FLEET-COMPLETE]" in r.stdout          # blocked counts as resolved
+    assert "[FLEET-INCOMPLETE" not in r.stdout
+
+
 def test_waive_unknown_slug_exits_2(tmp_path):
     run(["init", "https://a.com"], tmp_path)
     before = read_ledger(tmp_path)

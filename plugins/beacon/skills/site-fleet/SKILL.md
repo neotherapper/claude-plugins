@@ -45,7 +45,7 @@ Repeat until `fleet.py pending` prints nothing:
 5. Record the outcome:
    - completed (INDEX flipped `status: complete`) → `fleet.py update {slug} --status complete --verdict complete`
    - blocked for a concrete reason (e.g. auth wall) → `fleet.py update {slug} --status blocked --verdict blocked:{reason}`
-   - errored / produced nothing → `fleet.py update {slug} --status inconclusive --verdict inconclusive`, then **retry once**; if still not complete, leave it inconclusive.
+   - errored / produced nothing → `fleet.py update {slug} --status inconclusive --verdict inconclusive`, then **retry once**; if still not complete, `waive` it so it reaches a terminal status (`inconclusive` is NOT terminal — leaving it inconclusive would make `fleet.py pending` re-list it forever): `fleet.py waive {slug} --reason inconclusive-after-retry`.
 
 ## Close
 

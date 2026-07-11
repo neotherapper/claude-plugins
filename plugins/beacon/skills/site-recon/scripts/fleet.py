@@ -168,10 +168,12 @@ def cmd_sweep(a):
     led = load(path)
     incomplete = []
     for slug, s in led["sources"].items():
-        if is_complete(slug):
+        # blocked/waived is an explicit terminal decision recorded in the ledger
+        # (a blocked source has no complete INDEX); 'complete' must be proven by
+        # the INDEX itself (is_complete), never by ledger status alone.
+        if s["status"] == "blocked" or is_complete(slug):
             continue
         reason = (s["verdict"] or s["status"] or "unknown")
-        # fail toward flagging: a missing/invalid INDEX counts as incomplete
         incomplete.append((slug, reason))
     if not incomplete:
         print("[FLEET-COMPLETE]")
