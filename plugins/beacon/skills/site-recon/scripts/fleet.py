@@ -88,9 +88,10 @@ def _mutate(fn):
             f.seek(0)
             led = json.load(f)
             fn(led)
+            data = json.dumps(led, indent=2)   # serialize BEFORE truncating
             f.seek(0)
             f.truncate()
-            json.dump(led, f, indent=2)
+            f.write(data)
             f.flush()
         finally:
             fcntl.flock(f, fcntl.LOCK_UN)

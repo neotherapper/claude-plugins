@@ -66,3 +66,11 @@ def test_pending_lists_non_terminal_and_rearms(tmp_path):
     assert r.returncode == 0
     assert r.stdout.split() == ["b-com"]
     assert read_ledger(tmp_path)["state"] == "active"  # re-armed
+
+
+def test_update_unknown_slug_exits_2_and_preserves_ledger(tmp_path):
+    run(["init", "https://a.com"], tmp_path)
+    before = read_ledger(tmp_path)
+    r = run(["update", "nonexistent-slug", "--status", "complete"], tmp_path)
+    assert r.returncode == 2
+    assert read_ledger(tmp_path) == before  # ledger unchanged, not corrupted
