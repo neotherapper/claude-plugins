@@ -34,4 +34,14 @@ T4=$(mktemp -d)
 rc=$?; [ $rc -eq 0 ] || { echo "FAIL case4 rc=$rc"; exit 1; }
 [ -f "$T4/docs/sites/.fleet/active.json" ] || { echo "FAIL case4 dropped handle"; exit 1; }
 
+# case 5: incomplete fleet + corrupted ledger file -> exit 0 but do NOT destroy active.json
+T5=$(mktemp -d)
+( cd "$T5" && python3 "$FLEET" init https://a.com >/dev/null
+  python3 "$FLEET" update a-com --status reconning >/dev/null
+  LEDGER=$(python3 -c "import json;print(json.load(open('docs/sites/.fleet/active.json'))['ledger'])")
+  echo "{ not valid json" > "$LEDGER"
+  bash "$HOOK" )
+rc=$?; [ $rc -eq 0 ] || { echo "FAIL case5 rc=$rc"; exit 1; }
+[ -f "$T5/docs/sites/.fleet/active.json" ] || { echo "FAIL case5 destroyed active.json on corrupt ledger"; exit 1; }
+
 echo "OK"

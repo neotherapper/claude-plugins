@@ -23,7 +23,8 @@ if grep -q '\[FLEET-INCOMPLETE:' <<<"$SWEEP"; then
   echo "[FLEET-SWEEP-PENDING:$SLUGS] fleet has unresolved sources — finish, waive, or 'fleet.py pause'/'close'" >&2
   echo "$SWEEP" >&2
   exit 2
+elif grep -q '\[FLEET-COMPLETE\]' <<<"$SWEEP"; then
+  # only a confirmed all-terminal sweep deactivates; a crashed/empty sweep leaves state intact
+  rm -f "$ACTIVE"
 fi
-# all terminal -> deactivate so later, unrelated stops no-op
-rm -f "$ACTIVE"
 exit 0
