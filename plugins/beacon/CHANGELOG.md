@@ -66,6 +66,9 @@ Versions follow [Semantic Versioning](https://semver.org/).
   - The `[OSINT-SWEEP:run_all]` logging condition ("JSON is non-empty") was nearly always true regardless of whether any helper succeeded, since `run_all` always returns one entry per helper. It now requires at least one step to report `exit_code: 0`.
   - The third-party key harvest's document-relative URL branch didn't resolve against the fetched page's directory, producing 404s for any non-root `{url}` (e.g. a framed app shell). Fixed to resolve relative to the base URL's directory.
   - `osint.py`'s single 60s sweep timeout could silently truncate `tls_fingerprint.sh`/`sublist3r.sh`, which wrap tools with no cap of their own; they now get a 180s allowance via a per-helper override.
+- **OKF output-contract hardening** (deferred findings T5-m1, T6-m1 from the v0.7.1 review):
+  - `scaffold.sh` wrote the `.beacon/recon-active.json` gate marker with `printf '%s'`, so an `OUTPUT_ROOT` containing a `"` or `\` produced malformed JSON that `okf-gate.sh`'s `json.load` rejected — silently no-opping the Stop-hook gate (fail-open). The marker is now built with `json.dumps` (path passed as argv, never interpolated). `okf-gate.sh`'s read side was already argv-safe and is unchanged.
+  - The pre-0.7.0 `[LEGACY-WORKSPACE]` detection was prose in `SKILL.md` (skippable under synthesis pressure). `scaffold.sh` now detects it deterministically — on the default output path only — emitting `[LEGACY-WORKSPACE:docs/research/{slug}]` when a legacy folder exists; an explicitly caller-supplied path is never flagged.
 
 ---
 
