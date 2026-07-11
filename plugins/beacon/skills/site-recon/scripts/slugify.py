@@ -7,6 +7,7 @@ on a slug (a mismatch would make fleet.py read the wrong INDEX.md).
 
 Rule (order matters): lowercase -> strip scheme -> strip leading www. ->
 strip path -> strip :port -> dots to dashes.
+Note: the leading .strip() in slugify() is intentional robustness for CLI arg whitespace, NOT part of the historical sed rule.
 """
 import re
 import sys

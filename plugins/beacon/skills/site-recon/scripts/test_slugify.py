@@ -31,3 +31,15 @@ def test_slugify_cli(url, expected):
         capture_output=True, text=True, check=True,
     ).stdout.strip()
     assert out == expected
+
+
+def test_cli_no_args_exits_nonzero():
+    r = subprocess.run([sys.executable, str(Path(__file__).parent / "slugify.py")],
+                       capture_output=True, text=True)
+    assert r.returncode != 0
+
+
+def test_cli_extra_args_exits_nonzero():
+    r = subprocess.run([sys.executable, str(Path(__file__).parent / "slugify.py"), "a", "b"],
+                       capture_output=True, text=True)
+    assert r.returncode != 0
