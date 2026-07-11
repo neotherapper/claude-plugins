@@ -45,7 +45,7 @@ Repeat until `fleet.py pending` prints nothing:
 5. Record the outcome:
    - completed (INDEX flipped `status: complete`) → `fleet.py update {slug} --status complete --verdict complete`
    - blocked for a concrete reason (e.g. auth wall) → `fleet.py update {slug} --status blocked --verdict blocked:{reason}`
-   - errored / produced nothing → `fleet.py update {slug} --status inconclusive --verdict inconclusive`, then **retry once**; if still not complete, `waive` it so it reaches a terminal status (`inconclusive` is NOT terminal — leaving it inconclusive would make `fleet.py pending` re-list it forever): `fleet.py waive {slug} --reason inconclusive-after-retry`.
+   - errored / produced nothing → `fleet.py update {slug} --status inconclusive --verdict inconclusive`, then **retry once**; if still not complete, `waive` it so it reaches a terminal status (`inconclusive` is NOT terminal — leaving it inconclusive would make `fleet.py pending` re-list it forever): `fleet.py waive {slug} --reason inconclusive-after-retry`. Each `--status inconclusive` update bumps the row's durable `retries` count in the ledger (survives compaction) — the retry policy is bounded to **one** retry, so once `retries` reaches 2 for a slug, waive it rather than retrying again; do not rely on in-context memory of how many times you've retried, check `retries` in the ledger.
 
 ## Close
 

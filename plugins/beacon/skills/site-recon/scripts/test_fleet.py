@@ -145,3 +145,22 @@ def test_waive_unknown_slug_exits_2(tmp_path):
     r = run(["waive", "nonexistent-slug", "--reason", "x"], tmp_path)
     assert r.returncode == 2
     assert read_ledger(tmp_path) == before  # ledger untouched
+
+
+def test_corrupt_ledger_reports_error_not_traceback(tmp_path):
+    run(["init", "https://a.com"], tmp_path)
+    ledger = json.loads((tmp_path / "docs/sites/.fleet/active.json").read_text())["ledger"]
+    (tmp_path / ledger).write_text("{ not valid json")
+    for sub in (["pending"], ["sweep"], ["update", "a-com", "--status", "complete"]):
+        r = run(sub, tmp_path)
+        assert r.returncode != 0
+        assert "[FLEET-ERROR] corrupt" in r.stderr
+        assert "Traceback" not in r.stderr   # graceful, not a crash
+
+
+def test_update_inconclusive_bumps_retries(tmp_path):
+    run(["init", "https://a.com"], tmp_path)
+    run(["update", "a-com", "--status", "inconclusive"], tmp_path)
+    assert read_ledger(tmp_path)["sources"]["a-com"]["retries"] == 1
+    run(["update", "a-com", "--status", "inconclusive"], tmp_path)
+    assert read_ledger(tmp_path)["sources"]["a-com"]["retries"] == 2

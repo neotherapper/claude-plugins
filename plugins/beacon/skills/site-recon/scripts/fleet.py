@@ -86,7 +86,12 @@ def _mutate(fn):
         fcntl.flock(f, fcntl.LOCK_EX)
         try:
             f.seek(0)
-            led = json.load(f)
+            try:
+                led = json.load(f)
+            except json.JSONDecodeError:
+                sys.stderr.write(
+                    f"[FLEET-ERROR] corrupt ledger {path} — run 'fleet.py close' and re-init\n")
+                return None
             fn(led)
             data = json.dumps(led, indent=2)   # serialize BEFORE truncating
             f.seek(0)
@@ -112,7 +117,12 @@ def cmd_init(a):
         resolved[s] = url
     existing = ledger_path()
     if existing and os.path.isfile(existing):
-        led = load(existing)
+        try:
+            led = load(existing)
+        except json.JSONDecodeError:
+            sys.stderr.write(
+                f"[FLEET-ERROR] corrupt active ledger {existing} — run 'fleet.py close' and re-init\n")
+            return 2
         if any(v["status"] not in TERMINAL for v in led["sources"].values()):
             sys.stderr.write(
                 f"[FLEET-ERROR] an unresolved fleet is already active ({existing}). "
@@ -138,6 +148,8 @@ def cmd_update(a):
             raise KeyError(a.slug)
         row = led["sources"][a.slug]
         row["status"] = a.status
+        if a.status == "inconclusive":
+            row["retries"] = row.get("retries", 0) + 1
         if a.verdict is not None:
             row["verdict"] = a.verdict
         if a.agent_id is not None:
@@ -165,7 +177,11 @@ def cmd_sweep(a):
     if not path or not os.path.isfile(path):
         sys.stderr.write("[FLEET-ERROR] no active fleet\n")
         return 1
-    led = load(path)
+    try:
+        led = load(path)
+    except json.JSONDecodeError:
+        sys.stderr.write(f"[FLEET-ERROR] corrupt ledger {path} — run 'fleet.py close' and re-init\n")
+        return 1
     incomplete = []
     for slug, s in led["sources"].items():
         # blocked/waived is an explicit terminal decision recorded in the ledger
