@@ -191,10 +191,16 @@ def cmd_resume(a):
 
 def cmd_waive(a):
     def fn(led):
+        if a.slug not in led["sources"]:
+            raise KeyError(a.slug)
         row = led["sources"][a.slug]
         row["status"] = "blocked"
         row["verdict"] = f"blocked:{a.reason or 'waived'}"
-    return 0 if _mutate(fn) is not None else 1
+    try:
+        return 0 if _mutate(fn) is not None else 1
+    except KeyError as e:
+        sys.stderr.write(f"[FLEET-ERROR] unknown slug {e}\n")
+        return 2
 
 
 def cmd_close(a):

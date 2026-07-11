@@ -129,3 +129,11 @@ def test_close_removes_active(tmp_path):
     run(["init", "https://a.com"], tmp_path)
     run(["close"], tmp_path)
     assert not (tmp_path / "docs/sites/.fleet/active.json").exists()
+
+
+def test_waive_unknown_slug_exits_2(tmp_path):
+    run(["init", "https://a.com"], tmp_path)
+    before = read_ledger(tmp_path)
+    r = run(["waive", "nonexistent-slug", "--reason", "x"], tmp_path)
+    assert r.returncode == 2
+    assert read_ledger(tmp_path) == before  # ledger untouched
