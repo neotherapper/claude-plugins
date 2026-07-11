@@ -160,6 +160,50 @@ def cmd_pending(a):
     return 0
 
 
+def cmd_sweep(a):
+    path = ledger_path()
+    if not path or not os.path.isfile(path):
+        sys.stderr.write("[FLEET-ERROR] no active fleet\n")
+        return 1
+    led = load(path)
+    incomplete = []
+    for slug, s in led["sources"].items():
+        if is_complete(slug):
+            continue
+        reason = (s["verdict"] or s["status"] or "unknown")
+        # fail toward flagging: a missing/invalid INDEX counts as incomplete
+        incomplete.append((slug, reason))
+    if not incomplete:
+        print("[FLEET-COMPLETE]")
+    else:
+        for slug, reason in incomplete:
+            print(f"[FLEET-INCOMPLETE:{slug}:{reason}]")
+    return 0
+
+
+def cmd_pause(a):
+    return 0 if _mutate(lambda l: l.__setitem__("state", "paused")) is not None else 1
+
+
+def cmd_resume(a):
+    return 0 if _mutate(lambda l: l.__setitem__("state", "active")) is not None else 1
+
+
+def cmd_waive(a):
+    def fn(led):
+        row = led["sources"][a.slug]
+        row["status"] = "blocked"
+        row["verdict"] = f"blocked:{a.reason or 'waived'}"
+    return 0 if _mutate(fn) is not None else 1
+
+
+def cmd_close(a):
+    if os.path.isfile(ACTIVE):
+        os.remove(ACTIVE)
+    print("[FLEET-CLOSED]")
+    return 0
+
+
 def build_parser():
     p = argparse.ArgumentParser(prog="fleet.py")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -171,6 +215,12 @@ def build_parser():
     pu.add_argument("--agent-id", dest="agent_id")
     pu.set_defaults(fn=cmd_update)
     pp = sub.add_parser("pending"); pp.set_defaults(fn=cmd_pending)
+    ps = sub.add_parser("sweep"); ps.set_defaults(fn=cmd_sweep)
+    sub.add_parser("pause").set_defaults(fn=cmd_pause)
+    sub.add_parser("resume").set_defaults(fn=cmd_resume)
+    pw = sub.add_parser("waive"); pw.add_argument("slug"); pw.add_argument("--reason")
+    pw.set_defaults(fn=cmd_waive)
+    sub.add_parser("close").set_defaults(fn=cmd_close)
     return p
 
 

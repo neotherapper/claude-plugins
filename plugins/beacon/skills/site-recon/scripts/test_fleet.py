@@ -62,6 +62,7 @@ def test_pending_lists_non_terminal_and_rearms(tmp_path):
     run(["init", "https://a.com", "https://b.com"], tmp_path)
     run(["update", "a-com", "--status", "complete", "--verdict", "complete"], tmp_path)
     run(["pause"], tmp_path)  # defined in Task 5; import-time presence is fine
+    assert read_ledger(tmp_path)["state"] == "paused"   # pause actually took effect
     r = run(["pending"], tmp_path)
     assert r.returncode == 0
     assert r.stdout.split() == ["b-com"]
@@ -74,3 +75,57 @@ def test_update_unknown_slug_exits_2_and_preserves_ledger(tmp_path):
     r = run(["update", "nonexistent-slug", "--status", "complete"], tmp_path)
     assert r.returncode == 2
     assert read_ledger(tmp_path) == before  # ledger unchanged, not corrupted
+
+
+def _mk_index(root, slug, status):
+    d = root / "docs/sites" / slug / "research"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "INDEX.md").write_text(
+        f"---\ntype: site-index\nstatus: {status}\n---\n# {slug}\n")
+
+
+def test_sweep_flags_incomplete(tmp_path):
+    run(["init", "https://a.com", "https://b.com"], tmp_path)
+    _mk_index(tmp_path, "a-com", "complete")
+    run(["update", "a-com", "--status", "complete", "--verdict", "complete"], tmp_path)
+    _mk_index(tmp_path, "b-com", "draft")
+    run(["update", "b-com", "--status", "inconclusive", "--verdict", "inconclusive"], tmp_path)
+    r = run(["sweep"], tmp_path)
+    assert r.returncode == 0
+    assert "[FLEET-INCOMPLETE:b-com:inconclusive]" in r.stdout
+    assert "a-com" not in r.stdout
+
+
+def test_sweep_all_complete(tmp_path):
+    run(["init", "https://a.com"], tmp_path)
+    _mk_index(tmp_path, "a-com", "complete")
+    run(["update", "a-com", "--status", "complete", "--verdict", "complete"], tmp_path)
+    r = run(["sweep"], tmp_path)
+    assert "[FLEET-COMPLETE]" in r.stdout
+
+
+def test_sweep_missing_index_is_incomplete(tmp_path):
+    run(["init", "https://a.com"], tmp_path)  # no INDEX written
+    run(["update", "a-com", "--status", "reconning"], tmp_path)
+    r = run(["sweep"], tmp_path)
+    assert "[FLEET-INCOMPLETE:a-com:" in r.stdout
+
+
+def test_pause_sets_state(tmp_path):
+    run(["init", "https://a.com"], tmp_path)
+    run(["pause"], tmp_path)
+    assert read_ledger(tmp_path)["state"] == "paused"
+
+
+def test_waive_makes_terminal(tmp_path):
+    run(["init", "https://a.com"], tmp_path)
+    run(["waive", "a-com", "--reason", "auth-gated"], tmp_path)
+    row = read_ledger(tmp_path)["sources"]["a-com"]
+    assert row["status"] == "blocked"
+    assert row["verdict"] == "blocked:auth-gated"
+
+
+def test_close_removes_active(tmp_path):
+    run(["init", "https://a.com"], tmp_path)
+    run(["close"], tmp_path)
+    assert not (tmp_path / "docs/sites/.fleet/active.json").exists()
