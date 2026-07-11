@@ -10,6 +10,13 @@ Versions follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Fleet orchestration (B1, sequential core)**: `/beacon:fleet {urls|file}` recons multiple
+  sources one at a time through `site-analyst`, tracked in a durable `docs/sites/.fleet/` ledger
+  (`scripts/fleet.py`) that survives compaction and resumes via `fleet.py pending`. A `Stop`-only
+  `hooks/fleet-sweep.sh` gate blocks the orchestrator until every source is complete/blocked/waived
+  — deterministically closing the Option-A residual gap (abandoned/zero-output recons). Adds a
+  canonical `scripts/slugify.py` shared by `scaffold.sh` and `fleet.py`. Parallelism is deferred to
+  B2.
 - **New Tech Packs**: SolidJS, SvelteKit, React Native, Vercel (4 frameworks)
 - **New OSINT Patterns** in `references/osint-sources.md`:
   - Cloud Infrastructure Enumeration (AWS S3, Azure Blob, GCS, Cloudflare R2)
