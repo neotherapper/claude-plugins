@@ -3,7 +3,7 @@ set -euo pipefail
 DIR=$(cd "$(dirname "$0")" && pwd)
 TPL="$DIR/../../../templates/okf"
 : "${URL:?set URL}"
-SLUG=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s/^www\.//; s#/.*$##; s/:[0-9]+$//; s/\./-/g')
+SLUG=$(python3 "$DIR/slugify.py" "$URL")
 if [ -z "${OUTPUT_ROOT:-}" ]; then
   OUTPUT_ROOT="docs/sites/${SLUG}/research"
   # T6-m1: only on the default path, deterministically flag a pre-0.7.0 legacy

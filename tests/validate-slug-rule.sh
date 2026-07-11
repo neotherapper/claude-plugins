@@ -87,6 +87,20 @@ for c in "${cases[@]}"; do
 done
 [ "$fails" -eq 0 ] && green "canonical rule correct on ${#cases[@]} cases (incl. WWW./mixed-case/:port/path)"
 
+# --- Check 3: slugify.py (beacon runtime) matches the canonical rule ---
+SLUGIFY_PY="plugins/beacon/skills/site-recon/scripts/slugify.py"
+py_cases=(
+  "https://www.jetpens.com|jetpens-com"
+  "https://api.example.com:8080/v1|api-example-com"
+  "HTTPS://Example.COM/Path|example-com"
+)
+for c in "${py_cases[@]}"; do
+  url="${c%%|*}"; want="${c#*|}"
+  got=$(python3 "$SLUGIFY_PY" "$url")
+  [ "$got" = "$want" ] || { red "slugify.py '$url' -> '$got' != '$want'"; }
+done
+[ "$fails" -eq 0 ] && green "slugify.py matches canonical rule on ${#py_cases[@]} cases"
+
 echo
 if [ "$fails" -ne 0 ]; then
   echo "${fails} slug-rule error(s)"
