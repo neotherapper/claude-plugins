@@ -3,8 +3,9 @@
 Planned features and capabilities in priority order. Each version ships as a complete, tested unit.
 
 > **Status legend:** ✅ shipped · 🔜 next · 📋 planned. The version numbers below were reconciled
-> against what actually shipped on 2026-06-30 — read **Shipped** first. Planned numbers (v0.8.0+)
-> are indicative and assigned at release, since the sequence already slipped once.
+> against what actually shipped, most recently on 2026-07-08 — read **Shipped** first. Planned
+> numbers (v0.9.0+) are indicative and assigned at release, since the sequence has already
+> slipped twice.
 
 ---
 
@@ -13,9 +14,10 @@ Planned features and capabilities in priority order. Each version ships as a com
 | Version | What actually shipped | Notes |
 |---------|----------------------|-------|
 | ✅ v0.6.0 | site-intel tech-pack cross-referencing (Step 3a) | Matches the v0.6.0 plan below |
-| ✅ v0.7.0 | **Workspace restructure** → `docs/sites/{slug}/research/` with dual-path fallback (PR #27) | ⚠️ This consumed the v0.7.0 number; the planned "Query Proof Scripts" did **not** ship and is renumbered 🔜 below |
+| ✅ v0.7.0 | **Workspace restructure** → `docs/sites/{slug}/research/` with dual-path fallback (PR #27) | ⚠️ This consumed the v0.7.0 number; the planned "Query Proof Scripts" shipped one version later, as v0.8.0 (see below) |
 | ✅ #31 | site-recon `SKILL.md` de-dup + phase reorder (Phase 1–2.5 reconcile, Phase 8.5 restored after Phase 8) | Landed on `main` before this work; the OSINT wiring below builds on it |
 | ✅ site-recon OSINT wiring (2026-06-30) | On top of #31: Phase 9 OSINT sweep wired via `osint.py run_all` (fixed its `TARGET` env-var bug so the 9 `.sh` helpers actually run); CSP/CORS `connect-src` API-domain extraction (Phase 2) and third-party-key harvest (Phase 9) promoted from `references/`; bundled-scripts table added to `SKILL.md` | Closes the "catalogued-but-unwired" gap for the OSINT helpers |
+| ✅ v0.8.0 | site-intel Step 5 (Query Proof Scripts) + tech-pack `## Query Templates` | Data-driven snippet selection by `auth:`; see plan |
 
 ---
 
@@ -31,10 +33,11 @@ Planned features and capabilities in priority order. Each version ships as a com
 
 ---
 
-## Query Proof Scripts — 🔜 next (was mislabeled v0.7.0)
+## Query Proof Scripts — ✅ SHIPPED (v0.8.0)
 
-> **Reconciled 2026-06-30:** v0.7.0 actually shipped as the `docs/sites/{slug}/research/` workspace
-> restructure (see **Shipped**). This feature did not ship; it is the next planned increment.
+> **Reconciled 2026-07-08:** v0.7.0 actually shipped as the `docs/sites/{slug}/research/` workspace
+> restructure (see **Shipped**), so this feature slipped one version and shipped as v0.8.0 instead
+> (site-intel Step 5 + tech-pack `## Query Templates` — see **Shipped** above).
 
 **Goal:** Give site-intel the ability to optionally generate and run simple data-fetching scripts that prove discovered endpoints return real, useful data — showing the user the actual output, not just the status code.
 
@@ -53,7 +56,13 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
-## v0.8.0 — Research Freshness Signals
+## v0.9.0 — Research Freshness Signals — 🔜 next
+
+> **Reconciled 2026-07-08:** renumbered from v0.8.0 — that number was consumed by Query Proof
+> Scripts (see **Shipped**). This collides with the "v0.9.0 — Additional Tech Packs" number below;
+> per this doc's own disclaimer, planned numbers (v0.8.0+) are indicative and get reassigned at
+> actual release, since the sequence has already slipped twice. Not re-cascading the rest of the
+> backlog's numbers here — out of scope for this reconciliation.
 
 **Goal:** surface when research is stale and give the user a clear re-run path.
 
