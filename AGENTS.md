@@ -34,6 +34,7 @@ Skills in `plugins/beacon/skills/`:
 |-------|------|-----------------|
 | `site-recon` | `plugins/beacon/skills/site-recon/SKILL.md` | User asks to analyse a site, map API surfaces, research a URL, or runs `/beacon:analyze` |
 | `site-intel` | `plugins/beacon/skills/site-intel/SKILL.md` | User asks about a previously researched site, or asks questions about `docs/sites/{site}/research/` files |
+| `site-fleet` | `plugins/beacon/skills/site-fleet/SKILL.md` | User asks to recon MULTIPLE sites, or runs `/beacon:fleet` |
 
 ## Intent → Skill Mapping
 
@@ -56,6 +57,8 @@ When the user's request matches any of these patterns, load and follow the corre
 | "tell me about [known site]" | `site-intel` |
 | "load the research for..." | `site-intel` |
 | "what did we find on..." | `site-intel` |
+| "recon these sites" | `site-fleet` |
+| "run beacon over this list" | `site-fleet` |
 
 ## Execution Rules
 

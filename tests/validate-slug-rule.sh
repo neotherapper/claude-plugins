@@ -87,6 +87,28 @@ for c in "${cases[@]}"; do
 done
 [ "$fails" -eq 0 ] && green "canonical rule correct on ${#cases[@]} cases (incl. WWW./mixed-case/:port/path)"
 
+# --- Check 3: slugify.py (beacon runtime) is byte-identical to canonical ---
+# Runs the SAME inputs (the shared `cases` table from Check 2) through both
+# the canonical bash slugify() and slugify.py, and requires all three of
+# {canonical output, slugify.py output, expected slug} to agree. This is what
+# actually enforces "beacon's Python slug logic is byte-identical to the
+# canonical rule" — two implementations each graded against their own table
+# never proves that, only a one-time manual cross-check would.
+SLUGIFY_PY="plugins/beacon/skills/site-recon/scripts/slugify.py"
+py_checks=0
+for c in "${cases[@]}"; do
+  in="${c%%|*}"; want="${c#*|}"
+  canon="$(slugify "$in")"
+  got="$(python3 "$SLUGIFY_PY" "$in")"
+  py_checks=$((py_checks+1))
+  if [ "$got" != "$canon" ]; then
+    red "slugify.py('$in') = '$got' != canonical bash slugify() '$canon' (byte-identity mismatch)"
+  elif [ "$got" != "$want" ]; then
+    red "slugify.py('$in') = '$got', expected '$want'"
+  fi
+done
+[ "$fails" -eq 0 ] && green "slugify.py byte-identical to canonical rule on ${py_checks} cases"
+
 echo
 if [ "$fails" -ne 0 ]; then
   echo "${fails} slug-rule error(s)"

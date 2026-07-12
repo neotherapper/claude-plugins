@@ -18,6 +18,11 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/okf-gate.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/fleet-sweep.sh",
+            "timeout": 30
           }
         ]
       }

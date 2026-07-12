@@ -2,7 +2,8 @@
 
 All site-analysis plugins (beacon, reframe) MUST derive the same slug so their
 output lines up under `docs/sites/{slug}/`. reframe follows this rule today;
-beacon aligns in PR-C (v0.7.0). Rule:
+beacon aligns in PR-C (v0.7.0). The canonical implementation is in
+`plugins/beacon/skills/site-recon/scripts/slugify.py`. Rule:
 
 1. Lowercase
 2. Strip scheme (`https?://`)

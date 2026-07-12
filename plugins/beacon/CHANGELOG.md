@@ -72,6 +72,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.9.0] — 2026-07-12
+
+### Added
+- **Fleet orchestration (B1, sequential core)**: `/beacon:fleet {urls|file}` recons multiple
+  sources one at a time through `site-analyst`, tracked in a durable `docs/sites/.fleet/` ledger
+  (`scripts/fleet.py`) that survives compaction and resumes via `fleet.py pending`. A `Stop`-only
+  `hooks/fleet-sweep.sh` gate blocks the orchestrator until every source is complete/blocked/waived
+  — deterministically closing the Option-A residual gap (abandoned/zero-output recons). Adds a
+  canonical `scripts/slugify.py` shared by `scaffold.sh` and `fleet.py`. Parallelism is deferred to
+  a follow-on B2 spec.
+
+---
+
 ## [0.8.0] — 2026-07-08
 
 ### Added
