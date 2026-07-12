@@ -10,13 +10,6 @@ Versions follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
-- **Fleet orchestration (B1, sequential core)**: `/beacon:fleet {urls|file}` recons multiple
-  sources one at a time through `site-analyst`, tracked in a durable `docs/sites/.fleet/` ledger
-  (`scripts/fleet.py`) that survives compaction and resumes via `fleet.py pending`. A `Stop`-only
-  `hooks/fleet-sweep.sh` gate blocks the orchestrator until every source is complete/blocked/waived
-  — deterministically closing the Option-A residual gap (abandoned/zero-output recons). Adds a
-  canonical `scripts/slugify.py` shared by `scaffold.sh` and `fleet.py`. Parallelism is deferred to
-  B2.
 - **New Tech Packs**: SolidJS, SvelteKit, React Native, Vercel (4 frameworks)
 - **New OSINT Patterns** in `references/osint-sources.md`:
   - Cloud Infrastructure Enumeration (AWS S3, Azure Blob, GCS, Cloudflare R2)
@@ -76,6 +69,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - **OKF output-contract hardening** (deferred findings T5-m1, T6-m1 from the v0.7.1 review):
   - `scaffold.sh` wrote the `.beacon/recon-active.json` gate marker with `printf '%s'`, so an `OUTPUT_ROOT` containing a `"` or `\` produced malformed JSON that `okf-gate.sh`'s `json.load` rejected — silently no-opping the Stop-hook gate (fail-open). The marker is now built with `json.dumps` (path passed as argv, never interpolated). `okf-gate.sh`'s read side was already argv-safe and is unchanged.
   - The pre-0.7.0 `[LEGACY-WORKSPACE]` detection was prose in `SKILL.md` (skippable under synthesis pressure). `scaffold.sh` now detects it deterministically — on the default output path only — emitting `[LEGACY-WORKSPACE:docs/research/{slug}]` when a legacy folder exists; an explicitly caller-supplied path is never flagged.
+
+---
+
+## [0.9.0] — 2026-07-12
+
+### Added
+- **Fleet orchestration (B1, sequential core)**: `/beacon:fleet {urls|file}` recons multiple
+  sources one at a time through `site-analyst`, tracked in a durable `docs/sites/.fleet/` ledger
+  (`scripts/fleet.py`) that survives compaction and resumes via `fleet.py pending`. A `Stop`-only
+  `hooks/fleet-sweep.sh` gate blocks the orchestrator until every source is complete/blocked/waived
+  — deterministically closing the Option-A residual gap (abandoned/zero-output recons). Adds a
+  canonical `scripts/slugify.py` shared by `scaffold.sh` and `fleet.py`. Parallelism is deferred to
+  a follow-on B2 spec.
 
 ---
 
