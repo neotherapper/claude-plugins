@@ -75,6 +75,24 @@ plugins/seo/
 
 ---
 
+## Scoring model
+
+Composite 0-100 score across five categories with tiered fallbacks:
+
+| Category | Max | Top tier | Fallback tier |
+|----------|-----|----------|---------------|
+| Technical | 25 | wired from `technical-audit` (Phase 6) | 0 (v0.1.0 — wired in v0.2.0) |
+| On-Page | 25 | full credit when each rule hits | 1 pt when only the "presence" rule passes (e.g. title is present but length is off-band; description present but off-band; OG partially filled) |
+| Schema | 20 | full credit when JSON-LD valid + required properties + no deprecated types | per-property partial credit per missing required property |
+| Content | 15 | exactly one `<h1>` AND no skipped heading levels | 1 pt each (one H1 alone is 3, no skips alone is 3) — partial credit stacks |
+| Performance | 15 | live CWV via chrome-devtools MCP | 0 (v0.1.0 — wired in v0.2.0) |
+
+The 1-point fallback exists because **presence-without-quality** deserves a non-zero score so users see the rule is wired and can act on it. Catch-all patterns like "any non-empty title" earn 1 pt; the 3-pt tier requires the length band, keyword, or alignment the metric asks for.
+
+Mirrored in `skills/site-audit/references/scoring-model.md` (Phase 4) and asserted by `specs/site-audit.feature`.
+
+---
+
 ## Output structure (per run)
 
 ```

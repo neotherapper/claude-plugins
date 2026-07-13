@@ -38,13 +38,13 @@ Feature: Site-Audit skill — SEO audit producing docs/sites/{slug}/seo/
     Given a page with a title of 25 characters
     When I run /seo:audit https://example.com
     Then a warning finding with rule "title-short" is recorded
-    And the on-page score reaches the 1-point tier (presence only) not the 3-point tier (length)
+    And the on-page category-length tier stays at the 1-point fallback (presence only) instead of the 3-point tier (length band hit)
 
   Scenario: Duplicate H1 tags are flagged as an error
     Given a page with 3 <h1> tags
     When I run /seo:audit https://example.com
     Then an error finding with rule "h1-multiple" (count=3) is recorded
-    And the content score loses 2 points (1 → 1-point tier)
+    And the content score stays at the 1-point tier (some H1 present) instead of rising to the 3-point tier (exactly one H1)
 
   Scenario: Heading-level skip is flagged as a warning
     Given a page that goes <h1> → <h3> without an <h2>
