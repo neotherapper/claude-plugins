@@ -7,7 +7,8 @@ Planned features and capabilities in priority order. Each version ships as a com
 > sequence has slipped three times now (v0.7.0, v0.8.0, v0.9.0 each went to something other than
 > the item originally planned for that number), so the two items immediately below **Shipped**
 > intentionally carry no pre-assigned version number — it gets assigned at actual release, not
-> before. Numbers further down the backlog (v0.10.0+) are still indicative placeholders.
+> before. The rest of the backlog below carries no pre-assigned number either — the actual
+> version is assigned at release, per the legend above.
 
 ---
 
@@ -62,12 +63,10 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ## Research Freshness Signals — ✅ SHIPPED (v0.10.0)
 
-> **Reconciled 2026-07-12:** previously labeled v0.9.0, but that number was consumed by Fleet
-> orchestration B1 (see **Shipped**) — the third consecutive slip. Rather than bump to v0.10.0
-> (already "Multi-Site Comparison" further down) and create a fourth collision, this item and
-> "Additional Tech Packs" below now carry no pre-assigned number; per this doc's own legend,
-> the actual version gets assigned at release. Not re-cascading the rest of the backlog's
-> numbers here — out of scope for this reconciliation.
+> **Reconciled 2026-07-13:** this item shipped as v0.10.0 — the number freed up after Fleet
+> orchestration B1 consumed v0.9.0 (see **Shipped**). The former "Multi-Site Comparison" and
+> "Export Formats" backlog headings were de-numbered to `📋 planned` in the same pass; per this
+> doc's own legend, the actual version number is assigned at release, not before.
 
 **Goal:** surface when research is stale and give the user a clear re-run path.
 
