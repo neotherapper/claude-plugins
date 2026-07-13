@@ -21,6 +21,7 @@ Planned features and capabilities in priority order. Each version ships as a com
 | ✅ site-recon OSINT wiring (2026-06-30) | On top of #31: Phase 9 OSINT sweep wired via `osint.py run_all` (fixed its `TARGET` env-var bug so the 9 `.sh` helpers actually run); CSP/CORS `connect-src` API-domain extraction (Phase 2) and third-party-key harvest (Phase 9) promoted from `references/`; bundled-scripts table added to `SKILL.md` | Closes the "catalogued-but-unwired" gap for the OSINT helpers |
 | ✅ v0.8.0 | site-intel Step 5 (Query Proof Scripts) + tech-pack `## Query Templates` | Data-driven snippet selection by `auth:`; see plan |
 | ✅ v0.9.0 | **Fleet orchestration B1 (sequential core)** — `/beacon:fleet`, durable `.fleet/` ledger, `Stop`-only sweep gate (PR #40) | Closes the Option-A residual gap (abandoned/zero-output recons); parallelism deferred to B2 |
+| ✅ v0.10.0 | **Research Freshness Signals** — site-intel stale-research warnings via `freshness.py` (30-day threshold, deterministic) | site-intel-only; advisory, no hook |
 
 ---
 
@@ -59,7 +60,7 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
-## Research Freshness Signals — 🔜 next
+## Research Freshness Signals — ✅ SHIPPED (v0.10.0)
 
 > **Reconciled 2026-07-12:** previously labeled v0.9.0, but that number was consumed by Fleet
 > orchestration B1 (see **Shipped**) — the third consecutive slip. Rather than bump to v0.10.0
@@ -78,7 +79,7 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
-## Additional Tech Packs — 📋 planned
+## Additional Tech Packs — 🔜 next
 
 **Goal:** expand framework coverage beyond the current 12 packs.
 
@@ -111,7 +112,7 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
-## v0.10.0 — Multi-Site Comparison
+## Multi-Site Comparison — 📋 planned
 
 **Goal:** answer questions that span two research folders — "how does X differ from Y?", "which site has a public GraphQL API?", "compare the auth flows".
 
@@ -122,7 +123,7 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
-## v0.11.0 — Export Formats
+## Export Formats — 📋 planned
 
 **Goal:** convert the OpenAPI spec discovered during analysis into formats that are immediately usable in other tools.
 

@@ -72,6 +72,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.10.0] — 2026-07-13
+
+### Added
+- **Research Freshness Signals**: `site-intel` now warns when a site's research is stale. Step 2
+  runs `skills/site-intel/scripts/freshness.py`, which reads `INDEX.md`'s OKF `timestamp:` field and
+  emits `[RESEARCH-STALE:{N}d]` / `[RESEARCH-FRESH:{N}d]` / `[RESEARCH-DATE-UNKNOWN]` against the
+  system clock (30-day threshold, fail-safe, always exit 0). On a stale bundle site-intel prepends a
+  one-line warning suggesting a `/beacon:analyze` re-run. Advisory only — no hook, no INDEX changes.
+
+### Fixed
+- `tests/validate-site-intel.sh` version assertion was stale at `0.8.0`; aligned to `0.10.0`. Unrelated
+  to the Research Freshness Signals feature itself; recorded here so bisect does not misattribute it
+  (same precedent as the 0.8.0 entry below).
+
+---
+
 ## [0.9.0] — 2026-07-12
 
 ### Added
