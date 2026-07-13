@@ -134,6 +134,38 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
+## Fleet Orchestration B2 — Parallelism 📋 (deferred — not a priority)
+
+> **Deferred by design.** B1 (v0.9.0, shipped) already delivers every *correctness* win — the real
+> `site-analyst` agent, a durable ledger, no lost batch, and a deterministic zero-output catch. B2
+> buys only *throughput* (a large fleet finishes faster), and it is the genuinely hard part: the
+> parallel-first design failed adversarial review twice before B1 was decomposed out of it. Pick it
+> up only if reconning many sources (10+) sequentially becomes a real speed pain point. It gets its
+> own spec/plan — the requirements are sketched in the B1 design's "B2 boundary"
+> (`docs/superpowers/specs/2026-07-10-beacon-fleet-orchestration-design.md`, §13).
+
+**Goal:** run `/beacon:fleet` sources concurrently (waves of ≤3) instead of one at a time.
+
+**What changes:**
+- **Capability-sandboxed passive agent** (`site-scout` with a restricted `tools:` frontmatter that
+  omits the browser MCP namespaces) **plus a `PreToolUse` Bash hook to block `cmux`** — cmux is a
+  Bash CLI, so a tools-allowlist alone does not stop a scout from driving the browser.
+- **Content hand-off contract** — splitting a source across scout (passive) + main (browser)
+  contexts kills beacon's in-context session brief at scout termination, yielding a hollow bundle.
+  Persist the brief + passive synthesis across the seam, substance-gated so an empty bundle cannot
+  ship.
+- **Browser serialization** — parallel scouts must still serialize the browser phase; no two agents
+  drive one Chrome at once.
+- **Rate-limit backoff** — concurrency re-introduces the 6-concurrent API rate-limit problem B1
+  dissolved by going sequential.
+- Builds on B1's `.fleet/` ledger, sweep, `Stop`-hook, and `slugify.py` unchanged.
+
+**Related B1 fast-follow (smaller, can land independently):** atomic ledger write in `fleet.py`
+`_mutate` (`os.replace` instead of truncate-in-place) — the `fleet-sweep.sh` hook already fails safe
+on a corrupt ledger, so this is hardening, not a blocker.
+
+---
+
 ## Phase Enhancement Backlog
 
 Improvements to existing phases that don't require a version bump — suitable for patch releases.
