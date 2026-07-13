@@ -41,7 +41,9 @@ def _read_timestamp(path):
         try:
             data = yaml.safe_load(block)
             if isinstance(data, dict) and data.get("timestamp") not in (None, ""):
-                return str(data["timestamp"])
+                val = data["timestamp"]
+                if val not in (None, ""):
+                    return val.isoformat() if hasattr(val, "isoformat") else str(val)
         except yaml.YAMLError:
             pass  # fall through to the line scan
     for line in block.splitlines():

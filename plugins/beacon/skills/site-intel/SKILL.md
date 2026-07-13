@@ -54,7 +54,7 @@ and version before routing.
 Then check research freshness deterministically — do not compute the age yourself:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-intel/scripts/freshness.py" {INDEX path}
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-intel/scripts/freshness.py" "{INDEX path}"
 ```
 
 - `[RESEARCH-STALE:{N}d]` → **prepend one line** to your eventual answer:

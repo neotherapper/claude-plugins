@@ -71,10 +71,10 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 **Goal:** surface when research is stale and give the user a clear re-run path.
 
 **What changes:**
-- INDEX.md gains an `Analysed:` date field (already templated, but not used by site-intel)
-- site-intel Step 2 checks the date; if research is older than 30 days, prepends a freshness warning to every answer
-- New signal: `[RESEARCH-STALE:{days}d]` — logged in site-intel responses, not in INDEX.md
-- Optional: suggest which phases to re-run for freshness (e.g., Phase 3 for framework version, Phase 8 for OpenAPI)
+- site-intel Step 2 reads the pre-existing OKF `timestamp:` field in INDEX.md — no new field is added to INDEX.md
+- If research is stale, prepends **one** freshness warning line to the answer — not one per file, not on every answer
+- New script `skills/site-intel/scripts/freshness.py` emits one of three signals — `[RESEARCH-STALE:{N}d]`, `[RESEARCH-FRESH:{N}d]`, `[RESEARCH-DATE-UNKNOWN]` — computed against the system clock with a hardcoded 30-day threshold; fail-safe, always exits 0
+- Per-phase re-run suggestions (e.g., Phase 3 for framework version, Phase 8 for OpenAPI) were a deferred non-goal — the shipped warning suggests a generic `/beacon:analyze` re-run instead
 
 ---
 
