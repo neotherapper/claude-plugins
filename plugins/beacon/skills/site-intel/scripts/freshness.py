@@ -29,7 +29,8 @@ except ImportError:
 def _read_timestamp(path):
     """Return the raw `timestamp:` string from the file's frontmatter, or None."""
     try:
-        text = open(path, encoding="utf-8").read()
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
     except (OSError, UnicodeDecodeError):
         return None
     m = re.match(r"^---\s*\n(.*?)\n---\s*\n", text, re.DOTALL)
@@ -70,17 +71,22 @@ def _parse_iso(ts):
 
 def freshness(index_path, now=None):
     """Return the one-line freshness signal for the given INDEX.md path."""
-    if now is None:
-        now = datetime.now(timezone.utc)
-    ts = _parse_iso(_read_timestamp(index_path))
-    if ts is None:
-        return "[RESEARCH-DATE-UNKNOWN]"
-    days = (now - ts).days  # timedelta.days floors toward -inf, so future -> negative
-    if days < 0:
-        return "[RESEARCH-DATE-UNKNOWN]"  # future-dated / clock skew
-    if days > STALE_AFTER_DAYS:
-        return f"[RESEARCH-STALE:{days}d]"
-    return f"[RESEARCH-FRESH:{days}d]"
+    try:
+        if now is None:
+            now = datetime.now(timezone.utc)
+        elif getattr(now, "tzinfo", None) is None:
+            now = now.replace(tzinfo=timezone.utc)  # normalize naive -> aware UTC
+        ts = _parse_iso(_read_timestamp(index_path))
+        if ts is None:
+            return "[RESEARCH-DATE-UNKNOWN]"
+        days = (now - ts).days  # timedelta.days floors toward -inf, so future -> negative
+        if days < 0:
+            return "[RESEARCH-DATE-UNKNOWN]"  # future-dated / clock skew
+        if days > STALE_AFTER_DAYS:
+            return f"[RESEARCH-STALE:{days}d]"
+        return f"[RESEARCH-FRESH:{days}d]"
+    except Exception:
+        return "[RESEARCH-DATE-UNKNOWN]"  # advisory tool: never raise
 
 
 def main(argv=None):
@@ -88,11 +94,14 @@ def main(argv=None):
     now = None
     if "--now" in argv:
         i = argv.index("--now")
-        if i + 1 < len(argv):
-            now = _parse_iso(argv[i + 1])
-            del argv[i:i + 2]
-        else:
-            del argv[i:i + 1]
+        if i + 1 >= len(argv):
+            print("[RESEARCH-DATE-UNKNOWN]")  # dangling --now flag: fail safe
+            return 0
+        now = _parse_iso(argv[i + 1])
+        del argv[i:i + 2]
+        if now is None:
+            print("[RESEARCH-DATE-UNKNOWN]")  # present but unparseable: fail safe
+            return 0
     if not argv:
         # usage error stays fail-safe: advisory tool never errors out
         print("[RESEARCH-DATE-UNKNOWN]")
