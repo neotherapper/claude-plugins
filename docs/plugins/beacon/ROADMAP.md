@@ -3,9 +3,11 @@
 Planned features and capabilities in priority order. Each version ships as a complete, tested unit.
 
 > **Status legend:** ✅ shipped · 🔜 next · 📋 planned. The version numbers below were reconciled
-> against what actually shipped, most recently on 2026-07-08 — read **Shipped** first. Planned
-> numbers (v0.9.0+) are indicative and assigned at release, since the sequence has already
-> slipped twice.
+> against what actually shipped, most recently on 2026-07-12 — read **Shipped** first. The
+> sequence has slipped three times now (v0.7.0, v0.8.0, v0.9.0 each went to something other than
+> the item originally planned for that number), so the two items immediately below **Shipped**
+> intentionally carry no pre-assigned version number — it gets assigned at actual release, not
+> before. Numbers further down the backlog (v0.10.0+) are still indicative placeholders.
 
 ---
 
@@ -18,6 +20,7 @@ Planned features and capabilities in priority order. Each version ships as a com
 | ✅ #31 | site-recon `SKILL.md` de-dup + phase reorder (Phase 1–2.5 reconcile, Phase 8.5 restored after Phase 8) | Landed on `main` before this work; the OSINT wiring below builds on it |
 | ✅ site-recon OSINT wiring (2026-06-30) | On top of #31: Phase 9 OSINT sweep wired via `osint.py run_all` (fixed its `TARGET` env-var bug so the 9 `.sh` helpers actually run); CSP/CORS `connect-src` API-domain extraction (Phase 2) and third-party-key harvest (Phase 9) promoted from `references/`; bundled-scripts table added to `SKILL.md` | Closes the "catalogued-but-unwired" gap for the OSINT helpers |
 | ✅ v0.8.0 | site-intel Step 5 (Query Proof Scripts) + tech-pack `## Query Templates` | Data-driven snippet selection by `auth:`; see plan |
+| ✅ v0.9.0 | **Fleet orchestration B1 (sequential core)** — `/beacon:fleet`, durable `.fleet/` ledger, `Stop`-only sweep gate (PR #40) | Closes the Option-A residual gap (abandoned/zero-output recons); parallelism deferred to B2 |
 
 ---
 
@@ -56,13 +59,14 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
-## v0.9.0 — Research Freshness Signals — 🔜 next
+## Research Freshness Signals — 🔜 next
 
-> **Reconciled 2026-07-08:** renumbered from v0.8.0 — that number was consumed by Query Proof
-> Scripts (see **Shipped**). This collides with the "v0.9.0 — Additional Tech Packs" number below;
-> per this doc's own disclaimer, planned numbers (v0.8.0+) are indicative and get reassigned at
-> actual release, since the sequence has already slipped twice. Not re-cascading the rest of the
-> backlog's numbers here — out of scope for this reconciliation.
+> **Reconciled 2026-07-12:** previously labeled v0.9.0, but that number was consumed by Fleet
+> orchestration B1 (see **Shipped**) — the third consecutive slip. Rather than bump to v0.10.0
+> (already "Multi-Site Comparison" further down) and create a fourth collision, this item and
+> "Additional Tech Packs" below now carry no pre-assigned number; per this doc's own legend,
+> the actual version gets assigned at release. Not re-cascading the rest of the backlog's
+> numbers here — out of scope for this reconciliation.
 
 **Goal:** surface when research is stale and give the user a clear re-run path.
 
@@ -74,7 +78,7 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
-## v0.9.0 — Additional Tech Packs
+## Additional Tech Packs — 📋 planned
 
 **Goal:** expand framework coverage beyond the current 12 packs.
 
