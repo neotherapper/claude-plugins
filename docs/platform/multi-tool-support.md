@@ -180,6 +180,28 @@ Kiro reads a root `AGENTS.md` (always-included, no inclusion modes). Steering fi
 (remote servers use `url`). Import a skill folder via the IDE's "Agent Steering & Skills" panel, or
 just open this repo as the workspace so `.kiro/skills/` is present.
 
+### Cross-Tool: gh skill (Recommended)
+
+`gh skill` from GitHub CLI installs and updates skills across ALL agents:
+
+```sh
+# Install a skill for a specific agent
+gh skill install neotherapper/claude-plugins site-recon --agent claude-code
+gh skill install neotherapper/claude-plugins site-recon --agent opencode
+
+# Pin to a specific version
+gh skill install neotherapper/claude-plugins site-recon@v0.7.1
+
+# Update all skills across all agents
+gh skill update --all
+
+# Check for updates
+gh skill update --dry-run
+```
+
+This replaces the symlink farm for users who prefer versioned, updatable skills. The symlink
+farm (`scripts/sync-skills.sh`) remains available for repo-clone workflows.
+
 ---
 
 ## MCP servers

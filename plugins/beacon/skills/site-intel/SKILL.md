@@ -1,7 +1,10 @@
 ---
 name: site-intel
 description: This skill should be used when the user asks questions about a site that has already been analysed with site-recon — "what endpoints does X have?", "how do I query Y?", "what did we find on Z?", "load research for...", "tell me about [site]", "what auth does X use?", "give me the API for...". If a docs/sites/{slug}/research/ folder exists for the site (or a legacy docs/research/{slug}/), use this skill rather than re-analysing. Routes to the right pre-built file without re-running the full analysis.
-version: 0.8.0
+license: MIT
+metadata:
+  version: "0.8.0"
+  author: Georgios Pilitsoglou
 ---
 
 # site-intel — Router Mode
