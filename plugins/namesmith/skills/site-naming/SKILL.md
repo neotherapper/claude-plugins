@@ -6,7 +6,10 @@ description: >
   Trigger phrases: "find me a domain", "name my project", "what should I call",
   "available domains for", "domain for my portfolio", "I have an idea, find me a name".
   Also triggers when the user describes a project idea and mentions needing a web presence.
-version: 0.3.0
+license: MIT
+metadata:
+  version: "0.3.0"
+  author: Georgios Pilitsoglou
 ---
 
 # Site Naming

@@ -1,7 +1,10 @@
 ---
 name: site-fleet
 description: This skill should be used when the user asks to analyse/recon MULTIPLE sites at once — "recon these sites", "map the API surface of A, B and C", "run beacon over this list of URLs", or runs /beacon:fleet. Recons sources one at a time through site-analyst, tracks them in a durable ledger, and gates completion. For a single site, use site-recon instead.
-version: 0.9.0
+license: MIT
+metadata:
+  version: "0.9.0"
+  author: Georgios Pilitsoglou
 ---
 
 # site-fleet — Sequential fleet orchestration

@@ -1,7 +1,10 @@
 ---
 name: site-redesign
 description: This skill should be used when the user wants to redesign an existing website — e.g. "redesign this site", "create a redesign brief for acme.com", "redesign and modernise this site", "rethink the design of this site". Requires an EXPLICIT redesign intent; a bare URL or an API/endpoint request with no redesign intent belongs to beacon's site-recon, not here. Extracts purpose/content/IA, critiques vs category best-practice, and writes a paste-ready Claude Design brief to docs/sites/{slug}/redesign/.
-version: 0.2.0
+license: MIT
+metadata:
+  version: "0.2.0"
+  author: Georgios Pilitsoglou
 ---
 
 # site-redesign — Coverage-First Redesign Pipeline

@@ -8,7 +8,10 @@ description: >
   whenever the user wants to score an existing markdown file against SEO, hook,
   voice, and readability rubrics — even if they don't use the exact command
   name.
-version: "0.1.0"
+license: MIT
+metadata:
+  version: "0.1.0"
+  author: Georgios Pilitsoglou
 ---
 
 # Draftloom Eval Skill

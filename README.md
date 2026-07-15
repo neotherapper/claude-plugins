@@ -76,6 +76,20 @@ Kiro reads the root `AGENTS.md` (always-included) plus steering in `.kiro/steeri
 skills from `.kiro/skills/`. MCP servers go in `.kiro/settings/mcp.json`. Open this repo as the
 workspace, or import a skill folder via Kiro's "Agent Steering & Skills" panel.
 
+### Cross-Tool (gh skill)
+
+```sh
+# Install a skill for any agent
+gh skill install neotherapper/claude-plugins site-recon --agent claude-code
+gh skill install neotherapper/claude-plugins site-recon --agent opencode
+
+# Pin to a specific version
+gh skill install neotherapper/claude-plugins site-recon@v0.7.1
+
+# Update all skills across all agents
+gh skill update --all
+```
+
 <details>
 <summary><b>Other tools — Gemini CLI, GitHub Copilot, Cursor, Windsurf</b></summary>
 

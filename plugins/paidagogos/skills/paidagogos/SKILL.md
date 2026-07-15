@@ -11,6 +11,7 @@ description: >
   concepts. Handles server start ("/paidagogos serve") and future features
   (quiz, progress, curriculum). Use this skill for any learning intent even
   when the request is indirect.
+license: MIT
 ---
 
 # paidagogos — Router

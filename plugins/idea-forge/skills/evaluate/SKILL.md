@@ -1,7 +1,10 @@
 ---
 name: evaluate
-version: "0.1.0"
 description: "This skill should be used for ANY business idea validation, evaluation, or viability check. Key trigger signals: 'should I build', 'is this worth building', 'validate this', 'good idea?', 'rate my startup', 'honest feedback on my startup', 'is there market demand', 'wondering if the market is there', 'is this worth starting', 'any thoughts on viability', 'evaluate', 'got this side project idea', 'thinking about building', 'is this viable'. Also triggers for the /idea-forge:evaluate prefix and any message where someone describes a SaaS, marketplace, directory, e-commerce, content site, or free tool idea and wants to know whether it's worth pursuing. Runs 5+ research agents + scoring + critic pipeline and returns BET/BUILD/PIVOT/KILL verdict. Does NOT trigger for: writing copy/PRDs/pitch decks, filling in document sections, tech stack questions, knowledge vault lookups, general market research without a specific idea to evaluate."
+license: MIT
+metadata:
+  version: "0.1.0"
+  author: Georgios Pilitsoglou
 ---
 
 # Evaluate

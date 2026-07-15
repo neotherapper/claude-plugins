@@ -10,6 +10,7 @@ description: >
   "derivatives". For a bare or broad learning request ("teach me X", "explain
   X", "I want to learn X"), the paidagogos router handles scope first and then
   routes here.
+license: MIT
 ---
 
 # paidagogos:micro

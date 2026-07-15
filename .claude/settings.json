@@ -5,6 +5,7 @@
     "code-review@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true,
     "hookify@claude-plugins-official": true,
-    "mcp-server-dev@claude-plugins-official": true
+    "mcp-server-dev@claude-plugins-official": true,
+    "_spike-test-consumer@neotherapper-plugins": true
   }
 }
