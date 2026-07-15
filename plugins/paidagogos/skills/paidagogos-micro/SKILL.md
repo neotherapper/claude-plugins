@@ -10,6 +10,10 @@ description: >
   "derivatives". For a bare or broad learning request ("teach me X", "explain
   X", "I want to learn X"), the paidagogos router handles scope first and then
   routes here.
+license: MIT
+metadata:
+  version: "0.2.0"
+  author: Georgios Pilitsoglou
 ---
 
 # paidagogos:micro
@@ -166,4 +170,4 @@ Interactive lesson ready: {topic}
 | Content write fails | `"Could not write lesson file. Check visual-kit is running."` | Halt. Do not present content in chat. |
 | Vault lookup fails | *(no message)* | Continue. Use AI-suggested resources for `resources[]`. |
 
-Show error messages verbatim. No apologies, no extra suggestions.
+Show error messages verbatim. No apologies, no extra suggestions. (End of file - total 169 lines)

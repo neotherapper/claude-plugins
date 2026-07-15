@@ -11,6 +11,10 @@ description: >
   concepts. Handles server start ("/paidagogos serve") and future features
   (quiz, progress, curriculum). Use this skill for any learning intent even
   when the request is indirect.
+license: MIT
+metadata:
+  version: "0.2.0"
+  author: Georgios Pilitsoglou
 ---
 
 # paidagogos — Router
@@ -71,4 +75,4 @@ If `PAIDAGOGOS_DEBUG=1` is set, print before routing:
 
 ## Out of scope
 
-Lesson generation, visual rendering, progress storage, and curriculum planning are all delegated — this skill only classifies and routes.
+Lesson generation, visual rendering, progress storage, and curriculum planning are all delegated — this skill only classifies and routes. (End of file - total 74 lines)
