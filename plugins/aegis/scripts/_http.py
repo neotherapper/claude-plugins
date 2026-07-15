@@ -23,8 +23,8 @@ def _cache_path(key):
 def _cache_get(key, ttl):
     if ttl <= 0:
         return None
-    p = _cache_path(key)
     try:
+        p = _cache_path(key)
         if os.path.isfile(p) and (time.time() - os.path.getmtime(p)) < ttl:
             with open(p, encoding="utf-8") as f:
                 return json.load(f)
@@ -49,16 +49,17 @@ def _throttle():
     _last_call[0] = time.time()
 
 
-def _do(req, timeout):
+def _do(url, timeout, data=None, headers=None, method=None):
     try:
         _throttle()
+        req = request.Request(url, data=data, headers=headers or {}, method=method)
         with request.urlopen(req, timeout=timeout) as resp:
             body = resp.read().decode("utf-8", "replace")
         return json.loads(body)
     except (error.URLError, error.HTTPError) as e:
         return {"error": f"request failed: {e}"}
     except ValueError as e:
-        return {"error": f"bad json: {e}"}
+        return {"error": f"bad json or url: {e}"}
     except Exception as e:  # never raise from an advisory client
         return {"error": f"unexpected: {e}"}
 
@@ -68,8 +69,8 @@ def get_json(url, headers=None, timeout=20, cache_ttl=86400):
     if cached is not None:
         return cached
     h = {"Accept": "application/json", "User-Agent": _UA, **(headers or {})}
-    result = _do(request.Request(url, headers=h), timeout)
-    if "error" not in result:
+    result = _do(url, timeout, headers=h, method="GET")
+    if cache_ttl > 0 and not (isinstance(result, dict) and "error" in result):
         _cache_put(url, result)
     return result
 
@@ -77,5 +78,8 @@ def get_json(url, headers=None, timeout=20, cache_ttl=86400):
 def post_json(url, payload, headers=None, timeout=20):
     h = {"Accept": "application/json", "Content-Type": "application/json",
          "User-Agent": _UA, **(headers or {})}
-    data = json.dumps(payload).encode()
-    return _do(request.Request(url, data=data, headers=h, method="POST"), timeout)
+    try:
+        data = json.dumps(payload).encode()
+    except (TypeError, ValueError) as e:
+        return {"error": f"bad payload: {e}"}
+    return _do(url, timeout, data=data, headers=h, method="POST")

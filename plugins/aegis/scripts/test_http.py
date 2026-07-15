@@ -46,3 +46,34 @@ def test_cache_hit_avoids_second_call(monkeypatch, tmp_path):
     _http.get_json("https://e.com/a", cache_ttl=3600)
     _http.get_json("https://e.com/a", cache_ttl=3600)
     assert calls["n"] == 1  # second served from cache
+
+
+def test_post_json_non_serializable_payload_is_safe(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    r = _http.post_json("https://e.com/a", {"x": {1, 2, 3}})  # set is not JSON-serializable
+    assert "error" in r
+
+
+def test_malformed_url_is_safe(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    assert "error" in _http.get_json("not-a-url", cache_ttl=0)
+    assert "error" in _http.post_json("", {"x": 1})
+
+
+def test_scalar_json_response_does_not_crash(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(_http.request, "urlopen", lambda *a, **k: FakeResp("null"))
+    assert _http.get_json("https://e.com/a", cache_ttl=0) is None  # no crash
+
+
+def test_post_json_ok(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(_http.request, "urlopen", lambda *a, **k: FakeResp('{"ok": true}'))
+    assert _http.post_json("https://e.com/a", {"q": 1}) == {"ok": True}
+
+
+def test_cache_ttl_0_does_not_write(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(_http.request, "urlopen", lambda *a, **k: FakeResp('{"x": 1}'))
+    _http.get_json("https://e.com/a", cache_ttl=0)
+    assert not (tmp_path / ".aegis-cache").exists()
