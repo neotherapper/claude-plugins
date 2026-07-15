@@ -42,6 +42,11 @@
       "name": "idea-forge",
       "source": "./plugins/idea-forge",
       "description": "Two-stage business idea pipeline: surface opportunity gaps and evaluate viability."
+    },
+    {
+      "name": "aegis",
+      "source": "./plugins/aegis",
+      "description": "Passive vulnerability-coverage for your own sites — fingerprint → known-CVE + misconfig report."
     }
   ]
 }

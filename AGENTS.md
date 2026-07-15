@@ -36,6 +36,14 @@ Skills in `plugins/beacon/skills/`:
 | `site-intel` | `plugins/beacon/skills/site-intel/SKILL.md` | User asks about a previously researched site, or asks questions about `docs/sites/{site}/research/` files |
 | `site-fleet` | `plugins/beacon/skills/site-fleet/SKILL.md` | User asks to recon MULTIPLE sites, or runs `/beacon:fleet` |
 
+### aegis — Passive Vulnerability Coverage
+
+Skills in `plugins/aegis/skills/`:
+
+| Skill | Path | When to activate |
+|-------|------|-----------------|
+| `site-security` | `plugins/aegis/skills/site-security/SKILL.md` | User asks to scan for vulnerabilities, check CVEs, security coverage, or runs `/aegis:scan` |
+
 ## Intent → Skill Mapping
 
 When the user's request matches any of these patterns, load and follow the corresponding skill:
@@ -59,6 +67,11 @@ When the user's request matches any of these patterns, load and follow the corre
 | "what did we find on..." | `site-intel` |
 | "recon these sites" | `site-fleet` |
 | "run beacon over this list" | `site-fleet` |
+| "scan my site for vulnerabilities" | `site-security` |
+| "what CVEs does X have" | `site-security` |
+| "security coverage for..." | `site-security` |
+| "check my site's security" | `site-security` |
+| "/aegis:scan" | `site-security` |
 
 ## Execution Rules
 
