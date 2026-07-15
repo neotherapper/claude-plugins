@@ -8,7 +8,14 @@ import _http
 OSV_QUERY = "https://api.osv.dev/v1/query"
 
 def _cvss(sev):
-    scores = [float(s["score"]) for s in (sev or []) if s.get("score", "").replace(".", "").isdigit()]
+    scores = []
+    for s in sev or []:
+        if not isinstance(s, dict):
+            continue
+        try:
+            scores.append(float(s.get("score")))
+        except (TypeError, ValueError):
+            continue  # None, vector-string ("CVSS:3.1/..."), or missing → skip
     return max(scores) if scores else None
 
 def query(name, version, ecosystem="npm"):
@@ -18,7 +25,12 @@ def query(name, version, ecosystem="npm"):
         return []
     out = []
     for v in r["vulns"]:
-        out.append({"id": v.get("id"), "summary": v.get("summary") or v.get("details", "")[:200],
+        if not isinstance(v, dict):
+            continue
+        summary = v.get("summary") or v.get("details") or ""
+        if not isinstance(summary, str):
+            summary = str(summary)
+        out.append({"id": v.get("id"), "summary": summary[:200],
                     "cvss": _cvss(v.get("severity")), "aliases": v.get("aliases", []), "source": "osv"})
     return out
 
