@@ -38,7 +38,7 @@ Slug derivation: strip `www.`, then `example.com` → `example-com`.
 
 ## Category packs
 
-reframe ships with **5 category packs** (`plugins/reframe/categories/`); ~10 are planned. Each pack contains:
+reframe ships with **6 category packs** (`plugins/reframe/categories/`); ~9 are planned. Each pack contains:
 
 - Category-specific redesign priorities and conversion patterns
 - Trust signals and IA conventions for that category
@@ -46,7 +46,7 @@ reframe ships with **5 category packs** (`plugins/reframe/categories/`); ~10 are
 - Reference and anti-reference sites
 - "What to emphasize in the brief"
 
-**Available now:** `local-service`, `saas-marketing`, `ecommerce`, `portfolio-personal`, plus a `generic` fallback for ambiguous sites.
+**Available now:** `local-service`, `saas-marketing`, `ecommerce`, `portfolio-personal`, `residential-brokerage`, plus a `generic` fallback for ambiguous sites.
 **Planned (v1.1):** `editorial-blog`, `nonprofit`, `restaurant-hospitality`, `corporate-brochure`, `education-course`, `events` — until they ship, these detect to `generic`.
 
 Category is detected automatically in Phase 7. Low confidence falls back to `generic`. Multi-category sites use the dominant pack with secondaries noted inline.
