@@ -1,0 +1,13 @@
+{
+  "name": "aegis",
+  "version": "0.1.0",
+  "description": "Passive vulnerability-coverage for your own sites — fingerprint → known-CVE + misconfig report.",
+  "author": {
+    "name": "Georgios Pilitsoglou",
+    "url": "https://pilitsoglou.com"
+  },
+  "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/aegis",
+  "repository": "https://github.com/neotherapper/claude-plugins",
+  "license": "MIT",
+  "keywords": ["security", "vulnerability", "cve", "osv", "kev", "epss", "passive-scan"]
+}

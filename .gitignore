@@ -20,6 +20,13 @@ node_modules/
 __pycache__/
 *.pyc
 
+# aegis cache (TTL HTTP response cache)
+.aegis-cache/
+
+# Symlink farm output (cross-tool skills installed by scripts/sync-skills.sh)
+.agents/skills/
+.kiro/skills/
+
 # Site-analysis working data (reframe .crawl, captured screenshots) — safety net
 docs/sites/**/redesign/.crawl/
 docs/redesign/**/.crawl/

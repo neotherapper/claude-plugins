@@ -1,7 +1,10 @@
 ---
 name: generate
-version: "0.1.0"
 description: "This skill should be used when the user wants to generate, discover, or surface business ideas FROM domain/vault research — not evaluate a specific idea they already have. Trigger phrases: 'find ideas in [domain]', 'what could I build in [space]?', 'generate business ideas from [domain] research', 'what gaps exist in [market]?', '/idea-forge:generate'. Does NOT trigger for evaluating a specific idea, 'should I build X?', or 'is there a market for X?' — those go to /idea-forge:evaluate."
+license: MIT
+metadata:
+  version: "0.1.0"
+  author: Georgios Pilitsoglou
 ---
 
 # Generate

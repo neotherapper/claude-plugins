@@ -8,7 +8,10 @@ description: >
   "draftloom new profile", "/draftloom:setup". Use this skill whenever the
   user wants to configure how Draftloom writes — even if they don't use the
   exact command name.
-version: "0.1.0"
+license: MIT
+metadata:
+  version: "0.1.0"
+  author: Georgios Pilitsoglou
 ---
 
 # Draftloom Setup Skill

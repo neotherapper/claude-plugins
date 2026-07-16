@@ -19,8 +19,9 @@ jobs:
           python-version: '3.x'
       - name: Validate marketplace.json and every plugin.json
         run: bash scripts/validate-marketplace.sh
-      - name: Verify skill symlink farm is in sync (.agents/skills, .kiro/skills)
-        run: bash scripts/sync-skills.sh --check
+      - name: Build + verify skill symlink farm (.agents/skills, .kiro/skills)
+        # The farm is generated output (git-ignored), so build it first, then verify it resolves cleanly.
+        run: bash scripts/sync-skills.sh && bash scripts/sync-skills.sh --check
       - name: Validate canonical slug rule (drift + correctness)
         run: bash tests/validate-slug-rule.sh
       - name: Reframe helper contract smoke test (CLI + JSON keys + exit codes)

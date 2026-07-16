@@ -7,7 +7,10 @@ description: >
   a post", "help me write a blog post", "draft a blog post", "/draftloom:draft".
   Use this skill whenever the user wants to draft a blog post, article, or
   long-form post — even if they don't use the exact phrase "blog post".
-version: "0.1.0"
+license: MIT
+metadata:
+  version: "0.1.0"
+  author: Georgios Pilitsoglou
 ---
 
 # Draftloom Draft Skill
