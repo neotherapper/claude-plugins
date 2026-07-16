@@ -31,8 +31,8 @@ else
   check "SKILL.md exists" "fail"
 fi
 
-# Check 2: version is 0.10.0
-if [ -f "$SKILL_FILE" ] && grep -q 'version: 0.10.0' "$SKILL_FILE"; then
+# Check 2: version is 0.10.0 (canonical metadata block, quoted or bare)
+if [ -f "$SKILL_FILE" ] && grep -qE 'version:[[:space:]]*"?0\.10\.0"?' "$SKILL_FILE"; then
   check "version is 0.10.0" "ok"
 else
   check "version is 0.10.0" "fail"
