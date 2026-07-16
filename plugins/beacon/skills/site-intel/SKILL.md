@@ -3,7 +3,7 @@ name: site-intel
 description: This skill should be used when the user asks questions about a site that has already been analysed with site-recon — "what endpoints does X have?", "how do I query Y?", "what did we find on Z?", "load research for...", "tell me about [site]", "what auth does X use?", "give me the API for...". If a docs/sites/{slug}/research/ folder exists for the site (or a legacy docs/research/{slug}/), use this skill rather than re-analysing. Routes to the right pre-built file without re-running the full analysis.
 license: MIT
 metadata:
-  version: "0.8.0"
+  version: "0.10.0"
   author: Georgios Pilitsoglou
 ---
 
@@ -53,6 +53,19 @@ Which site are you asking about?
 Always read the resolved `{research-folder}/INDEX.md` first (new `docs/sites/{site}/research/INDEX.md`, or legacy `docs/research/{site}/INDEX.md`) — it has the infrastructure summary,
 quick API reference, and links to every other file. This surfaces the framework name
 and version before routing.
+
+Then check research freshness deterministically — do not compute the age yourself:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-intel/scripts/freshness.py" "{INDEX path}"
+```
+
+- `[RESEARCH-STALE:{N}d]` → **prepend one line** to your eventual answer:
+  `⚠️ This research is {N} days old (analysed {date}) and may be out of date — re-run \`/beacon:analyze {url}\` to refresh.`
+  (`{url}` = INDEX frontmatter `resource:`; `{date}` = the date part of `timestamp:`.)
+- `[RESEARCH-FRESH:{N}d]`, `[RESEARCH-DATE-UNKNOWN]`, or a missing/errored script → no warning; answer normally.
+
+The warning is prepended once, before the answer; it does not repeat per file loaded and never changes routing.
 
 ## Step 3: Route to the specific file
 

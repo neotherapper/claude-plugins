@@ -31,11 +31,11 @@ else
   check "SKILL.md exists" "fail"
 fi
 
-# Check 2: version is 0.8.0
-if [ -f "$SKILL_FILE" ] && grep -q 'version: 0.8.0' "$SKILL_FILE"; then
-  check "version is 0.8.0" "ok"
+# Check 2: version is 0.10.0 (canonical metadata block, quoted or bare)
+if [ -f "$SKILL_FILE" ] && grep -qE 'version:[[:space:]]*"?0\.10\.0"?' "$SKILL_FILE"; then
+  check "version is 0.10.0" "ok"
 else
-  check "version is 0.8.0" "fail"
+  check "version is 0.10.0" "fail"
 fi
 
 # Check 3: Step 1 (folder discovery) present

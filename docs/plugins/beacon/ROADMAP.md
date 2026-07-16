@@ -7,7 +7,8 @@ Planned features and capabilities in priority order. Each version ships as a com
 > sequence has slipped three times now (v0.7.0, v0.8.0, v0.9.0 each went to something other than
 > the item originally planned for that number), so the two items immediately below **Shipped**
 > intentionally carry no pre-assigned version number — it gets assigned at actual release, not
-> before. Numbers further down the backlog (v0.10.0+) are still indicative placeholders.
+> before. The rest of the backlog below carries no pre-assigned number either — the actual
+> version is assigned at release, per the legend above.
 
 ---
 
@@ -21,6 +22,7 @@ Planned features and capabilities in priority order. Each version ships as a com
 | ✅ site-recon OSINT wiring (2026-06-30) | On top of #31: Phase 9 OSINT sweep wired via `osint.py run_all` (fixed its `TARGET` env-var bug so the 9 `.sh` helpers actually run); CSP/CORS `connect-src` API-domain extraction (Phase 2) and third-party-key harvest (Phase 9) promoted from `references/`; bundled-scripts table added to `SKILL.md` | Closes the "catalogued-but-unwired" gap for the OSINT helpers |
 | ✅ v0.8.0 | site-intel Step 5 (Query Proof Scripts) + tech-pack `## Query Templates` | Data-driven snippet selection by `auth:`; see plan |
 | ✅ v0.9.0 | **Fleet orchestration B1 (sequential core)** — `/beacon:fleet`, durable `.fleet/` ledger, `Stop`-only sweep gate (PR #40) | Closes the Option-A residual gap (abandoned/zero-output recons); parallelism deferred to B2 |
+| ✅ v0.10.0 | **Research Freshness Signals** — site-intel stale-research warnings via `freshness.py` (30-day threshold, deterministic) | site-intel-only; advisory, no hook |
 
 ---
 
@@ -59,26 +61,24 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
-## Research Freshness Signals — 🔜 next
+## Research Freshness Signals — ✅ SHIPPED (v0.10.0)
 
-> **Reconciled 2026-07-12:** previously labeled v0.9.0, but that number was consumed by Fleet
-> orchestration B1 (see **Shipped**) — the third consecutive slip. Rather than bump to v0.10.0
-> (already "Multi-Site Comparison" further down) and create a fourth collision, this item and
-> "Additional Tech Packs" below now carry no pre-assigned number; per this doc's own legend,
-> the actual version gets assigned at release. Not re-cascading the rest of the backlog's
-> numbers here — out of scope for this reconciliation.
+> **Reconciled 2026-07-13:** this item shipped as v0.10.0 — the number freed up after Fleet
+> orchestration B1 consumed v0.9.0 (see **Shipped**). The former "Multi-Site Comparison" and
+> "Export Formats" backlog headings were de-numbered to `📋 planned` in the same pass; per this
+> doc's own legend, the actual version number is assigned at release, not before.
 
 **Goal:** surface when research is stale and give the user a clear re-run path.
 
 **What changes:**
-- INDEX.md gains an `Analysed:` date field (already templated, but not used by site-intel)
-- site-intel Step 2 checks the date; if research is older than 30 days, prepends a freshness warning to every answer
-- New signal: `[RESEARCH-STALE:{days}d]` — logged in site-intel responses, not in INDEX.md
-- Optional: suggest which phases to re-run for freshness (e.g., Phase 3 for framework version, Phase 8 for OpenAPI)
+- site-intel Step 2 reads the pre-existing OKF `timestamp:` field in INDEX.md — no new field is added to INDEX.md
+- If research is stale, prepends **one** freshness warning line to the answer — not one per file, not on every answer
+- New script `skills/site-intel/scripts/freshness.py` emits one of three signals — `[RESEARCH-STALE:{N}d]`, `[RESEARCH-FRESH:{N}d]`, `[RESEARCH-DATE-UNKNOWN]` — computed against the system clock with a hardcoded 30-day threshold; fail-safe, always exits 0
+- Per-phase re-run suggestions (e.g., Phase 3 for framework version, Phase 8 for OpenAPI) were a deferred non-goal — the shipped warning suggests a generic `/beacon:analyze` re-run instead
 
 ---
 
-## Additional Tech Packs — 📋 planned
+## Additional Tech Packs — 🔜 next
 
 **Goal:** expand framework coverage beyond the current 12 packs.
 
@@ -111,7 +111,7 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
-## v0.10.0 — Multi-Site Comparison
+## Multi-Site Comparison — 📋 planned
 
 **Goal:** answer questions that span two research folders — "how does X differ from Y?", "which site has a public GraphQL API?", "compare the auth flows".
 
@@ -122,7 +122,7 @@ curl -s "https://example.com/wp-json/wp/v2/posts?per_page=3" \
 
 ---
 
-## v0.11.0 — Export Formats
+## Export Formats — 📋 planned
 
 **Goal:** convert the OpenAPI spec discovered during analysis into formats that are immediately usable in other tools.
 
