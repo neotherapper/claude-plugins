@@ -36,7 +36,7 @@ This registry tracks all available tech packs for **Beacon/site-recon**, includi
 | **ASP.NET Core**| N/A              | Framework      | ✅                | ❌                 |
 | **Spring Boot** | N/A              | Framework      | ✅                | ❌                 |
 | **AEM**         | N/A              | CMS            | ✅                | ❌                 |
-| **Sitecore**    | N/A              | CMS            | ✅                | ❌                 |
+| **Sitecore**    | 10.x + XM Cloud + Headless 22.x | CMS            | ✅                | ❌                 |
 | **Strapi**      | 5.x              | CMS            | ✅                | ❌                 |
 | **Sanity**      | N/A              | CMS            | ✅                | ❌                 |
 
