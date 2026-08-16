@@ -1389,7 +1389,7 @@
         "CCAR-F D3 — 20%"
       ],
       "detail": {
-        "summary": "Configuration and team enablement. Weighted heavily on Foundations because it is where most day-to-day Claude Code competence actually lives — and the track where existing architecture experience transfers most directly.",
+        "summary": "Configuration and team enablement. This track means two different things depending on which exam you are sitting, and only one of them is comfortable.",
         "meta": [
           {
             "label": "Exam domains",
@@ -1398,6 +1398,13 @@
           {
             "label": "Build to prove it",
             "value": "A written SLA for the salvage harness"
+          }
+        ],
+        "body": [
+          {
+            "type": "callout",
+            "tone": "warning",
+            "text": "Do not treat this as the comfortable track under Foundations. The two exams disagree about what E is. Under CCAR-P it is stakeholder communication and lifecycle (21% across two domains) — largely vocabulary for experience you already have. Under CCAR-F it is Domain 3, Claude Code Configuration & Workflows, at 20% on its own, and that is examinable tooling detail: frontmatter options, glob-scoped rule files, CLI flags. Years of architecture experience do not supply those. Only the CCAR-F reading is a study risk, and it is the exam being sat first."
           }
         ]
       },
@@ -1477,7 +1484,7 @@
               {
                 "type": "callout",
                 "tone": "note",
-                "text": "You already build these. For the exam the work is mostly mapping what you do by habit onto the vocabulary the blueprint grades."
+                "text": "Building these by habit is not the same as knowing the frontmatter. The exam tests specific options — context: fork, allowed-tools, argument-hint, and project-scoped vs user-scoped paths — and habit does not reliably produce those from memory."
               }
             ]
           }
