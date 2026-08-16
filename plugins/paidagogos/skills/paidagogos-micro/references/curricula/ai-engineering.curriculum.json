@@ -949,6 +949,10 @@
               {
                 "label": "Guard",
                 "value": "Circularity: three outlets quoting one press release are one source"
+              },
+              {
+                "label": "Test",
+                "value": "Could this 'second source' have been derived from the first? If yes, it is not one."
               }
             ],
             "body": [
@@ -956,6 +960,10 @@
                 "type": "callout",
                 "tone": "pitfall",
                 "text": "Star counts, adoption figures and market sizes are the classic trap: the same number appears in a dozen places because it propagated from one, and the disagreement between two of them is louder than the fact that eleven share an origin."
+              },
+              {
+                "type": "text",
+                "text": "The harder case is derived agreement, where the second source is a restatement of the first in another form. A prose account that reproduces a machine reading to the digit is that reading in words, not a witness to it. Checking one against the other then measures round-tripping rather than truth: the agreement is guaranteed by construction, so a high score carries no information. Anywhere a pipeline both produces a value and ingests documents that quote it, corroboration has to check origin, not just wording."
               }
             ]
           }
@@ -1114,7 +1122,7 @@
             "body": [
               {
                 "type": "text",
-                "text": "An independent instance without the generator's context catches subtle issues that self-review instructions and extended thinking both miss. This generalises well beyond code review — it is the argument for adversarial verification anywhere."
+                "text": "An independent instance without the generator's context catches subtle issues that self-review instructions and extended thinking both miss. This generalises well beyond code review — it is the argument for adversarial verification anywhere. Stated as a mechanism rather than a practice: a second look from inside the same frame is not a second look. Independence is what does the work, not the repetition, which is why asking a model to check itself harder does not substitute for asking a different one that never saw the reasoning."
               }
             ]
           }
