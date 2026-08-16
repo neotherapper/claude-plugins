@@ -85,6 +85,27 @@ describe('tree.v1.json', () => {
     }));
     expect(r.ok).toBe(true);
   });
+
+  // ajv-formats was declared but never registered, so these passed silently.
+  it('rejects a malformed verified_at now that formats are enforced', () => {
+    const r = validateSpec(spec({
+      nodes: [{
+        id: 'n', label: 'n',
+        detail: { resources: [{ type: 'docs', title: 'x', verified_at: 'last Tuesday' }] },
+      }],
+    }));
+    expect(r.ok).toBe(false);
+  });
+
+  it('rejects a resource url that is not a URI', () => {
+    const r = validateSpec(spec({
+      nodes: [{
+        id: 'n', label: 'n',
+        detail: { resources: [{ type: 'docs', title: 'x', url: 'not a url' }] },
+      }],
+    }));
+    expect(r.ok).toBe(false);
+  });
 });
 
 describe('renderTree', () => {
@@ -271,5 +292,16 @@ describe('renderTree', () => {
       nodes: [{ id: 'a"><b', label: 'X', detail: { summary: 's' } }],
     }));
     expect(out).not.toContain('vk-detail-a"><b');
+  });
+
+  it('renders a hostile resource url as plain text instead of a link', () => {
+    const out = renderFragment(renderTree({
+      nodes: [{
+        id: 'n', label: 'N',
+        detail: { resources: [{ type: 'docs', title: 'Trap', url: 'javascript:alert(1)' }] },
+      }],
+    }));
+    expect(out).not.toContain('href="javascript:alert(1)"');
+    expect(out).toContain('Trap');
   });
 });

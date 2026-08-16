@@ -1,4 +1,5 @@
 import { html, type TemplateResult } from 'lit';
+import { safeUrl } from '../render/escape.js';
 
 /**
  * Tree surface — a navigable hierarchy whose nodes open a detail popover.
@@ -383,8 +384,8 @@ function resources(list: TreeResource[]): TemplateResult {
             <li class="vk-tree-resource" data-type=${r.type}>
               <span class="vk-tree-restype">${RESOURCE_LABEL[r.type] ?? r.type}</span>
               <span class="vk-tree-resmain">
-                ${r.url
-                  ? html`<a href=${r.url} target="_blank" rel="noopener noreferrer">${r.title}</a>`
+                ${safeUrl(r.url)
+                  ? html`<a href=${safeUrl(r.url)} target="_blank" rel="noopener noreferrer">${r.title}</a>`
                   : html`<span>${r.title}</span>`}
                 <span class="vk-tree-resmeta">
                   ${[r.institution, r.author, r.duration, r.level, r.cost]
@@ -415,8 +416,8 @@ function resources(list: TreeResource[]): TemplateResult {
                       : ''}
                 </span>
                 ${r.note ? html`<span class="vk-tree-resnote">${r.note}</span>` : ''}
-                ${r.artifact_url
-                  ? html`<a class="vk-tree-artifact" href=${r.artifact_url} target="_blank" rel="noopener noreferrer">retrieved document</a>`
+                ${safeUrl(r.artifact_url)
+                  ? html`<a class="vk-tree-artifact" href=${safeUrl(r.artifact_url)} target="_blank" rel="noopener noreferrer">retrieved document</a>`
                   : ''}
               </span>
             </li>
