@@ -1,0 +1,20 @@
+{
+  "id": "seo-developer-mastery",
+  "title": "Developer SEO Mastery",
+  "subtitle": "12 lessons, strictly linear",
+  "summary": "The original markdown curriculum format: a fixed lesson sequence with no tracks and no cross-cutting prerequisites. Kept as-is; new curricula should use the tree format.",
+  "badges": [
+    { "label": "legacy format", "tone": "warn" },
+    { "label": "12 lessons", "tone": "muted" }
+  ],
+  "updated_at": "2026-07-12",
+  "surfaces": [
+    {
+      "id": "seo-developer-mastery",
+      "title": "Developer SEO Mastery",
+      "file": "curriculum.md",
+      "format": "markdown",
+      "role": "curriculum"
+    }
+  ]
+}
