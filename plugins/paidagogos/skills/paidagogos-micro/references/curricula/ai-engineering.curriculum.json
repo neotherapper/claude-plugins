@@ -1495,6 +1495,35 @@
               },
               {
                 "type": "heading",
+                "text": "Lifetimes — adjacent fields, different scopes"
+              },
+              {
+                "type": "list",
+                "items": [
+                  "allowed-tools and disallowed-tools — the invoking turn only; both clear on your next message",
+                  "model — the rest of the current turn",
+                  "hooks — registered on invoke and kept running for the rest of the SESSION",
+                  "The skill body — enters the conversation once and stays all session, but is not re-read on later turns, so write standing instructions rather than one-time steps"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "warning",
+                "text": "hooks and allowed-tools sit two rows apart in the frontmatter table and have opposite lifetimes: one persists for the session, the other dies at your next message. Nothing in either name signals that."
+              },
+              {
+                "type": "heading",
+                "text": "Two more that read as free and are not"
+              },
+              {
+                "type": "list",
+                "items": [
+                  "when_to_use looks like extra trigger context at no cost. It is appended to description and counts toward the same 1,536-character cap, which truncates in the skill listing — put the key use case first",
+                  "paths uses the same glob format as path-specific rules, so a skill can be scoped to file types exactly the way .claude/rules/ files are"
+                ]
+              },
+              {
+                "type": "heading",
                 "text": "Running a bundled script without a prompt"
               },
               {
