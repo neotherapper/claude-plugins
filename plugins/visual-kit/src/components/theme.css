@@ -240,6 +240,8 @@ button.vk-tree-node:focus-visible .vk-tree-more{opacity:1;transform:translateX(2
   background:color-mix(in oklab,var(--vk-danger) 15%,transparent)}
 .vk-tree-lifecycle[data-lifecycle="version-changing"]{color:var(--vk-warning);
   background:color-mix(in oklab,var(--vk-warning) 15%,transparent)}
+.vk-tree-provenance{padding:.0625rem .4375rem;border:1px dashed var(--vk-border);border-radius:4px;
+  font-size:.75rem;font-weight:600;color:var(--vk-muted);cursor:help}
 .vk-tree-unverified{padding:.0625rem .4375rem;border-radius:4px;font-size:.75rem;font-weight:600;
   color:var(--vk-warning);background:color-mix(in oklab,var(--vk-warning) 14%,transparent)}
 .vk-tree-resnote{font-size:.8125rem;color:var(--vk-muted)}

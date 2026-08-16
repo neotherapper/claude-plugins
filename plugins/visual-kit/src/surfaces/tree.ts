@@ -26,6 +26,7 @@ export interface TreeResource {
   certification?: string;
   cost?: 'free' | 'freemium' | 'paid';
   lifecycle?: 'current' | 'version-changing' | 'retired';
+  provenance?: 'primary' | 'secondary' | 'relayed';
   duration?: string;
   level?: 'beginner' | 'intermediate' | 'advanced';
   note?: string;
@@ -396,6 +397,16 @@ function resources(list: TreeResource[]): TemplateResult {
                     ? html`<span class="vk-tree-lifecycle" data-lifecycle=${r.lifecycle}>
                         ${r.lifecycle === 'retired' ? 'retired' : 'version changing'}
                       </span>`
+                    : ''}
+                  ${r.provenance && r.provenance !== 'primary'
+                    ? html`<span
+                        class="vk-tree-provenance"
+                        data-provenance=${r.provenance}
+                        title=${r.provenance === 'relayed'
+                          ? 'Taken from another party’s extraction, not checked independently'
+                          : 'Summarised from someone else’s write-up, not read at the source'}
+                        >${r.provenance}</span
+                      >`
                     : ''}
                   ${unverified
                     ? html`<span class="vk-tree-unverified">unverified</span>`

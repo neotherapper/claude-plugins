@@ -24,7 +24,7 @@ Every certification fact in the catalogue was read from the vendor's own page or
 
 One entry is explicitly marked as single-sourced: the CCAR-P domain weights and item count were relayed from the nikai session's own PDF extraction rather than verified a second time here. The fee was verified directly.
 
-Every URL in both files was resolved before shipping, and each carries the date it was checked. Seven documentation links were rewritten to their canonical hosts after checking — `docs.claude.com/...` redirects to `platform.claude.com` for API docs and `code.claude.com` for Claude Code docs. Certification entries also carry a `lifecycle` status, so a retired credential is marked structurally rather than only in prose.
+Every URL in both files was resolved before shipping, and each carries the date it was checked. Seven documentation links were rewritten to their canonical hosts after checking — `docs.claude.com/...` redirects to `platform.claude.com` for API docs and `code.claude.com` for Claude Code docs. Certification entries also carry a `lifecycle` status, so a retired credential is marked structurally rather than only in prose, and every resource carries a `provenance` value. Of 22 resources across both files, 20 are `primary`, one is `secondary` (the MiniCheck paper — no URL, benchmark figures not independently checked) and one is `relayed` (the CCAR-P exam guide, whose domain weights came from the nikai session's extraction). A curriculum that teaches provenance should not store unattributed claims.
 
 ## 0.2.0 — 2026-04-17
 

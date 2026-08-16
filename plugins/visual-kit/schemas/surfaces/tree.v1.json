@@ -233,6 +233,10 @@
           "description": "Whether the thing this resource describes still exists in the form described. Distinct from `verified_at`: a date records when you looked, not whether what you found has since been withdrawn. A credential verified in March and retired in June is stale in a way a date alone does not surface. `version-changing` marks one being superseded on a known timetable.",
           "enum": ["current", "version-changing", "retired"]
         },
+        "provenance": {
+          "description": "How the author came to believe this entry's claims. `primary` — read from the publisher's own page or document. `secondary` — summarised from someone else's write-up of the source. `relayed` — taken from another party's extraction without independent checking. Orthogonal to `verified_at` and `lifecycle`, which answer *when* and *does it still exist*; this answers *how do I know*. Omitting a source does not make an unverified figure safer — it makes it unfalsifiable while the precision still reads as verification, which is the failure this field exists to prevent.",
+          "enum": ["primary", "secondary", "relayed"]
+        },
         "duration": {
           "description": "Human-readable length: '2 hrs', '12 lessons', '340 pp'.",
           "type": "string",

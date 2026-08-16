@@ -156,7 +156,8 @@
                 "cost": "free",
                 "verified_at": "2026-08-16",
                 "note": "Landing page is the durable citation; the S3 PDF link carries a numeric path segment and may rotate. Every figure above was read from the PDF itself.",
-                "lifecycle": "current"
+                "lifecycle": "current",
+                "provenance": "primary"
               },
               {
                 "type": "course",
@@ -165,7 +166,8 @@
                 "institution": "Anthropic Academy",
                 "cost": "free",
                 "note": "Certificate on completion. Maps to the Claude Code Configuration & Workflows domain (20%).",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }
@@ -254,7 +256,8 @@
                 "cost": "free",
                 "verified_at": "2026-08-16",
                 "note": "Landing page and fee verified here; domain weights relayed from the nikai session's PDF extraction.",
-                "lifecycle": "current"
+                "lifecycle": "current",
+                "provenance": "relayed"
               }
             ]
           }
@@ -298,7 +301,8 @@
                 "url": "https://www.anthropic.com/learn",
                 "institution": "Anthropic",
                 "cost": "free",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               },
               {
                 "type": "docs",
@@ -306,7 +310,8 @@
                 "url": "https://platform.claude.com/docs/en/home",
                 "institution": "Anthropic",
                 "cost": "free",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }
@@ -394,7 +399,8 @@
                 "certification": "Google Cloud Generative AI Leader",
                 "cost": "free",
                 "verified_at": "2026-08-16",
-                "lifecycle": "current"
+                "lifecycle": "current",
+                "provenance": "primary"
               }
             ]
           }
@@ -464,7 +470,8 @@
                 "certification": "Google Cloud Professional Machine Learning Engineer",
                 "cost": "free",
                 "verified_at": "2026-08-16",
-                "lifecycle": "current"
+                "lifecycle": "current",
+                "provenance": "primary"
               }
             ]
           }
@@ -536,7 +543,8 @@
                 "certification": "AWS Certified AI Practitioner",
                 "cost": "free",
                 "verified_at": "2026-08-16",
-                "lifecycle": "current"
+                "lifecycle": "current",
+                "provenance": "primary"
               }
             ]
           }
@@ -595,7 +603,8 @@
                 "cost": "free",
                 "verified_at": "2026-08-16",
                 "note": "Version-transition dates taken from the AWS Training and Certification blog post announcing MLA-C02.",
-                "lifecycle": "version-changing"
+                "lifecycle": "version-changing",
+                "provenance": "primary"
               }
             ]
           }
@@ -661,7 +670,8 @@
                 "cost": "free",
                 "verified_at": "2026-08-16",
                 "note": "Retirement confirmed on the credential page itself. No certification field is set on this entry because it is no longer obtainable.",
-                "lifecycle": "retired"
+                "lifecycle": "retired",
+                "provenance": "primary"
               }
             ]
           }
@@ -725,7 +735,8 @@
                 "institution": "DeepLearning.AI",
                 "cost": "freemium",
                 "verified_at": "2026-08-16",
-                "note": "Course titles and Anthropic partnership confirmed from the catalogue page. Individual pricing is not stated per course there — a membership option exists."
+                "note": "Course titles and Anthropic partnership confirmed from the catalogue page. Individual pricing is not stated per course there — a membership option exists.",
+                "provenance": "primary"
               }
             ]
           }
@@ -770,7 +781,8 @@
                 "url": "https://www.deeplearning.ai/courses/",
                 "institution": "DeepLearning.AI",
                 "cost": "freemium",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }

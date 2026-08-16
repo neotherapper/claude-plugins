@@ -20,6 +20,7 @@
 ### Verification
 - Certification claims are enforced structurally: a resource carrying `certification` must also carry `url` and `verified_at`, or the spec fails validation. The renderer marks any such resource without a verification date as `unverified` rather than presenting it as fact.
 - `artifact_url` is separate from `url` so a durable landing page and a rotating generated file (a dated PDF) are not conflated.
+- `provenance` (`primary` / `secondary` / `relayed`) records how the author came to believe an entry's claims. Omitting a source is not the cautious option: a precise figure with no citation is unfalsifiable while the precision still reads as verification. The renderer marks anything not `primary`.
 - `lifecycle` (`current` / `version-changing` / `retired`) records whether the thing described still exists in the form described. This is deliberately distinct from `verified_at`: a date says when you looked, not whether what you found has since been withdrawn — a credential verified in March and retired in June is stale in a way a date alone cannot surface. The renderer shows a chip for anything not `current`.
 
 ## 1.2.0 — 2026-04-19

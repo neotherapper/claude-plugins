@@ -203,7 +203,8 @@
                 "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
                 "institution": "Anthropic",
                 "cost": "free",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               },
               {
                 "type": "course",
@@ -212,7 +213,8 @@
                 "institution": "Anthropic Academy",
                 "cost": "free",
                 "note": "API guides and best practices; hosted on Anthropic's Skilljar.",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }
@@ -273,7 +275,8 @@
                 "url": "https://platform.claude.com/docs/en/build-with-claude/context-windows",
                 "institution": "Anthropic",
                 "cost": "free",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }
@@ -402,7 +405,8 @@
                 "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview",
                 "institution": "Anthropic",
                 "cost": "free",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }
@@ -446,7 +450,8 @@
                 "url": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
                 "institution": "Anthropic",
                 "cost": "free",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }
@@ -514,7 +519,8 @@
                 "url": "https://code.claude.com/docs/en/agent-sdk/overview",
                 "institution": "Anthropic",
                 "cost": "free",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }
@@ -562,7 +568,8 @@
                 "url": "https://modelcontextprotocol.io",
                 "institution": "MCP project",
                 "cost": "free",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }
@@ -914,7 +921,8 @@
                 "type": "paper",
                 "title": "MiniCheck — efficient fact-checking of LLM output against grounding documents",
                 "author": "Tang et al.",
-                "note": "Reference point for cheap entailment scoring. Verify the current release before depending on a specific checkpoint."
+                "note": "Reference point for cheap entailment scoring. Verify the current release before depending on a specific checkpoint.",
+                "provenance": "secondary"
               }
             ]
           }
@@ -1193,7 +1201,8 @@
                 "url": "https://code.claude.com/docs/en/hooks",
                 "institution": "Anthropic",
                 "cost": "free",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }
@@ -1429,7 +1438,8 @@
                 "url": "https://code.claude.com/docs/en/memory",
                 "institution": "Anthropic",
                 "cost": "free",
-                "verified_at": "2026-08-16"
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
               }
             ]
           }

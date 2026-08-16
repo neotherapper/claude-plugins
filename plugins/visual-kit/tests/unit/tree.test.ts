@@ -212,6 +212,36 @@ describe('renderTree', () => {
     expect(current).not.toContain('vk-tree-lifecycle');
   });
 
+  // Omitting a source does not make an unverified figure safer; it makes it
+  // unfalsifiable while the precision still reads as verification.
+  it('marks relayed and secondary claims, and stays quiet for first-hand ones', () => {
+    const relayed = renderFragment(renderTree({
+      nodes: [{
+        id: 'n', label: 'N',
+        detail: { resources: [{ type: 'paper', title: 'Someone else read it', provenance: 'relayed' }] },
+      }],
+    }));
+    expect(relayed).toContain('data-provenance="relayed"');
+
+    const primary = renderFragment(renderTree({
+      nodes: [{
+        id: 'n', label: 'N',
+        detail: { resources: [{ type: 'docs', title: 'I read it', provenance: 'primary' }] },
+      }],
+    }));
+    expect(primary).not.toContain('vk-tree-provenance');
+  });
+
+  it('rejects an unknown provenance value', () => {
+    const r = validateSpec(spec({
+      nodes: [{
+        id: 'n', label: 'n',
+        detail: { resources: [{ type: 'docs', title: 'x', provenance: 'hearsay' } as never] },
+      }],
+    }));
+    expect(r.ok).toBe(false);
+  });
+
   it('rejects an unknown lifecycle value', () => {
     const r = validateSpec(spec({
       nodes: [{

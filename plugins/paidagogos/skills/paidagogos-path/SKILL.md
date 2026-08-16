@@ -112,9 +112,24 @@ must carry both `url` and `verified_at` — but the discipline is yours:
 2. Cite the durable landing page as `url`. If you read a generated PDF, put it in
    `artifact_url` — those links rotate.
 3. Set `verified_at` to the date **you** checked it, not the date someone told you.
-4. If you are relaying a figure you did not verify yourself, say so in `note` and
-   leave the confidence visible. Do not launder second-hand facts into first-hand
-   ones.
+4. If you are relaying a figure you did not verify yourself, set `provenance` and
+   explain in `note`. Do not launder second-hand facts into first-hand ones.
+
+Set `provenance` on every resource — `primary` (you read the publisher's own
+page), `secondary` (summarised from someone else's write-up), `relayed` (taken
+from another party's extraction unchecked). The three verification fields are
+orthogonal and none substitutes for another:
+
+| Field | Answers |
+|---|---|
+| `verified_at` | When did someone last look? |
+| `lifecycle` | Does it still exist in the form described? |
+| `provenance` | Is this first-hand, or am I repeating someone? |
+
+**Dropping the URL is not the cautious option.** A precise figure with no source
+is unfalsifiable while the precision still reads as verification — that is worse
+than a source with no figure. If you cannot cite it, mark it `secondary` and say
+what it came from.
 
 Check retirement status before recommending any certification. Search results
 routinely present retired exams as current.
