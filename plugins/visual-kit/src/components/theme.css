@@ -9,6 +9,10 @@
      ≥4.5:1 where they carry text. */
   --vk-accent-1:#4f46e5; --vk-accent-2:#0f766e; --vk-accent-3:#b45309; --vk-accent-4:#be123c;
   --vk-accent-5:#7c3aed; --vk-accent-6:#0e7490; --vk-accent-7:#15803d; --vk-accent-8:#475569;
+  /* Foreground for text sitting *on* an accent fill. The accents invert between
+     themes — dark ones on white, light ones on near-black — so this has to flip
+     with them rather than being a fixed white. */
+  --vk-on-a:#ffffff;
 
   --vk-scrim:rgb(16 18 27 / 46%);
   --vk-shadow:0 1px 2px rgb(16 18 27 / 6%), 0 12px 32px -8px rgb(16 18 27 / 18%);
@@ -22,6 +26,7 @@
 
     --vk-accent-1:#a5b4fc; --vk-accent-2:#5eead4; --vk-accent-3:#fcd34d; --vk-accent-4:#fda4af;
     --vk-accent-5:#c4b5fd; --vk-accent-6:#67e8f9; --vk-accent-7:#86efac; --vk-accent-8:#cbd5e1;
+    --vk-on-a:#0d1117;
 
     --vk-scrim:rgb(1 4 9 / 66%);
     --vk-shadow:0 1px 2px rgb(1 4 9 / 40%), 0 16px 40px -10px rgb(1 4 9 / 70%);
@@ -31,6 +36,9 @@
 html,body{margin:0;padding:0;background:var(--vk-bg);color:var(--vk-text);
   font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .vk-surface{max-width:860px;margin:0 auto;padding:2rem 1.5rem}
+/* A two-sided spine needs room for two columns and the gutter between them; the
+   reading measure that suits prose surfaces would crush it. */
+.vk-surface:has(vk-tree){max-width:1180px}
 a{color:var(--vk-accent)}
 .vk-component-error{color:var(--vk-warning);font-family:monospace;font-size:.85rem;padding:.5rem}
 
@@ -40,13 +48,20 @@ a{color:var(--vk-accent)}
 
 /* ───────────────────────────────────────────────────────────────────────────
    tree surface
-   The hierarchy is drawn, not implied by indentation: each nested level hangs
-   off a 1px rail tinted with its parent's track accent, so colour carries
-   structure instead of decorating it. Disclosure is the native Popover API,
-   which is why nothing here needs JavaScript.
+   A roadmap spine: top-level nodes sit centred on a continuous vertical line
+   and their children branch alternately left and right, each tethered by a
+   connector ending in a marker on the spine. Colour carries structure — the
+   spine takes each track's accent as it passes through it.
+
+   The layout holds no coordinates. Sides come from `:nth-child`, pairing from
+   grid auto-placement, and vertical position from normal flow, so the same
+   rules render a five-track curriculum and a three-node taxonomy. Levels below
+   the first fall back to an indented rail, since a spine only reads at the
+   depth where it can stay centred. Disclosure is the native Popover API, which
+   is why none of this needs JavaScript.
    ─────────────────────────────────────────────────────────────────────────── */
 
-vk-tree{--vk-a:var(--vk-border);--vk-rail:1.25rem;display:block}
+vk-tree{--vk-a:var(--vk-border);--vk-rail:1.25rem;--vk-spine:7rem;--vk-dot:.5rem;display:block}
 vk-tree [data-accent="1"]{--vk-a:var(--vk-accent-1)}
 vk-tree [data-accent="2"]{--vk-a:var(--vk-accent-2)}
 vk-tree [data-accent="3"]{--vk-a:var(--vk-accent-3)}
@@ -113,36 +128,135 @@ vk-tree:has(.vk-tree-ordering-input:nth-of-type(8):checked) .vk-tree-step:nth-ch
 .vk-tree-legend-desc{color:var(--vk-muted)}
 
 .vk-tree-level{list-style:none;margin:0;padding:0}
-.vk-tree-level[data-depth="0"]{margin-top:2rem}
-.vk-tree-level[data-depth="0"]>.vk-tree-item+.vk-tree-item{margin-top:1.75rem}
 .vk-tree-item{position:relative}
 
-/* Nested levels hang off the parent item's accent rail. */
-.vk-tree-item>.vk-tree-level:not([data-depth="0"]){margin-left:.5rem;padding-left:var(--vk-rail);
+/* ── the spine ───────────────────────────────────────────────────────────── */
+
+/* Drawn behind everything and running the full column, so the gaps between
+   tracks stay connected. Dashed where no track owns it. */
+.vk-tree-level[data-depth="0"]{position:relative;margin-top:2.5rem}
+.vk-tree-level[data-depth="0"]::before{content:"";position:absolute;left:50%;top:0;bottom:0;
+  width:2px;margin-left:-1px;
+  background:repeating-linear-gradient(var(--vk-border) 0 6px,transparent 6px 12px)}
+.vk-tree-level[data-depth="0"]>.vk-tree-item+.vk-tree-item{margin-top:2.5rem}
+
+/* Solid and track-coloured for the stretch a track occupies. The children's
+   level already inherits its parent's accent, so this needs no extra markup. */
+.vk-tree-level[data-depth="0"]>.vk-tree-item>.vk-tree-level[data-depth="1"]::before{
+  content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;
+  background:color-mix(in oklab,var(--vk-a) 45%,transparent)}
+
+/* ── track node, centred on the spine ────────────────────────────────────── */
+
+.vk-tree-level[data-depth="0"]>.vk-tree-item>.vk-tree-node{
+  position:relative;z-index:1;justify-content:center;text-align:center;width:max-content;
+  max-width:min(34rem,100%);margin:0 auto;padding:.9375rem 1.75rem;
+  color:var(--vk-on-a);background:var(--vk-a);border-radius:12px;box-shadow:var(--vk-shadow)}
+.vk-tree-level[data-depth="0"]>.vk-tree-item>button.vk-tree-node:hover{
+  background:color-mix(in oklab,var(--vk-a) 86%,var(--vk-text));transform:translateY(-1px)}
+/* 1.25rem/700 clears the AA large-text threshold, so white-on-accent is legible
+   even on the lighter slots — and it is what a spine node should weigh anyway. */
+.vk-tree-level[data-depth="0"]>.vk-tree-item>.vk-tree-node .vk-tree-label{
+  flex:0 1 auto;text-wrap:balance;font-size:1.25rem;font-weight:700;letter-spacing:-.018em}
+.vk-tree-level[data-depth="0"]>.vk-tree-item>.vk-tree-node .vk-tree-badge{
+  color:var(--vk-on-a);border-color:color-mix(in oklab,var(--vk-on-a) 38%,transparent)}
+.vk-tree-level[data-depth="0"]>.vk-tree-item>.vk-tree-node .vk-tree-more{color:var(--vk-on-a)}
+
+/* ── concepts, branching alternately off the spine ───────────────────────── */
+
+.vk-tree-level[data-depth="0"]>.vk-tree-item>.vk-tree-level[data-depth="1"]{
+  position:relative;padding:1.75rem 0 .25rem}
+
+/* Each concept is an ordinary block occupying one half of the width, so it takes
+   a row to itself and the sides alternate down the page. Grid would pair them
+   two to a row, which puts two connectors on the spine at the same height and
+   makes a numbered sequence read as two parallel ones. */
+.vk-tree-level[data-depth="1"]>.vk-tree-item{width:calc(50% - var(--vk-spine) / 2)}
+.vk-tree-level[data-depth="1"]>.vk-tree-item+.vk-tree-item{margin-top:.5rem}
+.vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(even){
+  margin-left:calc(50% + var(--vk-spine) / 2)}
+
+/* Track identity is carried by the whole card — a tinted border and a barely
+   there fill — rather than by a bar down one side. The connector and the marker
+   on the spine already say which track this belongs to, so a third accent that
+   thick was decoration standing in for information. */
+.vk-tree-level[data-depth="1"]>.vk-tree-item>.vk-tree-node{
+  position:relative;z-index:1;width:max-content;max-width:100%;margin:0;
+  padding:.5625rem .8125rem;border-radius:10px;
+  background:color-mix(in oklab,var(--vk-a) 4%,var(--vk-bg));
+  border:1px solid color-mix(in oklab,var(--vk-a) 30%,var(--vk-border))}
+/* The card hugs the spine-facing edge of its half, so however wide it turns out
+   the connector always leaves from the card itself and never from empty space. */
+.vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(odd)>.vk-tree-node{margin-left:auto}
+.vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(even)>.vk-tree-node{margin-right:auto}
+.vk-tree-level[data-depth="1"]>.vk-tree-item>button.vk-tree-node:hover{
+  background:color-mix(in oklab,var(--vk-a) 11%,var(--vk-bg));
+  border-color:color-mix(in oklab,var(--vk-a) 55%,var(--vk-border));
+  box-shadow:var(--vk-shadow);transform:translateY(-1px)}
+
+/* Connector out to the spine, measured from the card's own centre so a card
+   made taller by wrapped badges still meets the line squarely. */
+.vk-tree-level[data-depth="1"]>.vk-tree-item::before{content:"";position:absolute;
+  top:50%;height:2px;margin-top:-1px;width:calc(var(--vk-spine) / 2);
+  background:color-mix(in oklab,var(--vk-a) 45%,transparent)}
+.vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(odd)::before{
+  right:calc(-1 * var(--vk-spine) / 2)}
+.vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(even)::before{
+  left:calc(-1 * var(--vk-spine) / 2)}
+
+/* Junction marker. Always present, so a concept the current ordering omits
+   still meets the spine somewhere rather than trailing off it. */
+.vk-tree-level[data-depth="1"]>.vk-tree-item::after{content:"";position:absolute;
+  top:50%;width:var(--vk-dot);height:var(--vk-dot);margin-top:calc(var(--vk-dot) / -2);
+  border-radius:50%;background:var(--vk-a);box-shadow:0 0 0 3px var(--vk-bg)}
+.vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(odd)::after{
+  right:calc(-1 * var(--vk-spine) / 2 - var(--vk-dot) / 2)}
+.vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(even)::after{
+  left:calc(-1 * var(--vk-spine) / 2 - var(--vk-dot) / 2)}
+
+/* ── levels below the first keep the indented rail ───────────────────────── */
+
+.vk-tree-item>.vk-tree-level:not([data-depth="0"]):not([data-depth="1"]){
+  margin:.5rem 0 0 .5rem;padding-left:var(--vk-rail);
   border-left:1px solid color-mix(in oklab,var(--vk-a) 55%,transparent)}
-.vk-tree-level:not([data-depth="0"])>.vk-tree-item::before{content:"";position:absolute;
-  left:calc(-1 * var(--vk-rail));top:1.0625rem;width:calc(var(--vk-rail) - .3125rem);height:1px;
+.vk-tree-level:not([data-depth="0"]):not([data-depth="1"])>.vk-tree-item::before{content:"";
+  position:absolute;left:calc(-1 * var(--vk-rail));top:1.0625rem;
+  width:calc(var(--vk-rail) - .3125rem);height:1px;
   background:color-mix(in oklab,var(--vk-a) 55%,transparent)}
 /* Stop the rail at the last elbow instead of running past it. */
-.vk-tree-level:not([data-depth="0"])>.vk-tree-item:last-child::after{content:"";position:absolute;
-  left:calc(-1 * var(--vk-rail) - 1px);top:1.125rem;bottom:0;width:1px;background:var(--vk-bg)}
+.vk-tree-level:not([data-depth="0"]):not([data-depth="1"])>.vk-tree-item:last-child::after{
+  content:"";position:absolute;left:calc(-1 * var(--vk-rail) - 1px);top:1.125rem;bottom:0;
+  width:1px;background:var(--vk-bg)}
+
+/* ── node internals ──────────────────────────────────────────────────────── */
 
 .vk-tree-node{display:flex;align-items:center;gap:.625rem;width:100%;
   padding:.4375rem .625rem .4375rem .5rem;margin-left:-.5rem;
   font:inherit;text-align:left;color:var(--vk-text);background:none;border:0;border-radius:8px;
-  transition:background .14s var(--vk-ease)}
+  transition:background .14s var(--vk-ease),box-shadow .18s var(--vk-ease),
+    transform .18s var(--vk-ease)}
 button.vk-tree-node{cursor:pointer}
 button.vk-tree-node:hover{background:color-mix(in oklab,var(--vk-a) 9%,transparent)}
 .vk-tree-node--static{cursor:default}
-.vk-tree-item[data-kind="branch"]>.vk-tree-node .vk-tree-label{font-size:1.0625rem;font-weight:650;
-  letter-spacing:-.011em}
 .vk-tree-item[data-kind="leaf"]>.vk-tree-node .vk-tree-label{font-size:.9375rem}
 .vk-tree-label{flex:1 1 auto;min-width:0}
 
+/* Step numbers ride the spine rather than the card: alternating sides make a
+   sequence read down the line, not down the page. */
 .vk-tree-steps{flex:none;display:inline-flex}
 .vk-tree-step{align-items:center;justify-content:center;min-width:1.5rem;height:1.5rem;padding:0 .25rem;
   border-radius:5px;background:color-mix(in oklab,var(--vk-a) 14%,transparent);
   color:var(--vk-a);font-size:.75rem;font-weight:650;font-variant-numeric:tabular-nums lining-nums}
+/* Centred on the spine by its own half-width, so a two-digit step sits as true
+   on the line as a one-digit one. */
+.vk-tree-level[data-depth="1"]>.vk-tree-item .vk-tree-steps{position:absolute;top:50%}
+.vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(odd) .vk-tree-steps{
+  right:calc(-1 * var(--vk-spine) / 2);transform:translate(50%,-50%)}
+.vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(even) .vk-tree-steps{
+  left:calc(-1 * var(--vk-spine) / 2);transform:translate(-50%,-50%)}
+.vk-tree-level[data-depth="1"]>.vk-tree-item .vk-tree-step{
+  border-radius:999px;background:var(--vk-bg);border:2px solid var(--vk-a);
+  box-shadow:0 0 0 3px var(--vk-bg)}
 
 .vk-tree-badges{flex:none;display:flex;flex-wrap:wrap;gap:.3125rem}
 .vk-tree-badge{padding:.0625rem .4375rem;border:1px solid var(--vk-border);border-radius:999px;
@@ -152,6 +266,36 @@ button.vk-tree-node:hover{background:color-mix(in oklab,var(--vk-a) 9%,transpare
   transition:opacity .14s var(--vk-ease),transform .18s var(--vk-ease)}
 button.vk-tree-node:hover .vk-tree-more,
 button.vk-tree-node:focus-visible .vk-tree-more{opacity:1;transform:translateX(2px)}
+
+/* ── narrow screens: the spine moves to the edge and everything stacks ───── */
+
+@media (max-width:760px){
+  .vk-tree-level[data-depth="0"]::before,
+  .vk-tree-level[data-depth="0"]>.vk-tree-item>.vk-tree-level[data-depth="1"]::before{
+    left:.875rem;margin-left:0}
+  .vk-tree-level[data-depth="0"]>.vk-tree-item>.vk-tree-node{
+    width:auto;max-width:none;margin:0;justify-content:flex-start;text-align:left}
+  .vk-tree-level[data-depth="0"]>.vk-tree-item>.vk-tree-level[data-depth="1"]{
+    padding:1.25rem 0 .25rem 2.75rem}
+  .vk-tree-level[data-depth="1"]>.vk-tree-item,
+  .vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(even){width:auto;margin-left:0}
+  .vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(odd)>.vk-tree-node,
+  .vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(even)>.vk-tree-node{
+    width:auto;max-width:none;margin:0}
+
+  .vk-tree-legend{flex-direction:column;gap:.625rem}
+  .vk-tree-legend-item{align-items:flex-start;flex-wrap:wrap;row-gap:.125rem}
+  .vk-tree-legend-desc{flex:1 1 100%;padding-left:1rem}
+  .vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(odd)::before,
+  .vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(even)::before{
+    left:-1.875rem;right:auto;width:1.875rem}
+  .vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(odd)::after,
+  .vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(even)::after{
+    left:calc(-1.875rem - var(--vk-dot) / 2);right:auto}
+  .vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(odd) .vk-tree-steps,
+  .vk-tree-level[data-depth="1"]>.vk-tree-item:nth-child(even) .vk-tree-steps{
+    left:-1.875rem;right:auto;transform:translate(-50%,-50%)}
+}
 
 /* ── detail popover ──────────────────────────────────────────────────────── */
 
