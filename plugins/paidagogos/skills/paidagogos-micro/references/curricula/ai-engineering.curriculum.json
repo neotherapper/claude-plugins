@@ -1464,7 +1464,7 @@
             "e-claude-md-hierarchy"
           ],
           "detail": {
-            "summary": "On-demand capability versus always-loaded standards — and the frontmatter that decides whether a skill pollutes the main conversation.",
+            "summary": "On-demand capability versus always-loaded standards — and the frontmatter that decides whether a skill pollutes the main conversation. Custom commands have been merged into skills, so the distinction that still matters is who invokes a thing, not which directory it lives in.",
             "meta": [
               {
                 "label": "Exam",
@@ -1476,7 +1476,9 @@
                 "type": "list",
                 "items": [
                   "context: fork runs a skill in an isolated subagent so verbose output never reaches the main session",
-                  "allowed-tools restricts what a skill may touch during execution",
+                  "allowed-tools GRANTS tools for the invoking turn without a permission prompt. It is additive and does not restrict anything — every other tool stays callable. The grant clears on your next message, even though the skill content stays in context",
+                  "disallowed-tools is the one that removes tools from the pool, and it also clears on the next message",
+                  "disable-model-invocation: true keeps a skill user-only; user-invocable: false keeps it Claude-only",
                   "argument-hint prompts for parameters when the skill is invoked bare",
                   "Skills for task-specific workflows; CLAUDE.md for universal standards"
                 ]
@@ -1485,6 +1487,36 @@
                 "type": "callout",
                 "tone": "note",
                 "text": "Building these by habit is not the same as knowing the frontmatter. The exam tests specific options — context: fork, allowed-tools, argument-hint, and project-scoped vs user-scoped paths — and habit does not reliably produce those from memory."
+              },
+              {
+                "type": "callout",
+                "tone": "pitfall",
+                "text": "The portability trap: argument-hint is Claude Code only. The same SKILL.md that works locally is rejected on upload with \"Unexpected key(s) in SKILL.md frontmatter: argument-hint. Allowed properties are: allowed-tools, compatibility, description, license, metadata, name.\" You only ever hit this when you package a skill for distribution, which is exactly why habit never teaches it."
+              },
+              {
+                "type": "heading",
+                "text": "Running a bundled script without a prompt"
+              },
+              {
+                "type": "text",
+                "text": "${CLAUDE_SKILL_DIR} and ${CLAUDE_PROJECT_DIR} substitute in two places — the skill body and Bash rules inside allowed-tools (plugin skills get ${CLAUDE_PLUGIN_ROOT} the same way). Using the same variable in both is what makes the grant match the command exactly, so the script runs unprompted."
+              },
+              {
+                "type": "code",
+                "language": "yaml",
+                "source": "---\nallowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/render.sh *)\n---\n\nRun ${CLAUDE_SKILL_DIR}/scripts/render.sh <csv-file> to render the chart."
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Extend Claude with skills — frontmatter reference",
+                "url": "https://code.claude.com/docs/en/skills",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary",
+                "note": "Full frontmatter table (20+ properties), allowed-tools turn scoping, and the string-substitution rules."
               }
             ]
           }
