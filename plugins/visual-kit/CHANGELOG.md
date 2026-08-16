@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.3.0 — 2026-08-16
+
+### Added
+- New surface kind `tree` — a navigable hierarchy whose nodes open a detail popover. Domain-neutral: curricula, roadmaps, taxonomies, decision trees. Schema: `/vk/schemas/tree.v1.json`.
+  - Display hierarchy comes from nested `children`; non-hierarchical dependencies are declared per node via `requires` and rendered as cross-links inside the detail panel rather than as drawn edges. This expresses a DAG without a layout engine.
+  - `groups` model tracks/lanes and carry a palette **slot** (`"1"`–`"8"`), never a raw colour, so the theme stays the single owner of what a group looks like.
+  - `orderings` carry several named traversal orders over one node set, so a tree can present multiple study sequences without duplicating content.
+  - `detail.meta` is the extension point for domain fields the surface deliberately does not model (exam weight, axis, difficulty).
+  - Typed `resources` (video / course / book / paper / article / docs / tool / presentation / exam-guide) with `institution` and `certification`, closing the gap left by `lesson.v1.json`, whose `resources` section is an untyped array.
+- Categorical accent palette `--vk-accent-1` … `--vk-accent-8` in `theme.css`, defined for light and dark.
+- Themed browser surfaces: `::selection` and a global `:focus-visible` ring drawn from the palette.
+
+### Design notes
+- **No component JavaScript.** Disclosure uses the native Popover API (`popovertarget` + `popover="auto"`), which supplies light-dismiss, Esc-to-close, focus restoration and top-layer stacking declaratively. The ordering switcher is a CSS-driven radio group. Both choices follow from the pure-component rule in `scripts/lint-pure-components.mjs`, which forbids network access in components — node detail therefore ships inline with the spec rather than being fetched on demand.
+- **Typed blocks, not markup.** `detail.body` is a closed set of block types mapped to known elements, because raw-markup injection is allowlisted to the lesson surface only.
+- The tree's visual design lives in the global stylesheet rather than in the component's shadow styles: the markup is deeply nested light DOM, which `::slotted()` cannot reach past the first level.
+
+### Verification
+- Certification claims are enforced structurally: a resource carrying `certification` must also carry `url` and `verified_at`, or the spec fails validation. The renderer marks any such resource without a verification date as `unverified` rather than presenting it as fact.
+- `artifact_url` is separate from `url` so a durable landing page and a rotating generated file (a dated PDF) are not conflated.
+- `lifecycle` (`current` / `version-changing` / `retired`) records whether the thing described still exists in the form described. This is deliberately distinct from `verified_at`: a date says when you looked, not whether what you found has since been withdrawn — a credential verified in March and retired in June is stale in a way a date alone cannot surface. The renderer shows a chip for anything not `current`.
+
 ## 1.2.0 — 2026-04-19
 
 ### Added

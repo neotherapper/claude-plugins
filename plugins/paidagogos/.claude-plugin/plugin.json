@@ -1,6 +1,6 @@
 {
   "name": "paidagogos",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Structured AI-powered lessons for any topic, rendered in a local visual browser UI.",
   "author": {
     "name": "George Pilitsoglou",
@@ -10,5 +10,8 @@
   "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/paidagogos",
   "repository": "https://github.com/neotherapper/claude-plugins",
   "license": "MIT",
-  "keywords": ["learning", "education", "lessons", "visual-kit"]
+  "keywords": ["learning", "education", "lessons", "curriculum", "visual-kit"],
+  "dependencies": [
+    { "name": "visual-kit", "version": "~1.3.0" }
+  ]
 }

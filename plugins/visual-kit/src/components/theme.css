@@ -2,12 +2,29 @@
   --vk-bg:#ffffff; --vk-surface:#f8f9fa; --vk-border:#e9ecef;
   --vk-text:#212529; --vk-muted:#6c757d; --vk-accent:#0066cc; --vk-accent-alt:#f69d50;
   --vk-code-bg:#f1f3f5; --vk-success:#198754; --vk-warning:#fd7e14; --vk-danger:#dc3545;
+
+  /* Categorical accent slots. Referenced by palette index so specs never carry raw
+     colour and the theme stays the single owner of what each track looks like.
+     Chosen for ≥3:1 against --vk-bg (non-text use: rails, markers, swatches) and
+     ≥4.5:1 where they carry text. */
+  --vk-accent-1:#4f46e5; --vk-accent-2:#0f766e; --vk-accent-3:#b45309; --vk-accent-4:#be123c;
+  --vk-accent-5:#7c3aed; --vk-accent-6:#0e7490; --vk-accent-7:#15803d; --vk-accent-8:#475569;
+
+  --vk-scrim:rgb(16 18 27 / 46%);
+  --vk-shadow:0 1px 2px rgb(16 18 27 / 6%), 0 12px 32px -8px rgb(16 18 27 / 18%);
+  --vk-ease:cubic-bezier(.16,1,.3,1);
 }
 @media (prefers-color-scheme:dark) {
   :root {
     --vk-bg:#0d1117; --vk-surface:#161b22; --vk-border:#30363d;
     --vk-text:#e6edf3; --vk-muted:#8b949e; --vk-accent:#58a6ff; --vk-accent-alt:#f69d50;
     --vk-code-bg:#1e2530; --vk-success:#3fb950; --vk-warning:#d29922; --vk-danger:#f85149;
+
+    --vk-accent-1:#a5b4fc; --vk-accent-2:#5eead4; --vk-accent-3:#fcd34d; --vk-accent-4:#fda4af;
+    --vk-accent-5:#c4b5fd; --vk-accent-6:#67e8f9; --vk-accent-7:#86efac; --vk-accent-8:#cbd5e1;
+
+    --vk-scrim:rgb(1 4 9 / 66%);
+    --vk-shadow:0 1px 2px rgb(1 4 9 / 40%), 0 16px 40px -10px rgb(1 4 9 / 70%);
   }
 }
 *{box-sizing:border-box}
@@ -16,3 +33,233 @@ html,body{margin:0;padding:0;background:var(--vk-bg);color:var(--vk-text);
 .vk-surface{max-width:860px;margin:0 auto;padding:2rem 1.5rem}
 a{color:var(--vk-accent)}
 .vk-component-error{color:var(--vk-warning);font-family:monospace;font-size:.85rem;padding:.5rem}
+
+/* Browser surfaces — parts we did not draw but still ship with the design. */
+::selection{background:color-mix(in oklab,var(--vk-accent) 26%,transparent);color:var(--vk-text)}
+:focus-visible{outline:2px solid var(--vk-accent);outline-offset:2px;border-radius:3px}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   tree surface
+   The hierarchy is drawn, not implied by indentation: each nested level hangs
+   off a 1px rail tinted with its parent's track accent, so colour carries
+   structure instead of decorating it. Disclosure is the native Popover API,
+   which is why nothing here needs JavaScript.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+vk-tree{--vk-a:var(--vk-border);--vk-rail:1.25rem;display:block}
+vk-tree [data-accent="1"]{--vk-a:var(--vk-accent-1)}
+vk-tree [data-accent="2"]{--vk-a:var(--vk-accent-2)}
+vk-tree [data-accent="3"]{--vk-a:var(--vk-accent-3)}
+vk-tree [data-accent="4"]{--vk-a:var(--vk-accent-4)}
+vk-tree [data-accent="5"]{--vk-a:var(--vk-accent-5)}
+vk-tree [data-accent="6"]{--vk-a:var(--vk-accent-6)}
+vk-tree [data-accent="7"]{--vk-a:var(--vk-accent-7)}
+vk-tree [data-accent="8"]{--vk-a:var(--vk-accent-8)}
+.vk-tree-detail[data-accent="1"]{--vk-a:var(--vk-accent-1)}
+.vk-tree-detail[data-accent="2"]{--vk-a:var(--vk-accent-2)}
+.vk-tree-detail[data-accent="3"]{--vk-a:var(--vk-accent-3)}
+.vk-tree-detail[data-accent="4"]{--vk-a:var(--vk-accent-4)}
+.vk-tree-detail[data-accent="5"]{--vk-a:var(--vk-accent-5)}
+.vk-tree-detail[data-accent="6"]{--vk-a:var(--vk-accent-6)}
+.vk-tree-detail[data-accent="7"]{--vk-a:var(--vk-accent-7)}
+.vk-tree-detail[data-accent="8"]{--vk-a:var(--vk-accent-8)}
+
+.vk-tree-subtitle{margin:.5rem 0 0;color:var(--vk-muted);max-width:68ch}
+.vk-icon{width:1em;height:1em;display:block;flex:none}
+
+/* Study-sequence switcher. A radio group rather than buttons so the active
+   ordering is expressible in CSS alone — see the :has() rules below. */
+.vk-tree-orderings{display:flex;flex-wrap:wrap;align-items:center;gap:.375rem;
+  margin:1.75rem 0 0;padding:.3125rem;border:1px solid var(--vk-border);border-radius:11px;
+  background:var(--vk-surface)}
+.vk-tree-orderings>legend{padding:0 .5rem;font-size:.75rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--vk-muted)}
+.vk-tree-ordering-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.vk-tree-ordering-label{padding:.4375rem .875rem;border-radius:7px;font-size:.875rem;
+  font-weight:500;color:var(--vk-muted);cursor:pointer;transition:background .14s,color .14s}
+.vk-tree-ordering-label:hover{color:var(--vk-text);background:color-mix(in oklab,var(--vk-text) 6%,transparent)}
+.vk-tree-ordering-input:checked+.vk-tree-ordering-label{background:var(--vk-bg);color:var(--vk-text);
+  box-shadow:var(--vk-shadow)}
+.vk-tree-ordering-input:focus-visible+.vk-tree-ordering-label{outline:2px solid var(--vk-accent);outline-offset:2px}
+
+/* Positional ordering→step mapping. CSS cannot read an attribute value into a
+   selector, so the surface emits one step slot per ordering, never sparse, and
+   these rules pair the Nth radio with the Nth slot. Bounded at 8 by the schema. */
+.vk-tree-step{display:none}
+.vk-tree-steps>.vk-tree-step:first-child{display:inline-flex}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(1):checked) .vk-tree-step{display:none}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(1):checked) .vk-tree-step:nth-child(1){display:inline-flex}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(2):checked) .vk-tree-step{display:none}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(2):checked) .vk-tree-step:nth-child(2){display:inline-flex}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(3):checked) .vk-tree-step{display:none}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(3):checked) .vk-tree-step:nth-child(3){display:inline-flex}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(4):checked) .vk-tree-step{display:none}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(4):checked) .vk-tree-step:nth-child(4){display:inline-flex}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(5):checked) .vk-tree-step{display:none}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(5):checked) .vk-tree-step:nth-child(5){display:inline-flex}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(6):checked) .vk-tree-step{display:none}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(6):checked) .vk-tree-step:nth-child(6){display:inline-flex}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(7):checked) .vk-tree-step{display:none}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(7):checked) .vk-tree-step:nth-child(7){display:inline-flex}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(8):checked) .vk-tree-step{display:none}
+vk-tree:has(.vk-tree-ordering-input:nth-of-type(8):checked) .vk-tree-step:nth-child(8){display:inline-flex}
+.vk-tree-step[data-empty]{visibility:hidden}
+
+.vk-tree-legend{display:flex;flex-wrap:wrap;gap:.375rem 1.5rem;margin:1.25rem 0 0;padding:0;list-style:none}
+.vk-tree-legend-item{display:flex;align-items:baseline;gap:.5rem;font-size:.8125rem}
+.vk-tree-swatch{width:.5rem;height:.5rem;border-radius:2px;background:var(--vk-a);
+  flex:none;transform:translateY(-1px)}
+.vk-tree-legend-label{font-weight:600;color:var(--vk-text)}
+.vk-tree-legend-desc{color:var(--vk-muted)}
+
+.vk-tree-level{list-style:none;margin:0;padding:0}
+.vk-tree-level[data-depth="0"]{margin-top:2rem}
+.vk-tree-level[data-depth="0"]>.vk-tree-item+.vk-tree-item{margin-top:1.75rem}
+.vk-tree-item{position:relative}
+
+/* Nested levels hang off the parent item's accent rail. */
+.vk-tree-item>.vk-tree-level:not([data-depth="0"]){margin-left:.5rem;padding-left:var(--vk-rail);
+  border-left:1px solid color-mix(in oklab,var(--vk-a) 55%,transparent)}
+.vk-tree-level:not([data-depth="0"])>.vk-tree-item::before{content:"";position:absolute;
+  left:calc(-1 * var(--vk-rail));top:1.0625rem;width:calc(var(--vk-rail) - .3125rem);height:1px;
+  background:color-mix(in oklab,var(--vk-a) 55%,transparent)}
+/* Stop the rail at the last elbow instead of running past it. */
+.vk-tree-level:not([data-depth="0"])>.vk-tree-item:last-child::after{content:"";position:absolute;
+  left:calc(-1 * var(--vk-rail) - 1px);top:1.125rem;bottom:0;width:1px;background:var(--vk-bg)}
+
+.vk-tree-node{display:flex;align-items:center;gap:.625rem;width:100%;
+  padding:.4375rem .625rem .4375rem .5rem;margin-left:-.5rem;
+  font:inherit;text-align:left;color:var(--vk-text);background:none;border:0;border-radius:8px;
+  transition:background .14s var(--vk-ease)}
+button.vk-tree-node{cursor:pointer}
+button.vk-tree-node:hover{background:color-mix(in oklab,var(--vk-a) 9%,transparent)}
+.vk-tree-node--static{cursor:default}
+.vk-tree-item[data-kind="branch"]>.vk-tree-node .vk-tree-label{font-size:1.0625rem;font-weight:650;
+  letter-spacing:-.011em}
+.vk-tree-item[data-kind="leaf"]>.vk-tree-node .vk-tree-label{font-size:.9375rem}
+.vk-tree-label{flex:1 1 auto;min-width:0}
+
+.vk-tree-steps{flex:none;display:inline-flex}
+.vk-tree-step{align-items:center;justify-content:center;min-width:1.5rem;height:1.5rem;padding:0 .25rem;
+  border-radius:5px;background:color-mix(in oklab,var(--vk-a) 14%,transparent);
+  color:var(--vk-a);font-size:.75rem;font-weight:650;font-variant-numeric:tabular-nums lining-nums}
+
+.vk-tree-badges{flex:none;display:flex;flex-wrap:wrap;gap:.3125rem}
+.vk-tree-badge{padding:.0625rem .4375rem;border:1px solid var(--vk-border);border-radius:999px;
+  font-size:.6875rem;font-weight:500;color:var(--vk-muted);white-space:nowrap}
+
+.vk-tree-more{flex:none;color:var(--vk-muted);opacity:0;
+  transition:opacity .14s var(--vk-ease),transform .18s var(--vk-ease)}
+button.vk-tree-node:hover .vk-tree-more,
+button.vk-tree-node:focus-visible .vk-tree-more{opacity:1;transform:translateX(2px)}
+
+/* ── detail popover ──────────────────────────────────────────────────────── */
+
+.vk-tree-detail{width:min(56rem,calc(100vw - 3rem));max-height:min(85vh,52rem);
+  margin:auto;padding:0;overflow:hidden;display:flex;flex-direction:column;
+  color:var(--vk-text);background:var(--vk-bg);
+  border:1px solid var(--vk-border);border-radius:16px;box-shadow:var(--vk-shadow)}
+.vk-tree-detail::backdrop{background:var(--vk-scrim)}
+
+/* The one authored moment on this surface: the panel settles in from slightly
+   under and behind. @starting-style is required because popovers animate out of
+   display:none, and allow-discrete keeps the exit frame alive. */
+.vk-tree-detail{opacity:1;transform:none;
+  transition:opacity .22s var(--vk-ease),transform .28s var(--vk-ease),
+             overlay .28s allow-discrete,display .28s allow-discrete}
+.vk-tree-detail:not(:popover-open){opacity:0;transform:translateY(8px) scale(.985)}
+@starting-style{.vk-tree-detail:popover-open{opacity:0;transform:translateY(8px) scale(.985)}}
+.vk-tree-detail::backdrop{opacity:1;transition:opacity .22s var(--vk-ease),
+  overlay .22s allow-discrete,display .22s allow-discrete}
+.vk-tree-detail:not(:popover-open)::backdrop{opacity:0}
+@starting-style{.vk-tree-detail:popover-open::backdrop{opacity:0}}
+
+.vk-tree-detail-head{flex:none;display:flex;align-items:flex-start;justify-content:space-between;
+  gap:1.5rem;padding:1.5rem 1.75rem 1.125rem;border-bottom:2px solid var(--vk-a)}
+.vk-tree-detail-group{margin:0 0 .375rem;font-size:.75rem;font-weight:650;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--vk-a)}
+.vk-tree-detail-head h2{margin:0;font-size:1.5rem;line-height:1.25;letter-spacing:-.021em;
+  text-wrap:balance}
+.vk-tree-close{flex:none;display:grid;place-items:center;width:2rem;height:2rem;padding:0;
+  font-size:1.125rem;color:var(--vk-muted);background:none;border:1px solid transparent;
+  border-radius:8px;cursor:pointer;transition:background .14s,color .14s,border-color .14s}
+.vk-tree-close:hover{color:var(--vk-text);background:var(--vk-surface);border-color:var(--vk-border)}
+
+.vk-tree-detail-body{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;
+  padding:1.375rem 1.75rem 1.75rem;scrollbar-width:thin;
+  scrollbar-color:color-mix(in oklab,var(--vk-text) 22%,transparent) transparent}
+.vk-tree-detail-body::-webkit-scrollbar{width:10px}
+.vk-tree-detail-body::-webkit-scrollbar-thumb{border:3px solid transparent;border-radius:999px;
+  background:color-mix(in oklab,var(--vk-text) 22%,transparent);background-clip:content-box}
+.vk-tree-detail-body>*{max-width:72ch}
+.vk-tree-detail-body p{margin:0 0 1rem}
+.vk-tree-summary{font-size:1.0625rem;line-height:1.6;color:var(--vk-text)}
+.vk-tree-h{margin:1.75rem 0 .625rem;font-size:.75rem;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--vk-muted)}
+.vk-tree-list{margin:0 0 1rem;padding-left:1.125rem}
+.vk-tree-list li{margin:.3125rem 0}
+.vk-tree-list li::marker{color:var(--vk-a)}
+
+.vk-tree-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.875rem 1.5rem;
+  margin:0 0 1.5rem;padding:.9375rem 0;border-block:1px solid var(--vk-border)}
+.vk-tree-meta dt{margin:0 0 .1875rem;font-size:.6875rem;font-weight:650;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--vk-muted)}
+.vk-tree-meta dd{margin:0;font-size:.9375rem;font-weight:550;font-variant-numeric:tabular-nums}
+
+.vk-tree-callout{margin:0 0 1rem;padding:.875rem 1rem;border:1px solid var(--vk-border);
+  border-radius:10px;background:var(--vk-surface);font-size:.9375rem}
+.vk-tree-callout[data-tone="warning"]{border-color:color-mix(in oklab,var(--vk-warning) 40%,var(--vk-border));
+  background:color-mix(in oklab,var(--vk-warning) 8%,transparent)}
+.vk-tree-callout[data-tone="pitfall"]{border-color:color-mix(in oklab,var(--vk-danger) 40%,var(--vk-border));
+  background:color-mix(in oklab,var(--vk-danger) 8%,transparent)}
+
+.vk-tree-requires h3,.vk-tree-resources h3{margin:1.75rem 0 .75rem;font-size:.75rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--vk-muted)}
+.vk-tree-requires ul{display:flex;flex-wrap:wrap;gap:.5rem;margin:0;padding:0;list-style:none}
+.vk-tree-link{padding:.3125rem .6875rem;font:inherit;font-size:.8125rem;font-weight:550;
+  color:var(--vk-text);background:var(--vk-surface);border:1px solid var(--vk-border);
+  border-radius:999px;cursor:pointer;transition:border-color .14s,background .14s}
+.vk-tree-link:hover{border-color:var(--vk-a);background:color-mix(in oklab,var(--vk-a) 10%,transparent)}
+
+.vk-tree-resources ul{margin:0;padding:0;list-style:none;max-width:none}
+.vk-tree-resource{display:grid;grid-template-columns:5.5rem 1fr;gap:1rem;padding:.8125rem 0;
+  border-top:1px solid var(--vk-border)}
+.vk-tree-resource:last-child{border-bottom:1px solid var(--vk-border)}
+.vk-tree-restype{font-size:.6875rem;font-weight:650;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--vk-muted);padding-top:.1875rem}
+.vk-tree-resmain{display:flex;flex-direction:column;gap:.25rem;min-width:0}
+.vk-tree-resmain>a{font-weight:550;text-decoration-thickness:1px;text-underline-offset:2px}
+.vk-tree-resmeta{display:flex;flex-wrap:wrap;align-items:center;gap:.375rem .625rem;
+  font-size:.8125rem;color:var(--vk-muted)}
+.vk-tree-cert{padding:.0625rem .4375rem;border-radius:4px;font-size:.75rem;font-weight:600;
+  color:var(--vk-a);background:color-mix(in oklab,var(--vk-a) 13%,transparent)}
+.vk-tree-verified{color:var(--vk-success);font-variant-numeric:tabular-nums}
+.vk-tree-lifecycle{padding:.0625rem .4375rem;border-radius:4px;font-size:.75rem;font-weight:700;
+  letter-spacing:.02em;text-transform:uppercase}
+.vk-tree-lifecycle[data-lifecycle="retired"]{color:var(--vk-danger);
+  background:color-mix(in oklab,var(--vk-danger) 15%,transparent)}
+.vk-tree-lifecycle[data-lifecycle="version-changing"]{color:var(--vk-warning);
+  background:color-mix(in oklab,var(--vk-warning) 15%,transparent)}
+.vk-tree-unverified{padding:.0625rem .4375rem;border-radius:4px;font-size:.75rem;font-weight:600;
+  color:var(--vk-warning);background:color-mix(in oklab,var(--vk-warning) 14%,transparent)}
+.vk-tree-resnote{font-size:.8125rem;color:var(--vk-muted)}
+.vk-tree-artifact{font-size:.75rem;align-self:flex-start}
+
+@media (max-width:640px){
+  vk-tree{--vk-rail:.875rem}
+  .vk-tree-detail{width:100vw;max-width:100vw;max-height:92vh;margin:auto auto 0;
+    border-width:1px 0 0;border-radius:18px 18px 0 0}
+  .vk-tree-detail:not(:popover-open){transform:translateY(16px)}
+  @starting-style{.vk-tree-detail:popover-open{transform:translateY(16px)}}
+  .vk-tree-detail-head{padding:1.25rem 1.25rem 1rem}
+  .vk-tree-detail-body{padding:1.125rem 1.25rem 2rem}
+  .vk-tree-resource{grid-template-columns:1fr;gap:.25rem}
+  .vk-tree-badges{display:none}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .vk-tree-detail,.vk-tree-detail::backdrop,.vk-tree-node,.vk-tree-more,
+  .vk-tree-ordering-label,.vk-tree-link,.vk-tree-close{transition-duration:.01ms}
+  .vk-tree-detail:not(:popover-open){transform:none}
+  @starting-style{.vk-tree-detail:popover-open{transform:none}}
+}
