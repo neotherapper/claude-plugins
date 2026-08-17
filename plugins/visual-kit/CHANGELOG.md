@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.0 — 2026-08-16
+
+### Added
+- `gallery` items accept an optional `href`, turning a card into a link. Additive, so existing gallery specs are unaffected. A linked card renders an anchor and does not emit a selection event — navigating and selecting are different meanings and one card should carry one of them.
+- `safeUrl()` in `src/render/escape.ts` — the single place a spec-supplied URL is vetted before reaching an `href`.
+
+### Fixed
+- **`ajv-formats` was a declared dependency that was never registered**, so every `"format"` in every schema was inert. Ajv had been logging `unknown format "uri" ignored` on each run while validating nothing. `tree.v1.json` now enforces the URL and date constraints it already claimed to.
+- The `tree` surface rendered resource URLs into anchors with no scheme check. Both anchors now go through `safeUrl()`.
+
+### Security
+URLs in a SurfaceSpec are untrusted input, since specs are AI-authored. `safeUrl()` allows `http(s)`, site-relative and fragment targets only, and strips control characters before reading the scheme — browsers ignore them, so `java\nscript:` defeats a whitespace-only trim. The scheme allowlist is enforced twice, in the schema and again in the renderer, because the dispatcher can invoke a renderer on a spec that was never validated. The strict CSP would block `javascript:` from executing, but `free-interactive` ships without CSP by design, so that mitigation could not be relied on.
+
 ## 1.3.0 — 2026-08-16
 
 ### Added

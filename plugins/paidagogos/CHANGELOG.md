@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.0 — 2026-08-16
+
+### Added
+- **Packs.** A curriculum is now a directory under `packs/<slug>/` with a `pack.json` manifest validated against `schemas/pack.v1.json`. A manifest declares `surfaces[]`, because a pack can hold more than one renderable tree — the AI Engineering pack ships both its curriculum and its course catalogue.
+- **Roadmap index.** `scripts/build-index.mjs` globs the manifests and emits a `gallery` spec whose cards link to each curriculum. Requests that name no subject now render the index.
+
+### Changed
+- Curricula moved out of `skills/paidagogos-micro/references/curricula/` into `packs/`. Files were moved with `git mv`; content is byte-identical and **no concept id changed**, so the nikai learning path's wiring is unaffected.
+- `paidagogos:path` no longer carries a table of available curricula. It runs the script and reads the answer, so adding a pack requires no skill edit and the list cannot drift from the filesystem.
+- Requires `visual-kit ~1.4.0` for the `gallery` `href` field.
+
+### Why discovery is a script
+A list of curricula written into a skill is a second source of truth that goes stale silently, and this repository has twice recorded that prose-only steps get skipped under synthesis pressure. `build-index.mjs` fails closed: one invalid manifest aborts the index rather than emitting a directory with a hole in it, because an index missing an entry looks exactly like a complete one.
+
 ## 0.3.0 — 2026-08-16
 
 ### Added
