@@ -41,6 +41,8 @@ Entry point for the `paidagogos` plugin. Classify the user's learning intent and
 | "show me the curriculum" / "learning path for X" | Route to `paidagogos:path` |
 | "what should I learn next" | Route to `paidagogos:path` |
 | "/paidagogos:path" | Route to `paidagogos:path` |
+| "what curricula do you have" / "show me all roadmaps" | `paidagogos:path` (index) |
+| "/paidagogos:path" with no topic | `paidagogos:path` (index) |
 
 ## Scope classifier
 
@@ -66,7 +68,7 @@ Which would you prefer?
 If the user picks option 1: suggest the best entry concept and invoke `paidagogos:micro`.
 If the user picks option 2: invoke `paidagogos:path`.
 
-When a curriculum already exists for the broad topic (see the table in
+When a curriculum already exists for the broad topic (see the index produced by
 `paidagogos:path`), skip the question and route straight to `paidagogos:path` —
 asking is only worthwhile when no path exists yet.
 

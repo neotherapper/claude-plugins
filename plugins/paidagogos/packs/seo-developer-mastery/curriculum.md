@@ -718,7 +718,7 @@ You'll use this when building a site that depends on discoverability through AI 
 
 | Field | Value |
 |-------|-------|
-| Catalog file | `plugins/paidagogos/skills/paidagogos-micro/references/curricula/seo-developer-mastery.md` |
+| Catalog file | `plugins/paidagogos/packs/seo-developer-mastery/curriculum.md` |
 | Audit-tool consumer | `/seo:audit` from `plugins/seo/` |
 | Total lessons | 12 + 1 bonus |
 | Total time | ~12 hours |

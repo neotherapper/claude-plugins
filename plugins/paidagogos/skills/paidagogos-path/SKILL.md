@@ -24,14 +24,16 @@ conversation — write or load a curriculum file and render it.
 
 ## Available curricula
 
-| Curriculum | File | Covers |
-|---|---|---|
-| AI Engineering | `references/curricula/ai-engineering.curriculum.json` | 38 concepts across 5 tracks; CCAR-F front-loaded |
-| AI Engineering — external courses | `references/curricula/ai-engineering.catalogue.json` | Certifications and courses by institution |
-| Developer SEO Mastery | `references/curricula/seo-developer-mastery.md` | 12 lessons, linear (legacy markdown format) |
+Do not keep a list here. Run:
 
-Curriculum files live in `../paidagogos-micro/references/curricula/` relative to
-this skill.
+```bash
+node plugins/paidagogos/scripts/build-index.mjs
+```
+
+It prints a `gallery` SurfaceSpec built from `plugins/paidagogos/packs/*/pack.json`.
+Every pack that exists is in that output; anything not in it does not exist.
+A list written into this file would be a second source of truth that drifts
+from the first one silently.
 
 ## Phase sequence
 
@@ -39,19 +41,37 @@ Do not reorder these.
 
 ### Phase 1 — Identify the curriculum
 
-Match the user's request to a curriculum in the table above. If nothing matches,
-say so and offer either `paidagogos:micro` for a single concept or to author a new
-curriculum (Phase 5). Never silently substitute a neighbouring curriculum.
+Match the user's request to a curriculum by running
+`node plugins/paidagogos/scripts/build-index.mjs` and reading the gallery output.
+If nothing matches, say so and offer either `paidagogos:micro` for a single
+concept or to author a new curriculum (Phase 6). Never silently substitute a
+neighbouring curriculum.
 
-### Phase 2 — Start the renderer
+### Phase 2 — Show the index when the request is not about one subject
+
+If the user asked what curricula exist, or asked for "the roadmaps", stage the
+index instead of a single curriculum:
+
+```bash
+node plugins/paidagogos/scripts/build-index.mjs --out .paidagogos/content/roadmaps.json
+```
+
+Give them `http://localhost:<port>/p/paidagogos/roadmaps`. Each card links
+straight to its curriculum. If the script exits non-zero, report its stderr
+verbatim and stop — a manifest is broken, and rendering a partial index would
+present a missing curriculum as one that does not exist.
+
+If the user named a subject, skip this phase.
+
+### Phase 3 — Start the renderer
 
 Run `visual-kit serve --project-dir .` with `run_in_background: true`. Poll
 `.visual-kit/server/state/server-info` until `status` is `"running"`, then read
 the `port`. Do **not** ask the user to start it.
 
-If `visual-kit` is not on PATH, fall back to Phase 4 and report the tree in text.
+If `visual-kit` is not on PATH, fall back to Phase 5 and report the tree in text.
 
-### Phase 3 — Stage and open
+### Phase 4 — Stage and open
 
 Copy the curriculum JSON to `.paidagogos/content/<surface-id>.json`, where
 `<surface-id>` matches `^[a-zA-Z0-9_-]+$` — the server rejects anything else, so
@@ -62,7 +82,7 @@ Give the user the URL: `http://localhost:<port>/p/paidagogos/<surface-id>`
 State what they can do with it: click any node for the concept detail and its
 resources, and switch study sequence if the curriculum defines more than one.
 
-### Phase 4 — Orient, don't dump
+### Phase 5 — Orient, don't dump
 
 Summarise in **at most 10 lines**: the tracks, the recommended first concept, and
 why that one is first. The tree carries the detail — repeating it in chat defeats
@@ -71,7 +91,7 @@ the point of rendering it.
 If the curriculum defines `orderings`, name which is default and what the
 alternative optimises for.
 
-### Phase 5 — Route to teaching
+### Phase 6 — Route to teaching
 
 When the user picks a concept, invoke `paidagogos:micro` with:
 
@@ -99,6 +119,7 @@ Conventions this plugin adds on top of the schema:
 | `detail.meta` | Domain fields the tree surface does not model — axis, exam weight, build-to-prove-it |
 | `requires` | Real prerequisites only, including cross-track ones. This is what makes it a DAG rather than a list. |
 | `orderings` | One per defensible study sequence. Mark one `default`. |
+| Pack manifest | Every curriculum needs `packs/<slug>/pack.json` validated against `plugins/paidagogos/schemas/pack.v1.json`. Without it the curriculum is invisible to the index. |
 
 ### Sourcing rules for resources
 

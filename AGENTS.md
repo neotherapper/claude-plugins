@@ -60,6 +60,7 @@ When the user's request matches any of these patterns, load and follow the corre
 | "/paidagogos serve" | `paidagogos` (start visual server) |
 | "I want to become [role]" / "roadmap for X" | `paidagogos:path` |
 | "show me the curriculum" / "what should I learn next" | `paidagogos:path` |
+| "show me all roadmaps" / "what curricula exist" | `paidagogos:path` (renders the index) |
 | "analyse https://..." | `site-recon` |
 | "research this site" | `site-recon` |
 | "map the API surface of..." | `site-recon` |
