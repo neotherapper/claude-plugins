@@ -60,13 +60,19 @@ packs.sort((a, b) => a.title.localeCompare(b.title, 'en'));
 const items = packs.map(p => {
   const main = p.surfaces.find(s => s.role === 'curriculum') ?? p.surfaces[0];
   const extra = p.surfaces.filter(s => s !== main);
+  // Only a tree surface has a SurfaceSpec the server can render. A markdown
+  // pack has nothing at /p/paidagogos/<id>, so linking it produces a card that
+  // 404s — worse than one that is plainly not a link. href is optional in the
+  // gallery schema precisely so a card can decline to be one.
+  const renderable = (main.format ?? 'tree') === 'tree';
   return {
     id: p.id,
     title: p.title,
     ...(p.subtitle ? { subtitle: p.subtitle } : {}),
     ...(p.summary ? { body: p.summary } : {}),
-    href: `/p/paidagogos/${main.id}`,
+    ...(renderable ? { href: `/p/paidagogos/${main.id}` } : {}),
     badges: [
+      ...(renderable ? [] : [{ label: 'not rendered', tone: 'muted' }]),
       ...(p.badges ?? []),
       ...extra.map(s => ({ label: s.title, tone: 'muted' })),
     ].slice(0, 6),
