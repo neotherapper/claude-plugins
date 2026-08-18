@@ -2,6 +2,8 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { loadSchemas, validateSpec } from '../../src/render/validate.js';
 import { renderGallery } from '../../src/surfaces/gallery.js';
 import { renderFragment } from '../../src/render/ssr.js';
+import { html } from 'lit';
+import '../../src/components/card.js';
 
 beforeAll(async () => { await loadSchemas(); });
 
@@ -33,7 +35,7 @@ describe('renderGallery', () => {
 
   it('omits the attribute entirely when there is no href', () => {
     const out = renderFragment(renderGallery({ items: [{ id: 'a', title: 'A' }] }));
-    expect(out).not.toContain('data-href');
+    expect(out).not.toContain('data-href="');
   });
 
   // Defence in depth: the dispatcher can call a renderer on an unvalidated spec.
@@ -42,6 +44,25 @@ describe('renderGallery', () => {
       { id: 'a', title: 'A', href: 'javascript:alert(1)' },
     ] }));
     expect(out).not.toContain('javascript:alert(1)');
-    expect(out).not.toContain('data-href');
+    expect(out).not.toContain('data-href="');
+  });
+});
+
+// The renderer only puts `data-href` on the light-DOM element; the anchor that
+// actually navigates is produced by vk-card's own render. Importing the
+// component is what makes renderFragment emit its declarative shadow DOM —
+// without that import these assertions would silently test nothing.
+describe('vk-card (upgraded)', () => {
+  it('renders an anchor to the href, and no selection handler', () => {
+    const out = renderFragment(html`<vk-card data-id="a" data-href="/p/paidagogos/x"></vk-card>`);
+    expect(out).toMatch(/<template shadowroot(?:mode)?="open"/);
+    expect(out).toContain('<a class="link" href="/p/paidagogos/x">');
+  });
+
+  it('renders a plain div when there is no href, keeping selection behaviour', () => {
+    const out = renderFragment(html`<vk-card data-id="a"></vk-card>`);
+    expect(out).toMatch(/<template shadowroot(?:mode)?="open"/);
+    expect(out).not.toContain('<a class="link"');
+    expect(out).toContain('<div');
   });
 });
