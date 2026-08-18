@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.4.0 — 2026-08-16
+
+### Added
+- `gallery` items accept an optional `href`, turning a card into a link. Additive, so existing gallery specs are unaffected. A linked card renders an anchor and does not emit a selection event — navigating and selecting are different meanings and one card should carry one of them.
+- `safeUrl()` in `src/render/escape.ts` — the single place a spec-supplied URL is vetted before reaching an `href`.
+
+### Fixed
+- **`ajv-formats` was a declared dependency that was never registered**, so every `"format"` in every schema was inert. Ajv had been logging `unknown format "uri" ignored` on each run while validating nothing. `tree.v1.json` now enforces the URL and date constraints it already claimed to.
+- The `tree` surface rendered resource URLs into anchors with no scheme check. Both anchors now go through `safeUrl()`.
+
+### Security
+URLs in a SurfaceSpec are untrusted input, since specs are AI-authored. `safeUrl()` allows `http(s)`, site-relative and fragment targets only, and strips control characters before reading the scheme — browsers ignore them, so `java\nscript:` defeats a whitespace-only trim. The scheme allowlist is enforced twice, in the schema and again in the renderer, because the dispatcher can invoke a renderer on a spec that was never validated. The strict CSP would block `javascript:` from executing, but `free-interactive` ships without CSP by design, so that mitigation could not be relied on.
+
+## 1.3.0 — 2026-08-16
+
+### Added
+- New surface kind `tree` — a navigable hierarchy whose nodes open a detail popover. Domain-neutral: curricula, roadmaps, taxonomies, decision trees. Schema: `/vk/schemas/tree.v1.json`.
+  - Display hierarchy comes from nested `children`; non-hierarchical dependencies are declared per node via `requires` and rendered as cross-links inside the detail panel rather than as drawn edges. This expresses a DAG without a layout engine.
+  - `groups` model tracks/lanes and carry a palette **slot** (`"1"`–`"8"`), never a raw colour, so the theme stays the single owner of what a group looks like.
+  - `orderings` carry several named traversal orders over one node set, so a tree can present multiple study sequences without duplicating content.
+  - `detail.meta` is the extension point for domain fields the surface deliberately does not model (exam weight, axis, difficulty).
+  - Typed `resources` (video / course / book / paper / article / docs / tool / presentation / exam-guide) with `institution` and `certification`, closing the gap left by `lesson.v1.json`, whose `resources` section is an untyped array.
+- Categorical accent palette `--vk-accent-1` … `--vk-accent-8` in `theme.css`, defined for light and dark.
+- Themed browser surfaces: `::selection` and a global `:focus-visible` ring drawn from the palette.
+
+### Design notes
+- **No component JavaScript.** Disclosure uses the native Popover API (`popovertarget` + `popover="auto"`), which supplies light-dismiss, Esc-to-close, focus restoration and top-layer stacking declaratively. The ordering switcher is a CSS-driven radio group. Both choices follow from the pure-component rule in `scripts/lint-pure-components.mjs`, which forbids network access in components — node detail therefore ships inline with the spec rather than being fetched on demand.
+- **Typed blocks, not markup.** `detail.body` is a closed set of block types mapped to known elements, because raw-markup injection is allowlisted to the lesson surface only.
+- The tree's visual design lives in the global stylesheet rather than in the component's shadow styles: the markup is deeply nested light DOM, which `::slotted()` cannot reach past the first level.
+
+### Verification
+- Certification claims are enforced structurally: a resource carrying `certification` must also carry `url` and `verified_at`, or the spec fails validation. The renderer marks any such resource without a verification date as `unverified` rather than presenting it as fact.
+- `artifact_url` is separate from `url` so a durable landing page and a rotating generated file (a dated PDF) are not conflated.
+- `provenance` (`primary` / `secondary` / `relayed`) records how the author came to believe an entry's claims. Omitting a source is not the cautious option: a precise figure with no citation is unfalsifiable while the precision still reads as verification. The renderer marks anything not `primary`.
+- `lifecycle` (`current` / `version-changing` / `retired`) records whether the thing described still exists in the form described. This is deliberately distinct from `verified_at`: a date says when you looked, not whether what you found has since been withdrawn — a credential verified in March and retired in June is stale in a way a date alone cannot surface. The renderer shows a chip for anything not `current`.
+
 ## 1.2.0 — 2026-04-19
 
 ### Added

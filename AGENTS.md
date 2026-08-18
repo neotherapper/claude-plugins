@@ -25,6 +25,7 @@ Skills in `plugins/paidagogos/skills/`:
 |-------|------|-----------------|
 | `paidagogos` | `plugins/paidagogos/skills/paidagogos/SKILL.md` | User asks to learn a topic, wants an explanation, or says "teach me X" |
 | `paidagogos:micro` | `plugins/paidagogos/skills/paidagogos-micro/SKILL.md` | User specifies `/paidagogos:micro` directly, or router routes a single-concept request here |
+| `paidagogos:path` | `plugins/paidagogos/skills/paidagogos-path/SKILL.md` | User wants a whole learning path or roadmap rather than one lesson — "I want to become X", "show me the curriculum", `/paidagogos:path` |
 
 ### beacon — Site API Surface Mapper
 
@@ -57,6 +58,9 @@ When the user's request matches any of these patterns, load and follow the corre
 | "what is [topic]" (learning context) | `paidagogos` |
 | "quiz me on [topic]" | `paidagogos` |
 | "/paidagogos serve" | `paidagogos` (start visual server) |
+| "I want to become [role]" / "roadmap for X" | `paidagogos:path` |
+| "show me the curriculum" / "what should I learn next" | `paidagogos:path` |
+| "show me all roadmaps" / "what curricula exist" | `paidagogos:path` (renders the index) |
 | "analyse https://..." | `site-recon` |
 | "research this site" | `site-recon` |
 | "map the API surface of..." | `site-recon` |
