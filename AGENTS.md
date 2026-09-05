@@ -11,8 +11,8 @@ them at the top-level path it scans (via symlinks kept in sync by `scripts/sync-
 - **Claude Code** — auto-discovered from each plugin via the marketplace.
 - **Codex, OpenCode, Antigravity, Cline, Cursor, Gemini CLI, Copilot** — `.agents/skills/<skill>/SKILL.md`.
 - **Kiro** — `.kiro/skills/<skill>/SKILL.md`.
-- **Pi** — `.pi/skills/<skill>/SKILL.md`.
-- **Any other harness** (DeepSeek, Roo, Goose, Windsurf, ...) — wherever
+- **Pi, and any other harness** (DeepSeek, Roo, Goose, Windsurf, ...) — not in this repo's symlink
+  farm; Pi reads `.pi/skills/<skill>/SKILL.md`, which is wherever
   `npx skills add neotherapper/claude-plugins` put it (the CLI's per-agent path), or the folder
   the user copied from `plugins/<plugin>/skills/<skill>/`.
 
@@ -22,10 +22,14 @@ this repo, the skill folders are real copies at the path above. Each copy carrie
 variable — resolve it like this on any other harness:
 
 - `${CLAUDE_PLUGIN_ROOT}/skills/<skill>/<file>` → `<file>` inside that skill's own folder.
-- `${CLAUDE_PLUGIN_ROOT}/technologies/…` (beacon tech packs) lives at the plugin root, outside the
-  skill folder, so the CLI copy does not include it. Read it from
-  `plugins/beacon/technologies/` in a clone of this repo, or fetch it from
-  `https://raw.githubusercontent.com/neotherapper/claude-plugins/main/plugins/beacon/technologies/`.
+- Any other `${CLAUDE_PLUGIN_ROOT}/…` path (beacon `technologies/`, `scripts/core/`, `templates/`;
+  aegis `scripts/coverage.py`; idea-forge `agents/`; reframe `categories/`, `templates/`;
+  paidagogos `packs/`, `scripts/`, and the `visual-kit` renderer) lives at the plugin root, outside
+  the skill folder, so a CLI copy does not include it. Read it from `plugins/<plugin>/…` in a clone
+  of this repo, or fetch it from
+  `https://raw.githubusercontent.com/neotherapper/claude-plugins/main/plugins/<plugin>/…`.
+  If the file is essential (aegis, idea-forge evaluate, paidagogos rendering) tell the user the
+  skill needs the repo clone or the Claude Code plugin.
 
 Match a skill by its `description` and follow it when it applies. Full settings/files matrix and
 per-harness install commands: `docs/platform/multi-tool-support.md`.

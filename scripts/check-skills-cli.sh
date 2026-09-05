@@ -30,12 +30,15 @@ PY
 )"
 
 # `--list` prints one indented name line per skill ("│    site-recon") followed by its description.
-raw="$(cd "$ROOT" && npx -y skills@latest add "$ROOT" --list 2>&1)" || {
+# GitHub Actions sets CI=true, which makes the skills CLI colourise its output; NO_COLOR keeps the
+# name lines parseable, and the sed strips any ANSI escapes that still slip through.
+raw="$(cd "$ROOT" && NO_COLOR=1 npx -y skills@latest add "$ROOT" --list 2>&1 </dev/null)" || {
   echo "FAIL  'npx skills add . --list' exited non-zero:" >&2
   echo "$raw" | tail -20 >&2
   exit 1
 }
-found="$(printf '%s\n' "$raw" | sed -n -E 's/^[│ ]*([a-z0-9][a-z0-9-]*)[[:space:]]*$/\1/p' | sort -u)"
+found="$(printf '%s\n' "$raw" | sed -E $'s/\e\\[[0-9;?]*[A-Za-z]//g' | sed -n -E 's/^[│ ]*([a-z0-9][a-z0-9-]*)[[:space:]]*$/\1/p' | LC_ALL=C sort -u)"
+expected="$(printf '%s\n' "$expected" | LC_ALL=C sort -u)"
 
 missing="$(comm -23 <(printf '%s\n' "$expected") <(printf '%s\n' "$found"))"
 extra="$(comm -13 <(printf '%s\n' "$expected") <(printf '%s\n' "$found"))"

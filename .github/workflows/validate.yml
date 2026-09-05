@@ -19,15 +19,16 @@ jobs:
           python-version: '3.x'
       - name: Validate marketplace.json and every plugin.json
         run: bash scripts/validate-marketplace.sh
-      - name: Build + verify skill symlink farm (.agents/skills, .kiro/skills)
-        # The farm is generated output (git-ignored), so build it first, then verify it resolves cleanly.
-        run: bash scripts/sync-skills.sh && bash scripts/sync-skills.sh --check
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Skills CLI discovery (npx skills add . --list finds every canonical skill)
+        # Runs BEFORE the symlink farm is built so it exercises the discovery a clean `npx skills add` clone gets.
         # Guards the non-Claude install path: Pi, OpenCode, Cline, Kiro, Codex, ... all install via this CLI.
         run: bash scripts/check-skills-cli.sh
+      - name: Build + verify skill symlink farm (.agents/skills, .kiro/skills)
+        # The farm is generated output (git-ignored), so build it first, then verify it resolves cleanly.
+        run: bash scripts/sync-skills.sh && bash scripts/sync-skills.sh --check
       - name: Validate canonical slug rule (drift + correctness)
         run: bash tests/validate-slug-rule.sh
       - name: Reframe helper contract smoke test (CLI + JSON keys + exit codes)

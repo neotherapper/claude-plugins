@@ -44,11 +44,9 @@ In future sessions, ask questions about the site and Beacon routes directly to t
 
 Two ways in. **Claude Code** installs a plugin as a managed bundle that updates when we ship.
 **Every other harness** gets the skills through the universal [`skills` CLI](https://github.com/vercel-labs/skills)
-(`npx skills add`), which copies the `SKILL.md` folders — scripts and references included — into
-the path your agent scans. Pick one per machine; installing both gives you every skill twice in
-Claude Code.
-
-[![skills.sh](https://skills.sh/b/neotherapper/claude-plugins)](https://skills.sh/neotherapper/claude-plugins)
+(`npx skills add`), which puts the `SKILL.md` folders — scripts and references included — at
+the path your agent scans. Claude Code users should stick to the marketplace: adding
+`-a claude-code` on top of it gives you every skill twice.
 
 ### Claude Code
 
@@ -121,10 +119,22 @@ symlink farms expose every skill in place.
 
 `scripts/check-skills-cli.sh` runs in CI and fails if the skills CLI stops seeing any of these.
 
-> **Known limit outside Claude Code.** Nine skills reference `${CLAUDE_PLUGIN_ROOT}`; the agent
-> should read that as the skill's own folder (see `AGENTS.md`). Beacon's tech packs
-> (`plugins/beacon/technologies/`) sit at the plugin root and are **not** carried by a CLI install —
-> clone this repo alongside if you need them, or run beacon through the Claude Code plugin.
+**What a CLI install carries, per plugin.** A CLI copy contains only the skill folder
+(`SKILL.md`, `scripts/`, `references/`). Nine skills reference `${CLAUDE_PLUGIN_ROOT}`, Claude
+Code's plugin-root variable, and some depend on files at the plugin root that are **not** copied:
+
+| Plugin | Via `npx skills add` | Missing outside the Claude Code plugin / a repo clone |
+|---|---|---|
+| namesmith, draftloom, idea-forge `generate` | works | nothing |
+| beacon | degraded | `technologies/` tech packs, `scripts/core/`, `templates/`, version from `plugin.json` |
+| reframe | degraded | `categories/`, `templates/` |
+| idea-forge `evaluate` | broken | `agents/*.md` research-agent prompts |
+| aegis | broken | `scripts/coverage.py` (the whole scan) |
+| paidagogos (all three) | broken | `packs/`, `scripts/`, and the `visual-kit` renderer |
+
+For the degraded and broken rows, clone this repo next to your project (the skill can then read
+`plugins/<plugin>/…`) or use the Claude Code plugin. `AGENTS.md` tells agents how to resolve the
+variable. Follow-up work: skill-relative paths and moving those resources under each skill.
 
 ### Cross-Tool (gh skill)
 

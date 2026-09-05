@@ -150,7 +150,7 @@ What we verified on 2026-09-05 (skills CLI `latest`, local clone as the source):
 |---|---|
 | `npx skills add <repo> --list` | finds all 14 canonical skills, no duplicates from the `.agents/`/`.kiro/` farms |
 | `-a cline -a opencode` (default symlink mode) | canonical copy at `./.agents/skills/<skill>/`, with `scripts/` + `references/` |
-| `-a pi -a kiro-cli` (symlink mode, agent **not** installed) | only `.agents/skills/` written; `.pi/` and `.kiro/` skipped |
+| `-a pi -a kiro-cli` (symlink mode, agent **not** installed) | only `.agents/skills/` written; `.pi/` and `.kiro/` skipped (this repo's own symlink farm does not cover `.pi/` either) |
 | `-a pi -a kiro-cli -a cline --copy` | real dirs at `./.pi/skills/`, `./.kiro/skills/`, `./.agents/skills/` |
 
 So: the default is fine when the agent is installed on that machine; for CI, fresh machines, or
@@ -178,9 +178,22 @@ and `references/` live inside the folder and travel with it.
 
 **Portability gap (open).** 9 of 14 `SKILL.md` files use `${CLAUDE_PLUGIN_ROOT}` — a Claude
 Code-only variable. `AGENTS.md` tells agents to resolve `${CLAUDE_PLUGIN_ROOT}/skills/<s>/…` to the
-skill's own folder, which covers every reference except beacon's `technologies/` tech-pack
-library at the plugin root. Follow-up: rewrite those references as skill-relative paths and either
-move the tech packs under `site-recon/references/` or have `scaffold.sh` fetch them from GitHub.
+skill's own folder, but several skills also need plugin-root files that a CLI copy never includes
+(verified with a `--copy` install: no `technologies/`, `categories/`, `agents/`, or plugin
+`scripts/` land in the target):
+
+| Plugin | CLI install | Plugin-root dependencies not copied |
+|---|---|---|
+| namesmith, draftloom, idea-forge `generate` | self-contained | — |
+| beacon (`site-recon`, `site-intel`, `site-fleet`) | degraded | `technologies/`, `scripts/core/har-reconstruct.py`, `templates/query-templates.md`, `.claude-plugin/plugin.json` |
+| reframe (`site-redesign`) | degraded | `categories/`, `templates/` |
+| idea-forge (`evaluate`) | non-functional | `agents/*.md` (11 research-agent prompts) |
+| aegis (`site-security`) | non-functional | `scripts/coverage.py` |
+| paidagogos (all three) | non-functional | `packs/`, `scripts/build-index.mjs`, `visual-kit` schemas + renderer |
+
+Follow-up: rewrite those references as skill-relative paths and move (or fetch) the plugin-root
+resources into each skill folder, starting with aegis and idea-forge `evaluate`, which are single
+files.
 
 **CI gate.** `scripts/check-skills-cli.sh` runs `npx skills add . --list` and fails if the set
 of discovered skills differs from the canonical `plugins/*/skills/*` set — so a renamed folder or
