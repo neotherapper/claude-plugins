@@ -9,11 +9,26 @@ The canonical skills live under `plugins/<plugin>/skills/<skill>/SKILL.md`. Each
 them at the top-level path it scans (via symlinks kept in sync by `scripts/sync-skills.sh`):
 
 - **Claude Code** — auto-discovered from each plugin via the marketplace.
-- **Codex, OpenCode, Antigravity** — `.agents/skills/<skill>/SKILL.md`.
+- **Codex, OpenCode, Antigravity, Cline, Cursor, Gemini CLI, Copilot** — `.agents/skills/<skill>/SKILL.md`.
 - **Kiro** — `.kiro/skills/<skill>/SKILL.md`.
+- **Pi** — `.pi/skills/<skill>/SKILL.md`.
+- **Any other harness** (DeepSeek, Roo, Goose, Windsurf, ...) — wherever
+  `npx skills add neotherapper/claude-plugins` put it (the CLI's per-agent path), or the folder
+  the user copied from `plugins/<plugin>/skills/<skill>/`.
 
-Match a skill by its `description` and follow it when it applies. Full settings/files matrix:
-`docs/platform/multi-tool-support.md`.
+If you are running inside a project that installed these skills with the `skills` CLI rather than
+this repo, the skill folders are real copies at the path above. Each copy carries its own
+`scripts/` and `references/`. Some skills still use Claude Code's `${CLAUDE_PLUGIN_ROOT}`
+variable — resolve it like this on any other harness:
+
+- `${CLAUDE_PLUGIN_ROOT}/skills/<skill>/<file>` → `<file>` inside that skill's own folder.
+- `${CLAUDE_PLUGIN_ROOT}/technologies/…` (beacon tech packs) lives at the plugin root, outside the
+  skill folder, so the CLI copy does not include it. Read it from
+  `plugins/beacon/technologies/` in a clone of this repo, or fetch it from
+  `https://raw.githubusercontent.com/neotherapper/claude-plugins/main/plugins/beacon/technologies/`.
+
+Match a skill by its `description` and follow it when it applies. Full settings/files matrix and
+per-harness install commands: `docs/platform/multi-tool-support.md`.
 
 ## Available Plugins
 
