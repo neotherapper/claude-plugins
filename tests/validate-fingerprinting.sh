@@ -18,7 +18,7 @@ cd "$WORKTREE_ROOT"
 
 SKILL_FILE="plugins/beacon/skills/site-recon/SKILL.md"
 FINGERPRINTS_FILE="plugins/beacon/skills/site-recon/references/fingerprints.md"
-TECH_DIR="plugins/beacon/technologies"
+TECH_DIR="plugins/beacon/skills/site-recon/technologies"
 EXCLUDED_PACK="graphql"
 
 PASS=0

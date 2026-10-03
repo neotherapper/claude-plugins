@@ -9,6 +9,9 @@ metadata:
 
 # site-fleet — Sequential fleet orchestration
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+> Requires the `site-recon` skill installed alongside (it holds the tech packs, templates and shared scripts).
+
 Recon a LIST of sources one at a time, reusing site-recon per source, with a durable
 ledger that survives compaction and a deterministic completeness gate.
 
@@ -20,14 +23,14 @@ parallelism (that is the deferred B2 subsystem).
 
 - **With URLs / a file arg** → start a new fleet:
   ```bash
-  python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/fleet.py" init {url1} {url2} …
+  python3 "../site-recon/scripts/fleet.py" init {url1} {url2} …
   ```
   (A file of URLs, one per line: expand it to the arg list first.) Record the printed
   `[FLEET:{ledger}]`. If it prints `[FLEET-ERROR] … already active`, do NOT retry init —
   go to resume.
 - **With no args, OR after `[FLEET-ERROR] already active`** → resume; never call `init`:
   ```bash
-  python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/fleet.py" pending
+  python3 "../site-recon/scripts/fleet.py" pending
   ```
 
 ## The loop (sequential)

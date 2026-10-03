@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-FILE="${1:-plugins/beacon/technologies/wordpress/6.x.md}"
+FILE="${1:-plugins/beacon/skills/site-recon/technologies/wordpress/6.x.md}"
 PASS=0
 FAIL=0
 

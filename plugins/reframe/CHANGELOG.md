@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.4.1 — 2026-10-03
+
+- `categories/` and `templates/` moved into `skills/site-redesign/` so the skill works from a `npx skills add` copy; paths in `SKILL.md` are skill-relative.
+
 ## 0.4.0 — 2026-06-27
 
 Hardening from two real redesign sessions (`amarsolutions.gr`, `trustyourphysio.com`) — see `docs/research/reframe-session-analysis/`. The driving finding: clean output depended on the harness `advisor()` rescuing both runs; these changes move those rescues into the skill.

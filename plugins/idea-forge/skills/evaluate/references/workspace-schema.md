@@ -41,5 +41,5 @@ These are human-readable markdown research reports, not JSON. Each file contains
 2. Output file: `{name}-research.json`
 3. Required JSON fields: `schema_version`, `agent`, `timestamp`, `findings[]`, `confidence`
 4. Add the agent to `agents/orchestrator.md` Stage 1 parallel dispatch list
-5. Add a scoring input reference in `skills/evaluate/references/criteria.md`
+5. Add a scoring input reference in `references/criteria.md`
 6. Update this file to document the new output file

@@ -9,7 +9,7 @@ set -euo pipefail
 PASS=0
 FAIL=0
 
-TEMPLATES_DIR="plugins/beacon/templates"
+TEMPLATES_DIR="plugins/beacon/skills/site-recon/templates"
 
 INDEX_TPL="$TEMPLATES_DIR/INDEX.md.template"
 TECH_STACK_TPL="$TEMPLATES_DIR/tech-stack.md.template"

@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-FILE="plugins/beacon/templates/smoke-test.sh.template"
+FILE="plugins/beacon/skills/site-recon/templates/smoke-test.sh.template"
 PASS=0
 FAIL=0
 

@@ -7,6 +7,18 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.10.2] — 2026-10-03
+
+### Fixed
+- The `Stop` hook (`okf-gate.sh`) searched the whole repo with `find .` on every turn end. In large repos it never finished: 175 of 175 measured runs died at the 30s hook timeout, so the gate never evaluated a bundle. It now searches only `docs/`, where markers live by contract (`docs/sites/{slug}/research` and legacy `docs/research/{slug}`) — ~90ms on a large monorepo.
+
+## [0.10.1] — 2026-10-03
+
+### Changed
+- `technologies/`, `templates/` and `har-reconstruct.py` moved into `skills/site-recon/` so the skill works from a `npx skills add` copy. `site-intel` and `site-fleet` read them via `../site-recon/` and need `site-recon` installed alongside. Remote tech-pack fallback fetches from `main`.
+
+---
+
 ## [Unreleased]
 
 ### Added

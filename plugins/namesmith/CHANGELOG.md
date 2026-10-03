@@ -7,6 +7,11 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.1.1] — 2026-10-03
+
+### Changed
+- `site-naming` uses skill-relative paths instead of `${CLAUDE_PLUGIN_ROOT}`, so it works from a `npx skills add` copy.
+
 ## [0.1.0] — 2026-04-15
 
 ### Added

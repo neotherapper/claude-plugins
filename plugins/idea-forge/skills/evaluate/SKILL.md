@@ -9,6 +9,8 @@ metadata:
 
 # Evaluate
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
 Evaluates business ideas across 6 model types (directory, e-commerce, SaaS, marketplace, content, tool-site) through a rigorous multi-stage research and scoring pipeline with lens-specific rubrics.
 
 ## When to Invoke
@@ -39,7 +41,7 @@ Trigger on any of:
 Load and follow the orchestration prompt:
 
 ```
-Read ${CLAUDE_PLUGIN_ROOT}/skills/evaluate/evaluator.md
+Read evaluator.md
 ```
 
 The evaluator.md file contains the complete pipeline instructions, agent dispatch logic, and output handling.
@@ -62,20 +64,20 @@ The evaluator.md file contains the complete pipeline instructions, agent dispatc
 
 ## Agents
 
-All agent prompts live in `${CLAUDE_PLUGIN_ROOT}/agents/` at the plugin root:
+All agent prompts live in `agents/` inside this skill's folder:
 
 | Agent | Purpose |
 |-------|---------|
-| `${CLAUDE_PLUGIN_ROOT}/agents/market-research.md` | Stage 1: Market research agent |
-| `${CLAUDE_PLUGIN_ROOT}/agents/competition-research.md` | Stage 1: Competition research agent |
-| `${CLAUDE_PLUGIN_ROOT}/agents/data-research.md` | Stage 1: Data availability agent |
-| `${CLAUDE_PLUGIN_ROOT}/agents/distribution-research.md` | Stage 1: Distribution opportunity agent |
-| `${CLAUDE_PLUGIN_ROOT}/agents/customer-voice.md` | Stage 1: Synthetic interview — pain signals from public sources |
-| `${CLAUDE_PLUGIN_ROOT}/agents/competitor-deep-dive.md` | Stage 1.5: Deep competitor profiling agent |
-| `${CLAUDE_PLUGIN_ROOT}/agents/scoring.md` | Stage 2: Evidence-based scoring agent |
-| `${CLAUDE_PLUGIN_ROOT}/agents/critic.md` | Stage 3: Bias detection and score adjustment |
-| `${CLAUDE_PLUGIN_ROOT}/agents/orchestrator.md` | Stage 4: Final aggregation and verdict |
-| `${CLAUDE_PLUGIN_ROOT}/agents/family-evaluator.md` | Family mode: evaluate a cluster of related ideas |
+| `agents/market-research.md` | Stage 1: Market research agent |
+| `agents/competition-research.md` | Stage 1: Competition research agent |
+| `agents/data-research.md` | Stage 1: Data availability agent |
+| `agents/distribution-research.md` | Stage 1: Distribution opportunity agent |
+| `agents/customer-voice.md` | Stage 1: Synthetic interview — pain signals from public sources |
+| `agents/competitor-deep-dive.md` | Stage 1.5: Deep competitor profiling agent |
+| `agents/scoring.md` | Stage 2: Evidence-based scoring agent |
+| `agents/critic.md` | Stage 3: Bias detection and score adjustment |
+| `agents/orchestrator.md` | Stage 4: Final aggregation and verdict |
+| `agents/family-evaluator.md` | Family mode: evaluate a cluster of related ideas |
 
 ## Output Location
 

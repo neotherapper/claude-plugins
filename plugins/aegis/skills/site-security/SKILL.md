@@ -9,6 +9,8 @@ metadata:
 
 # site-security — Passive Vulnerability Coverage
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
 Produce a prioritized security-coverage report for a target site. This is a **passive
 lookup only** — it queries public CVE feeds and grading services, never probes the target.
 
@@ -20,9 +22,9 @@ Active scanning / exploit confirmation is a future v0.2 step requiring explicit 
 Resolve the target (slug or URL), then run the orchestrator:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/coverage.py" --slug {slug}
+python3 scripts/coverage.py --slug {slug}
 # or
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/coverage.py" --url {url}
+python3 scripts/coverage.py --url {url}
 ```
 
 Output is written to `docs/sites/{slug}/security/coverage.{json,md}`.

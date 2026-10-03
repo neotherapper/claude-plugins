@@ -19,6 +19,8 @@ metadata:
 
 # paidagogos — Router
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
 Entry point for the `paidagogos` plugin. Classify the user's learning intent and scope, then route to the right sub-skill. Always state which sub-skill is being routed to — never silently reroute.
 
 ## Routing table

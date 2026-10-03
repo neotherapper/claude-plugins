@@ -1,6 +1,6 @@
 {
   "name": "namesmith",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Find the right name for your project — brand interview, AI generation across 8 archetypes, live availability + pricing via Cloudflare or Porkbun.",
   "author": {
     "name": "Georgios Pilitsoglou",

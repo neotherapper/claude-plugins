@@ -1,5 +1,7 @@
 # Tool Availability — Detection, Fallbacks, Browser Commands
 
+Paths here are relative to the `site-recon` skill folder (the parent of `references/`), not to this file.
+
 ## Detection Commands (run during Phase 1)
 
 Check each tool and log `[AVAILABLE]` or `[TOOL-UNAVAILABLE:{name}]` in the session brief.
@@ -330,7 +332,7 @@ har-to-openapi .beacon/capture.har \
 If Chrome DevTools MCP captured requests, reconstruct a valid HAR 1.2 using `har-reconstruct.py`:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/core/har-reconstruct.py \
+python3 scripts/har-reconstruct.py \
   --input .beacon/chrome-requests.json \
   --output .beacon/capture.har \
   --domain {target-domain}

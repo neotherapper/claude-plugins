@@ -17,7 +17,7 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 SCRIPTS="plugins/reframe/skills/site-redesign/scripts"
-CATS="plugins/reframe/categories"
+CATS="plugins/reframe/skills/site-redesign/categories"
 
 fails=0
 red()   { printf '  \033[31mFAIL\033[0m  %s\n' "$1"; fails=$((fails+1)); }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 DIR=$(cd "$(dirname "$0")" && pwd)
-TPL="$DIR/../../../templates/okf"
+TPL="$DIR/../templates/okf"
 : "${URL:?set URL}"
 SLUG=$(python3 "$DIR/slugify.py" "$URL")
 if [ -z "${OUTPUT_ROOT:-}" ]; then
