@@ -45,6 +45,10 @@ class T(unittest.TestCase):
         skill(self.root, "p", "a", "https://raw.githubusercontent.com/o/r/main/plugins/p/x.md\n")
         rc, out = run(self.root); self.assertEqual(rc, 0, out)
 
+    def test_r2_hyphenated_repo_name_in_url_ok(self):
+        skill(self.root, "p", "a", "https://raw.githubusercontent.com/o/claude-plugins/main/plugins/p/x.md\n")
+        rc, out = run(self.root); self.assertEqual(rc, 0, out)
+
     def test_r3_missing_path(self):
         skill(self.root, "p", "a", "Load `templates/brief.md.template`.\n")
         rc, out = run(self.root); self.assertEqual(rc, 1); self.assertIn("R3", out)

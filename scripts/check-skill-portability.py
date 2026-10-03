@@ -34,7 +34,7 @@ SCAN_SUFFIXES = {".md", ".sh", ".py", ".mjs", ".js", ".json", ".txt", ".template
 CODE_SUFFIXES = {".sh", ".py", ".mjs", ".js"}
 
 R1_RE = re.compile(r"\$\{?CLAUDE_PLUGIN_ROOT\b")
-R2_RE = re.compile(r"(?<![/\w])plugins/[A-Za-z0-9._-]+/")
+R2_RE = re.compile(r"(?<![/\w.-])plugins/[A-Za-z0-9._-]+/")
 R3_SPAN_RE = re.compile(r"`([^`\n]+)`")
 R3_PATH_RE = re.compile(
     r"(?<![\w/.-])(\.\./[a-z0-9][a-z0-9-]*/)?"
