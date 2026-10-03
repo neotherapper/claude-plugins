@@ -1,5 +1,7 @@
 # Phase 11 — Active Browser Recon
 
+Paths here are relative to the `site-recon` skill folder (the parent of `references/`), not to this file.
+
 This reference covers the full Phase 11 execution flow: tool detection, auth setup, browse plan execution, HAR reconstruction, and OpenAPI generation.
 
 ---
@@ -176,7 +178,7 @@ Save raw captures before reconstruction:
 Run har-reconstruct.py:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/core/har-reconstruct.py \
+python3 scripts/har-reconstruct.py \
   --input .beacon/chrome-requests.json \
   --output .beacon/capture.har \
   --domain {target-domain}

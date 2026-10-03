@@ -79,7 +79,7 @@ The three existing sub-patterns differ significantly. Each is documented as-is; 
 
 ### 3a. fingerprint-pack (beacon)
 
-**Location:** `plugins/beacon/technologies/{framework}/{version}.md`
+**Location:** `plugins/beacon/skills/site-recon/technologies/{framework}/{version}.md`
 
 **Examples:** `technologies/nextjs/15.x.md`, `technologies/shopify/storefront.md`
 
@@ -98,7 +98,7 @@ Selection rule: most-specific version match first (e.g. `15.x.md` beats a hypoth
 
 ### 3b. category-pack (reframe)
 
-**Location:** `plugins/reframe/categories/{category}.md`
+**Location:** `plugins/reframe/skills/site-redesign/categories/{category}.md`
 
 **Examples:** `categories/ecommerce.md`, `categories/saas-marketing.md`, `categories/local-service.md`
 
@@ -167,7 +167,7 @@ Beacon's fingerprint-packs have this driver: framework APIs change with major ve
 
 ### Add a category-pack (reframe)
 
-1. Copy `plugins/reframe/categories/_TEMPLATE.md` to `plugins/reframe/categories/{category}.md`
+1. Copy `plugins/reframe/skills/site-redesign/categories/_TEMPLATE.md` to `plugins/reframe/skills/site-redesign/categories/{category}.md`
 2. Fill in all 8 required sections
 3. Set `detect_signals` to 3–8 URL/content/nav signals specific to this category
 4. Verify `generic.md` still has `detect_signals: []` (the fallback)
@@ -197,8 +197,8 @@ A new site-analysis skill that writes per-site output should:
 
 | Sub-pattern name | Plugin | Pack location | Selection mechanism | Frontmatter | Fallback | Schema validated | Status |
 |-----------------|--------|---------------|--------------------|--------------------|----------|-----------------|--------|
-| fingerprint-pack | beacon | `plugins/beacon/technologies/{fw}/{ver}.md` | Fingerprinting signals (Phase 2) | Yes — `framework`, `version`, `last_updated`, `author`, `status` | No generic file; beacon methodology is fallback | Yes — `schemas/tech-pack.schema.json` + `tests/validate-tech-pack.sh` | Shipped; output at `docs/sites/{slug}/research/` (v0.7.0+); legacy `docs/research/` deprecated 0.7.0, removed 0.8.0 |
-| category-pack | reframe | `plugins/reframe/categories/{category}.md` | `detect_signals` scoring | Yes — `category`, `display_name`, `detect_signals` | `generic.md` (`detect_signals: []`) | No (template only; no automated validator yet) | Shipped in PR-A; output at `docs/sites/{slug}/redesign/` |
+| fingerprint-pack | beacon | `plugins/beacon/skills/site-recon/technologies/{fw}/{ver}.md` | Fingerprinting signals (Phase 2) | Yes — `framework`, `version`, `last_updated`, `author`, `status` | No generic file; beacon methodology is fallback | Yes — `schemas/tech-pack.schema.json` + `tests/validate-tech-pack.sh` | Shipped; output at `docs/sites/{slug}/research/` (v0.7.0+); legacy `docs/research/` deprecated 0.7.0, removed 0.8.0 |
+| category-pack | reframe | `plugins/reframe/skills/site-redesign/categories/{category}.md` | `detect_signals` scoring | Yes — `category`, `display_name`, `detect_signals` | `generic.md` (`detect_signals: []`) | No (template only; no automated validator yet) | Shipped in PR-A; output at `docs/sites/{slug}/redesign/` |
 | inference-lens | idea-forge | `plugins/idea-forge/skills/evaluate/references/lenses/{model}.md` | Agent inference from idea description | No — files begin with `#` heading; no YAML frontmatter | Agent proceeds with baseline criteria | No | Shipped; workspace is `ideas/{slug}/` (not `docs/sites/`); described here, not migrated |
 
 **Divergences noted honestly:**

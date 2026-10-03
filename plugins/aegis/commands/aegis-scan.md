@@ -9,10 +9,10 @@ If a URL or slug was provided as `$ARGUMENTS`, pass it to coverage.py:
 
 ```bash
 # If argument looks like a URL:
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/coverage.py" --url "$ARGUMENTS"
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-security/scripts/coverage.py" --url "$ARGUMENTS"
 
 # If argument looks like a slug:
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/coverage.py" --slug "$ARGUMENTS"
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-security/scripts/coverage.py" --slug "$ARGUMENTS"
 ```
 
 If no argument was provided, ask the user: "Which site would you like to scan? (URL or slug)"

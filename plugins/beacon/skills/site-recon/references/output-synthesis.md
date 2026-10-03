@@ -1,5 +1,7 @@
 # Output Synthesis
 
+Paths here are relative to the `site-recon` skill folder (the parent of `references/`), not to this file.
+
 Phase 12 reads the completed session brief and writes all research output files to disk.
 No network calls. No new tools. Pure synthesis from what Phases 1–11 captured.
 
@@ -108,7 +110,7 @@ by the frontmatter-preservation rules above). Replace tokens:
 | Token | Value |
 |-------|-------|
 | `{{SITE_SLUG}}` | Site slug (e.g. `example-com`) |
-| `{{PLUGIN_VERSION}}` | Current plugin version from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` |
+| `{{PLUGIN_VERSION}}` | Plugin version from `../../.claude-plugin/plugin.json`, or `unversioned` if the file is absent |
 | `{{DATE}}` | Session date |
 | `{{BASE_URL}}` | Target site root URL (e.g. `https://example.com`) |
 
@@ -188,7 +190,7 @@ remaining token listed in the table below, including `{{FRAMEWORK}}`, which `sca
 templated in the scaffolded body. Do not add or remove sections; the skeleton already matches this
 table.
 
-**Never** render `INDEX.md` fresh from `${CLAUDE_PLUGIN_ROOT}/templates/INDEX.md.template` — that
+**Never** render `INDEX.md` fresh from `templates/INDEX.md.template` — that
 legacy template has no frontmatter, so writing it as the whole file would drop the frontmatter
 Phase 1 wrote and permanently disarm the `Stop`-hook completion gate (it keys on `INDEX.md`'s
 `status:` line).
@@ -199,7 +201,7 @@ Resolve all tokens:
 |-------|-------------|
 | `{{SITE_NAME}}` | Site name from session brief header (already resolved by `scaffold.sh`; re-resolve only if `OUTPUT_ROOT` bypassed it) |
 | `{{URL}}` | Target URL (already resolved by `scaffold.sh`) |
-| `{{PLUGIN_VERSION}}` | Current plugin version from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` |
+| `{{PLUGIN_VERSION}}` | Plugin version from `../../.claude-plugin/plugin.json`, or `unversioned` if the file is absent |
 | `{{FRAMEWORK}}` / `{{VERSION}}` | From infrastructure table |
 | `{{CDN}}` | From infrastructure table |
 | `{{AUTH}}` | From infrastructure table |
@@ -258,7 +260,7 @@ invocations:
    differently-cased key (`Status: Complete`) or a body line that merely reads `status: complete`,
    since the parser is frontmatter-anchored, not a whole-file grep — get the frontmatter field
    itself right and the gate will engage.
-3. Re-run `python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "{OUTPUT_ROOT}"`
+3. Re-run `python3 scripts/okf_validate.py "{OUTPUT_ROOT}"`
    once more after the flip. Flipping to `status: complete` activates the validator's
    unfilled-token check on every file that just changed — this final run is what actually proves
    the bundle is complete, not just draft-valid. Fix any reported violation before ending the run;
@@ -279,4 +281,4 @@ After writing all files, confirm:
 - [ ] `docs/sites/{site-slug}/research/specs/{site-slug}.openapi.yaml` — present if Phase 8 or 11 produced one, absent otherwise
 - [ ] `docs/sites/{site-slug}/research/scripts/test-{site-slug}.sh` — one `check()` call per endpoint
 - [ ] Every finished file's `status:` flipped `draft → complete`, `INDEX.md` last, unquoted and lowercase
-- [ ] `python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "{OUTPUT_ROOT}"` exits 0 after the flip (substitute the actual scaffolded path — not a persisted `$OUTPUT_ROOT` shell variable)
+- [ ] `python3 scripts/okf_validate.py "{OUTPUT_ROOT}"` exits 0 after the flip (substitute the actual scaffolded path — not a persisted `$OUTPUT_ROOT` shell variable)

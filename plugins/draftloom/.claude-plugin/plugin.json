@@ -1,6 +1,7 @@
 {
   "name": "draftloom",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "agents": "./skills/draft/agents",
   "author": {
     "name": "Georgios Pilitsoglou",
     "url": "https://pilitsoglou.com",

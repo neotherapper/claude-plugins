@@ -1,0 +1,5 @@
+# Skills that still depend on something outside their own folder, so a `skills` CLI copy breaks.
+# Ratchet: remove a line when the skill is fixed; the checker fails on stale lines.
+# `paidagogos-path` is expected to stay (needs the plugin's node_modules + visual-kit).
+# Format: <skill-name>  <reason>
+paidagogos-path   R2: repo-relative plugins/paidagogos + plugins/visual-kit (build-index.mjs needs node_modules + visual-kit)

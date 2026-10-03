@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1 — 2026-10-03
+
+- `paidagogos-micro` uses skill-relative paths and falls back to a Markdown lesson in chat when `visual-kit` is unavailable (skills-CLI installs).
+
 ## 0.4.0 — 2026-08-16
 
 ### Added

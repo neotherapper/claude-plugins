@@ -26,6 +26,12 @@ jobs:
         # Runs BEFORE the symlink farm is built so it exercises the discovery a clean `npx skills add` clone gets.
         # Guards the non-Claude install path: Pi, OpenCode, Cline, Kiro, Codex, ... all install via this CLI.
         run: bash scripts/check-skills-cli.sh
+      - name: Skill portability (no plugin-root dependencies; ratcheting allowlist)
+        run: |
+          python3 tests/test_check_skill_portability.py
+          python3 scripts/check-skill-portability.py
+      - name: Skills CLI install (copy every skill, re-check portability, smoke-test the copies)
+        run: bash scripts/check-skills-cli-install.sh
       - name: Build + verify skill symlink farm (.agents/skills, .kiro/skills)
         # The farm is generated output (git-ignored), so build it first, then verify it resolves cleanly.
         run: bash scripts/sync-skills.sh && bash scripts/sync-skills.sh --check

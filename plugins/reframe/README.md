@@ -38,7 +38,7 @@ Slug derivation: strip `www.`, then `example.com` → `example-com`.
 
 ## Category packs
 
-reframe ships with **6 category packs** (`plugins/reframe/categories/`); ~9 are planned. Each pack contains:
+reframe ships with **6 category packs** (`plugins/reframe/skills/site-redesign/categories/`); ~9 are planned. Each pack contains:
 
 - Category-specific redesign priorities and conversion patterns
 - Trust signals and IA conventions for that category

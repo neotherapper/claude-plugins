@@ -18,7 +18,9 @@ metadata:
 
 # paidagogos:micro
 
-Generates a SurfaceSpec JSON file that visual-kit renders in the browser. Two modes: **standard** (structured lesson page) and **interactive** (live HTML with sliders/canvas/SVG). The chat response is always a short URL-only confirmation — no lesson content in chat.
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
+Generates a SurfaceSpec JSON file that visual-kit renders in the browser. Two modes: **standard** (structured lesson page) and **interactive** (live HTML with sliders/canvas/SVG). The chat response is always a short URL-only confirmation — no lesson content in chat, unless `visual-kit` is unavailable (then the text fallback in **Error handling** applies).
 
 ---
 
@@ -68,17 +70,17 @@ Store as `{mode}`.
 
 Read all three before generating content. Do not rely on memory from prior sessions.
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/lesson-schema.md` — canonical `Lesson` SurfaceSpec schema, field rules, valid example
-2. `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/teaching-guide.md` — content rules per section, level guidelines, quiz rules
-3. `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/vault-integration.md` — vault lookup contract for `resources[]`
+1. `references/lesson-schema.md` — canonical `Lesson` SurfaceSpec schema, field rules, valid example
+2. `references/teaching-guide.md` — content rules per section, level guidelines, quiz rules
+3. `references/vault-integration.md` — vault lookup contract for `resources[]`
 
 ### S2 — Vault lookup
 
-Attempt to source `resources[]` from the nikai Knowledge Vault following `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/vault-integration.md` exactly. If it fails for any reason, continue silently — see **Error handling → Vault lookup fails**.
+Attempt to source `resources[]` from the nikai Knowledge Vault following `references/vault-integration.md` exactly. If it fails for any reason, continue silently — see **Error handling → Vault lookup fails**.
 
 ### S3 — Generate lesson SurfaceSpec
 
-Generate a JSON object conforming to `vk://schemas/lesson.v1.json` and applying all rules from `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/lesson-schema.md` and `${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/references/teaching-guide.md`. Those files are authoritative — do not improvise field shapes.
+Generate a JSON object conforming to `vk://schemas/lesson.v1.json` and applying all rules from `references/lesson-schema.md` and `references/teaching-guide.md`. Those files are authoritative — do not improvise field shapes.
 
 Minimum required sections: `concept`, `why`, `code` (or prose equivalent), `mistakes`, `generate`, `quiz`, `resources`, `next`.
 
@@ -157,7 +159,7 @@ Interactive lesson ready: {topic}
 ## Notes (both modes)
 
 - If the browser is already open to this URL, it auto-reloads via SSE when the file is overwritten. On a new topic the user must open it manually.
-- Never include lesson content, quiz answers, or resource links in the chat response. All content lives in the browser page.
+- Never include lesson content, quiz answers, or resource links in the chat response. All content lives in the browser page, except in the text fallback (see **Error handling**).
 
 ---
 
@@ -165,9 +167,9 @@ Interactive lesson ready: {topic}
 
 | Condition | User message | Action |
 |---|---|---|
-| Server failed to auto-start | `"Could not start visual-kit automatically. Verify the binary is installed: run \`which visual-kit\`."` | Halt. Re-check PATH and report the actual error from the background process. |
+| Server failed to auto-start, or `visual-kit` not on PATH | *(no halt)* | Text fallback: present the lesson as Markdown in chat, following the section order in `references/lesson-schema.md`, and tell the user visual rendering needs the `visual-kit` binary (Claude Code plugin or repo clone). If the binary exists but failed to start, also report the actual error from the background process. |
 | Schema validation failed | `"Lesson generation failed. Try a more specific topic."` | Halt. Do not write the file. |
-| Content write fails | `"Could not write lesson file. Check visual-kit is running."` | Halt. Do not present content in chat. |
+| Content write fails | `"Could not write lesson file. Check visual-kit is running."` | Halt. The server is running, so this is a genuine write error; do not present content in chat. |
 | Vault lookup fails | *(no message)* | Continue. Use AI-suggested resources for `resources[]`. |
 
 Show error messages verbatim. No apologies, no extra suggestions. (End of file - total 169 lines)

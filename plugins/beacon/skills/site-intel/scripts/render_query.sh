@@ -14,12 +14,10 @@
 set -euo pipefail
 
 DIR=$(cd "$(dirname "$0")" && pwd)
-# Renderer lives at <CLAUDE_PLUGINS>/plugins/beacon/skills/site-intel/scripts/.
-# Default template lives at <CLAUDE_PLUGINS>/plugins/beacon/templates/query-templates.md.
-# Steps up from $DIR:
-#   ../       = site-intel/   ../..   = skills/    ../../../ = beacon/    ../../../../ = plugins/    (5 levels up = repo root)
-PLUGIN_ROOT=$(cd "$DIR/../../../../.." && pwd)
-DEFAULT_TEMPLATE="$PLUGIN_ROOT/plugins/beacon/templates/query-templates.md"
+# Renderer lives at <skills>/site-intel/scripts/.
+# Default template lives in the sibling skill: <skills>/site-recon/templates/query-templates.md
+# (../.. from $DIR = the skills dir).
+DEFAULT_TEMPLATE="$DIR/../../site-recon/templates/query-templates.md"
 
 SURFACE=""; SITE=""; PACK=""; OUT_DIR=""; AUTHOR="site-intel"; FIRST=0
 while [ $# -gt 0 ]; do
@@ -53,7 +51,7 @@ fi
 # Strip one surrounding matching pair of single or double quotes from a YAML
 # scalar value, e.g. `"https://example.com"` -> `https://example.com`,
 # `'none'` -> `none`. Already-unquoted values (`none`) pass through unchanged.
-# The canonical OKF template quotes `resource:` (plugins/beacon/templates/okf/
+# The canonical OKF template quotes `resource:` (site-recon/templates/okf/
 # api-surface.md:4, `resource: "{{BASE_URL}}"`), and agent-authored surfaces
 # routinely quote `auth:` too, so both extractions need this normalization.
 strip_quotes() {
@@ -128,8 +126,7 @@ while IFS= read -r ROW; do
   # Token substitution using a literal splice. Both sed's s/// and awk's gsub()/
   # sub() interpret & and \ in the *replacement* as metacharacters (matched text,
   # backreferences), so a URL or path containing & or \ would corrupt for free.
-  # scaffold.sh uses python str.replace() for the same reason (see plugins/beacon/
-  # skills/site-recon/scripts/scaffold.sh:11-24). Here we use pure-bash index() +
+  # scaffold.sh uses python str.replace() for the same reason (see site-recon/scripts/scaffold.sh:11-24). Here we use pure-bash index() +
   # substr() so we don't introduce a python dependency at this layer.
   splice() {
     # splice <string> <needle> <replacement>

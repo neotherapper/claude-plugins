@@ -9,6 +9,8 @@ metadata:
 
 # Generate
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
 Surfaces business opportunity gaps from existing vault research using 5 gap patterns. Produces evaluator-ready idea seeds in three stages: generate candidates → light score → flesh out top ideas.
 
 ## When to Invoke
@@ -40,7 +42,7 @@ Does NOT trigger for:
 Load and follow the orchestration prompt:
 
 ```
-Read ${CLAUDE_PLUGIN_ROOT}/skills/generate/generator.md
+Read generator.md
 ```
 
 The generator.md file contains the complete pipeline instructions for all four sections.

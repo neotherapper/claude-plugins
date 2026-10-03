@@ -48,7 +48,7 @@ The TLD completes the word or phrase — the domain itself IS the brand name.
 **Techniques:** ccTLD catalog (load tld-catalog.md)
 **Examples:** bra.in, gath.er, cra.sh, plu.sh, na.me, crypt.o, la.st, fa.st
 
-**How to generate:** Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/tld-catalog.md`. Take core concept words. Identify if any fragment of the word matches a ccTLD ending. The best hacks are short (under 8 chars total) and the TLD meaning reinforces the concept.
+**How to generate:** Load `references/tld-catalog.md`. Take core concept words. Identify if any fragment of the word matches a ccTLD ending. The best hacks are short (under 8 chars total) and the TLD meaning reinforces the concept.
 
 ---
 
@@ -66,7 +66,7 @@ Two meaningful words merged into one brand name.
 ---
 
 ### 7. Thematic TLD Play
-A generic or descriptive base name paired with a TLD that adds meaning (load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/tld-catalog.md` for full category matrix).
+A generic or descriptive base name paired with a TLD that adds meaning (load `references/tld-catalog.md` for full category matrix).
 
 **Examples:** build.studio, launch.ai, code.run, ship.it, deploy.dev, design.systems, make.tools
 
@@ -176,4 +176,4 @@ Use semantic substitution: if "build" is taken → try forge, craft, make, ship,
 Step back entirely. Generate 10 new concept-based names from scratch using only metaphor mining (technique 5) and abstract/brandable (archetype 3) approaches. Do not reuse any words from prior waves.
 
 ### Strategy 4: Domain Hacks
-Load `$CLAUDE_PLUGIN_ROOT/skills/site-naming/references/tld-catalog.md`. Take the 3–5 best base words from the session. Scan the domain hack catalog for any word fragment + ccTLD completion. Present all matches.
+Load `references/tld-catalog.md`. Take the 3–5 best base words from the session. Scan the domain hack catalog for any word fragment + ccTLD completion. Present all matches.

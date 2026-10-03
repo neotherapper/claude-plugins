@@ -9,6 +9,9 @@ metadata:
 
 # site-intel — Router Mode
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+> Requires the `site-recon` skill installed alongside (it holds the tech packs, templates and shared scripts).
+
 Answer questions about a previously-analysed site by routing to the correct
 pre-built research file. Read the file, then answer directly — do not re-analyse.
 
@@ -57,7 +60,7 @@ and version before routing.
 Then check research freshness deterministically — do not compute the age yourself:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-intel/scripts/freshness.py" "{INDEX path}"
+python3 "scripts/freshness.py" "{INDEX path}"
 ```
 
 - `[RESEARCH-STALE:{N}d]` → **prepend one line** to your eventual answer:
@@ -101,14 +104,14 @@ After opening the research file, check whether the question is **framework-speci
 1. Read the framework name and major version from INDEX.md infrastructure table (e.g., `WordPress 6.5` → `wordpress`, `6.x`)
 2. **Bundled pack** (primary — offline, always matches the running version):
    ```
-   ${CLAUDE_PLUGIN_ROOT}/technologies/{framework}/{major}.x.md
+   ../site-recon/technologies/{framework}/{major}.x.md
    ```
-   If that exact file is absent, list `${CLAUDE_PLUGIN_ROOT}/technologies/{framework}/` and load the best match — a `{N}.x.md` for the nearest major, else `current.md`, `tech-pack.md`, or a dated `{YYYY-MM}.md`. Consult `${CLAUDE_PLUGIN_ROOT}/technologies/REGISTRY.md` to confirm the framework slug and which packs exist. If the version is missing or partial, use the nearest available major and note it (e.g., "Using WordPress 6.x pack — site is on 6.5").
-3. **GitHub** (fallback — newer packs published after this install, or no bundled copy) — version-pinned raw URL:
+   If that exact file is absent, list `../site-recon/technologies/{framework}/` and load the best match — a `{N}.x.md` for the nearest major, else `current.md`, `tech-pack.md`, or a dated `{YYYY-MM}.md`. Consult `../site-recon/technologies/REGISTRY.md` to confirm the framework slug and which packs exist. If the version is missing or partial, use the nearest available major and note it (e.g., "Using WordPress 6.x pack — site is on 6.5").
+3. **GitHub** (fallback — only when the bundled pack file is missing) — raw URL:
    ```
-   https://raw.githubusercontent.com/neotherapper/claude-plugins/v{PLUGIN_VERSION}/plugins/beacon/technologies/{framework}/{major}.x.md
+   https://raw.githubusercontent.com/neotherapper/claude-plugins/main/plugins/beacon/skills/site-recon/technologies/{framework}/{major}.x.md
    ```
-   Read `{PLUGIN_VERSION}` from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` — never use the `main` branch. (The bundled pack above is the version-matched source; this network path only adds packs published after the install.)
+   Release tags stop at v0.6.0, so a versioned URL never resolved; use `main`, and only when the bundled file is missing. Read `{PLUGIN_VERSION}` from `../../.claude-plugin/plugin.json` (present in a Claude Code install and a repo clone); if the file is absent (skills-CLI copy) record `unversioned`.
 4. **context7 MCP** (if available) — ask for the framework's official API documentation
 5. **Web search fallback** — search `{framework} {major}.x API routes endpoints file structure`
 6. If no pack and no internet, proceed with research files only and note it once in the response: "No tech pack available for {framework} — answer based on research files only"
@@ -118,7 +121,7 @@ After opening the research file, check whether the question is **framework-speci
 > User: "How do I query products in WooCommerce?"
 >
 > Load: `docs/sites/example-com/research/api-surfaces/woocommerce.md` (from Step 3)
-> Also load: `${CLAUDE_PLUGIN_ROOT}/technologies/wordpress/6.x.md` (from Step 3a — framework-specific query question)
+> Also load: `../site-recon/technologies/wordpress/6.x.md` (from Step 3a — framework-specific query question)
 > Answer: combine what was discovered in the API surface file with the WooCommerce REST API conventions from the tech pack
 
 ## Step 4: Answer directly
@@ -163,14 +166,14 @@ Step 4 and never enter Step 5.
 **How to run:**
 
 1. Resolve the surface file from Steps 2 / 3 (e.g. `api-surfaces/store-api.md`).
-2. Resolve the tech pack from Step 3a (e.g. `${CLAUDE_PLUGIN_ROOT}/technologies/wordpress/6.x.md`).
-   Fall back to `plugins/beacon/templates/query-templates.md` when no bundled pack matches.
+2. Resolve the tech pack from Step 3a (e.g. `../site-recon/technologies/wordpress/6.x.md`).
+   Fall back to `../site-recon/templates/query-templates.md` when no bundled pack matches.
 3. Run the renderer:
    ```bash
-   bash "${CLAUDE_PLUGIN_ROOT}/skills/site-intel/scripts/render_query.sh" \
+   bash "scripts/render_query.sh" \
      --surface "${research_folder}/api-surfaces/${surface}.md" \
      --site "${site_slug}" \
-     --tech-pack "${CLAUDE_PLUGIN_ROOT}/technologies/${framework}/${major}.x.md" \
+     --tech-pack "../site-recon/technologies/${framework}/${major}.x.md" \
      --out-dir "${research_folder}/scripts"
    ```
    The renderer logs `[SNIPPET-PICK:...]` to stderr with the chosen snippet +

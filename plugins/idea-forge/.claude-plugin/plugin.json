@@ -1,6 +1,6 @@
 {
   "name": "idea-forge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Georgios Pilitsoglou",
     "url": "https://pilitsoglou.com",
@@ -10,5 +10,6 @@
   "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/idea-forge",
   "repository": "https://github.com/neotherapper/claude-plugins",
   "license": "MIT",
+  "agents": "./skills/evaluate/agents",
   "keywords": ["business-ideas", "idea-generation", "idea-evaluation", "market-research", "startup"]
 }

@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-FILE="plugins/beacon/templates/constants.md.template"
+FILE="plugins/beacon/skills/site-recon/templates/constants.md.template"
 PASS=0
 FAIL=0
 

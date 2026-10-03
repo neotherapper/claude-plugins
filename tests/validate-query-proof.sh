@@ -15,19 +15,19 @@ check() {
   && check "test_render_query.sh exists and executable" ok \
   || check "test_render_query.sh exists and executable" fail
 
-[ -f plugins/beacon/templates/query-templates.md ] \
+[ -f plugins/beacon/skills/site-recon/templates/query-templates.md ] \
   && check "query-templates.md fragment exists" ok \
   || check "query-templates.md fragment exists" fail
 
-grep -q '^### First record$'          plugins/beacon/templates/query-templates.md \
+grep -q '^### First record$'          plugins/beacon/skills/site-recon/templates/query-templates.md \
   && check "fragment has ### First record" ok \
   || check "fragment has ### First record" fail
 
-grep -q '^### Pagination$'            plugins/beacon/templates/query-templates.md \
+grep -q '^### Pagination$'            plugins/beacon/skills/site-recon/templates/query-templates.md \
   && check "fragment has ### Pagination" ok \
   || check "fragment has ### Pagination" fail
 
-grep -q '^### Authed first record$'   plugins/beacon/templates/query-templates.md \
+grep -q '^### Authed first record$'   plugins/beacon/skills/site-recon/templates/query-templates.md \
   && check "fragment has ### Authed first record" ok \
   || check "fragment has ### Authed first record" fail
 
