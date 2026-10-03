@@ -107,12 +107,12 @@ Symlinking the **directory** (not copying) means:
 
 - **One source of truth.** Editing `plugins/beacon/skills/site-recon/SKILL.md` updates every
   tool at once — no drift, no generated copies to keep in sync.
-- **Supporting files come for free.** A skill's `scripts/`, `references/`, `assets/` are inside
+- **Supporting files come for free.** Everything in a skill's folder (`scripts/`, `references/`, `templates/`, …) is inside
   the linked directory, so they resolve identically through the symlink.
 
 Why symlinks are safe here (the decision was measured, not assumed):
 
-- **No name collisions** — all 11 skill folder names are unique across the 7 plugins, so a flat
+- **No name collisions** — all 14 skill folder names are unique across the 7 plugins that ship skills, so a flat
   `.agents/skills/<name>/` namespace is unambiguous.
 - **Kiro's limits are met** — Kiro requires `name` ≤64 chars (lowercase/digits/hyphens, matching
   the folder) and `description` ≤1024 chars. Every skill already complies (longest description is
@@ -149,7 +149,7 @@ What we verified on 2026-09-05 (skills CLI `latest`, local clone as the source):
 | Check | Result |
 |---|---|
 | `npx skills add <repo> --list` | finds all 14 canonical skills, no duplicates from the `.agents/`/`.kiro/` farms |
-| `-a cline -a opencode` (default symlink mode) | canonical copy at `./.agents/skills/<skill>/`, with `scripts/` + `references/` |
+| `-a cline -a opencode` (default symlink mode) | canonical copy at `./.agents/skills/<skill>/`, whole skill folder |
 | `-a pi -a kiro-cli` (symlink mode, agent **not** installed) | only `.agents/skills/` written; `.pi/` and `.kiro/` skipped (this repo's own symlink farm does not cover `.pi/` either) |
 | `-a pi -a kiro-cli -a cline --copy` | real dirs at `./.pi/skills/`, `./.kiro/skills/`, `./.agents/skills/` |
 
@@ -173,27 +173,43 @@ project so `npx skills update` can track versions.
 | Anything else (DeepSeek, custom harness) | `universal` | `.agents/skills/` | `~/.config/agents/skills/` |
 
 A harness with no CLI entry and no `.agents/skills/` support still works: copy
-`plugins/<plugin>/skills/<skill>/` to the directory it scans for `SKILL.md`. A skill's `scripts/`
-and `references/` live inside the folder and travel with it.
+`plugins/<plugin>/skills/<skill>/` to the directory it scans for `SKILL.md`. The skills CLI copies the
+whole skill folder (verified 2026-10-03), so anything inside it travels.
 
-**Portability gap (open).** 9 of 14 `SKILL.md` files use `${CLAUDE_PLUGIN_ROOT}` — a Claude
-Code-only variable. `AGENTS.md` tells agents to resolve `${CLAUDE_PLUGIN_ROOT}/skills/<s>/…` to the
-skill's own folder, but several skills also need plugin-root files that a CLI copy never includes
-(verified with a `--copy` install: no `technologies/`, `categories/`, `agents/`, or plugin
-`scripts/` land in the target):
+**Portability (resolved).** Skills used `${CLAUDE_PLUGIN_ROOT}` (a Claude Code-only variable) and
+plugin-root files that a CLI copy never included. Every resource a skill needs now lives in that
+skill's folder, moved with `git mv`:
 
-| Plugin | CLI install | Plugin-root dependencies not copied |
-|---|---|---|
-| namesmith, draftloom, idea-forge `generate` | self-contained | — |
-| beacon (`site-recon`, `site-intel`, `site-fleet`) | degraded | `technologies/`, `scripts/core/har-reconstruct.py`, `templates/query-templates.md`, `.claude-plugin/plugin.json` |
-| reframe (`site-redesign`) | degraded | `categories/`, `templates/` |
-| idea-forge (`evaluate`) | non-functional | `agents/*.md` (11 research-agent prompts) |
-| aegis (`site-security`) | non-functional | `scripts/coverage.py` |
-| paidagogos (all three) | non-functional | `packs/`, `scripts/build-index.mjs`, `visual-kit` schemas + renderer |
+| Plugin | Moved into the skill folder |
+|---|---|
+| aegis `site-security` | `scripts/` (`coverage.py` and helpers) |
+| reframe `site-redesign` | `categories/`, `templates/` |
+| idea-forge `evaluate` | `agents/` (plugin.json `"agents": "./skills/evaluate/agents"` keeps Claude Code registration) |
+| beacon `site-recon` | `technologies/`, `templates/`, `scripts/har-reconstruct.py` |
+| namesmith, paidagogos `paidagogos-micro` | path rewrites only |
 
-Follow-up: rewrite those references as skill-relative paths and move (or fetch) the plugin-root
-resources into each skill folder, starting with aegis and idea-forge `evaluate`, which are single
-files.
+Convention: paths in a `SKILL.md` are relative to the folder holding it, stated under each H1;
+agents resolve them to absolute paths first. Sibling references use `../<skill>/…` within one
+plugin: beacon `site-intel` and `site-fleet` need `site-recon` installed alongside. Scripts find
+resources from their own file location, never the cwd. `${CLAUDE_PLUGIN_ROOT}` stays in
+`commands/`, `hooks/` and `agents/`, which only Claude Code reads. Plugin version in beacon is read
+from `../../.claude-plugin/plugin.json` and recorded as `unversioned` in a CLI copy; the remote
+tech-pack fallback fetches from `main`.
+
+Two CI gates keep it that way:
+
+- `scripts/check-skill-portability.py` scans every skill folder for `${CLAUDE_PLUGIN_ROOT}`,
+  repo-relative `plugins/<name>/` paths, backticked resource paths that do not exist inside the
+  skill folder, and scripts that climb out of it. A ratcheting allowlist
+  (`scripts/skill-portability-allowlist.txt`) holds known violations; a stale entry fails.
+- `scripts/check-skills-cli-install.sh` installs every skill with `npx skills add --copy` into a
+  temp project, re-runs the checker on the copies, and smoke-tests the moved scripts.
+
+**Remaining caveat: paidagogos.** Rendering needs the `visual-kit` Node app, and
+`paidagogos-path`'s index build (`scripts/build-index.mjs`) needs the plugin's `node_modules`;
+neither fits in a skill folder. `paidagogos-micro` falls back to a Markdown lesson in chat without
+`visual-kit`; `paidagogos` and `paidagogos-path` need the Claude Code plugin or a repo clone for
+rendering. `paidagogos-path` stays on the allowlist.
 
 **CI gate.** `scripts/check-skills-cli.sh` runs `npx skills add . --list` and fails if the set
 of discovered skills differs from the canonical `plugins/*/skills/*` set — so a renamed folder or

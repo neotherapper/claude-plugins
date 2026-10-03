@@ -7,6 +7,13 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.10.1] — 2026-10-03
+
+### Changed
+- `technologies/`, `templates/` and `har-reconstruct.py` moved into `skills/site-recon/` so the skill works from a `npx skills add` copy. `site-intel` and `site-fleet` read them via `../site-recon/` and need `site-recon` installed alongside. Remote tech-pack fallback fetches from `main`.
+
+---
+
 ## [Unreleased]
 
 ### Added

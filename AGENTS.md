@@ -16,20 +16,15 @@ them at the top-level path it scans (via symlinks kept in sync by `scripts/sync-
   `npx skills add neotherapper/claude-plugins` put it (the CLI's per-agent path), or the folder
   the user copied from `plugins/<plugin>/skills/<skill>/`.
 
-If you are running inside a project that installed these skills with the `skills` CLI rather than
-this repo, the skill folders are real copies at the path above. Each copy carries its own
-`scripts/` and `references/`. Some skills still use Claude Code's `${CLAUDE_PLUGIN_ROOT}`
-variable — resolve it like this on any other harness:
+Skill folders installed with the `skills` CLI are real, self-contained copies at the path above.
+Paths inside a `SKILL.md` are relative to the folder holding that `SKILL.md`; resolve them to
+absolute paths before reading a file or running a script.
 
-- `${CLAUDE_PLUGIN_ROOT}/skills/<skill>/<file>` → `<file>` inside that skill's own folder.
-- Any other `${CLAUDE_PLUGIN_ROOT}/…` path (beacon `technologies/`, `scripts/core/`, `templates/`;
-  aegis `scripts/coverage.py`; idea-forge `agents/`; reframe `categories/`, `templates/`;
-  paidagogos `packs/`, `scripts/`, and the `visual-kit` renderer) lives at the plugin root, outside
-  the skill folder, so a CLI copy does not include it. Read it from `plugins/<plugin>/…` in a clone
-  of this repo, or fetch it from
-  `https://raw.githubusercontent.com/neotherapper/claude-plugins/main/plugins/<plugin>/…`.
-  If the file is essential (aegis, idea-forge evaluate, paidagogos rendering) tell the user the
-  skill needs the repo clone or the Claude Code plugin.
+- **beacon** — `site-intel` and `site-fleet` read `../site-recon/…`; they need `site-recon`
+  installed alongside.
+- **paidagogos** — lesson and path rendering needs the `visual-kit` renderer (Claude Code plugin or
+  a repo clone). `paidagogos-micro` presents the lesson as Markdown in chat without it. Tell the
+  user what is missing when a skill needs it.
 
 Match a skill by its `description` and follow it when it applies. Full settings/files matrix and
 per-harness install commands: `docs/platform/multi-tool-support.md`.

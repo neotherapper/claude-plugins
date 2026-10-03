@@ -44,7 +44,7 @@ In future sessions, ask questions about the site and Beacon routes directly to t
 
 Two ways in. **Claude Code** installs a plugin as a managed bundle that updates when we ship.
 **Every other harness** gets the skills through the universal [`skills` CLI](https://github.com/vercel-labs/skills)
-(`npx skills add`), which puts the `SKILL.md` folders — scripts and references included — at
+(`npx skills add`), which copies each skill folder, whole, to
 the path your agent scans. Claude Code users should stick to the marketplace: adding
 `-a claude-code` on top of it gives you every skill twice.
 
@@ -119,22 +119,21 @@ symlink farms expose every skill in place.
 
 `scripts/check-skills-cli.sh` runs in CI and fails if the skills CLI stops seeing any of these.
 
-**What a CLI install carries, per plugin.** A CLI copy contains only the skill folder
-(`SKILL.md`, `scripts/`, `references/`). Nine skills reference `${CLAUDE_PLUGIN_ROOT}`, Claude
-Code's plugin-root variable, and some depend on files at the plugin root that are **not** copied:
+**What a CLI install carries, per plugin.** A CLI copy is the whole skill folder: `SKILL.md` plus
+any `scripts/`, `references/`, `templates/`, `technologies/`, `categories/` or `agents/` it ships.
+Skill text uses paths relative to that folder, so the copy works without the rest of the repo:
 
-| Plugin | Via `npx skills add` | Missing outside the Claude Code plugin / a repo clone |
+| Plugin | Via `npx skills add` | Needs more than the skill folder |
 |---|---|---|
-| namesmith, draftloom, idea-forge `generate` | works | nothing |
-| beacon | degraded | `technologies/` tech packs, `scripts/core/`, `templates/`, version from `plugin.json` |
-| reframe | degraded | `categories/`, `templates/` |
-| idea-forge `evaluate` | broken | `agents/*.md` research-agent prompts |
-| aegis | broken | `scripts/coverage.py` (the whole scan) |
-| paidagogos (all three) | broken | `packs/`, `scripts/`, and the `visual-kit` renderer |
+| namesmith, draftloom, aegis, reframe, idea-forge (`generate`, `evaluate`) | works | nothing |
+| beacon `site-recon` | works | nothing; version reads `unversioned` outside a plugin install |
+| beacon `site-intel`, `site-fleet` | works with `site-recon` | `site-recon` installed alongside (tech packs, templates, shared scripts) |
+| paidagogos `paidagogos-micro` | works | `visual-kit` for rendered lessons; falls back to Markdown in chat |
+| paidagogos `paidagogos`, `paidagogos-path` | partial | `visual-kit` renderer; path's index build (`scripts/build-index.mjs`) needs a repo clone |
 
-For the degraded and broken rows, clone this repo next to your project (the skill can then read
-`plugins/<plugin>/…`) or use the Claude Code plugin. `AGENTS.md` tells agents how to resolve the
-variable. Follow-up work: skill-relative paths and moving those resources under each skill.
+`visual-kit` is a Node app and `build-index.mjs` needs the plugin's `node_modules`, so neither fits
+in a skill folder: use the Claude Code plugin or a repo clone for those. Installing every skill
+(`--skill '*'`) satisfies the beacon sibling rule.
 
 ### Cross-Tool (gh skill)
 
@@ -191,8 +190,11 @@ cat claude-plugins/plugins/beacon/skills/site-recon/SKILL.md >> .windsurfrules
   each one via symlink into `.agents/skills/` (Codex + Antigravity + OpenCode) and `.kiro/skills/`
   (Kiro) — so there's a single source of truth and no duplicated content.
 - **Any other harness** gets the same folders through the `skills` CLI, which scans this repo for
-  `SKILL.md` files and copies each skill (with its `scripts/` and `references/`) to the path that
-  harness reads. `scripts/check-skills-cli.sh` is CI-gated so the CLI always sees every skill.
+  `SKILL.md` files and copies each skill folder to the path that harness reads.
+  `scripts/check-skills-cli.sh` is CI-gated so the CLI always sees every skill.
+  `scripts/check-skill-portability.py` fails CI if a skill references a plugin-root path or a file
+  outside its own folder, and `scripts/check-skills-cli-install.sh` installs every skill with
+  `--copy` and smoke-tests the copies.
 - Adding a skill? Run `scripts/sync-skills.sh`; CI runs `scripts/sync-skills.sh --check` to fail the
   build if a skill isn't exposed.
 
