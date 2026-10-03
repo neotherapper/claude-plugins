@@ -9,6 +9,8 @@ metadata:
 
 # site-redesign — Coverage-First Redesign Pipeline
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
 Given an existing site URL with explicit redesign intent, runs 9 ordered phases that
 produce a strategic brief for Claude Design plus four supporting analysis files.
 
@@ -93,7 +95,7 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 
 **Actions:**
 1. Fetch homepage (WebFetch; WAF fallback: Firecrawl → Jina → browser-fetch if 403).
-2. **Render gate + content-sufficiency gate:** Run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/coverage-metrics.py <fetched-markdown-file>` (or `--stdin`). Read `body_text_chars`, `nav_link_count`, `unique_headings`, `non_nav_prose_words`, and `signals` from the JSON output. Fallback if python3 or the script is unavailable: estimate the four metrics by inspection against the same thresholds below.
+2. **Render gate + content-sufficiency gate:** Run `python3 scripts/coverage-metrics.py <fetched-markdown-file>` (or `--stdin`). Read `body_text_chars`, `nav_link_count`, `unique_headings`, `non_nav_prose_words`, and `signals` from the JSON output. Fallback if python3 or the script is unavailable: estimate the four metrics by inspection against the same thresholds below.
    - `[RENDER-ESCALATED]` — `body_text_chars < 200` OR `nav_link_count == 0` → re-fetch via Jina → Firecrawl → Crawl4AI (Chrome MCP: auth/interactive walls only).
    - `[GREENFIELD-MODE]` — after render: `unique_headings < 2` AND `non_nav_prose_words < 150` → write `INDEX.md` with `{{PHASE_MARKERS}}` set to `[GREENFIELD-MODE]` and `{{SIGNALS_FIRED}}` set to `[GREENFIELD-MODE]` (so no token is left unresolved and the gate detects the halt correctly), delete the five unfilled output files (every Phase-1 file except `INDEX.md`), halt pipeline.
 3. **Coverage manifest:** each URL → Reachable (200) or Gated/Blocked (401/403/challenge). Emit `[COVERAGE-PARTIAL:gated]` if any URL gated.
@@ -164,7 +166,7 @@ Write to `ia-map.md` using `templates/ia-map.md.template` (replacing the skeleto
 
 **Actions:**
 1. **Infer:** purpose, audience, primary goal — with per-field confidence (high / medium / low).
-2. **Detect category:** Run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/detect-category.py --categories ${CLAUDE_PLUGIN_ROOT}/categories --corpus <.crawl-dir-or-file>`. Read `winner` from JSON; load `categories/{winner}.md`. Fallback if the script is unavailable: score each pack's `detect_signals` against the corpus by inspection and pick the dominant; ties and zero-match → `generic`.
+2. **Detect category:** Run `python3 scripts/detect-category.py --categories categories --corpus <.crawl-dir-or-file>`. Read `winner` from JSON; load `categories/{winner}.md`. Fallback if the script is unavailable: score each pack's `detect_signals` against the corpus by inspection and pick the dominant; ties and zero-match → `generic`.
    - If the top-scoring category's confidence is low, load `categories/generic.md` and note the assumption explicitly in the brief.
    - If a site scores across multiple categories, pick the **single dominant pack**, note secondaries inline (e.g. "primarily ecommerce; secondary: local-service"). **Never merge packs.**
 3. Emit `[PACK-LOADED:{winner}]` once the pack is selected.
@@ -212,7 +214,7 @@ If `[TOOL-UNAVAILABLE:chrome-mcp]`: no screenshots — add `[VISUAL-GAP: visual-
 5. Write `INDEX.md` via `templates/INDEX.md.template`. Populate `{{PHASE_MARKERS}}` with the emitted markers (or `[GREENFIELD-MODE]`): list each one explicitly — `[P1✓] [P2✓] [P3✓] [P4✓] [P5✓] [P6✓] [P7✓] [P8✓] [P9✓]` — a literal range/ellipsis like `[P1✓]–[P9✓]` will fail the gate's per-marker check. Populate `{{SIGNALS_FIRED}}` with every degradation signal that fired this run, including the `[PACK-LOADED:<cat>]` from Phase 7.
 6. Resolve `{{TECH_EXPORT_HANDOFF}}`: read `docs/sites/{slug}/research/tech-stack.md`; if absent, read `docs/research/{slug}/tech-stack.md` (legacy); if neither exists, log `[TECH-STACK-ABSENT]` and add to `brief.md` §10: "No beacon tech-stack found — specify the target stack manually, or run beacon first".
 
-7. **Completeness check:** Run `bash ${CLAUDE_PLUGIN_ROOT}/skills/site-redesign/scripts/check-output-complete.sh docs/sites/{slug}/redesign`. A non-zero exit means the run is not complete — resolve the named files/tokens and re-run. Fallback if unavailable: grep each output file for `{{` manually; no `{{` remaining = complete run. The gate now also fails if `INDEX.md` is missing any phase marker or the `[PACK-LOADED:<cat>]` token; resolve by recording the genuine run log (do not fabricate markers for phases you skipped — run them).
+7. **Completeness check:** Run `bash scripts/check-output-complete.sh docs/sites/{slug}/redesign`. A non-zero exit means the run is not complete — resolve the named files/tokens and re-run. Fallback if unavailable: grep each output file for `{{` manually; no `{{` remaining = complete run. The gate now also fails if `INDEX.md` is missing any phase marker or the `[PACK-LOADED:<cat>]` token; resolve by recording the genuine run log (do not fabricate markers for phases you skipped — run them).
 
 **Output:** All six output files written. Phase marker `[P9✓]`.
 
@@ -255,4 +257,4 @@ Load on demand:
 - **`categories/{detected}.md`** — matched category pack; `categories/generic.md` is the low-confidence fallback
 - **`templates/`** — the six `*.template` files resolved in Phase 9
 
-> **Path note:** `categories/` and `templates/` are at the plugin root (`plugins/reframe/`). `references/` is in `plugins/reframe/skills/site-redesign/references/`.
+> **Path note:** `categories/`, `templates/`, `references/` and `scripts/` all live in this skill's folder.

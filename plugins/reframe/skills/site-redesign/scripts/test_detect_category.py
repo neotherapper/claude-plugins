@@ -314,7 +314,7 @@ class TestFrontmatterParsing(unittest.TestCase):
 # Integration test — intentionally NON-hermetic; validates the REAL shipped
 # b2b-industrial.md pack file against a realistic B2B distributor corpus.
 # Unlike the hermetic tests above (which build their own temp categories dirs),
-# this test loads the actual plugins/reframe/categories/ directory so it also
+# this test loads the actual skills/site-redesign/categories/ directory so it also
 # catches regressions from accidental pack edits.  Future tests of new real
 # packs should follow this class's pattern (one method per pack).
 # ---------------------------------------------------------------------------
@@ -325,11 +325,11 @@ class TestRealPackIntegration(unittest.TestCase):
         """
         A realistic B2B marine-parts distributor corpus must map to b2b-industrial.
 
-        NON-HERMETIC: loads the real plugins/reframe/categories/ directory so
+        NON-HERMETIC: loads the real skills/site-redesign/categories/ directory so
         it validates the actual shipped pack, not a synthetic stub.
         TDD RED until b2b-industrial.md exists; GREEN after creation.
         """
-        real_cats = Path(__file__).parent.parent.parent.parent / "categories"
+        real_cats = Path(__file__).parent.parent / "categories"
         corpus = (
             "Request a quote for our industrial valves and marine spare parts. "
             "We are an authorized distributor and OEM supplier. Datasheet PDF, "
@@ -356,7 +356,7 @@ class TestRealPackIntegration(unittest.TestCase):
         "quote") while every other pack scored 0, flipping a thin local-service
         page from the safe `generic` fallback to a confidently-wrong B2B pack.
         """
-        real_cats = Path(__file__).parent.parent.parent.parent / "categories"
+        real_cats = Path(__file__).parent.parent / "categories"
         corpus = (
             "Acme Plumbing. Emergency plumbing repair near you. "
             "Get a free quote today. Book a call. Licensed and insured. "
