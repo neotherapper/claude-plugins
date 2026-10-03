@@ -1,0 +1,1726 @@
+{
+  "surface": "tree",
+  "version": 1,
+  "title": "AI Engineering",
+  "subtitle": "Five tracks toward AI engineer / architect, ordered so the Claude Certified Architect – Foundations domains come first. Track letters and the two-axis framing are shared with the nikai learning path.",
+  "groups": [
+    {
+      "id": "a",
+      "label": "A · Model & context",
+      "accent": "1",
+      "description": "What the model can hold, and how what you put in front of it changes the answer."
+    },
+    {
+      "id": "b",
+      "label": "B · Harness & integration",
+      "accent": "2",
+      "description": "The loop, the tools, the subagents — the machinery around the model."
+    },
+    {
+      "id": "c",
+      "label": "C · Grounding & evaluation",
+      "accent": "3",
+      "description": "Axis B. Is the claim about the world correct, and can you show why you believe it?"
+    },
+    {
+      "id": "d",
+      "label": "D · Verified state & governance",
+      "accent": "4",
+      "description": "Axis A. Can the system enter a broken state, and what makes that impossible rather than unlikely?"
+    },
+    {
+      "id": "e",
+      "label": "E · Delivery & enablement",
+      "accent": "5",
+      "description": "Configuration, lifecycle, and getting a team to actually use the thing."
+    }
+  ],
+  "orderings": [
+    {
+      "id": "foundations-first",
+      "label": "Foundations first",
+      "default": true,
+      "description": "Weighted toward the CCAR-F exam blueprint: Agentic Architecture 27%, Claude Code 20%, Prompt Engineering 20%, Tool Design & MCP 18%, Context Management 15%. Depth beyond the exam follows. The weights are quoted from the exam guide; the order itself is an interpretation of them — which concept answers which task statement is an editorial judgement, not a mapping the guide states.",
+      "sequence": [
+        "a-prompt-engineering",
+        "a-context-engineering",
+        "a-prompt-vs-context-engineering",
+        "b-agentic-loop",
+        "b-subagent-orchestration",
+        "b-task-decomposition",
+        "d-programmatic-enforcement",
+        "b-session-state",
+        "e-claude-md-hierarchy",
+        "e-skills-and-commands",
+        "e-path-scoped-rules",
+        "e-plan-mode",
+        "e-iterative-refinement",
+        "e-cicd-integration",
+        "a-structured-output",
+        "c-multi-pass-review",
+        "b-tool-interface-design",
+        "b-structured-errors",
+        "b-tool-distribution",
+        "b-mcp-integration",
+        "a-context-windows",
+        "c-provenance",
+        "d-escalation-policy",
+        "c-confidence-calibration",
+        "b-error-propagation",
+        "a-batch-and-economics",
+        "c-eval-design",
+        "c-entailment-checking",
+        "c-corroboration",
+        "c-contradiction-detection",
+        "c-abstention",
+        "d-invariants-and-guards",
+        "d-prerequisite-gates",
+        "d-state-machines",
+        "d-property-testing",
+        "d-governance-and-risk",
+        "e-stakeholder-communication",
+        "e-lifecycle-and-slas"
+      ]
+    },
+    {
+      "id": "dependency-first",
+      "label": "Dependency first",
+      "description": "nikai's ordering: C → B → D → A → E, weighted by the CCAR-P Professional blueprint and by what the salvage harness needs before anything is safe to automate.",
+      "sequence": [
+        "c-provenance",
+        "c-entailment-checking",
+        "c-corroboration",
+        "c-contradiction-detection",
+        "c-abstention",
+        "c-eval-design",
+        "c-confidence-calibration",
+        "c-multi-pass-review",
+        "b-agentic-loop",
+        "b-tool-interface-design",
+        "b-mcp-integration",
+        "b-subagent-orchestration",
+        "b-task-decomposition",
+        "b-structured-errors",
+        "b-error-propagation",
+        "b-tool-distribution",
+        "b-session-state",
+        "d-programmatic-enforcement",
+        "d-prerequisite-gates",
+        "d-invariants-and-guards",
+        "d-state-machines",
+        "d-property-testing",
+        "d-escalation-policy",
+        "d-governance-and-risk",
+        "a-context-windows",
+        "a-prompt-engineering",
+        "a-context-engineering",
+        "a-prompt-vs-context-engineering",
+        "a-structured-output",
+        "a-batch-and-economics",
+        "e-claude-md-hierarchy",
+        "e-skills-and-commands",
+        "e-path-scoped-rules",
+        "e-plan-mode",
+        "e-iterative-refinement",
+        "e-cicd-integration",
+        "e-stakeholder-communication",
+        "e-lifecycle-and-slas"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a",
+      "label": "Track A · Model & context fundamentals",
+      "group": "a",
+      "kind": "branch",
+      "badges": [
+        "CCAR-F D4 + D5"
+      ],
+      "detail": {
+        "summary": "The model is a function from a context window to a token stream. This track is about what you can put in that window, what happens to material buried in the middle of it, and where the money goes.",
+        "meta": [
+          {
+            "label": "Axis",
+            "value": "Mixed"
+          },
+          {
+            "label": "Exam domains",
+            "value": "Prompt Engineering & Structured Output (20%), Context Management (15%)"
+          },
+          {
+            "label": "Build to prove it",
+            "value": "An extraction prompt that cannot emit an uncited field"
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "a-prompt-engineering",
+          "label": "Prompt engineering",
+          "group": "a",
+          "kind": "leaf",
+          "badges": [
+            "45 min",
+            "beginner"
+          ],
+          "detail": {
+            "summary": "Writing the instruction so the model's output is reliable enough to build on. The exam's framing is unusually sharp: explicit categorical criteria beat confidence-based hedging, and few-shot examples beat more prose.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "Neither — this is craft, not proof"
+              },
+              {
+                "label": "Exam",
+                "value": "CCAR-F 4.1, 4.2"
+              }
+            ],
+            "body": [
+              {
+                "type": "text",
+                "text": "The most transferable idea here is that 'be conservative' and 'only report high-confidence findings' do not improve precision. They read like instructions but give the model no decision boundary. Replacing them with a categorical rule — which classes of thing to report and which to skip — does improve it."
+              },
+              {
+                "type": "callout",
+                "tone": "pitfall",
+                "text": "A model's self-reported confidence is not calibrated. The exam tests this twice: routing on a self-reported 1–10 score is a wrong answer both times, because the agent is already confidently wrong on exactly the hard cases you wanted to catch."
+              },
+              {
+                "type": "list",
+                "items": [
+                  "Explicit criteria over vague instruction: name the categories, not the confidence level",
+                  "2–4 few-shot examples for ambiguous cases, showing the reasoning for why one action beat a plausible alternative",
+                  "Few-shot examples generalise judgment to novel patterns; enumerated rules only match what you enumerated",
+                  "High false-positive categories destroy trust in the accurate ones — disable them while you fix them"
+                ]
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Prompt engineering overview",
+                "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              },
+              {
+                "type": "course",
+                "title": "Build with Claude — learning path",
+                "url": "https://www.anthropic.com/learn",
+                "institution": "Anthropic Academy",
+                "cost": "free",
+                "note": "API guides and best practices; hosted on Anthropic's Skilljar.",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "a-context-engineering",
+          "label": "Context engineering",
+          "group": "a",
+          "kind": "leaf",
+          "badges": [
+            "60 min",
+            "intermediate"
+          ],
+          "requires": [
+            "a-prompt-engineering"
+          ],
+          "detail": {
+            "summary": "Deciding what occupies the window at each turn — and, more importantly, what gets evicted. Prompt engineering asks how to phrase the ask; context engineering asks what the model should be able to see when it reads it.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "Neither directly, but it decides whether C and D are even possible"
+              },
+              {
+                "label": "Exam",
+                "value": "CCAR-F 5.1, 5.4"
+              }
+            ],
+            "body": [
+              {
+                "type": "text",
+                "text": "Tool results accumulate in context out of all proportion to their relevance — forty fields returned when five mattered. The discipline is to trim at the boundary, before the noise lands, rather than to summarise it away later."
+              },
+              {
+                "type": "heading",
+                "text": "The techniques that matter"
+              },
+              {
+                "type": "list",
+                "items": [
+                  "Persist transactional facts (amounts, dates, IDs) into a durable block that survives summarisation",
+                  "Trim verbose tool output at the point of return, not after it has accumulated",
+                  "Put key findings at the start of aggregated input and use explicit section headers, to work around position effects",
+                  "Scratchpad files to carry findings across a context boundary",
+                  "Subagent delegation to keep verbose exploration out of the coordinating context"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "warning",
+                "text": "Progressive summarisation is where numbers go to die. Percentages, dates and stated expectations get condensed into vague prose, and nothing downstream can tell that it happened."
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Context windows",
+                "url": "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "a-prompt-vs-context-engineering",
+          "label": "Prompt vs context engineering",
+          "group": "a",
+          "kind": "leaf",
+          "badges": [
+            "30 min",
+            "comparative"
+          ],
+          "requires": [
+            "a-prompt-engineering",
+            "a-context-engineering"
+          ],
+          "detail": {
+            "summary": "The two get used interchangeably and are not the same discipline. Naming which one a failure belongs to is most of the diagnosis.",
+            "meta": [
+              {
+                "label": "Kind",
+                "value": "Comparative concept"
+              },
+              {
+                "label": "Diagnostic value",
+                "value": "Tells you whether to rewrite the instruction or restructure the window"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "ordered": false,
+                "items": [
+                  "Prompt engineering changes the instruction. Unit of work: wording, examples, output contract. Fails as: the model misunderstood what you wanted.",
+                  "Context engineering changes what is visible. Unit of work: retrieval, trimming, ordering, persistence, delegation. Fails as: the model never saw what it needed, or saw it and lost it.",
+                  "Same symptom, different fix: an agent that forgets a constraint stated forty turns ago is a context failure. An agent that read the constraint and applied it inconsistently is a prompt failure."
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "note",
+                "text": "A useful test: if you can fix it by re-sending the same information in the same session, it was context. If re-sending changes nothing, it was the prompt."
+              },
+              {
+                "type": "text",
+                "text": "The exam blueprint keeps them in separate domains — Prompt Engineering & Structured Output at 20%, Context Management & Reliability at 15% — which is itself evidence that the industry treats them as distinct competencies."
+              }
+            ]
+          }
+        },
+        {
+          "id": "a-context-windows",
+          "label": "Context windows and position effects",
+          "group": "a",
+          "kind": "leaf",
+          "badges": [
+            "40 min",
+            "intermediate"
+          ],
+          "detail": {
+            "summary": "Models process the beginning and end of a long input reliably and may omit findings from the middle. Everything about long-document handling follows from that asymmetry.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 5.1"
+              },
+              {
+                "label": "Named effect",
+                "value": "\"Lost in the middle\""
+              }
+            ],
+            "body": [
+              {
+                "type": "callout",
+                "tone": "pitfall",
+                "text": "Context degradation in long sessions is quiet: the model starts answering about 'typical patterns' rather than the specific classes it discovered earlier. Nothing errors — the answers just stop being about your codebase."
+              }
+            ]
+          }
+        },
+        {
+          "id": "a-structured-output",
+          "label": "Structured output and JSON schemas",
+          "group": "a",
+          "kind": "leaf",
+          "badges": [
+            "50 min",
+            "intermediate"
+          ],
+          "requires": [
+            "a-prompt-engineering"
+          ],
+          "detail": {
+            "summary": "Tool use with a JSON schema is the reliable way to get schema-compliant output. It eliminates syntax errors completely — and semantic errors not at all.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 4.3, 4.4"
+              },
+              {
+                "label": "Axis",
+                "value": "A, weakly — a schema is a structural guard"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "tool_choice \"auto\" lets the model answer in prose instead of calling anything; \"any\" forces a call; a named tool forces which one",
+                  "Strict schemas remove JSON syntax errors but not line items that fail to sum to the stated total",
+                  "Make a field nullable when the source may not contain it — a required field is an invitation to fabricate one",
+                  "Add \"unclear\" as an enum value, and \"other\" plus a detail string, so ambiguity has somewhere to go"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "note",
+                "text": "Retry-with-error-feedback works for format and structure failures. It cannot work when the information is simply absent from the source — recognising which case you are in is the actual skill."
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Tool use with Claude",
+                "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "a-batch-and-economics",
+          "label": "Batch processing and cost shape",
+          "group": "a",
+          "kind": "leaf",
+          "badges": [
+            "35 min",
+            "intermediate"
+          ],
+          "detail": {
+            "summary": "Where the money and the latency actually go. The exam frames this as an architecture decision — matching API mode to the workflow's latency tolerance — rather than as an optimisation.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 4.5"
+              },
+              {
+                "label": "Gap for George",
+                "value": "This is economics, not technique — the weakest part of Track A for a strong engineer"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Message Batches API: 50% cost saving, up to a 24-hour window, no guaranteed latency SLA",
+                  "Right for overnight reports and weekly audits; wrong for anything blocking a merge",
+                  "Batch does not support multi-turn tool calling inside a single request",
+                  "custom_id correlates request to response, and is how you resubmit only what failed"
+                ]
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Message Batches API",
+                "url": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "b",
+      "label": "Track B · Harness construction & integration",
+      "group": "b",
+      "kind": "branch",
+      "badges": [
+        "CCAR-F D1 + D2 — 45%"
+      ],
+      "detail": {
+        "summary": "The largest block on the Foundations exam and the closest to existing architecture skill. The loop, the tools, the subagents, and the error contracts between them.",
+        "meta": [
+          {
+            "label": "Axis",
+            "value": "Neither — this is plumbing that A and B discipline ride on"
+          },
+          {
+            "label": "Exam domains",
+            "value": "Agentic Architecture & Orchestration (27%), Tool Design & MCP (18%)"
+          },
+          {
+            "label": "Build to prove it",
+            "value": "An extractor-authoring loop with a fixture gate"
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "b-agentic-loop",
+          "label": "The agentic loop",
+          "group": "b",
+          "kind": "leaf",
+          "badges": [
+            "50 min",
+            "beginner"
+          ],
+          "detail": {
+            "summary": "Send a request, inspect stop_reason, execute the requested tools, append the results, go again. The whole of agent engineering is variations on this loop and on when to leave it.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 1.1 — inside the 27% domain"
+              }
+            ],
+            "body": [
+              {
+                "type": "text",
+                "text": "Loop control belongs to stop_reason: continue on \"tool_use\", terminate on \"end_turn\". Everything else is a guess dressed as a condition."
+              },
+              {
+                "type": "callout",
+                "tone": "pitfall",
+                "text": "Three anti-patterns the exam names explicitly: parsing natural-language signals to decide termination, using an arbitrary iteration cap as the primary stopping mechanism, and checking for assistant text as a completion indicator."
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Claude Agent SDK",
+                "url": "https://code.claude.com/docs/en/agent-sdk/overview",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "b-tool-interface-design",
+          "label": "Tool interface design",
+          "group": "b",
+          "kind": "leaf",
+          "badges": [
+            "55 min",
+            "intermediate"
+          ],
+          "requires": [
+            "b-agentic-loop"
+          ],
+          "detail": {
+            "summary": "The tool description is the primary mechanism the model uses to choose. Most 'the agent called the wrong tool' bugs are description bugs, and the fix is cheaper than the alternatives.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 2.1"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Include input formats, example queries, edge cases, and an explicit boundary against the nearest similar tool",
+                  "Near-identical descriptions on two tools guarantee misrouting — rename and re-scope rather than adding examples",
+                  "Split an over-general tool into purpose-specific ones with defined contracts",
+                  "Audit the system prompt for keyword-sensitive phrasing that quietly overrides a good description"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "note",
+                "text": "In the exam's own sample question, expanding the tool description beats adding 5–8 few-shot examples, beats a routing layer, and beats consolidating the tools. Lowest effort, highest leverage, addresses the root cause."
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Model Context Protocol specification",
+                "url": "https://modelcontextprotocol.io",
+                "institution": "MCP project",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "b-mcp-integration",
+          "label": "MCP servers and resources",
+          "group": "b",
+          "kind": "leaf",
+          "badges": [
+            "50 min",
+            "intermediate"
+          ],
+          "requires": [
+            "b-tool-interface-design"
+          ],
+          "detail": {
+            "summary": "Scoping, credential handling, and the resource primitive most people never reach for.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 2.4"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Project-level .mcp.json for shared team tooling; user-level ~/.claude.json for personal or experimental servers",
+                  "Environment-variable expansion in .mcp.json keeps tokens out of version control",
+                  "Tools from every configured server are discovered at connection time and offered simultaneously",
+                  "MCP resources expose content catalogues — issue summaries, schemas, doc hierarchies — so the agent stops making exploratory calls to find out what exists"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "note",
+                "text": "A weak MCP tool description loses to a built-in like Grep. If the agent keeps preferring the built-in, the integration is not broken — the description is underselling it."
+              }
+            ]
+          }
+        },
+        {
+          "id": "b-subagent-orchestration",
+          "label": "Coordinator and subagent patterns",
+          "group": "b",
+          "kind": "leaf",
+          "badges": [
+            "60 min",
+            "intermediate"
+          ],
+          "requires": [
+            "b-agentic-loop"
+          ],
+          "detail": {
+            "summary": "Hub-and-spoke: one coordinator owns delegation, aggregation and error routing. Subagents do not inherit the coordinator's history — context is something you pass, deliberately, every time.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 1.2, 1.3"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Subagent context must be explicit in the prompt; there is no shared memory between invocations",
+                  "Parallel fan-out means emitting multiple Task calls in one response, not across successive turns",
+                  "Partition scope across subagents to avoid duplicated work",
+                  "Specify goals and quality criteria, not step-by-step procedure, so subagents can adapt",
+                  "Route all subagent traffic through the coordinator for observability and consistent error handling"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "warning",
+                "text": "Over-narrow decomposition is the failure mode on open-ended research: each subagent succeeds at its slice and the union still misses the topic."
+              }
+            ]
+          }
+        },
+        {
+          "id": "b-task-decomposition",
+          "label": "Task decomposition strategy",
+          "group": "b",
+          "kind": "leaf",
+          "badges": [
+            "45 min",
+            "intermediate"
+          ],
+          "requires": [
+            "b-subagent-orchestration"
+          ],
+          "detail": {
+            "summary": "Fixed sequential chaining versus decomposition that adapts to what earlier steps found. Choosing wrong is expensive in both directions.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 1.6"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Prompt chaining for predictable multi-aspect work — per-file analysis, then a cross-file integration pass",
+                  "Dynamic decomposition for open-ended investigation, where the plan depends on findings",
+                  "Splitting a large review into local passes plus an integration pass avoids attention dilution"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "b-structured-errors",
+          "label": "Structured tool errors",
+          "group": "b",
+          "kind": "leaf",
+          "badges": [
+            "40 min",
+            "intermediate"
+          ],
+          "requires": [
+            "b-tool-interface-design"
+          ],
+          "detail": {
+            "summary": "A uniform 'Operation failed' strips the agent of every signal it needs to recover well. Error shape is an interface design problem.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 2.2"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Return errorCategory (transient / validation / business / permission), an isRetryable boolean, and a human-readable description",
+                  "Transient, validation, business and permission errors want four different recoveries",
+                  "Distinguish an access failure from a valid empty result — a successful query with no matches is not an error"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "b-error-propagation",
+          "label": "Error propagation across agents",
+          "group": "b",
+          "kind": "leaf",
+          "badges": [
+            "40 min",
+            "advanced"
+          ],
+          "requires": [
+            "b-structured-errors",
+            "b-subagent-orchestration"
+          ],
+          "detail": {
+            "summary": "What a subagent should handle itself, what it should escalate, and what the coordinator needs in order to decide.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 5.3"
+              }
+            ],
+            "body": [
+              {
+                "type": "callout",
+                "tone": "pitfall",
+                "text": "Two symmetrical anti-patterns: silently returning empty results as success, and terminating the whole workflow on one subagent's failure. Both destroy information the coordinator needed."
+              },
+              {
+                "type": "text",
+                "text": "The good shape is partial results plus structured error context — failure type, what was attempted, what came back anyway — and a synthesis output annotated with which topic areas have coverage gaps."
+              }
+            ]
+          }
+        },
+        {
+          "id": "b-tool-distribution",
+          "label": "Tool distribution and tool_choice",
+          "group": "b",
+          "kind": "leaf",
+          "badges": [
+            "35 min",
+            "intermediate"
+          ],
+          "requires": [
+            "b-tool-interface-design"
+          ],
+          "detail": {
+            "summary": "Selection reliability degrades as the tool count rises. Scoping each agent to its role is a correctness measure, not tidiness.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 2.3"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Eighteen tools instead of four or five measurably degrades selection",
+                  "Agents given tools outside their specialisation misuse them — a synthesis agent will attempt web searches",
+                  "Replace a general tool with a constrained one where you can (load_document that validates URLs, over fetch_url)",
+                  "Allow narrow cross-role tools for genuine high-frequency needs; route the complex cases through the coordinator"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "b-session-state",
+          "label": "Session state, resumption and forking",
+          "group": "b",
+          "kind": "leaf",
+          "badges": [
+            "35 min",
+            "intermediate"
+          ],
+          "detail": {
+            "summary": "When to resume a session, when to fork it, and when a fresh session with an injected summary beats both.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 1.7"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Named resumption continues a specific prior conversation",
+                  "Forking creates independent branches from a shared analysis baseline — two refactoring strategies from one codebase read",
+                  "Resume when prior context is mostly still valid; start fresh with a structured summary when the tool results have gone stale",
+                  "On resume after edits, tell the agent which files changed instead of making it re-explore"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "c",
+      "label": "Track C · Grounding & evaluation ⭐",
+      "group": "c",
+      "kind": "branch",
+      "badges": [
+        "Axis B",
+        "differentiator"
+      ],
+      "detail": {
+        "summary": "Axis B: is the claim about the world correct? This is the differentiating track — the one that separates an engineer who can wire an agent from one who can say why its output should be believed.",
+        "meta": [
+          {
+            "label": "Axis",
+            "value": "B — factual truth"
+          },
+          {
+            "label": "Exam domains",
+            "value": "Evaluation, Testing & Optimization (CCAR-P, 16%); partly CCAR-F 5.5, 5.6"
+          },
+          {
+            "label": "Build to prove it",
+            "value": "A commit gate on one vault category, with measured cost"
+          }
+        ],
+        "body": [
+          {
+            "type": "callout",
+            "tone": "note",
+            "text": "Independent corroboration for the two-axis framing: CCAR-F Task 5.6 — 'preserve information provenance and handle uncertainty in multi-source synthesis' — is Axis B stated in Anthropic's own words, in a job-task analysis written without reference to this roadmap."
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "c-provenance",
+          "label": "Provenance and claim-source mapping",
+          "group": "c",
+          "kind": "leaf",
+          "badges": [
+            "60 min",
+            "advanced"
+          ],
+          "detail": {
+            "summary": "Attribution is lost at summarisation boundaries unless the claim-source mapping is a structured object that every downstream step is obliged to carry.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "B"
+              },
+              {
+                "label": "Exam",
+                "value": "CCAR-F 5.6"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Subagents emit claim, evidence excerpt, source URL or document name, and publication date — as fields, not prose",
+                  "Synthesis preserves and merges those mappings rather than regenerating them",
+                  "Separate content from metadata when passing context between agents, so attribution survives the hop"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "warning",
+                "text": "Publication dates are load-bearing. Without them, a figure that changed between 2024 and 2026 reads as two sources contradicting each other rather than one fact moving."
+              }
+            ]
+          }
+        },
+        {
+          "id": "c-entailment-checking",
+          "label": "Entailment checking",
+          "group": "c",
+          "kind": "leaf",
+          "badges": [
+            "60 min",
+            "advanced"
+          ],
+          "requires": [
+            "c-provenance"
+          ],
+          "detail": {
+            "summary": "Does the cited source actually support the claim? A citation that exists is not a citation that entails.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "B"
+              },
+              {
+                "label": "Reference tooling",
+                "value": "MiniCheck-family entailment models"
+              }
+            ],
+            "body": [
+              {
+                "type": "text",
+                "text": "The cheap failure this catches is the plausible citation: a real source, correctly quoted, that does not in fact establish the sentence it is attached to. Human reviewers miss these at scale; an entailment pass does not."
+              }
+            ],
+            "resources": [
+              {
+                "type": "paper",
+                "title": "MiniCheck — efficient fact-checking of LLM output against grounding documents",
+                "author": "Tang et al.",
+                "note": "Reference point for cheap entailment scoring. Verify the current release before depending on a specific checkpoint.",
+                "provenance": "secondary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "c-corroboration",
+          "label": "Multi-source corroboration",
+          "group": "c",
+          "kind": "leaf",
+          "badges": [
+            "45 min",
+            "advanced"
+          ],
+          "requires": [
+            "c-entailment-checking"
+          ],
+          "detail": {
+            "summary": "Independent agreement raises confidence — but only if the sources are actually independent, which most citation graphs are not.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "B"
+              },
+              {
+                "label": "Guard",
+                "value": "Circularity: three outlets quoting one press release are one source"
+              },
+              {
+                "label": "Test",
+                "value": "Could this 'second source' have been derived from the first? If yes, it is not one."
+              }
+            ],
+            "body": [
+              {
+                "type": "callout",
+                "tone": "pitfall",
+                "text": "Star counts, adoption figures and market sizes are the classic trap: the same number appears in a dozen places because it propagated from one, and the disagreement between two of them is louder than the fact that eleven share an origin."
+              },
+              {
+                "type": "text",
+                "text": "The harder case is derived agreement, where the second source is a restatement of the first in another form. A prose account that reproduces a machine reading to the digit is that reading in words, not a witness to it. Checking one against the other then measures round-tripping rather than truth: the agreement is guaranteed by construction, so a high score carries no information. Anywhere a pipeline both produces a value and ingests documents that quote it, corroboration has to check origin, not just wording."
+              }
+            ]
+          }
+        },
+        {
+          "id": "c-contradiction-detection",
+          "label": "Contradiction detection",
+          "group": "c",
+          "kind": "leaf",
+          "badges": [
+            "45 min",
+            "advanced"
+          ],
+          "requires": [
+            "c-corroboration"
+          ],
+          "detail": {
+            "summary": "When credible sources disagree, the correct output preserves both values with attribution. Silently picking one is the failure.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "B"
+              },
+              {
+                "label": "Exam",
+                "value": "CCAR-F 5.6"
+              }
+            ],
+            "body": [
+              {
+                "type": "text",
+                "text": "The exam's framing is that document analysis should complete with conflicting values included and explicitly annotated, letting the coordinator decide how to reconcile — rather than resolving the conflict at the point where the least context is available."
+              }
+            ]
+          }
+        },
+        {
+          "id": "c-abstention",
+          "label": "Abstention as a result",
+          "group": "c",
+          "kind": "leaf",
+          "badges": [
+            "35 min",
+            "advanced"
+          ],
+          "requires": [
+            "c-contradiction-detection"
+          ],
+          "detail": {
+            "summary": "A pipeline that cannot return 'insufficient evidence' will fabricate rather than decline. Abstention has to be a first-class, rewarded outcome.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "B"
+              },
+              {
+                "label": "Design rule",
+                "value": "Nullable fields over required ones when the source may be silent"
+              }
+            ],
+            "body": [
+              {
+                "type": "text",
+                "text": "This connects directly to schema design in Track A: a required field the source cannot fill is an instruction to invent one. The exam states it plainly — design fields as optional or nullable when source documents may not contain the information."
+              }
+            ]
+          }
+        },
+        {
+          "id": "c-eval-design",
+          "label": "Evaluation set design",
+          "group": "c",
+          "kind": "leaf",
+          "badges": [
+            "60 min",
+            "advanced"
+          ],
+          "detail": {
+            "summary": "Aggregate accuracy hides segment failure. 97% overall is compatible with one document type failing completely.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "B"
+              },
+              {
+                "label": "Exam",
+                "value": "CCAR-F 5.5"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Break accuracy down by document type and by field before trusting any headline number",
+                  "Stratified random sampling of high-confidence extractions, to measure error rate and catch novel patterns",
+                  "Validate every segment before reducing human review anywhere"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "c-confidence-calibration",
+          "label": "Confidence calibration",
+          "group": "c",
+          "kind": "leaf",
+          "badges": [
+            "50 min",
+            "advanced"
+          ],
+          "requires": [
+            "c-eval-design"
+          ],
+          "detail": {
+            "summary": "Field-level confidence is useful only after it has been calibrated against a labelled set. Uncalibrated, it is a number that feels like information.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "B"
+              },
+              {
+                "label": "Exam",
+                "value": "CCAR-F 5.5"
+              }
+            ],
+            "body": [
+              {
+                "type": "callout",
+                "tone": "pitfall",
+                "text": "Self-reported confidence used as a routing threshold is a wrong answer in two separate exam questions. Calibrate against labels, or route on something else."
+              }
+            ]
+          }
+        },
+        {
+          "id": "c-multi-pass-review",
+          "label": "Multi-instance and multi-pass review",
+          "group": "c",
+          "kind": "leaf",
+          "badges": [
+            "45 min",
+            "intermediate"
+          ],
+          "detail": {
+            "summary": "A model that generated something retains the reasoning that produced it, and is correspondingly bad at doubting it. Independence is the mechanism, not more instructions.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 4.6"
+              },
+              {
+                "label": "Axis",
+                "value": "B, applied to your own output"
+              }
+            ],
+            "body": [
+              {
+                "type": "text",
+                "text": "An independent instance without the generator's context catches subtle issues that self-review instructions and extended thinking both miss. This generalises well beyond code review — it is the argument for adversarial verification anywhere. Stated as a mechanism rather than a practice: a second look from inside the same frame is not a second look. Independence is what does the work, not the repetition, which is why asking a model to check itself harder does not substitute for asking a different one that never saw the reasoning."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "d",
+      "label": "Track D · Verified state & governance",
+      "group": "d",
+      "kind": "branch",
+      "badges": [
+        "Axis A"
+      ],
+      "detail": {
+        "summary": "Axis A: can the system enter a broken state? Not 'is it unlikely to' — can it, at all. Guards, gates, invariants and the machinery that makes a bad state unrepresentable.",
+        "meta": [
+          {
+            "label": "Axis",
+            "value": "A — structural soundness"
+          },
+          {
+            "label": "Exam domains",
+            "value": "Governance, Safety & Risk (CCAR-P, 14%); CCAR-F 1.4, 1.5, 5.2"
+          },
+          {
+            "label": "Build to prove it",
+            "value": "An incident lifecycle state machine, property-tested"
+          }
+        ],
+        "body": [
+          {
+            "type": "callout",
+            "tone": "note",
+            "text": "The other half of the corroboration: CCAR-F Task 1.4 distinguishes programmatic enforcement from prompt-based guidance and states that prompt instructions alone carry a non-zero failure rate. That is Axis A, in the exam's own words."
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "d-programmatic-enforcement",
+          "label": "Programmatic enforcement vs prompting",
+          "group": "d",
+          "kind": "leaf",
+          "badges": [
+            "50 min",
+            "intermediate"
+          ],
+          "detail": {
+            "summary": "The single highest-leverage idea in the Foundations blueprint: when compliance must be guaranteed, a hook enforces it and a prompt merely requests it.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "A"
+              },
+              {
+                "label": "Exam",
+                "value": "CCAR-F 1.4, 1.5"
+              }
+            ],
+            "body": [
+              {
+                "type": "text",
+                "text": "Prompt instructions have a non-zero failure rate. That is tolerable for style and intolerable for identity verification before a financial operation. The decision rule is whether the failure is one you are willing to have happen at some rate."
+              },
+              {
+                "type": "list",
+                "items": [
+                  "PostToolUse hooks normalise heterogeneous tool output before the model ever sees it",
+                  "Interception hooks block policy-violating calls and redirect to an alternative workflow",
+                  "Choose hooks over prompt enforcement whenever a business rule requires guaranteed compliance"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "note",
+                "text": "This is the same lesson recorded in this repo's own memory as 'prose-only skill steps get skipped under synthesis pressure — gate what matters deterministically'. Independently arrived at, same conclusion."
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Claude Code hooks",
+                "url": "https://code.claude.com/docs/en/hooks",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "d-prerequisite-gates",
+          "label": "Prerequisite gates",
+          "group": "d",
+          "kind": "leaf",
+          "badges": [
+            "40 min",
+            "intermediate"
+          ],
+          "requires": [
+            "d-programmatic-enforcement"
+          ],
+          "detail": {
+            "summary": "Blocking a downstream tool call until an upstream step has actually completed — ordering as a structural property rather than an instruction.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "A"
+              },
+              {
+                "label": "Exam",
+                "value": "CCAR-F 1.4"
+              }
+            ],
+            "body": [
+              {
+                "type": "text",
+                "text": "The canonical example, and the exam's own: block process_refund until get_customer has returned a verified customer ID. Not 'instruct the agent to verify first' — block the call."
+              }
+            ]
+          }
+        },
+        {
+          "id": "d-invariants-and-guards",
+          "label": "Invariants and guards",
+          "group": "d",
+          "kind": "leaf",
+          "badges": [
+            "55 min",
+            "advanced"
+          ],
+          "requires": [
+            "d-programmatic-enforcement"
+          ],
+          "detail": {
+            "summary": "Properties that must hold at every observable point, expressed so a violation is detectable rather than merely regrettable.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "A"
+              },
+              {
+                "label": "Reference system",
+                "value": "Temper — take the verification cascade as a mental model, not the runtime"
+              }
+            ]
+          }
+        },
+        {
+          "id": "d-state-machines",
+          "label": "State machines for agent lifecycle",
+          "group": "d",
+          "kind": "leaf",
+          "badges": [
+            "60 min",
+            "advanced"
+          ],
+          "requires": [
+            "d-invariants-and-guards"
+          ],
+          "detail": {
+            "summary": "Making illegal transitions unrepresentable instead of merely unhandled. The formal-methods gap this whole path exists to close.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "A"
+              },
+              {
+                "label": "Build",
+                "value": "The incident lifecycle machine in the salvage harness"
+              }
+            ]
+          }
+        },
+        {
+          "id": "d-property-testing",
+          "label": "Property-based testing",
+          "group": "d",
+          "kind": "leaf",
+          "badges": [
+            "50 min",
+            "advanced"
+          ],
+          "requires": [
+            "d-state-machines"
+          ],
+          "detail": {
+            "summary": "Asserting that a property holds across generated inputs, rather than that three hand-picked examples produce three expected outputs.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "A"
+              },
+              {
+                "label": "Why here",
+                "value": "It is how you check a state machine's invariants without enumerating its paths"
+              }
+            ]
+          }
+        },
+        {
+          "id": "d-escalation-policy",
+          "label": "Escalation and human-in-the-loop",
+          "group": "d",
+          "kind": "leaf",
+          "badges": [
+            "45 min",
+            "intermediate"
+          ],
+          "detail": {
+            "summary": "When the system must stop and hand over. The exam is unusually specific here, and specific in ways that contradict the obvious design.",
+            "meta": [
+              {
+                "label": "Axis",
+                "value": "A, at the boundary"
+              },
+              {
+                "label": "Exam",
+                "value": "CCAR-F 5.2"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Escalate on: an explicit request for a human, a policy gap or exception, and inability to make meaningful progress",
+                  "Honour an explicit request for a human immediately — do not investigate first",
+                  "Policy silence on the specific request is an escalation trigger, not a judgement call",
+                  "Multiple matches means ask for another identifier, never pick heuristically"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "pitfall",
+                "text": "Sentiment-based escalation is a wrong answer: frustration does not correlate with case complexity. Neither does the model's own confidence score."
+              }
+            ]
+          }
+        },
+        {
+          "id": "d-governance-and-risk",
+          "label": "Governance, safety and risk framing",
+          "group": "d",
+          "kind": "leaf",
+          "badges": [
+            "45 min",
+            "advanced"
+          ],
+          "requires": [
+            "d-escalation-policy"
+          ],
+          "detail": {
+            "summary": "The vocabulary the Professional exam grades and that stakeholders actually use: risk registers, failure modes, blast radius, acceptable-use boundaries.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-P Governance, Safety & Risk Management — 14%"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "e",
+      "label": "Track E · Delivery, lifecycle & enablement",
+      "group": "e",
+      "kind": "branch",
+      "badges": [
+        "CCAR-F D3 — 20%"
+      ],
+      "detail": {
+        "summary": "Configuration and team enablement. This track means two different things depending on which exam you are sitting, and only one of them is comfortable.",
+        "meta": [
+          {
+            "label": "Exam domains",
+            "value": "Claude Code Configuration & Workflows (20%); CCAR-P Stakeholder Communication (14%) and Developer Productivity (7%)"
+          },
+          {
+            "label": "Build to prove it",
+            "value": "A written SLA for the salvage harness"
+          }
+        ],
+        "body": [
+          {
+            "type": "callout",
+            "tone": "warning",
+            "text": "Do not treat this as the comfortable track under Foundations. The two exams disagree about what E is. Under CCAR-P it is stakeholder communication and lifecycle (21% across two domains) — largely vocabulary for experience you already have. Under CCAR-F it is Domain 3, Claude Code Configuration & Workflows, at 20% on its own, and that is examinable tooling detail: frontmatter options, glob-scoped rule files, CLI flags. Years of architecture experience do not supply those. Only the CCAR-F reading is a study risk, and it is the exam being sat first."
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "e-claude-md-hierarchy",
+          "label": "CLAUDE.md hierarchy and scoping",
+          "group": "e",
+          "kind": "leaf",
+          "badges": [
+            "40 min",
+            "beginner"
+          ],
+          "detail": {
+            "summary": "Three levels — user, project, directory — and a common failure where a teammate does not receive an instruction because it was written at the wrong one.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 3.1"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "User-level (~/.claude/CLAUDE.md) applies only to you and is not shared through version control",
+                  "Project-level is the shared surface; directory-level narrows further",
+                  "@import keeps files modular — pull in only the standards each package needs",
+                  ".claude/rules/ is the alternative to one monolithic file",
+                  "/memory shows which files actually loaded, which is how you debug inconsistent behaviour"
+                ]
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Claude Code memory and CLAUDE.md",
+                "url": "https://code.claude.com/docs/en/memory",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "e-skills-and-commands",
+          "label": "Skills and slash commands",
+          "group": "e",
+          "kind": "leaf",
+          "badges": [
+            "45 min",
+            "intermediate"
+          ],
+          "requires": [
+            "e-claude-md-hierarchy"
+          ],
+          "detail": {
+            "summary": "On-demand capability versus always-loaded standards — and the frontmatter that decides whether a skill pollutes the main conversation. Custom commands have been merged into skills, so the distinction that still matters is who invokes a thing, not which directory it lives in.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 3.2"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "context: fork runs a skill in an isolated subagent so verbose output never reaches the main session",
+                  "allowed-tools GRANTS tools for the invoking turn without a permission prompt. It is additive and does not restrict anything — every other tool stays callable. The grant clears on your next message, even though the skill content stays in context",
+                  "disallowed-tools is the one that removes tools from the pool, and it also clears on the next message",
+                  "disable-model-invocation: true keeps a skill user-only; user-invocable: false keeps it Claude-only",
+                  "argument-hint prompts for parameters when the skill is invoked bare",
+                  "Skills for task-specific workflows; CLAUDE.md for universal standards"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "note",
+                "text": "Building these by habit is not the same as knowing the frontmatter. The exam tests specific options — context: fork, allowed-tools, argument-hint, and project-scoped vs user-scoped paths — and habit does not reliably produce those from memory."
+              },
+              {
+                "type": "callout",
+                "tone": "pitfall",
+                "text": "The portability trap: argument-hint is Claude Code only. The same SKILL.md that works locally is rejected on upload with \"Unexpected key(s) in SKILL.md frontmatter: argument-hint. Allowed properties are: allowed-tools, compatibility, description, license, metadata, name.\" You only ever hit this when you package a skill for distribution, which is exactly why habit never teaches it."
+              },
+              {
+                "type": "heading",
+                "text": "Lifetimes — adjacent fields, different scopes"
+              },
+              {
+                "type": "list",
+                "items": [
+                  "allowed-tools and disallowed-tools — the invoking turn only; both clear on your next message",
+                  "model — the rest of the current turn",
+                  "hooks — registered on invoke and kept running for the rest of the SESSION",
+                  "The skill body — enters the conversation once and stays all session, but is not re-read on later turns, so write standing instructions rather than one-time steps"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "warning",
+                "text": "hooks and allowed-tools sit two rows apart in the frontmatter table and have opposite lifetimes: one persists for the session, the other dies at your next message. Nothing in either name signals that."
+              },
+              {
+                "type": "heading",
+                "text": "Two more that read as free and are not"
+              },
+              {
+                "type": "list",
+                "items": [
+                  "when_to_use looks like extra trigger context at no cost. It is appended to description and counts toward the same 1,536-character cap, which truncates in the skill listing — put the key use case first",
+                  "paths uses the same glob format as path-specific rules, so a skill can be scoped to file types exactly the way .claude/rules/ files are"
+                ]
+              },
+              {
+                "type": "heading",
+                "text": "Running a bundled script without a prompt"
+              },
+              {
+                "type": "text",
+                "text": "${CLAUDE_SKILL_DIR} and ${CLAUDE_PROJECT_DIR} substitute in two places — the skill body and Bash rules inside allowed-tools (plugin skills get ${CLAUDE_PLUGIN_ROOT} the same way). Using the same variable in both is what makes the grant match the command exactly, so the script runs unprompted."
+              },
+              {
+                "type": "code",
+                "language": "yaml",
+                "source": "---\nallowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/render.sh *)\n---\n\nRun ${CLAUDE_SKILL_DIR}/scripts/render.sh <csv-file> to render the chart."
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Extend Claude with skills — frontmatter reference",
+                "url": "https://code.claude.com/docs/en/skills",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary",
+                "note": "Full frontmatter table (20+ properties), allowed-tools turn scoping, and the string-substitution rules."
+              }
+            ]
+          }
+        },
+        {
+          "id": "e-path-scoped-rules",
+          "label": "Path-scoped rules",
+          "group": "e",
+          "kind": "leaf",
+          "badges": [
+            "30 min",
+            "intermediate"
+          ],
+          "requires": [
+            "e-claude-md-hierarchy"
+          ],
+          "detail": {
+            "summary": "Glob-matched rule files that load only when you touch matching files — conventions that follow file type rather than directory.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 3.3"
+              }
+            ],
+            "body": [
+              {
+                "type": "code",
+                "language": "yaml",
+                "source": "---\npaths:\n  - \"**/*.test.tsx\"\n---\n\nTest files use Testing Library queries, never container.querySelector."
+              },
+              {
+                "type": "text",
+                "text": "Choose these over a subdirectory CLAUDE.md whenever the convention applies to files scattered across the tree rather than gathered in one place."
+              }
+            ]
+          }
+        },
+        {
+          "id": "e-plan-mode",
+          "label": "Plan mode vs direct execution",
+          "group": "e",
+          "kind": "leaf",
+          "badges": [
+            "30 min",
+            "beginner"
+          ],
+          "detail": {
+            "summary": "Plan mode for architectural implications and multi-file change; direct execution for a scoped fix with a clear stack trace.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 3.4"
+              }
+            ],
+            "body": [
+              {
+                "type": "text",
+                "text": "The pairing worth internalising: plan for the investigation, direct execution for the implementation, and the Explore subagent for verbose discovery so the main context survives the phase."
+              }
+            ]
+          }
+        },
+        {
+          "id": "e-iterative-refinement",
+          "label": "Iterative refinement patterns",
+          "group": "e",
+          "kind": "leaf",
+          "badges": [
+            "40 min",
+            "intermediate"
+          ],
+          "detail": {
+            "summary": "Concrete input/output examples beat prose when prose is being read inconsistently — plus the interview pattern and knowing when to batch fixes.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 3.5"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "2–3 concrete examples communicate a transformation better than any description of it",
+                  "Test-driven iteration: write the suite first, then iterate by sharing failures",
+                  "The interview pattern surfaces considerations you had not anticipated, before implementation",
+                  "Interacting problems go in one message; independent ones are fixed sequentially"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "e-cicd-integration",
+          "label": "CI/CD integration",
+          "group": "e",
+          "kind": "leaf",
+          "badges": [
+            "45 min",
+            "intermediate"
+          ],
+          "requires": [
+            "e-claude-md-hierarchy"
+          ],
+          "detail": {
+            "summary": "Running non-interactively, enforcing machine-parseable output, and why the session that wrote the code is the wrong one to review it.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-F 3.6"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "-p / --print for non-interactive runs that will not hang waiting for input",
+                  "--output-format json with --json-schema for findings you can post as inline PR comments",
+                  "CLAUDE.md is how CI-invoked Claude gets your testing standards and review criteria",
+                  "Pass prior findings back in so a re-run reports only new or still-unaddressed issues"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "e-stakeholder-communication",
+          "label": "Stakeholder communication",
+          "group": "e",
+          "kind": "leaf",
+          "badges": [
+            "35 min",
+            "intermediate"
+          ],
+          "detail": {
+            "summary": "Explaining an AI system's guarantees and limits to people who will make decisions based on your answer. Existing strength — study it to map experience onto the exam's vocabulary.",
+            "meta": [
+              {
+                "label": "Exam",
+                "value": "CCAR-P Stakeholder Communication & Lifecycle — 14%"
+              }
+            ]
+          }
+        },
+        {
+          "id": "e-lifecycle-and-slas",
+          "label": "Lifecycle and SLAs",
+          "group": "e",
+          "kind": "leaf",
+          "badges": [
+            "40 min",
+            "advanced"
+          ],
+          "requires": [
+            "e-stakeholder-communication"
+          ],
+          "detail": {
+            "summary": "What you promise about an AI system's behaviour, how you measure whether you kept the promise, and what happens when you did not.",
+            "meta": [
+              {
+                "label": "Build",
+                "value": "A written SLA for the salvage harness — the Track E capstone"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

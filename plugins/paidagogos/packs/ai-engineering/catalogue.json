@@ -1,0 +1,793 @@
+{
+  "surface": "tree",
+  "version": 1,
+  "title": "AI Engineering — external courses & certifications",
+  "subtitle": "Grouped by institution, and marked with the certification each resource officially prepares for. Every certification fact here was read off the vendor's own page or exam guide on the date shown; anything unconfirmed says so.",
+  "groups": [
+    {
+      "id": "anthropic",
+      "label": "Anthropic",
+      "accent": "3",
+      "description": "Claude Code, Agent SDK, Claude API, MCP."
+    },
+    {
+      "id": "google",
+      "label": "Google Cloud",
+      "accent": "1",
+      "description": "Gemini platform, Vertex/Agent platform, business-level gen AI."
+    },
+    {
+      "id": "aws",
+      "label": "AWS",
+      "accent": "6",
+      "description": "Bedrock, SageMaker, ML operations."
+    },
+    {
+      "id": "microsoft",
+      "label": "Microsoft",
+      "accent": "8",
+      "description": "Azure AI — currently in transition."
+    },
+    {
+      "id": "independent",
+      "label": "Independent",
+      "accent": "2",
+      "description": "Vendor-neutral course providers."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "anthropic",
+      "label": "Anthropic",
+      "group": "anthropic",
+      "kind": "branch",
+      "badges": [
+        "2 certifications"
+      ],
+      "detail": {
+        "summary": "The only vendor whose certification maps directly onto the tools already in daily use here — Claude Code, the Agent SDK, the Claude API and MCP. Two tiers, both introduced with version 1.0 effective July 2026.",
+        "meta": [
+          {
+            "label": "Certification tiers",
+            "value": "Foundations, Professional"
+          },
+          {
+            "label": "Validity",
+            "value": "12 months (both)"
+          },
+          {
+            "label": "Recommendation",
+            "value": "Foundations first"
+          }
+        ],
+        "body": [
+          {
+            "type": "callout",
+            "tone": "warning",
+            "text": "Several third-party study sites publish blueprints for these exams. At least one set matched the official weights on inspection — which is not a reason to trust the next one. Use the exam guide PDFs only."
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "ccar-f",
+          "label": "Claude Certified Architect – Foundations",
+          "group": "anthropic",
+          "kind": "leaf",
+          "badges": [
+            "CCAR-F",
+            "$125",
+            "60 items"
+          ],
+          "detail": {
+            "summary": "Validates practical judgment about architecture, configuration and tradeoffs when building production applications with Claude. Scenario-based: four scenarios drawn at random from a bank of six.",
+            "meta": [
+              {
+                "label": "Exam code",
+                "value": "CCAR-F"
+              },
+              {
+                "label": "Version",
+                "value": "1.0 · effective July 2026"
+              },
+              {
+                "label": "Items",
+                "value": "60"
+              },
+              {
+                "label": "Time limit",
+                "value": "120 minutes"
+              },
+              {
+                "label": "Passing score",
+                "value": "720 on a 100–1,000 scale"
+              },
+              {
+                "label": "Fee",
+                "value": "$125 USD"
+              },
+              {
+                "label": "Validity",
+                "value": "12 months from award"
+              },
+              {
+                "label": "Delivery",
+                "value": "Proctored — online and/or test centre"
+              },
+              {
+                "label": "Prerequisites",
+                "value": "None stated; 6+ months hands-on recommended"
+              }
+            ],
+            "body": [
+              {
+                "type": "heading",
+                "text": "Domain weights"
+              },
+              {
+                "type": "list",
+                "ordered": true,
+                "items": [
+                  "Agentic Architecture & Orchestration — 27%",
+                  "Tool Design & MCP Integration — 18%",
+                  "Claude Code Configuration & Workflows — 20%",
+                  "Prompt Engineering & Structured Output — 20%",
+                  "Context Management & Reliability — 15%"
+                ]
+              },
+              {
+                "type": "text",
+                "text": "Item format is multiple-choice and multiple-response, with each item stating how many responses to select. Results report pass/fail with a scaled score plus percent-correct by domain."
+              },
+              {
+                "type": "callout",
+                "tone": "note",
+                "text": "The guide's section 8 contains four hands-on preparation exercises — a multi-tool agent with escalation logic, a team Claude Code configuration, a structured extraction pipeline, and a multi-agent research pipeline. They are the fastest route through the blueprint."
+              }
+            ],
+            "resources": [
+              {
+                "type": "exam-guide",
+                "title": "Claude Certified Architect – Foundations Exam Guide (v1.0)",
+                "url": "https://anthropic-partners.skilljar.com/claude-certified-architect-foundations-certification",
+                "artifact_url": "https://everpath-course-content.s3-accelerate.amazonaws.com/instructor/6nizmqk8tpzpfjvt6qmmav7rh/public/1783542750/Claude+Certified+Architect+%E2%80%93+Foundations+Exam+Guide.pdf",
+                "institution": "Anthropic",
+                "certification": "Claude Certified Architect – Foundations",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "note": "Landing page is the durable citation; the S3 PDF link carries a numeric path segment and may rotate. Every figure above was read from the PDF itself.",
+                "lifecycle": "current",
+                "provenance": "primary"
+              },
+              {
+                "type": "course",
+                "title": "Claude Code in action",
+                "url": "https://www.anthropic.com/learn",
+                "institution": "Anthropic Academy",
+                "cost": "free",
+                "note": "Certificate on completion. Maps to the Claude Code Configuration & Workflows domain (20%).",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "ccar-p",
+          "label": "Claude Certified Architect – Professional",
+          "group": "anthropic",
+          "kind": "leaf",
+          "badges": [
+            "CCAR-P",
+            "$175",
+            "63 items"
+          ],
+          "requires": [
+            "ccar-f"
+          ],
+          "detail": {
+            "summary": "The architect-level tier, weighted toward integration, solution design and governance rather than hands-on configuration. This is the blueprint nikai's five tracks are built from.",
+            "meta": [
+              {
+                "label": "Exam code",
+                "value": "CCAR-P"
+              },
+              {
+                "label": "Version",
+                "value": "1.0 · effective July 2026"
+              },
+              {
+                "label": "Items",
+                "value": "63"
+              },
+              {
+                "label": "Time limit",
+                "value": "120 minutes"
+              },
+              {
+                "label": "Passing score",
+                "value": "720 on a 100–1,000 scale"
+              },
+              {
+                "label": "Fee",
+                "value": "$175 USD"
+              },
+              {
+                "label": "Validity",
+                "value": "12 months from award"
+              },
+              {
+                "label": "Recommended",
+                "value": "3+ yrs systems architecture, 6+ months production LLM"
+              }
+            ],
+            "body": [
+              {
+                "type": "heading",
+                "text": "Domain weights"
+              },
+              {
+                "type": "list",
+                "ordered": true,
+                "items": [
+                  "Integration — 19%",
+                  "Solution Design & Architecture — 17%",
+                  "Evaluation, Testing & Optimization — 16%",
+                  "Governance, Safety & Risk Management — 14%",
+                  "Stakeholder Communication & Lifecycle Management — 14%",
+                  "Claude Models, Prompting & Context Engineering — 13%",
+                  "Developer Productivity & Operational Enablement — 7%"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "warning",
+                "text": "Provenance differs from the Foundations entry above. The $175 fee was read off the Skilljar page on 2026-08-16. The item count, time limit, passing score, validity and domain weights come from the nikai session's own extraction of the Professional exam guide PDF, not from a second reading here. Treat them as high-confidence but single-sourced, and re-check against the PDF before relying on them."
+              }
+            ],
+            "resources": [
+              {
+                "type": "exam-guide",
+                "title": "Claude Certified Architect – Professional Exam Guide (v1.0)",
+                "url": "https://anthropic-partners.skilljar.com/claude-certified-architect-professional-certification",
+                "artifact_url": "https://everpath-course-content.s3-accelerate.amazonaws.com/instructor/6nizmqk8tpzpfjvt6qmmav7rh/public/1783542810/Claude+Certified+Architect+%E2%80%93+Professional+Exam+Guide.pdf",
+                "institution": "Anthropic",
+                "certification": "Claude Certified Architect – Professional",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "note": "Landing page and fee verified here; domain weights relayed from the nikai session's PDF extraction.",
+                "lifecycle": "current",
+                "provenance": "relayed"
+              }
+            ]
+          }
+        },
+        {
+          "id": "anthropic-academy",
+          "label": "Anthropic Academy",
+          "group": "anthropic",
+          "kind": "leaf",
+          "badges": [
+            "free"
+          ],
+          "detail": {
+            "summary": "Anthropic's own course platform. Free, certificate-bearing, and organised into role-based learning paths rather than a single sequence.",
+            "meta": [
+              {
+                "label": "Cost",
+                "value": "Free"
+              },
+              {
+                "label": "Platform",
+                "value": "Skilljar"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Claude Code in action — course, certificate on completion",
+                  "Introduction to Cowork — course, certificate on completion",
+                  "Build with Claude — learning path, API guides and best practices",
+                  "Claude for Work / Claude for Personal — role-oriented paths",
+                  "AI Fluency newsletter — quarterly, free"
+                ]
+              }
+            ],
+            "resources": [
+              {
+                "type": "course",
+                "title": "Anthropic Academy",
+                "url": "https://www.anthropic.com/learn",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              },
+              {
+                "type": "docs",
+                "title": "Claude Docs",
+                "url": "https://platform.claude.com/docs/en/home",
+                "institution": "Anthropic",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "google",
+      "label": "Google Cloud",
+      "group": "google",
+      "kind": "branch",
+      "badges": [
+        "2 relevant certs"
+      ],
+      "detail": {
+        "summary": "Two certifications sit near this path from opposite ends: one deliberately non-technical, one a full ML engineering exam. Neither is a substitute for the Anthropic track — they certify a different platform.",
+        "meta": [
+          {
+            "label": "Validity",
+            "value": "3 years (both)"
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "google-genai-leader",
+          "label": "Generative AI Leader",
+          "group": "google",
+          "kind": "leaf",
+          "badges": [
+            "$99",
+            "90 min",
+            "non-technical"
+          ],
+          "detail": {
+            "summary": "Business-level certification for influencing gen AI initiatives. Explicitly open to any role, with or without hands-on technical experience.",
+            "meta": [
+              {
+                "label": "Duration",
+                "value": "90 minutes"
+              },
+              {
+                "label": "Questions",
+                "value": "50–60 multiple choice"
+              },
+              {
+                "label": "Fee",
+                "value": "$99 USD"
+              },
+              {
+                "label": "Validity",
+                "value": "3 years"
+              },
+              {
+                "label": "Prerequisites",
+                "value": "None"
+              },
+              {
+                "label": "Languages",
+                "value": "English, Japanese, Spanish, Portuguese"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Fundamentals of gen AI",
+                  "Google Cloud's gen AI offerings",
+                  "Techniques to improve gen AI model output",
+                  "Business strategies for a successful gen AI solution"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "note",
+                "text": "Worth naming plainly: this certifies business fluency, not engineering. For someone already architecting production systems it adds vocabulary for stakeholder conversations and little else. Low priority against CCAR-F."
+              }
+            ],
+            "resources": [
+              {
+                "type": "exam-guide",
+                "title": "Generative AI Leader certification",
+                "url": "https://cloud.google.com/learn/certification/generative-ai-leader",
+                "institution": "Google Cloud",
+                "certification": "Google Cloud Generative AI Leader",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "lifecycle": "current",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "google-pmle",
+          "label": "Professional Machine Learning Engineer",
+          "group": "google",
+          "kind": "leaf",
+          "badges": [
+            "$200",
+            "2 hrs",
+            "advanced"
+          ],
+          "detail": {
+            "summary": "Google's full ML engineering certification, covering build, evaluation, productionisation and optimisation. Recently updated to reflect the move from Vertex AI toward the Gemini Enterprise Agent Platform.",
+            "meta": [
+              {
+                "label": "Duration",
+                "value": "2 hours"
+              },
+              {
+                "label": "Questions",
+                "value": "50–60 multiple choice / multiple select"
+              },
+              {
+                "label": "Fee",
+                "value": "$200 USD"
+              },
+              {
+                "label": "Prerequisites",
+                "value": "None formal"
+              },
+              {
+                "label": "Recommended",
+                "value": "3+ yrs industry, 1+ yr on Google Cloud"
+              },
+              {
+                "label": "Languages",
+                "value": "English, Japanese"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Architect low-code AI solutions",
+                  "Collaborate across teams to manage data and models",
+                  "Scale prototypes into ML models",
+                  "Serve and scale models",
+                  "Automate and orchestrate ML pipelines",
+                  "Monitor AI solutions"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "note",
+                "text": "The exam does not directly assess coding — enough Python and SQL to read a snippet is stated as sufficient. The real prerequisite is Google Cloud platform experience, which is the gating cost here."
+              }
+            ],
+            "resources": [
+              {
+                "type": "exam-guide",
+                "title": "Professional Machine Learning Engineer certification",
+                "url": "https://cloud.google.com/learn/certification/machine-learning-engineer",
+                "institution": "Google Cloud",
+                "certification": "Google Cloud Professional Machine Learning Engineer",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "lifecycle": "current",
+                "provenance": "primary"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "aws",
+      "label": "AWS",
+      "group": "aws",
+      "kind": "branch",
+      "badges": [
+        "exam in transition"
+      ],
+      "detail": {
+        "summary": "A foundational tier and an associate engineering tier. The engineering exam is mid-revision, and the revision is the interesting part — it adds generative and agentic AI.",
+        "meta": [
+          {
+            "label": "Validity",
+            "value": "3 years"
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "aws-ai-practitioner",
+          "label": "AWS Certified AI Practitioner",
+          "group": "aws",
+          "kind": "leaf",
+          "badges": [
+            "AIF-C01",
+            "$100",
+            "foundational"
+          ],
+          "detail": {
+            "summary": "Foundational validation of AI, ML and generative AI concepts on AWS. Aimed at people who use rather than build AI/ML solutions.",
+            "meta": [
+              {
+                "label": "Exam code",
+                "value": "AIF-C01"
+              },
+              {
+                "label": "Questions",
+                "value": "65"
+              },
+              {
+                "label": "Time limit",
+                "value": "90 minutes"
+              },
+              {
+                "label": "Fee",
+                "value": "$100 USD"
+              },
+              {
+                "label": "Validity",
+                "value": "3 years"
+              },
+              {
+                "label": "Level",
+                "value": "Foundational"
+              }
+            ],
+            "resources": [
+              {
+                "type": "exam-guide",
+                "title": "AWS Certified AI Practitioner",
+                "url": "https://aws.amazon.com/certification/certified-ai-practitioner/",
+                "institution": "AWS",
+                "certification": "AWS Certified AI Practitioner",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "lifecycle": "current",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "aws-mle-associate",
+          "label": "Certified Machine Learning Engineer – Associate",
+          "group": "aws",
+          "kind": "leaf",
+          "badges": [
+            "MLA-C01 → C02",
+            "changing"
+          ],
+          "detail": {
+            "summary": "Building, operationalising, deploying and maintaining ML pipelines on AWS. Currently mid-version-change, which matters if you are scheduling.",
+            "meta": [
+              {
+                "label": "Current code",
+                "value": "MLA-C01"
+              },
+              {
+                "label": "Successor",
+                "value": "MLA-C02"
+              },
+              {
+                "label": "Scored questions",
+                "value": "50 (plus 15 unscored)"
+              },
+              {
+                "label": "Passing score",
+                "value": "720 on a 100–1,000 scale"
+              },
+              {
+                "label": "Recommended",
+                "value": "1 yr ML engineering, 1 yr AWS"
+              }
+            ],
+            "body": [
+              {
+                "type": "callout",
+                "tone": "warning",
+                "text": "Timing, per AWS's own training blog: registration for MLA-C02 opens 1 September 2026, and the last day to sit MLA-C01 in English is 28 September 2026. If this exam is on the list at all, wait for C02 — it adds generative AI, agentic AI and foundation-model workloads, which is the part relevant to this path."
+              },
+              {
+                "type": "text",
+                "text": "Scoring is compensatory: you need the overall scaled score, not a pass in each section."
+              }
+            ],
+            "resources": [
+              {
+                "type": "exam-guide",
+                "title": "AWS Certified Machine Learning Engineer – Associate",
+                "url": "https://aws.amazon.com/certification/certified-machine-learning-engineer-associate/",
+                "institution": "AWS",
+                "certification": "AWS Certified Machine Learning Engineer – Associate",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "note": "Version-transition dates taken from the AWS Training and Certification blog post announcing MLA-C02.",
+                "lifecycle": "version-changing",
+                "provenance": "primary"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "microsoft",
+      "label": "Microsoft",
+      "group": "microsoft",
+      "kind": "branch",
+      "badges": [
+        "retired"
+      ],
+      "detail": {
+        "summary": "Listed so it can be ruled out rather than rediscovered. Microsoft's AI engineering certification has retired and no direct replacement is named on the credential page.",
+        "meta": [
+          {
+            "label": "Status",
+            "value": "Retired"
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "ms-ai-102",
+          "label": "Azure AI Engineer Associate (AI-102) — retired",
+          "group": "microsoft",
+          "kind": "leaf",
+          "badges": [
+            "retired",
+            "do not schedule"
+          ],
+          "detail": {
+            "summary": "Designing and implementing Azure AI solutions. The credential page now carries a retirement notice for both the certification and its renewal assessment.",
+            "meta": [
+              {
+                "label": "Exam code",
+                "value": "AI-102"
+              },
+              {
+                "label": "Status",
+                "value": "Retired — cannot be earned or renewed"
+              },
+              {
+                "label": "Page last updated",
+                "value": "2025-12-23"
+              }
+            ],
+            "body": [
+              {
+                "type": "callout",
+                "tone": "pitfall",
+                "text": "Search results and study-guide sites still present AI-102 as current, including domain weightings. It is not. The credential page states plainly that the certification and the renewal assessment are retired, and lists no training. Anything recommending it as a 2026 target is stale."
+              }
+            ],
+            "resources": [
+              {
+                "type": "docs",
+                "title": "Microsoft Certified: Azure AI Engineer Associate (retirement notice)",
+                "url": "https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-engineer/",
+                "institution": "Microsoft",
+                "cost": "free",
+                "verified_at": "2026-08-16",
+                "note": "Retirement confirmed on the credential page itself. No certification field is set on this entry because it is no longer obtainable.",
+                "lifecycle": "retired",
+                "provenance": "primary"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "independent",
+      "label": "Independent providers",
+      "group": "independent",
+      "kind": "branch",
+      "badges": [
+        "no certification"
+      ],
+      "detail": {
+        "summary": "Course providers with no exam attached. Useful for closing specific gaps rather than for credentials — and in DeepLearning.AI's case, several are built with Anthropic directly.",
+        "meta": [
+          {
+            "label": "Certification",
+            "value": "None — completion certificates only"
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "dlai-anthropic",
+          "label": "DeepLearning.AI × Anthropic short courses",
+          "group": "independent",
+          "kind": "leaf",
+          "badges": [
+            "short courses"
+          ],
+          "detail": {
+            "summary": "Four short courses built with Anthropic. These sit closest to the CCAR-F blueprint of anything outside Anthropic's own material.",
+            "meta": [
+              {
+                "label": "Partner",
+                "value": "Anthropic"
+              },
+              {
+                "label": "Maps to",
+                "value": "CCAR-F domains 1, 2 and 3"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "MCP: Build Rich-Context AI Apps with Anthropic — Tool Design & MCP Integration (18%)",
+                  "Claude Code: A Highly Agentic Coding Assistant — Claude Code Configuration & Workflows (20%)",
+                  "Agent Skills with Anthropic — on-demand knowledge for agents",
+                  "Building toward Computer Use with Anthropic"
+                ]
+              }
+            ],
+            "resources": [
+              {
+                "type": "course",
+                "title": "DeepLearning.AI short courses",
+                "url": "https://www.deeplearning.ai/courses/",
+                "institution": "DeepLearning.AI",
+                "cost": "freemium",
+                "verified_at": "2026-08-16",
+                "note": "Course titles and Anthropic partnership confirmed from the catalogue page. Individual pricing is not stated per course there — a membership option exists.",
+                "provenance": "primary"
+              }
+            ]
+          }
+        },
+        {
+          "id": "dlai-eval",
+          "label": "DeepLearning.AI — evaluation & reliability",
+          "group": "independent",
+          "kind": "leaf",
+          "badges": [
+            "Track C"
+          ],
+          "detail": {
+            "summary": "The subset that feeds Track C, which is the track with the least first-party Anthropic material behind it.",
+            "meta": [
+              {
+                "label": "Maps to",
+                "value": "Track C · Grounding & evaluation"
+              }
+            ],
+            "body": [
+              {
+                "type": "list",
+                "items": [
+                  "Evaluating AI Agents (Arize AI) — systematic evaluation and iteration",
+                  "Red Teaming LLM Applications (Giskard)",
+                  "Safe and reliable AI via guardrails (GuardrailsAI)",
+                  "Building and Evaluating Advanced RAG (TruEra, LlamaIndex)",
+                  "Retrieval Augmented Generation (RAG) — 26 hours"
+                ]
+              },
+              {
+                "type": "callout",
+                "tone": "note",
+                "text": "None of these teach Axis B directly — they teach evaluation harnesses, not factual entailment. Useful scaffolding; the grounding discipline itself still has to come from the verification/provenance literature."
+              }
+            ],
+            "resources": [
+              {
+                "type": "course",
+                "title": "DeepLearning.AI course catalogue",
+                "url": "https://www.deeplearning.ai/courses/",
+                "institution": "DeepLearning.AI",
+                "cost": "freemium",
+                "verified_at": "2026-08-16",
+                "provenance": "primary"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

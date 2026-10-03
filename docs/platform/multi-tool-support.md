@@ -3,7 +3,9 @@
 This repo is a **Claude Code plugin marketplace** (`.claude-plugin/marketplace.json` +
 `plugins/<name>/`). This document is the source of truth for making the same skills usable
 by **Claude Code, OpenAI Codex CLI, OpenCode, Google Antigravity (CLI + IDE), and AWS Kiro**
-with the least duplication possible.
+with the least duplication possible — and installable into any other project, for Pi, Cline, and
+70+ more harnesses, through the universal `skills` CLI (see
+[Install into your own project](#install-into-your-own-project--any-harness-skills-cli)).
 
 > **Verification status.**
 > - **Claude Code** — loading exercised via the marketplace validator.
@@ -124,6 +126,78 @@ regenerate after adding/removing a skill, or on a machine where a checkout dropp
 > export. On macOS/Linux with git they are preserved. If you need a symlink-free distribution,
 > switch `sync-skills.sh` to copy mode — but then a drift-detection check becomes mandatory
 > (which is why we default to symlinks).
+
+---
+
+## Install into your own project — any harness (`skills` CLI)
+
+The symlink farm above only helps someone who **clones this repo as their workspace**. To use the
+skills inside *another* project — with Pi, OpenCode, Cline, Kiro, Codex, Cursor, Gemini CLI,
+Copilot, Windsurf, Antigravity, Roo, Goose, or any of the 70+ agents the
+[`skills` CLI](https://github.com/vercel-labs/skills) knows — install them the same way
+[mattpocock/skills](https://github.com/mattpocock/skills) does:
+
+```bash
+npx skills@latest add neotherapper/claude-plugins                     # interactive picker
+npx skills@latest add neotherapper/claude-plugins --skill '*' -a pi -a opencode -a cline -a kiro-cli -y
+npx skills@latest add neotherapper/claude-plugins --skill site-recon -a opencode --copy -y
+npx skills update                                                     # pull newer versions later
+```
+
+What we verified on 2026-09-05 (skills CLI `latest`, local clone as the source):
+
+| Check | Result |
+|---|---|
+| `npx skills add <repo> --list` | finds all 14 canonical skills, no duplicates from the `.agents/`/`.kiro/` farms |
+| `-a cline -a opencode` (default symlink mode) | canonical copy at `./.agents/skills/<skill>/`, with `scripts/` + `references/` |
+| `-a pi -a kiro-cli` (symlink mode, agent **not** installed) | only `.agents/skills/` written; `.pi/` and `.kiro/` skipped (this repo's own symlink farm does not cover `.pi/` either) |
+| `-a pi -a kiro-cli -a cline --copy` | real dirs at `./.pi/skills/`, `./.kiro/skills/`, `./.agents/skills/` |
+
+So: the default is fine when the agent is installed on that machine; for CI, fresh machines, or
+an undetected agent, add **`--copy`**. The CLI also writes a `skills-lock.json` in the target
+project so `npx skills update` can track versions.
+
+| Harness | `-a` | Project path | Global path (`-g`) |
+|---|---|---|---|
+| Pi | `pi` | `.pi/skills/` | `~/.pi/agent/skills/` |
+| OpenCode | `opencode` | `.agents/skills/` | `~/.config/opencode/skills/` |
+| Cline | `cline` | `.agents/skills/` | `~/.agents/skills/` |
+| Kiro CLI | `kiro-cli` | `.kiro/skills/` | `~/.kiro/skills/` |
+| Codex | `codex` | `.agents/skills/` | `~/.codex/skills/` |
+| Cursor | `cursor` | `.agents/skills/` | `~/.cursor/skills/` |
+| Gemini CLI | `gemini-cli` | `.agents/skills/` | `~/.gemini/skills/` |
+| GitHub Copilot | `github-copilot` | `.agents/skills/` | `~/.copilot/skills/` |
+| Antigravity | `antigravity` | `.agents/skills/` | `~/.gemini/antigravity/skills/` |
+| Windsurf | `windsurf` | `.windsurf/skills/` | `~/.codeium/windsurf/skills/` |
+| Claude Code (if you prefer files over the marketplace) | `claude-code` | `.claude/skills/` | `~/.claude/skills/` |
+| Anything else (DeepSeek, custom harness) | `universal` | `.agents/skills/` | `~/.config/agents/skills/` |
+
+A harness with no CLI entry and no `.agents/skills/` support still works: copy
+`plugins/<plugin>/skills/<skill>/` to the directory it scans for `SKILL.md`. A skill's `scripts/`
+and `references/` live inside the folder and travel with it.
+
+**Portability gap (open).** 9 of 14 `SKILL.md` files use `${CLAUDE_PLUGIN_ROOT}` — a Claude
+Code-only variable. `AGENTS.md` tells agents to resolve `${CLAUDE_PLUGIN_ROOT}/skills/<s>/…` to the
+skill's own folder, but several skills also need plugin-root files that a CLI copy never includes
+(verified with a `--copy` install: no `technologies/`, `categories/`, `agents/`, or plugin
+`scripts/` land in the target):
+
+| Plugin | CLI install | Plugin-root dependencies not copied |
+|---|---|---|
+| namesmith, draftloom, idea-forge `generate` | self-contained | — |
+| beacon (`site-recon`, `site-intel`, `site-fleet`) | degraded | `technologies/`, `scripts/core/har-reconstruct.py`, `templates/query-templates.md`, `.claude-plugin/plugin.json` |
+| reframe (`site-redesign`) | degraded | `categories/`, `templates/` |
+| idea-forge (`evaluate`) | non-functional | `agents/*.md` (11 research-agent prompts) |
+| aegis (`site-security`) | non-functional | `scripts/coverage.py` |
+| paidagogos (all three) | non-functional | `packs/`, `scripts/build-index.mjs`, `visual-kit` schemas + renderer |
+
+Follow-up: rewrite those references as skill-relative paths and move (or fetch) the plugin-root
+resources into each skill folder, starting with aegis and idea-forge `evaluate`, which are single
+files.
+
+**CI gate.** `scripts/check-skills-cli.sh` runs `npx skills add . --list` and fails if the set
+of discovered skills differs from the canonical `plugins/*/skills/*` set — so a renamed folder or
+a broken frontmatter can never silently drop a skill from the non-Claude install path.
 
 ---
 

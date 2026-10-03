@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "paidagogos://schemas/pack.v1.json",
+  "title": "PaidagogosPackV1",
+  "type": "object",
+  "required": ["id", "title", "surfaces"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$",
+      "description": "Slug. Must equal the pack's directory name — build-index.mjs checks this, because a manifest that disagrees with its own location produces links that 404."
+    },
+    "title": { "type": "string", "maxLength": 200 },
+    "subtitle": { "type": "string", "maxLength": 200 },
+    "summary": { "type": "string", "maxLength": 1000 },
+    "badges": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["label"],
+        "additionalProperties": false,
+        "properties": {
+          "label": { "type": "string", "maxLength": 40 },
+          "tone": { "enum": ["ok", "warn", "danger", "info", "muted"] }
+        }
+      }
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date",
+      "description": "When the pack's content was last revised. Distinct from a git timestamp: moving a file is not revising a curriculum."
+    },
+    "surfaces": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "description": "The renderable specs in this pack. A pack has more than one whenever its catalogue is a separate tree from its curriculum.",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "file", "role"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "maxLength": 80,
+            "description": "Staged filename and URL segment. The server rejects any other character class, so dots are not permitted here even though the source file has one."
+          },
+          "title": { "type": "string", "maxLength": 200 },
+          "file": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]*$",
+            "description": "Path relative to the pack directory. No slashes: a pack is one flat directory, and allowing traversal here would let a manifest reach outside it."
+          },
+          "format": { "enum": ["tree", "markdown"], "default": "tree" },
+          "role": { "enum": ["curriculum", "catalogue"] }
+        }
+      }
+    }
+  }
+}

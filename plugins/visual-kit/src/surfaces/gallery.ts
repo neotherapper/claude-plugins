@@ -1,10 +1,12 @@
-import { html, type TemplateResult } from 'lit';
+import { html, nothing, type TemplateResult } from 'lit';
+import { safeUrl } from '../render/escape.js';
 
 interface GalleryItem {
   id: string;
   title: string;
   subtitle?: string;
   body?: string;
+  href?: string;
   badges?: Array<{ label: string; tone?: string }>;
 }
 
@@ -19,7 +21,7 @@ export function renderGallery(spec: GallerySpec): TemplateResult {
     ${spec.title ? html`<vk-section data-variant="header"><h1 slot="title">${spec.title}</h1></vk-section>` : ''}
     <vk-gallery data-multiselect="${spec.multiselect ? 'true' : 'false'}">
       ${spec.items.map(item => html`
-        <vk-card data-id="${item.id}">
+        <vk-card data-id="${item.id}" data-href=${safeUrl(item.href) ?? nothing}>
           <h3 slot="title">${item.title}</h3>
           ${item.subtitle ? html`<p slot="subtitle">${item.subtitle}</p>` : ''}
           ${item.body ? html`<p slot="body">${item.body}</p>` : ''}

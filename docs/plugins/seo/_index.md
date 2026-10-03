@@ -111,7 +111,7 @@ docs/sites/{site-slug}/seo/
 |--------|-----------|---------|
 | **beacon** | read | `docs/sites/{slug}/research/` — tech stack + recon |
 | **reframe** | write | `docs/sites/{slug}/redesign/current-critique.md` (SEO section) |
-| **paidagogos** | reference | `plugins/paidagogos/skills/paidagogos-micro/references/curricula/seo-developer-mastery.md` |
+| **paidagogos** | reference | `plugins/paidagogos/packs/seo-developer-mastery/curriculum.md` |
 
 See `skills/site-audit/references/beacon-integration.md` and
 `skills/site-audit/references/reframe-integration.md` for surface contracts.

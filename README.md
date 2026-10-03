@@ -5,8 +5,9 @@
 [![validate](https://github.com/neotherapper/claude-plugins/actions/workflows/validate.yml/badge.svg)](https://github.com/neotherapper/claude-plugins/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A **Claude Code plugin marketplace** that also works with **OpenAI Codex**, **OpenCode**,
-**Google Antigravity**, and **AWS Kiro** — plus Gemini CLI, GitHub Copilot, Cursor, and Windsurf.
+A **Claude Code plugin marketplace** whose skills install into **any agent harness** — Pi, OpenCode,
+Cline, Kiro, Codex, Cursor, Gemini CLI, GitHub Copilot, Windsurf, Antigravity, and 70+ more — with
+one `npx skills add neotherapper/claude-plugins` ([install](#installation-30-second-setup)).
 One `AGENTS.md` drives the instructions layer for every tool; the skills are exposed to each tool
 at the path it scans. See **[docs/platform/multi-tool-support.md](docs/platform/multi-tool-support.md)**
 for the full settings/files matrix.
@@ -39,7 +40,13 @@ In future sessions, ask questions about the site and Beacon routes directly to t
 
 ---
 
-## Installation
+## Installation (30-second setup)
+
+Two ways in. **Claude Code** installs a plugin as a managed bundle that updates when we ship.
+**Every other harness** gets the skills through the universal [`skills` CLI](https://github.com/vercel-labs/skills)
+(`npx skills add`), which puts the `SKILL.md` folders — scripts and references included — at
+the path your agent scans. Claude Code users should stick to the marketplace: adding
+`-a claude-code` on top of it gives you every skill twice.
 
 ### Claude Code
 
@@ -49,32 +56,85 @@ In future sessions, ask questions about the site and Beacon routes directly to t
 ```
 
 Skills, commands, agents, and hooks are auto-discovered per plugin. Install any of:
-`beacon`, `reframe`, `namesmith`, `draftloom`, `idea-forge`, `paidagogos`, `visual-kit`
+`beacon`, `aegis`, `reframe`, `namesmith`, `draftloom`, `idea-forge`, `paidagogos`, `visual-kit`
 (all `@neotherapper-plugins`).
 
-### OpenAI Codex CLI
+### Everything else — Pi, OpenCode, Cline, Kiro, Codex, Cursor, Gemini CLI, Copilot, and 70+ more
 
-Codex reads this repo's root `AGENTS.md` automatically. The skills are exposed at `.agents/skills/`
-(one of Codex's documented scan roots) as symlinks back into `plugins/` — clone the repo and work
-inside it (or add it as a git submodule), rather than copying files out: `.agents/skills/` entries
-only resolve when `plugins/` is present alongside them. MCP servers go in `~/.codex/config.toml`.
+```bash
+# interactive: pick the skills and the agents you have installed
+npx skills@latest add neotherapper/claude-plugins
 
-### OpenCode
+# non-interactive: every skill, into the agents you name
+npx skills@latest add neotherapper/claude-plugins --skill '*' -a pi -a opencode -a cline -a kiro-cli -y
 
-OpenCode reads the root `AGENTS.md` automatically and falls back to scanning `.agents/skills/`, so
-cloning this repo (or adding it to your workspace) exposes every skill with **no extra config**.
-MCP servers go in `opencode.json` under the `mcp` key.
+# one plugin's skills only (skill names per plugin are in the table below)
+npx skills@latest add neotherapper/claude-plugins --skill site-recon --skill site-intel --skill site-fleet -a opencode -y
+```
 
-### Google Antigravity (CLI `agy` + IDE)
+Add `-g` to install for your user instead of the current project, and `npx skills update` to pull
+the latest versions later. The CLI auto-detects installed agents; for an agent it cannot detect
+(a fresh machine, CI, a harness it has no entry for) add `--copy` so the files land as real
+directories at that agent's path instead of symlinks into `.agents/skills/`.
 
-Antigravity reads the root `AGENTS.md`, workspace rules from `.agents/rules/`, and workspace skills
-from `.agents/skills/` — all shipped here. Workspace MCP config is `.agents/mcp_config.json`.
+| Harness | `-a` flag | Project path the skill lands in | Notes |
+|---|---|---|---|
+| Pi | `pi` | `.pi/skills/` | use `--copy` if Pi isn't detected on the machine |
+| OpenCode | `opencode` | `.agents/skills/` | native fallback path — verified live |
+| Cline | `cline` | `.agents/skills/` | shared "universal" path |
+| Kiro CLI / IDE | `kiro-cli` | `.kiro/skills/` | custom agents: add `skill://.kiro/skills/**/SKILL.md` to `resources` |
+| Codex | `codex` | `.agents/skills/` | reads `AGENTS.md` natively too |
+| Cursor | `cursor` | `.agents/skills/` | |
+| Gemini CLI | `gemini-cli` | `.agents/skills/` | or `gemini skills install` — see [docs/platform/gemini-cli.md](docs/platform/gemini-cli.md) |
+| GitHub Copilot | `github-copilot` | `.agents/skills/` | see [docs/platform/copilot.md](docs/platform/copilot.md) |
+| Windsurf | `windsurf` | `.windsurf/skills/` | |
+| Antigravity | `antigravity` | `.agents/skills/` | |
+| Roo Code / Kilo / Goose / Droid / Qwen / MiniMax / Mistral Vibe … | see [full list](https://github.com/vercel-labs/skills#supported-agents) | per agent | |
+| DeepSeek or any harness not listed | `universal` | `.agents/skills/` | most harnesses read `.agents/skills/`; otherwise copy the folder — see below |
 
-### AWS Kiro
+**No CLI, or a harness the CLI does not know?** A skill is just a folder. Copy it to wherever
+your agent scans for `SKILL.md`:
 
-Kiro reads the root `AGENTS.md` (always-included) plus steering in `.kiro/steering/`, and loads
-skills from `.kiro/skills/`. MCP servers go in `.kiro/settings/mcp.json`. Open this repo as the
-workspace, or import a skill folder via Kiro's "Agent Steering & Skills" panel.
+```bash
+git clone https://github.com/neotherapper/claude-plugins.git
+cp -r claude-plugins/plugins/beacon/skills/site-recon <your-agent-skills-dir>/
+```
+
+Or clone this repo and open it as the workspace: `AGENTS.md` at the root is read natively by
+Codex, OpenCode, Antigravity, Kiro, and Gemini CLI, and the `.agents/skills/` + `.kiro/skills/`
+symlink farms expose every skill in place.
+
+### Which skills belong to which plugin
+
+| Plugin | Skills (`--skill` names) |
+|---|---|
+| beacon | `site-recon`, `site-intel`, `site-fleet` |
+| aegis | `site-security` |
+| reframe | `site-redesign` |
+| namesmith | `site-naming` |
+| draftloom | `draft`, `eval`, `setup` |
+| idea-forge | `generate`, `evaluate` |
+| paidagogos | `paidagogos`, `paidagogos-micro`, `paidagogos-path` |
+| visual-kit | no skills — a shared renderer used by paidagogos; Claude Code plugin only |
+
+`scripts/check-skills-cli.sh` runs in CI and fails if the skills CLI stops seeing any of these.
+
+**What a CLI install carries, per plugin.** A CLI copy contains only the skill folder
+(`SKILL.md`, `scripts/`, `references/`). Nine skills reference `${CLAUDE_PLUGIN_ROOT}`, Claude
+Code's plugin-root variable, and some depend on files at the plugin root that are **not** copied:
+
+| Plugin | Via `npx skills add` | Missing outside the Claude Code plugin / a repo clone |
+|---|---|---|
+| namesmith, draftloom, idea-forge `generate` | works | nothing |
+| beacon | degraded | `technologies/` tech packs, `scripts/core/`, `templates/`, version from `plugin.json` |
+| reframe | degraded | `categories/`, `templates/` |
+| idea-forge `evaluate` | broken | `agents/*.md` research-agent prompts |
+| aegis | broken | `scripts/coverage.py` (the whole scan) |
+| paidagogos (all three) | broken | `packs/`, `scripts/`, and the `visual-kit` renderer |
+
+For the degraded and broken rows, clone this repo next to your project (the skill can then read
+`plugins/<plugin>/…`) or use the Claude Code plugin. `AGENTS.md` tells agents how to resolve the
+variable. Follow-up work: skill-relative paths and moving those resources under each skill.
 
 ### Cross-Tool (gh skill)
 
@@ -91,20 +151,22 @@ gh skill update --all
 ```
 
 <details>
-<summary><b>Other tools — Gemini CLI, GitHub Copilot, Cursor, Windsurf</b></summary>
+<summary><b>Manual per-tool notes — Codex, OpenCode, Antigravity, Kiro, Cursor, Windsurf</b></summary>
 
-**Gemini CLI** — full guide: [docs/platform/gemini-cli.md](docs/platform/gemini-cli.md)
-```bash
-gemini skills install https://github.com/neotherapper/claude-plugins.git --path plugins/beacon/skills
-```
+**OpenAI Codex CLI** — reads this repo's root `AGENTS.md` automatically. Skills at `.agents/skills/`
+(a documented Codex scan root) are symlinks back into `plugins/`, so clone the repo and work inside
+it, or use `npx skills add` above. MCP servers go in `~/.codex/config.toml`.
 
-**GitHub Copilot** — full guide: [docs/platform/copilot.md](docs/platform/copilot.md)
-```bash
-git clone https://github.com/neotherapper/claude-plugins.git
-cp -r claude-plugins/plugins/beacon/skills/* .github/skills/
-cp -r claude-plugins/plugins/beacon/agents/* .github/agents/
-```
-Then in `.github/copilot-instructions.md`: `Skills are available in .github/skills/. Follow them when they match the task.`
+**OpenCode** — reads the root `AGENTS.md` and falls back to scanning `.agents/skills/`, so cloning
+this repo exposes every skill with **no extra config**. MCP servers go in `opencode.json` under `mcp`.
+Full guide: [docs/platform/opencode.md](docs/platform/opencode.md).
+
+**Google Antigravity (CLI `agy` + IDE)** — reads the root `AGENTS.md`, rules from `.agents/rules/`,
+and skills from `.agents/skills/`. Workspace MCP config is `.agents/mcp_config.json`.
+
+**AWS Kiro** — reads the root `AGENTS.md` plus `.kiro/steering/`, loads skills from `.kiro/skills/`.
+MCP servers go in `.kiro/settings/mcp.json`. Open this repo as the workspace, or import a skill
+folder via Kiro's "Agent Steering & Skills" panel.
 
 **Cursor** — full guide: [docs/platform/cursor.md](docs/platform/cursor.md)
 ```bash
@@ -128,6 +190,9 @@ cat claude-plugins/plugins/beacon/skills/site-recon/SKILL.md >> .windsurfrules
 - **Skills live once** under `plugins/<plugin>/skills/<skill>/`. `scripts/sync-skills.sh` mirrors
   each one via symlink into `.agents/skills/` (Codex + Antigravity + OpenCode) and `.kiro/skills/`
   (Kiro) — so there's a single source of truth and no duplicated content.
+- **Any other harness** gets the same folders through the `skills` CLI, which scans this repo for
+  `SKILL.md` files and copies each skill (with its `scripts/` and `references/`) to the path that
+  harness reads. `scripts/check-skills-cli.sh` is CI-gated so the CLI always sees every skill.
 - Adding a skill? Run `scripts/sync-skills.sh`; CI runs `scripts/sync-skills.sh --check` to fail the
   build if a skill isn't exposed.
 

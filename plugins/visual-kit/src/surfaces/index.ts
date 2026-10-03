@@ -5,6 +5,7 @@ import { renderOutline } from './outline.js';
 import { renderComparison } from './comparison.js';
 import { renderFeedback } from './feedback.js';
 import { renderFree } from './free.js';
+import { renderTree } from './tree.js';
 
 export function registerAllSurfaces(): void {
   registerSurface('lesson',     renderLesson     as never);
@@ -13,4 +14,5 @@ export function registerAllSurfaces(): void {
   registerSurface('comparison', renderComparison as never);
   registerSurface('feedback',   renderFeedback   as never);
   registerSurface('free',       renderFree       as never);
+  registerSurface('tree',       renderTree       as never);
 }

@@ -1,0 +1,27 @@
+{
+  "id": "ai-engineering",
+  "title": "AI Engineering",
+  "subtitle": "38 concepts across five tracks",
+  "summary": "Toward AI engineer / architect, ordered so the Claude Certified Architect – Foundations domains come first. Track letters and the two-axis framing are shared with the nikai learning path.",
+  "badges": [
+    { "label": "CCAR-F", "tone": "info" },
+    { "label": "38 concepts", "tone": "muted" }
+  ],
+  "updated_at": "2026-08-16",
+  "surfaces": [
+    {
+      "id": "ai-engineering",
+      "title": "AI Engineering curriculum",
+      "file": "curriculum.json",
+      "format": "tree",
+      "role": "curriculum"
+    },
+    {
+      "id": "ai-engineering-courses",
+      "title": "External courses and certifications",
+      "file": "catalogue.json",
+      "format": "tree",
+      "role": "catalogue"
+    }
+  ]
+}

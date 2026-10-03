@@ -7,3 +7,4 @@ import './feedback.js';
 import './loader.js';
 import './error.js';
 import './code.js';
+import './tree.js';

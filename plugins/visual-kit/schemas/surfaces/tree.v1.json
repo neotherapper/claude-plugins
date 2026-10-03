@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vk://schemas/tree.v1.json",
+  "title": "TreeSurfaceV1",
+  "description": "A navigable tree of nodes, each optionally carrying inline detail shown in a popover when the node is activated. Domain-neutral: used for curricula, roadmaps, taxonomies, decision trees. Display hierarchy comes from nested `children`; non-hierarchical dependencies are declared per-node via `requires` and rendered as cross-links in the detail panel rather than as drawn edges.",
+  "type": "object",
+  "required": ["surface", "version", "nodes"],
+  "additionalProperties": false,
+  "properties": {
+    "surface": { "const": "tree" },
+    "version": { "const": 1 },
+    "title": { "type": "string", "maxLength": 200 },
+    "subtitle": { "type": "string", "maxLength": 400 },
+
+    "groups": {
+      "description": "Optional named groups (curriculum tracks, roadmap lanes, categories). Nodes reference a group by id; the renderer uses them for the legend and per-node accent.",
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "label": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "description": { "type": "string", "maxLength": 600 },
+          "accent": {
+            "description": "Palette slot, not a raw colour. The theme owns the actual value so groups stay legible in light and dark.",
+            "enum": ["1", "2", "3", "4", "5", "6", "7", "8"]
+          }
+        }
+      }
+    },
+
+    "orderings": {
+      "description": "Named traversal orders over the node ids. Lets one tree carry several study sequences (e.g. an exam-first order and a dependency-first order) without duplicating content.",
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "sequence"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "label": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "description": { "type": "string", "maxLength": 600 },
+          "default": { "type": "boolean" },
+          "sequence": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 500,
+            "items": { "$ref": "#/$defs/id" }
+          }
+        }
+      }
+    },
+
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "items": { "$ref": "#/$defs/node" }
+    }
+  },
+
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$",
+      "description": "Stable kebab-case identifier, unique across the whole spec."
+    },
+
+    "node": {
+      "type": "object",
+      "required": ["id", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "group": { "$ref": "#/$defs/id" },
+        "kind": {
+          "description": "Structural role. `branch` nodes organise; `leaf` nodes are the actual units of content. Advisory — the renderer styles them differently but does not enforce childlessness.",
+          "enum": ["branch", "leaf"]
+        },
+        "badges": {
+          "description": "Short display-only chips (level, duration, status supplied by an overlay). Carries no semantics for the renderer beyond ordering.",
+          "type": "array",
+          "maxItems": 6,
+          "items": { "type": "string", "minLength": 1, "maxLength": 40 }
+        },
+        "requires": {
+          "description": "Ids of nodes that should be understood first. May point anywhere in the tree, including other branches — this is how a DAG is expressed without drawing edges.",
+          "type": "array",
+          "maxItems": 20,
+          "items": { "$ref": "#/$defs/id" }
+        },
+        "detail": { "$ref": "#/$defs/detail" },
+        "children": {
+          "type": "array",
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/node" }
+        }
+      }
+    },
+
+    "detail": {
+      "description": "Inline node detail rendered in the popover. Inline rather than fetched by id: components are forbidden from performing network access (pure-component rule), so everything the popover shows must arrive with the spec.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": { "type": "string", "maxLength": 800 },
+        "meta": {
+          "description": "Label/value pairs shown as a definition list. The extension point for domain fields the tree surface deliberately does not model (exam weight, axis, difficulty).",
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": ["label", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string", "minLength": 1, "maxLength": 60 },
+              "value": { "type": "string", "minLength": 1, "maxLength": 200 }
+            }
+          }
+        },
+        "body": {
+          "type": "array",
+          "maxItems": 30,
+          "items": { "$ref": "#/$defs/block" }
+        },
+        "resources": {
+          "type": "array",
+          "maxItems": 40,
+          "items": { "$ref": "#/$defs/resource" }
+        }
+      }
+    },
+
+    "block": {
+      "description": "Typed content block. Typed rather than raw HTML because unsafeHTML is allowlisted to the lesson surface only; every block here maps to a known element.",
+      "type": "object",
+      "required": ["type"],
+      "oneOf": [
+        {
+          "properties": {
+            "type": { "const": "text" },
+            "text": { "type": "string", "minLength": 1, "maxLength": 4000 }
+          },
+          "required": ["text"],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "type": { "const": "heading" },
+            "text": { "type": "string", "minLength": 1, "maxLength": 200 }
+          },
+          "required": ["text"],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "type": { "const": "list" },
+            "ordered": { "type": "boolean" },
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 30,
+              "items": { "type": "string", "minLength": 1, "maxLength": 600 }
+            }
+          },
+          "required": ["items"],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "type": { "const": "code" },
+            "language": { "type": "string", "maxLength": 40 },
+            "source": { "type": "string", "minLength": 1, "maxLength": 6000 }
+          },
+          "required": ["source"],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "type": { "const": "callout" },
+            "tone": { "enum": ["note", "warning", "pitfall"] },
+            "text": { "type": "string", "minLength": 1, "maxLength": 1200 }
+          },
+          "required": ["text"],
+          "additionalProperties": false
+        }
+      ]
+    },
+
+    "resource": {
+      "description": "A learning resource. `institution` and `certification` make the catalogue queryable from the same data that feeds the popover, so the course catalogue and the concept detail cannot drift apart.",
+      "type": "object",
+      "required": ["type", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "video", "course", "book", "paper", "article",
+            "docs", "tool", "presentation", "exam-guide"
+          ]
+        },
+        "title": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "url": {
+          "description": "Canonical, durable location — the publisher's own landing page. Prefer this over a direct file link, which may rotate.",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2000
+        },
+        "artifact_url": {
+          "description": "The specific document retrieved when the claim was checked (a PDF, a dated release). Distinct from `url` because artifact links are often generated and expire, while the landing page persists.",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2000
+        },
+        "author": { "type": "string", "maxLength": 200 },
+        "institution": {
+          "description": "Publishing body — Anthropic, Google Cloud, DeepLearning.AI, a university, a named author's own site.",
+          "type": "string",
+          "maxLength": 160
+        },
+        "certification": {
+          "description": "Certification this resource is official preparation for. Omit entirely unless the vendor itself says so — third-party sites circulate invented exam blueprints.",
+          "type": "string",
+          "maxLength": 200
+        },
+        "cost": { "enum": ["free", "freemium", "paid"] },
+        "lifecycle": {
+          "description": "Whether the thing this resource describes still exists in the form described. Distinct from `verified_at`: a date records when you looked, not whether what you found has since been withdrawn. A credential verified in March and retired in June is stale in a way a date alone does not surface. `version-changing` marks one being superseded on a known timetable.",
+          "enum": ["current", "version-changing", "retired"]
+        },
+        "provenance": {
+          "description": "How the author came to believe this entry's claims. `primary` — read from the publisher's own page or document. `secondary` — summarised from someone else's write-up of the source. `relayed` — taken from another party's extraction without independent checking. Orthogonal to `verified_at` and `lifecycle`, which answer *when* and *does it still exist*; this answers *how do I know*. Omitting a source does not make an unverified figure safer — it makes it unfalsifiable while the precision still reads as verification, which is the failure this field exists to prevent.",
+          "enum": ["primary", "secondary", "relayed"]
+        },
+        "duration": {
+          "description": "Human-readable length: '2 hrs', '12 lessons', '340 pp'.",
+          "type": "string",
+          "maxLength": 60
+        },
+        "level": { "enum": ["beginner", "intermediate", "advanced"] },
+        "note": { "type": "string", "maxLength": 600 },
+        "verified_at": {
+          "description": "ISO date on which `url` was last checked against the publisher's own page. Absent means the claim is unverified and the renderer marks it as such.",
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "Any resource asserting a certification affiliation must be checkable: it needs both a URL and a verification date.",
+          "if": { "required": ["certification"] },
+          "then": { "required": ["url", "verified_at"] }
+        }
+      ]
+    }
+  }
+}

@@ -11,7 +11,7 @@ const TAG_TO_BUNDLE: Record<string, string> = {
 // Core-bundle tags — used only for the unknown-tag assertion below.
 const KNOWN_CORE_TAGS = new Set([
   'vk-section', 'vk-card', 'vk-gallery', 'vk-outline', 'vk-comparison',
-  'vk-feedback', 'vk-loader', 'vk-error', 'vk-code',
+  'vk-feedback', 'vk-loader', 'vk-error', 'vk-code', 'vk-tree',
 ]);
 
 // Scan rendered HTML for <vk-*> opening tags in tag-name position only.

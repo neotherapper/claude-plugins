@@ -9,11 +9,30 @@ The canonical skills live under `plugins/<plugin>/skills/<skill>/SKILL.md`. Each
 them at the top-level path it scans (via symlinks kept in sync by `scripts/sync-skills.sh`):
 
 - **Claude Code** — auto-discovered from each plugin via the marketplace.
-- **Codex, OpenCode, Antigravity** — `.agents/skills/<skill>/SKILL.md`.
+- **Codex, OpenCode, Antigravity, Cline, Cursor, Gemini CLI, Copilot** — `.agents/skills/<skill>/SKILL.md`.
 - **Kiro** — `.kiro/skills/<skill>/SKILL.md`.
+- **Pi, and any other harness** (DeepSeek, Roo, Goose, Windsurf, ...) — not in this repo's symlink
+  farm; Pi reads `.pi/skills/<skill>/SKILL.md`, which is wherever
+  `npx skills add neotherapper/claude-plugins` put it (the CLI's per-agent path), or the folder
+  the user copied from `plugins/<plugin>/skills/<skill>/`.
 
-Match a skill by its `description` and follow it when it applies. Full settings/files matrix:
-`docs/platform/multi-tool-support.md`.
+If you are running inside a project that installed these skills with the `skills` CLI rather than
+this repo, the skill folders are real copies at the path above. Each copy carries its own
+`scripts/` and `references/`. Some skills still use Claude Code's `${CLAUDE_PLUGIN_ROOT}`
+variable — resolve it like this on any other harness:
+
+- `${CLAUDE_PLUGIN_ROOT}/skills/<skill>/<file>` → `<file>` inside that skill's own folder.
+- Any other `${CLAUDE_PLUGIN_ROOT}/…` path (beacon `technologies/`, `scripts/core/`, `templates/`;
+  aegis `scripts/coverage.py`; idea-forge `agents/`; reframe `categories/`, `templates/`;
+  paidagogos `packs/`, `scripts/`, and the `visual-kit` renderer) lives at the plugin root, outside
+  the skill folder, so a CLI copy does not include it. Read it from `plugins/<plugin>/…` in a clone
+  of this repo, or fetch it from
+  `https://raw.githubusercontent.com/neotherapper/claude-plugins/main/plugins/<plugin>/…`.
+  If the file is essential (aegis, idea-forge evaluate, paidagogos rendering) tell the user the
+  skill needs the repo clone or the Claude Code plugin.
+
+Match a skill by its `description` and follow it when it applies. Full settings/files matrix and
+per-harness install commands: `docs/platform/multi-tool-support.md`.
 
 ## Available Plugins
 
@@ -25,6 +44,7 @@ Skills in `plugins/paidagogos/skills/`:
 |-------|------|-----------------|
 | `paidagogos` | `plugins/paidagogos/skills/paidagogos/SKILL.md` | User asks to learn a topic, wants an explanation, or says "teach me X" |
 | `paidagogos:micro` | `plugins/paidagogos/skills/paidagogos-micro/SKILL.md` | User specifies `/paidagogos:micro` directly, or router routes a single-concept request here |
+| `paidagogos:path` | `plugins/paidagogos/skills/paidagogos-path/SKILL.md` | User wants a whole learning path or roadmap rather than one lesson — "I want to become X", "show me the curriculum", `/paidagogos:path` |
 
 ### beacon — Site API Surface Mapper
 
@@ -57,6 +77,9 @@ When the user's request matches any of these patterns, load and follow the corre
 | "what is [topic]" (learning context) | `paidagogos` |
 | "quiz me on [topic]" | `paidagogos` |
 | "/paidagogos serve" | `paidagogos` (start visual server) |
+| "I want to become [role]" / "roadmap for X" | `paidagogos:path` |
+| "show me the curriculum" / "what should I learn next" | `paidagogos:path` |
+| "show me all roadmaps" / "what curricula exist" | `paidagogos:path` (renders the index) |
 | "analyse https://..." | `site-recon` |
 | "research this site" | `site-recon` |
 | "map the API surface of..." | `site-recon` |
@@ -131,3 +154,17 @@ When the user's request matches any of these patterns, use the corresponding too
 2. The chrome-devtools MCP is available for browser testing — use it via `agent-skills:browser-testing-with-devtools`, not directly
 3. All new plugin code goes in `plugins/<plugin-name>/` — never in `docs/` or project root
 4. Specs for new plugins go in `docs/superpowers/specs/` before any implementation begins
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as GitHub issues in `neotherapper/claude-plugins`, driven by the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical triage roles, each label string equal to its name. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.

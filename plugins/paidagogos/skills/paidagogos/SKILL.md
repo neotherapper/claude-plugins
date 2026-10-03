@@ -34,10 +34,15 @@ Entry point for the `paidagogos` plugin. Classify the user's learning intent and
 | "show me [thing] visually / with sliders / animated" | Scope check → route to `paidagogos:micro` (interactive mode) |
 | "/paidagogos [topic]" (bare invocation) | Scope check → route to `paidagogos:micro` |
 | "/paidagogos serve" or "start the server" | Start visual-kit: run `visual-kit serve --project-dir .` in background (`run_in_background: true`), poll `.visual-kit/server/state/server-info` until `status` is `"running"`, report the URL. Do NOT ask the user to run it. |
-| "quiz me on [thing]" | Respond: "`paidagogos:quiz` is coming in v0.3.0. Use `/paidagogos [topic]` to get a lesson with a built-in quiz." |
-| "what have I learned" / "show progress" | Respond: "Progress tracking is coming in v0.3.0." |
-| "continue my lesson on X" | Respond: "Session recall is coming in v0.3.0." |
-| "I want to become [role]" / "roadmap for X" | Scope check → if broad, explain path is v0.3.0, offer first concept |
+| "quiz me on [thing]" | Respond: "`paidagogos:quiz` is coming in a later release. Use `/paidagogos [topic]` to get a lesson with a built-in quiz." |
+| "what have I learned" / "show progress" | Respond: "Progress tracking is not modelled yet — curricula are content-only by design. Ask for the path to see the concept tree." |
+| "continue my lesson on X" | Respond: "Session recall is coming in a later release." |
+| "I want to become [role]" / "roadmap for X" | Route to `paidagogos:path` |
+| "show me the curriculum" / "learning path for X" | Route to `paidagogos:path` |
+| "what should I learn next" | Route to `paidagogos:path` |
+| "/paidagogos:path" | Route to `paidagogos:path` |
+| "what curricula do you have" / "show me all roadmaps" | `paidagogos:path` (index) |
+| "/paidagogos:path" with no topic | `paidagogos:path` (index) |
 
 ## Scope classifier
 
@@ -55,13 +60,17 @@ When the topic is broad, respond:
 **[Topic]** is a broad area with many concepts. What would you like to do?
 
 1. **One focused lesson** — pick one concept to learn right now (I'll suggest a good starting point)
-2. **Full learning path** — a structured roadmap with milestones *(coming in v0.3.0)*
+2. **Full learning path** — the concept tree, rendered in the browser
 
 Which would you prefer?
 ```
 
 If the user picks option 1: suggest the best entry concept and invoke `paidagogos:micro`.
-If the user picks option 2: "Learning paths are coming in v0.3.0. For now, I can teach you [entry concept]. Want to start there?"
+If the user picks option 2: invoke `paidagogos:path`.
+
+When a curriculum already exists for the broad topic (see the index produced by
+`paidagogos:path`), skip the question and route straight to `paidagogos:path` —
+asking is only worthwhile when no path exists yet.
 
 When genuinely uncertain, default to the broad topic flow and ask.
 

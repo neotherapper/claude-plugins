@@ -86,7 +86,7 @@
 
 ## D-009 — Curriculum lives in paidagogos, not in the SEO plugin
 
-**Decision:** The 12-lesson SEO Developer Mastery curriculum lives at `plugins/paidagogos/skills/paidagogos-micro/references/curricula/seo-developer-mastery.md`, not in `plugins/seo/`.
+**Decision:** The 12-lesson SEO Developer Mastery curriculum lives at `plugins/paidagogos/packs/seo-developer-mastery/curriculum.md`, not in `plugins/seo/`.
 
 **Why:** Separation of concerns: SEO plugin = audit tools, paidagogos = learning. Lesson 12 references `/seo:audit` as the final practical exercise, but the curriculum can be reviewed and updated without touching the audit code or the plugin manifest. Outline, quizzes, and resources are paidagogos's domain; check inputs and rule thresholds are SEO's domain.
 

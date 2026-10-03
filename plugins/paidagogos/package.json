@@ -1,0 +1,12 @@
+{
+  "name": "@claude-plugins/paidagogos-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Build-time scripts for the paidagogos plugin. Runtime is handled by .claude-plugin/plugin.json; this package.json only provides deps for scripts/build-index.mjs.",
+  "version": "0.4.0",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1"
+  }
+}
