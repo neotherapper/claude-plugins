@@ -22,8 +22,8 @@ Turns a site's fingerprint (from beacon or HTTP headers) into a prioritized secu
 Or run the orchestrator directly:
 
 ```bash
-python3 plugins/aegis/scripts/coverage.py --url https://example.com
-python3 plugins/aegis/scripts/coverage.py --slug my-site-slug
+python3 plugins/aegis/skills/site-security/scripts/coverage.py --url https://example.com
+python3 plugins/aegis/skills/site-security/scripts/coverage.py --slug my-site-slug
 ```
 
 ## Data Sources
@@ -54,11 +54,11 @@ python3 plugins/aegis/scripts/coverage.py --slug my-site-slug
 
 ```bash
 # Run all tests
-python3 -m pytest plugins/aegis/scripts/ -q
+python3 -m pytest plugins/aegis/skills/site-security/scripts/ -q
 
 # Individual module tests
-python3 -m pytest plugins/aegis/scripts/test_http.py -q
-python3 -m pytest plugins/aegis/scripts/test_osv.py -q
+python3 -m pytest plugins/aegis/skills/site-security/scripts/test_http.py -q
+python3 -m pytest plugins/aegis/skills/site-security/scripts/test_osv.py -q
 ```
 
 Zero third-party dependencies — stdlib `urllib` only.
