@@ -137,10 +137,12 @@ success) — every later phase and the Phase 12 gate refer back to it as `{OUTPU
 `{OUTPUT_ROOT}` is the scaffolded path itself (a placeholder you substitute, like `{url}`/`{slug}`),
 not a persisted shell variable — `$OUTPUT_ROOT` does not survive across separate command
 invocations, so re-substitute the actual path each time you run a command that needs it. If
-scaffold.sh prints `[LEGACY-WORKSPACE:docs/research/{slug}]` (it detects this deterministically —
-default path in use and a pre-0.7.0 `docs/research/{slug}/` folder present), point the user at
-the new path: new output goes to `docs/sites/{slug}/research/`; the old `docs/research/{slug}/` is
-read-only and removed in 0.8.0 — move it to consolidate.
+scaffold.sh prints `[LEGACY-WORKSPACE:docs/research/{slug}]` or
+`[LEGACY-WORKSPACE-CROSS-SLUG:{path}]` (it detects both deterministically — default path in use,
+plus either an exact-slug match or a legacy `docs/research/*/INDEX.md` that mentions the target
+hostname under a *different* slug), point the user at the new path: new output goes to
+`docs/sites/{slug}/research/`; the old workspace is read-only — move/consolidate it into the new
+one rather than writing further findings into it.
 
 **Critical:** Every output file now exists on disk with valid OKF frontmatter — never create
 output files by hand with `Write`/`touch`. All subsequent phases (including Phase 12) `Edit` into

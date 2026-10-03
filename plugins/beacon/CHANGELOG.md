@@ -7,6 +7,11 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.10.3] — 2026-10-03
+
+### Fixed
+- `scaffold.sh` only flagged a legacy `docs/research/` workspace filed under the *exact* new slug. A bundle filed under a different name (a business name instead of the domain) went unnoticed, so new findings silently forked into a second workspace. It now falls back to a content match — any legacy `INDEX.md` mentioning the target hostname — and prints `[LEGACY-WORKSPACE-CROSS-SLUG:{path}]`; `SKILL.md` tells the agent to consolidate rather than write into it.
+
 ## [0.10.2] — 2026-10-03
 
 ### Fixed

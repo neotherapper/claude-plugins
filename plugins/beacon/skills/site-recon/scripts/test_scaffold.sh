@@ -36,4 +36,30 @@ TMP5=$(mktemp -d)
 OVR_LOG=$( cd "$TMP5" && mkdir -p "docs/research/ex-com" && OUTPUT_ROOT="$TMP5/custom" OUTPUT_ROOT_OVERRIDDEN=1 URL="https://ex.com" bash "$DIR/scaffold.sh" 2>&1 )
 grep -qF "[LEGACY-WORKSPACE" <<<"$OVR_LOG" && { echo "FAIL: caller-supplied OUTPUT_ROOT must suppress [LEGACY-WORKSPACE]"; exit 1; }
 
+# ---- T7-m1: cross-slug legacy detection — content match by hostname, not slug ----
+# Positive: a legacy bundle exists under a DIFFERENT slug (a business name, not the
+# domain) but its own INDEX.md mentions the target hostname — must still be flagged.
+TM6=$(mktemp -d)
+XSLUG_LOG=$( cd "$TM6" && mkdir -p "docs/research/acme-portal" \
+  && printf 'resource: "https://app.example.com/"\n' > "docs/research/acme-portal/INDEX.md" \
+  && URL="https://app.example.com/Login.aspx?r=4" bash "$DIR/scaffold.sh" 2>&1 )
+grep -qF "[LEGACY-WORKSPACE-CROSS-SLUG:docs/research/acme-portal]" <<<"$XSLUG_LOG" \
+  || { echo "FAIL: cross-slug legacy bundle mentioning target hostname not flagged"; exit 1; }
+# Negative: an unrelated legacy bundle under docs/research/ (different hostname) must
+# not false-positive.
+TM7=$(mktemp -d)
+NOHIT_LOG=$( cd "$TM7" && mkdir -p "docs/research/some-other-site" \
+  && printf 'resource: "https://totally-unrelated.example/"\n' > "docs/research/some-other-site/INDEX.md" \
+  && URL="https://app.example.com/Login.aspx?r=4" bash "$DIR/scaffold.sh" 2>&1 )
+grep -qF "[LEGACY-WORKSPACE" <<<"$NOHIT_LOG" \
+  && { echo "FAIL: unrelated legacy bundle must not trigger a false-positive match"; exit 1; }
+# Negative: exact-slug match still takes the existing (cheaper) path, not the new one.
+TM8=$(mktemp -d)
+EXACT_LOG=$( cd "$TM8" && mkdir -p "docs/research/app-example-com" \
+  && URL="https://app.example.com/Login.aspx?r=4" bash "$DIR/scaffold.sh" 2>&1 )
+grep -qF "[LEGACY-WORKSPACE:docs/research/app-example-com]" <<<"$EXACT_LOG" \
+  || { echo "FAIL: exact-slug legacy match regressed"; exit 1; }
+grep -qF "CROSS-SLUG" <<<"$EXACT_LOG" \
+  && { echo "FAIL: exact-slug match should not also emit the cross-slug token"; exit 1; }
+
 echo "OK"
