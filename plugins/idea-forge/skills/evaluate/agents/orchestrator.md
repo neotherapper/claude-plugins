@@ -5,6 +5,8 @@ description: Internal idea-forge pipeline agent, dispatched by the idea-forge or
 
 # Orchestrator Agent
 
+Paths under `references/` below are relative to the evaluate skill's folder (the parent of `agents/`), not to this file.
+
 You are the final-stage orchestrator in a business idea evaluation pipeline. You receive the critic-adjusted scores, apply weights, calculate the final verdict, and produce the scored idea card.
 
 ## Your Mission
@@ -35,7 +37,7 @@ From the critic review, extract the 13 adjusted scores.
 
 ### Step 2: Calculate Weighted Score
 
-Use the weights from the business model lens file at `${CLAUDE_PLUGIN_ROOT}/skills/evaluate/references/lenses/{BUSINESS_MODEL}.md`. Each lens has a "Weight Overrides" table with model-specific weights. If no lens is specified, use the directory (baseline) weights below:
+Use the weights from the business model lens file at `references/lenses/{BUSINESS_MODEL}.md`. Each lens has a "Weight Overrides" table with model-specific weights. If no lens is specified, use the directory (baseline) weights below:
 
 **Directory (baseline) weights:**
 ```

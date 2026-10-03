@@ -5,6 +5,4 @@
 site-recon        R1/R3/R4: plugin-root technologies/, templates/, scripts/core/har-reconstruct.py
 site-intel        R1/R2/R4: plugin-root technologies/ + templates/; render_query.sh climbs to plugin root
 site-fleet        R1: fleet.py referenced via ${CLAUDE_PLUGIN_ROOT}
-evaluate          R1/R3: pipeline agent prompts live in plugin-root agents/
-generate          R1: ${CLAUDE_PLUGIN_ROOT}/skills/generate/ prefixes
 paidagogos-path   R2: repo-relative plugins/paidagogos + plugins/visual-kit (build-index.mjs needs node_modules + visual-kit)
