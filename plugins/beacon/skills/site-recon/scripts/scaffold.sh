@@ -11,7 +11,21 @@ if [ -z "${OUTPUT_ROOT:-}" ]; then
   # pressure — so the detection lives here. Suppressed whenever the caller supplied
   # an explicit OUTPUT_ROOT (incl. SKILL.md's own docs/research/{slug} example), so
   # we never nag a caller away from a path they deliberately chose.
-  [ -d "docs/research/${SLUG}" ] && echo "[LEGACY-WORKSPACE:docs/research/${SLUG}]"
+  if [ -d "docs/research/${SLUG}" ]; then
+    echo "[LEGACY-WORKSPACE:docs/research/${SLUG}]"
+  elif [ -d "docs/research" ]; then
+    # T7-m1: the check above is exact-directory-name only, so a legacy bundle filed
+    # under a DIFFERENT slug (e.g. a business name instead of the domain:
+    # "acme-portal" vs "app-example-com") was never caught, silently forking new
+    # findings into two workspaces — this happened in a real recon. Fall back to a content match: grep
+    # every legacy INDEX.md for the target hostname.
+    DOMAIN=$(printf '%s' "$URL" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s#/.*$##; s/:[0-9]+$//; s/^www\.//')
+    HIT=$(grep -rli -- "$DOMAIN" docs/research --include="*.md" 2>/dev/null | head -1 || true)
+    if [ -n "$HIT" ]; then
+      LEGACY_ROOT=$(printf '%s\n' "$HIT" | sed -E 's#^(docs/research/[^/]+).*#\1#')
+      echo "[LEGACY-WORKSPACE-CROSS-SLUG:${LEGACY_ROOT}]"
+    fi
+  fi
 fi
 [ -n "${OUTPUT_ROOT_OVERRIDDEN:-}" ] && echo "[OUTPUT-OVERRIDE:${OUTPUT_ROOT}]"
 TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
