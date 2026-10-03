@@ -2,7 +2,4 @@
 # Ratchet: remove a line when the skill is fixed; the checker fails on stale lines.
 # `paidagogos-path` is expected to stay (needs the plugin's node_modules + visual-kit).
 # Format: <skill-name>  <reason>
-site-recon        R1/R3/R4: plugin-root technologies/, templates/, scripts/core/har-reconstruct.py
-site-intel        R1/R2/R4: plugin-root technologies/ + templates/; render_query.sh climbs to plugin root
-site-fleet        R1: fleet.py referenced via ${CLAUDE_PLUGIN_ROOT}
 paidagogos-path   R2: repo-relative plugins/paidagogos + plugins/visual-kit (build-index.mjs needs node_modules + visual-kit)

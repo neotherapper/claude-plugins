@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-SCRIPT="plugins/beacon/scripts/core/har-reconstruct.py"
+SCRIPT="plugins/beacon/skills/site-recon/scripts/har-reconstruct.py"
 PASS=0
 FAIL=0
 

@@ -47,7 +47,7 @@ LEG="$TMP/site/research/api-surfaces/authed.md"
 } > "$LEG"
 
 # Fixture 3: OKF-canonical quoted style — `resource:` and `auth:` both quoted,
-# exactly as plugins/beacon/templates/okf/api-surface.md:4,8 render them for a
+# exactly as site-recon/templates/okf/api-surface.md:4,8 render them for a
 # real (post-0.7.1) public surface (`resource: "{{BASE_URL}}"`, `auth: "none"`).
 # This is the case Finding 1 reproduced: unstripped quotes on a quoted `auth:
 # "none"` were misclassified as needing an authed snippet, and unstripped quotes
@@ -111,7 +111,7 @@ grep -q "# authed surface snippet" "$TMP/site/research/scripts/query-authed-auth
   || { echo "FAIL: quoted auth: \"oauth\" should still pick Authed first record after quote-stripping"; exit 1; }
 
 # 2b) Quoted OKF-canonical surface (Finding 1 regression): resource: "..." and
-#     auth: "none" both quoted, exactly as plugins/beacon/templates/okf/api-surface.md
+#     auth: "none" both quoted, exactly as site-recon/templates/okf/api-surface.md
 #     renders them. Before the fix, unstripped quotes on auth: "none" picked the
 #     Authed snippet instead of First record, and unstripped quotes on resource:
 #     embedded literal quote characters inside the generated URL.

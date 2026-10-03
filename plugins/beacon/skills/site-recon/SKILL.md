@@ -9,6 +9,8 @@ metadata:
 
 # site-recon — Research Mode
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
 Systematically analyse a target website across 16 ordered phases. Each phase writes
 findings to an in-memory **session brief** (a running markdown document in context).
 Phase 12 flushes everything to disk as structured research files.
@@ -19,8 +21,8 @@ Before reading the phase detail below, run the scaffold so every output file exi
 OKF stub, then edit into those files as you go:
 
 ```bash
-URL="{url}" bash "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/scaffold.sh"
-# honour a caller-supplied path: OUTPUT_ROOT="docs/research/{slug}" OUTPUT_ROOT_OVERRIDDEN=1 URL="{url}" bash .../scaffold.sh
+URL="{url}" bash scripts/scaffold.sh
+# honour a caller-supplied path: OUTPUT_ROOT="docs/research/{slug}" OUTPUT_ROOT_OVERRIDDEN=1 URL="{url}" bash scripts/scaffold.sh
 ```
 
 Output conforms to `references/okf-profile.md` (Google OKF v0.1 + beacon types/enums). Never
@@ -120,14 +122,14 @@ tree, and writes every output file as a valid OKF stub (`status: draft`) plus th
 working files:
 
 ```bash
-URL="{url}" bash "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/scaffold.sh"
+URL="{url}" bash scripts/scaffold.sh
 ```
 
 `OUTPUT_ROOT` defaults to `docs/sites/{slug}/research`. To honour a caller-supplied path instead,
 set both `OUTPUT_ROOT` and `OUTPUT_ROOT_OVERRIDDEN=1`:
 
 ```bash
-OUTPUT_ROOT="docs/research/{slug}" OUTPUT_ROOT_OVERRIDDEN=1 URL="{url}" bash "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/scaffold.sh"
+OUTPUT_ROOT="docs/research/{slug}" OUTPUT_ROOT_OVERRIDDEN=1 URL="{url}" bash scripts/scaffold.sh
 ```
 
 Record the printed path as `{OUTPUT_ROOT}` (scaffold.sh echoes `[SCAFFOLD:${OUTPUT_ROOT}]` on
@@ -302,15 +304,15 @@ Once framework and major version are known, try in order:
 
 1. **Bundled pack** (primary — offline, always matches the running version):
    ```
-   ${CLAUDE_PLUGIN_ROOT}/technologies/{framework}/{major}.x.md
+   technologies/{framework}/{major}.x.md
    ```
-   If that exact file is absent, list `${CLAUDE_PLUGIN_ROOT}/technologies/{framework}/` and load the best match — a `{N}.x.md` for the nearest major, else `current.md`, `tech-pack.md`, or a dated `{YYYY-MM}.md`. Consult `${CLAUDE_PLUGIN_ROOT}/technologies/REGISTRY.md` to confirm the framework slug and which packs exist. This copy ships with the plugin, so it needs no network and can never 404.
+   If that exact file is absent, list `technologies/{framework}/` and load the best match — a `{N}.x.md` for the nearest major, else `current.md`, `tech-pack.md`, or a dated `{YYYY-MM}.md`. Consult `technologies/REGISTRY.md` to confirm the framework slug and which packs exist. The bundled copy needs no network.
 
-2. **GitHub** (fallback — newer packs published after this install, or no bundled copy) — version-pinned raw URL:
+2. **GitHub** (fallback — only when the bundled pack file is missing) — raw URL:
    ```
-   https://raw.githubusercontent.com/neotherapper/claude-plugins/v{PLUGIN_VERSION}/plugins/beacon/technologies/{framework}/{major}.x.md
+   https://raw.githubusercontent.com/neotherapper/claude-plugins/main/plugins/beacon/skills/site-recon/technologies/{framework}/{major}.x.md
    ```
-   Read `{PLUGIN_VERSION}` from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` — never use the `main` branch. (The bundled pack above is the version-matched source; this network path only adds packs published after the install.)
+   Release tags stop at v0.6.0, so a versioned URL never resolved; use `main`, and only when the bundled file is missing. Read `{PLUGIN_VERSION}` from `../../.claude-plugin/plugin.json` (present in a Claude Code install and a repo clone); if the file is absent (skills-CLI copy) record `unversioned`.
 
 3. **context7 MCP** (if available) — ask for framework's official API documentation
 
@@ -408,7 +410,7 @@ If an exposed file check returns content containing "cf-browser-verification" or
 log `[PHASE-6B-FALSE-POSITIVE:{path}]` and mark as `MITIGATED`.
 
 **Bundled script:** `scripts/config_leakage.sh` automates the exposed-config probe above
-(`TARGET={domain} bash ${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/config_leakage.sh`). It is
+(`TARGET={domain} bash scripts/config_leakage.sh`). It is
 also executed by the Phase 9 `osint.py run_all` sweep, so a full run covers it even if skipped here.
 
 **Output**: Append findings to the session brief with severity assessment. High-severity findings
@@ -583,11 +585,11 @@ Run the bundled OSINT sweep first, then mine the additional sources in
 execute rather than living only in a reference file that gets skipped under synthesis pressure.
 
 **1 — Bundled script sweep (primary).** `osint.py run_all` orchestrates every bundled `*.sh`
-helper in `${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/` (via `bash`, so the executable bit does
+helper in `scripts/` (via `bash`, so the executable bit does
 not matter) and returns one JSON document keyed by step:
 ```bash
 DOMAIN=$(printf '%s' "{url}" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s#/.*$##; s/:[0-9]+$//')
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/osint.py" run_all --target "$DOMAIN" --exclude cloud-enum,container-scan
+python3 "scripts/osint.py" run_all --target "$DOMAIN" --exclude cloud-enum,container-scan
 ```
 This runs 7 of the 9 bundled helpers — `passive_dns`, `sublist3r`, `tls_fingerprint`, `cicd-scan`,
 `graphql_introspect`, `openapi_detect`, `config_leakage` (purposes in the **Bundled scripts** table
@@ -602,7 +604,7 @@ non-zero, fall back to running each helper directly and log
 `[TOOL-UNAVAILABLE:osint-orchestrator:fell-back-to-loop]`:
 ```bash
 DOMAIN=$(printf '%s' "{url}" | tr 'A-Z' 'a-z' | sed -E 's#^https?://##; s#/.*$##; s/:[0-9]+$//')
-for s in "${CLAUDE_PLUGIN_ROOT}"/skills/site-recon/scripts/*.sh; do
+for s in scripts/*.sh; do
   case "$(basename "$s")" in *_tests.sh|cloud-enum.sh|container-scan.sh) continue;; esac   # skip test harness + active infra probes (see Scope note)
   echo "=== $(basename "$s") ==="; TARGET="$DOMAIN" bash "$s" || true
 done
@@ -684,7 +686,7 @@ and OpenAPI generation commands.
 Summary of sub-phases:
 - **11a** — Detect Chrome MCP mode (`auto-connect` vs `new-instance`) or cmux; handle auth
 - **11b** — Execute browse plan: JS globals + network capture per URL (up to 10)
-- **11c** — Save raw captures to `.beacon/`; run `${CLAUDE_PLUGIN_ROOT}/scripts/core/har-reconstruct.py` → `.beacon/capture.har`
+- **11c** — Save raw captures to `.beacon/`; run `scripts/har-reconstruct.py` → `.beacon/capture.har`
 - **11d** — Run `npx har-to-openapi`; merge with passive spec if Phase 8 found one
 
 If neither Chrome DevTools MCP nor cmux is available: log `[PHASE-11-SKIPPED]`, proceed to Phase 12.
@@ -823,7 +825,7 @@ and `[THIRD-PARTY-KEYS:{n} found]` (Phase 9). A bare `[P9✓]` with none of thes
 deterministic sweep was skipped — run it now before writing output.
 
 Then run the deterministic OKF gate before declaring done:
-`python3 "${CLAUDE_PLUGIN_ROOT}/skills/site-recon/scripts/okf_validate.py" "{OUTPUT_ROOT}"`
+`python3 scripts/okf_validate.py "{OUTPUT_ROOT}"`
 (substitute the actual scaffolded path recorded in Phase 1 — `$OUTPUT_ROOT` is not a persisted
 shell variable across separate commands). Fix every reported violation; the `Stop` hook runs the
 same check and will block otherwise.
@@ -895,7 +897,7 @@ documentation. Every `.sh` helper reads a `TARGET={domain}` environment variable
 | `scripts/graphql_introspect.sh` | 6 / 9 | `/graphql` introspection schema dump |
 | `scripts/openapi_detect.sh` | 8 / 9 | Swagger / OpenAPI path probe |
 | `scripts/config_leakage.sh` | 6b / 9 | Exposed `.env` / config file probe |
-| `${CLAUDE_PLUGIN_ROOT}/scripts/core/har-reconstruct.py` | 11 | Rebuild `.beacon/capture.har` from raw captures (plugin-root `scripts/`, not this dir) |
+| `scripts/har-reconstruct.py` | 11 | Rebuild `.beacon/capture.har` from raw captures |
 
 The test harness (`run_osint_tests.sh`, `test_osint.py`) is not part of the phase flow and is
 skipped by `run_all`.
