@@ -30,6 +30,8 @@ jobs:
         run: |
           python3 tests/test_check_skill_portability.py
           python3 scripts/check-skill-portability.py
+      - name: Skills CLI install (copy every skill, re-check portability, smoke-test the copies)
+        run: bash scripts/check-skills-cli-install.sh
       - name: Build + verify skill symlink farm (.agents/skills, .kiro/skills)
         # The farm is generated output (git-ignored), so build it first, then verify it resolves cleanly.
         run: bash scripts/sync-skills.sh && bash scripts/sync-skills.sh --check
