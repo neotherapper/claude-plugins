@@ -6,7 +6,7 @@ folder into the user's project. Nothing outside that folder travels, so a skill 
 root resource, a repo-relative path, or climbs out of its folder works in a clone and in Claude Code
 but breaks silently everywhere else. Four rules, applied per skill folder (a dir holding SKILL.md):
 
-  R1  literal ${CLAUDE_PLUGIN_ROOT} anywhere (only Claude Code defines it).
+  R1  ${CLAUDE_PLUGIN_ROOT} or $CLAUDE_PLUGIN_ROOT anywhere (only Claude Code defines it).
   R2  repo-relative `plugins/<name>/` paths (they only exist in a clone). URLs such as
       raw.githubusercontent.com/.../plugins/<name>/... are fine. Files named test_* are skipped.
   R3  in .md files, a backticked path under references|scripts|templates|technologies|categories|
@@ -33,7 +33,7 @@ SKIP_DIRS = {"node_modules", ".pytest_cache", "__pycache__"}
 SCAN_SUFFIXES = {".md", ".sh", ".py", ".mjs", ".js", ".json", ".txt", ".template"}
 CODE_SUFFIXES = {".sh", ".py", ".mjs", ".js"}
 
-R1_RE = re.compile(r"\$\{CLAUDE_PLUGIN_ROOT\}")
+R1_RE = re.compile(r"\$\{?CLAUDE_PLUGIN_ROOT\b")
 R2_RE = re.compile(r"(?<![/\w])plugins/[A-Za-z0-9._-]+/")
 R3_SPAN_RE = re.compile(r"`([^`\n]+)`")
 R3_PATH_RE = re.compile(

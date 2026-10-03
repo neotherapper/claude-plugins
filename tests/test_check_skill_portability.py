@@ -33,6 +33,10 @@ class T(unittest.TestCase):
         skill(self.root, "p", "a", "Run `${CLAUDE_PLUGIN_ROOT}/scripts/x.py`.\n")
         rc, out = run(self.root); self.assertEqual(rc, 1); self.assertIn("R1", out)
 
+    def test_r1_braceless_plugin_root(self):
+        skill(self.root, "p", "a", "", {"references/r.md": "See $CLAUDE_PLUGIN_ROOT/skills/a/x.md"})
+        rc, out = run(self.root); self.assertEqual(rc, 1); self.assertIn("R1", out)
+
     def test_r2_repo_relative_but_not_raw_url(self):
         skill(self.root, "p", "a", "node plugins/p/scripts/x.mjs\n")
         rc, out = run(self.root); self.assertEqual(rc, 1); self.assertIn("R2", out)
