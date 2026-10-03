@@ -16,6 +16,10 @@ metadata:
 
 # paidagogos:path — Curriculum paths
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
+This skill's index build and schema checks run from a clone of this repo (they use `plugins/paidagogos/…` and `plugins/visual-kit/…` from the repo root); without a clone, report the curriculum in text.
+
 Loads a curriculum catalogue, renders it as an interactive tree, and hands
 individual concepts to `paidagogos:micro` when the user wants to actually learn one.
 

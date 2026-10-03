@@ -1,5 +1,7 @@
 # Output Synthesis
 
+Paths here are relative to the `site-recon` skill folder (the parent of `references/`), not to this file.
+
 Phase 12 reads the completed session brief and writes all research output files to disk.
 No network calls. No new tools. Pure synthesis from what Phases 1–11 captured.
 

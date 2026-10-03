@@ -96,13 +96,13 @@ The file write pattern used by eval agents: write to `{name}-eval.tmp`, then ren
 
 ## Tech-pack
 
-A framework-specific knowledge guide in `plugins/beacon/technologies/{framework}/{version}.md`. Tells the site-analyst exactly where to look for endpoints, routes, and API surfaces in a given framework version. This is the **fingerprint-pack** sub-pattern of the modular knowledge pack convention. See `docs/MODULAR_KNOWLEDGE_PACKS.md` §3a for the full definition including schema, required sections, and selection rules.
+A framework-specific knowledge guide in `plugins/beacon/skills/site-recon/technologies/{framework}/{version}.md`. Tells the site-analyst exactly where to look for endpoints, routes, and API surfaces in a given framework version. This is the **fingerprint-pack** sub-pattern of the modular knowledge pack convention. See `docs/MODULAR_KNOWLEDGE_PACKS.md` §3a for the full definition including schema, required sections, and selection rules.
 
 ---
 
 ## Category-pack
 
-A site-category knowledge file in `plugins/reframe/categories/{category}.md`. Carries redesign priorities, conversion patterns, IA conventions, and a design-system seed specific to a detected site category (e.g. `ecommerce`, `saas-marketing`, `local-service`). Selected by scoring `detect_signals` frontmatter against the analysed site; `generic.md` is the required fallback. See `docs/MODULAR_KNOWLEDGE_PACKS.md` §3b.
+A site-category knowledge file in `plugins/reframe/skills/site-redesign/categories/{category}.md`. Carries redesign priorities, conversion patterns, IA conventions, and a design-system seed specific to a detected site category (e.g. `ecommerce`, `saas-marketing`, `local-service`). Selected by scoring `detect_signals` frontmatter against the analysed site; `generic.md` is the required fallback. See `docs/MODULAR_KNOWLEDGE_PACKS.md` §3b.
 
 ---
 

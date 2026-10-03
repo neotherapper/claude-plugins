@@ -125,7 +125,9 @@ Skill text uses paths relative to that folder, so the copy works without the res
 
 | Plugin | Via `npx skills add` | Needs more than the skill folder |
 |---|---|---|
-| namesmith, draftloom, aegis, reframe, idea-forge (`generate`, `evaluate`) | works | nothing |
+| namesmith, aegis, reframe, idea-forge (`generate`, `evaluate`) | works | nothing |
+| draftloom `draft`, `setup` | works | nothing; `draft` carries the agent prompts (non-Claude harnesses run them as subagents or inline) |
+| draftloom `eval` | works with `draft` | `draft` installed alongside (it holds the scoring rubric and the agent prompts) |
 | beacon `site-recon` | works | nothing; version reads `unversioned` outside a plugin install |
 | beacon `site-intel`, `site-fleet` | works with `site-recon` | `site-recon` installed alongside (tech packs, templates, shared scripts) |
 | paidagogos `paidagogos-micro` | works | `visual-kit` for rendered lessons; falls back to Markdown in chat |

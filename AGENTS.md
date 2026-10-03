@@ -22,6 +22,7 @@ absolute paths before reading a file or running a script.
 
 - **beacon** — `site-intel` and `site-fleet` read `../site-recon/…`; they need `site-recon`
   installed alongside.
+- **draftloom** — `eval` reads `../draft/…` (the scoring rubric); it needs `draft` installed alongside.
 - **paidagogos** — lesson and path rendering needs the `visual-kit` renderer (Claude Code plugin or
   a repo clone). `paidagogos-micro` presents the lesson as Markdown in chat without it. Tell the
   user what is missing when a skill needs it.

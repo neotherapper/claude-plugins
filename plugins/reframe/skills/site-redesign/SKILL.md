@@ -91,7 +91,7 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 
 ## Phase 3 — Render gate and coverage gate
 
-**Input:** Site URL, session brief. Load `skills/site-redesign/references/crawl-and-coverage.md`.
+**Input:** Site URL, session brief. Load `references/crawl-and-coverage.md`.
 
 **Actions:**
 1. Fetch homepage (WebFetch; WAF fallback: Firecrawl → Jina → browser-fetch if 403).
@@ -108,7 +108,7 @@ Running markdown doc in context. Append after each phase; never overwrite. Secti
 
 ## Phase 4 — Content crawl and screenshots
 
-**Input:** URL cluster map from Phase 2, session brief. Load `skills/site-redesign/references/crawl-and-coverage.md`.
+**Input:** URL cluster map from Phase 2, session brief. Load `references/crawl-and-coverage.md`.
 
 **Actions:**
 1. Sample **1–2 pages per template cluster**; floor = homepage + primary nav targets.

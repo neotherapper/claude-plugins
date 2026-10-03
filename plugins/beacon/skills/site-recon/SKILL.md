@@ -847,7 +847,7 @@ Summary:
 
 > **v0.8.0 contract:** every api-surface file written under `${research_folder}/api-surfaces/`
 > MUST carry the OKF `resource:` frontmatter field (the surface's base URL). The
-> site-intel query-proof renderer (`skills/site-intel/scripts/render_query.sh`) reads
+> site-intel query-proof renderer (`../site-intel/scripts/render_query.sh`) reads
 > `resource:` as the base URL when present and falls back to `**Base URL:**` only for
 > legacy pre-0.7.1 surfaces. Phase 12 writes each surface file from
 > `templates/okf/api-surface.md`, whose `resource:` field already carries the
@@ -880,7 +880,7 @@ Load these when you need detailed guidance — they are not always necessary:
 
 ## Bundled scripts
 
-Deterministic helpers under `skills/site-recon/scripts/` — invoked by the phases above, not just
+Deterministic helpers under `scripts/` — invoked by the phases above, not just
 documentation. Every `.sh` helper reads a `TARGET={domain}` environment variable;
 `osint.py run_all --target {domain}` runs all of them in one call via `bash` (Phase 9) and accepts
 `--exclude name1,name2` to skip helpers.

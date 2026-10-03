@@ -1,5 +1,7 @@
 # Tool Availability — Detection, Fallbacks, Browser Commands
 
+Paths here are relative to the `site-recon` skill folder (the parent of `references/`), not to this file.
+
 ## Detection Commands (run during Phase 1)
 
 Check each tool and log `[AVAILABLE]` or `[TOOL-UNAVAILABLE:{name}]` in the session brief.
