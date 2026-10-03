@@ -7,7 +7,5 @@ site-intel        R1/R2/R4: plugin-root technologies/ + templates/; render_query
 site-fleet        R1: fleet.py referenced via ${CLAUDE_PLUGIN_ROOT}
 evaluate          R1/R3: pipeline agent prompts live in plugin-root agents/
 generate          R1: ${CLAUDE_PLUGIN_ROOT}/skills/generate/ prefixes
-site-naming       R1: ${CLAUDE_PLUGIN_ROOT}/skills/site-naming/ prefixes
-paidagogos-micro  R1: ${CLAUDE_PLUGIN_ROOT}/skills/paidagogos-micro/ prefixes
 paidagogos-path   R2: repo-relative plugins/paidagogos + plugins/visual-kit (build-index.mjs needs node_modules + visual-kit)
 site-redesign     R1/R2/R3: plugin-root categories/ and templates/; ${CLAUDE_PLUGIN_ROOT} script paths
