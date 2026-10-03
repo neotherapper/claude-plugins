@@ -37,7 +37,16 @@ SCRIPTS="$HOOKS/../skills/site-recon/scripts"
 VALIDATE="$SCRIPTS/okf_validate.py"
 MARKER_RETRY="$SCRIPTS/okf_marker_retry.py"
 
-MARKS=$(find . -path '*/.beacon/recon-active.json' -not -path '*/node_modules/*' 2>/dev/null)
+# Markers live under docs/ by contract: OUTPUT_ROOT defaults to
+# docs/sites/{slug}/research, and the legacy layout is docs/research/{slug}. Phase 12's
+# own sweep already globs exactly those two roots, so scoping the search to docs/ here
+# is the same assumption, not a new one.
+#
+# This MUST stay scoped. A bare `find .` walks the entire repo on every Stop — in a large
+# monorepo (worktrees, node_modules per worktree, .nx, .venv) that measured 60s+ and never
+# completed, so all 175 recorded runs died at the 30s hook timeout and the gate never
+# evaluated anything. Scoped to docs/ the same search takes ~90ms.
+MARKS=$([ -d docs ] && find docs -path '*/.beacon/recon-active.json' -not -path '*/node_modules/*' 2>/dev/null)
 [ -z "$MARKS" ] && exit 0   # no active beacon recon anywhere → not our concern
 
 STATUS=0
