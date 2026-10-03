@@ -22,7 +22,11 @@ absolute paths before reading a file or running a script.
 
 - **beacon** — `site-intel` and `site-fleet` read `../site-recon/…`; they need `site-recon`
   installed alongside.
-- **draftloom** — `eval` reads `../draft/…` (the scoring rubric); it needs `draft` installed alongside.
+- **draftloom** — `eval` reads `../draft/…` (the scoring rubric and agent prompts); it needs `draft`
+  installed alongside.
+- **Agent prompts** (draftloom `draft/agents/`, idea-forge `evaluate/agents/`) — where a skill
+  dispatches a Claude Code plugin agent your harness lacks, spawn a subagent with that prompt file
+  (absolute path), or run it inline if subagents are unsupported.
 - **paidagogos** — lesson and path rendering needs the `visual-kit` renderer (Claude Code plugin or
   a repo clone). `paidagogos-micro` presents the lesson as Markdown in chat without it. Tell the
   user what is missing when a skill needs it.

@@ -190,7 +190,7 @@ skill's folder, moved with `git mv`:
 
 Convention: paths in a `SKILL.md` are relative to the folder holding it, stated under each H1;
 agents resolve them to absolute paths first. Sibling references use `../<skill>/…` within one
-plugin: beacon `site-intel` and `site-fleet` need `site-recon` installed alongside; draftloom `eval` needs `draft`. Scripts find
+plugin: beacon `site-intel` and `site-fleet` need `site-recon` installed alongside; draftloom `eval` needs `draft`. Skills that dispatch Claude Code plugin agents (draftloom, idea-forge `evaluate`) carry those prompts in `agents/` and say to run them as subagents or inline elsewhere. Scripts find
 resources from their own file location, never the cwd. `${CLAUDE_PLUGIN_ROOT}` stays in
 `commands/`, `hooks/` and `agents/`, which only Claude Code reads. Plugin version in beacon is read
 from `../../.claude-plugin/plugin.json` and recorded as `unversioned` in a CLI copy; the remote
