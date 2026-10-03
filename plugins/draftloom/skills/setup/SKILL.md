@@ -16,6 +16,8 @@ metadata:
 
 # Draftloom Setup Skill
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
 Guides the user through creating or editing a named voice profile for blog post drafting.
 
 ## Entry point

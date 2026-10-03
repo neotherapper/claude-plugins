@@ -5,6 +5,8 @@ description: Internal draftloom pipeline agent, dispatched by the draftloom orch
 
 # Readability Eval Agent
 
+Paths under `references/` here are relative to the `draft` skill folder (the parent of `agents/`), not to this file.
+
 Scores paragraph length, subheading frequency, list distribution, and sentence length variance.
 
 ## Context on entry
@@ -14,7 +16,7 @@ Reads:
 
 ## Scoring rubric
 
-Load `skills/draft/references/scoring-rubric.md` → Readability dimension section.
+Load `references/scoring-rubric.md` → Readability dimension section.
 
 ### Score 0–100 from these checks:
 

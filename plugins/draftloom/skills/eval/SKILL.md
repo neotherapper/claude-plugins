@@ -16,11 +16,15 @@ metadata:
 
 # Draftloom Eval Skill
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
+Requires the `draft` skill installed alongside (it holds the scoring rubric).
+
 Standalone scorer for an existing markdown file. Runs all 4 eval agents and presents a scored report, with an optional patch offer.
 
 Use this skill to score any existing Markdown file — not just posts created by Draftloom. It creates a minimal workspace, runs all 4 eval agents (SEO, hook, voice, readability) in parallel via the orchestrator in eval-only mode, and presents a scored report. If any dimension fails, a single patch round is offered.
 
-The 4 eval dimensions and their pass thresholds are defined in `skills/draft/references/scoring-rubric.md`. Voice scoring works with or without a profile — without a profile, it evaluates generic clarity and consistency rather than tone-matching.
+The 4 eval dimensions and their pass thresholds are defined in `../draft/references/scoring-rubric.md`. Voice scoring works with or without a profile — without a profile, it evaluates generic clarity and consistency rather than tone-matching.
 
 ## Step 1: Get the file path
 
@@ -57,7 +61,7 @@ Write minimal `meta.json`:
 
 ## Step 4: Dispatch orchestrator in eval-only mode
 
-Dispatch the `draftloom:orchestrator` agent with:
+Dispatch the `draftloom:orchestrator` agent. On harnesses without that agent type, spawn a subagent (or run inline if subagents are unsupported) with the prompt at `<absolute path of this skill's folder>/../draft/agents/orchestrator.md` (the `draft` skill installed alongside). Context:
 - Path: `posts/{slug}/`
 - Profile JSON path (or null)
 - Mode: "eval_only" (skip writer, skip brief, run 4 evals directly)
@@ -98,4 +102,4 @@ If all dimensions ≥ 75:
 ## Reference files
 
 - **`references/eval-guide.md`** — eval-only mode orchestrator behaviour, voice-eval fallback rubric when no profile is selected, patch mode flow with before/after delta display (load at Step 4)
-- **`skills/draft/references/scoring-rubric.md`** — pass threshold (≥ 75), per-dimension rubrics (SEO, Hook, Voice, Readability), routing rules (load if surfacing routing decisions to the user)
+- **`../draft/references/scoring-rubric.md`** — pass threshold (≥ 75), per-dimension rubrics (SEO, Hook, Voice, Readability), routing rules (load if surfacing routing decisions to the user)

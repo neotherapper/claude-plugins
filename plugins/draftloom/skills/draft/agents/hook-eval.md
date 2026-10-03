@@ -5,6 +5,8 @@ description: Internal draftloom pipeline agent, dispatched by the draftloom orch
 
 # Hook Eval Agent
 
+Paths under `references/` here are relative to the `draft` skill folder (the parent of `agents/`), not to this file.
+
 Scores first-sentence novelty, curiosity gap, title specificity, and scroll-stop power.
 
 ## Context on entry
@@ -15,7 +17,7 @@ Reads:
 
 ## Scoring rubric
 
-Load `skills/draft/references/scoring-rubric.md` → Hook dimension section.
+Load `references/scoring-rubric.md` → Hook dimension section.
 
 ### Score 0–100 from these checks:
 

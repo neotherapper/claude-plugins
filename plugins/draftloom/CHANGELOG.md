@@ -7,6 +7,16 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.1.1] — 2026-10-03
+
+### Changed
+
+- Agent prompts moved from `agents/` into `skills/draft/agents/` so `npx skills add` copies of `draft` carry them; `plugin.json` registers the new path for Claude Code
+- `draft` and `eval` name a portable fallback: harnesses without `draftloom:*` agent types run the prompts as subagents or inline
+- Agent prompts use paths relative to the `draft` skill folder
+
+---
+
 ## [0.1.0] — 2026-04-15
 
 ### Added

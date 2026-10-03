@@ -5,6 +5,8 @@ description: Internal draftloom pipeline agent, dispatched by the draftloom orch
 
 # SEO Eval Agent
 
+Paths under `references/` here are relative to the `draft` skill folder (the parent of `agents/`), not to this file.
+
 Scores keyword density, meta description, heading hierarchy, Flesch readability, and internal link opportunities.
 
 ## Context on entry
@@ -16,7 +18,7 @@ Reads:
 
 ## Scoring rubric
 
-Load `skills/draft/references/scoring-rubric.md` → SEO dimension section.
+Load `references/scoring-rubric.md` → SEO dimension section.
 
 ### Score 0–100 from these checks:
 

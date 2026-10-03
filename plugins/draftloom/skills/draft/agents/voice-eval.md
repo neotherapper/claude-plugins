@@ -5,6 +5,8 @@ description: Internal draftloom pipeline agent, dispatched by the draftloom orch
 
 # Voice Eval Agent
 
+Paths under `references/` here are relative to the `draft` skill folder (the parent of `agents/`), not to this file.
+
 Scores tone adjective match, sentence rhythm, vocabulary range, and brand voice example alignment.
 
 ## Context on entry
@@ -16,7 +18,7 @@ Reads:
 
 ## Scoring rubric
 
-Load `skills/draft/references/scoring-rubric.md` → Voice dimension section.
+Load `references/scoring-rubric.md` → Voice dimension section.
 
 ### Score 0–100 from these checks:
 

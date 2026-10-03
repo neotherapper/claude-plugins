@@ -15,6 +15,8 @@ metadata:
 
 # Draftloom Draft Skill
 
+> Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
+
 Orchestrates the full blog post workflow: profile selection → brief interview → wireframe → eval loop → distribution.
 
 A complete draft run moves through: session recovery check → profile selection → brief interview (4 mandatory + 3 optional questions) → wireframe layout with parse-able edits → orchestrator-driven eval loop (writer + 4 eval agents in parallel, up to 3 iterations) → distribution copy generation. All inter-step state is written to `posts/{slug}/` so sessions can be recovered after interruption.
@@ -94,7 +96,9 @@ Write `session.json` → checkpoint: `wireframe_approved`, `wireframe_approved: 
 
 ## Step 4: Delegate to orchestrator
 
-Dispatch the `draftloom:orchestrator` agent with context:
+Dispatch the `draftloom:orchestrator` agent with context. On harnesses without the `draftloom:orchestrator` agent type, spawn a subagent (or run inline if subagents are unsupported) with the prompt at `<absolute path of this skill's folder>/agents/orchestrator.md`; the orchestrator dispatches `writer.md`, the four `*-eval.md` agents and `distribution.md` from the same folder the same way.
+
+Context:
 - Path to `posts/{slug}/`
 - Profile JSON path
 - Mode: `"full_draft"` (writer runs first, then eval loop)

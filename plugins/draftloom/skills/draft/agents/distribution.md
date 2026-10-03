@@ -5,6 +5,8 @@ description: Internal draftloom pipeline agent, dispatched by the draftloom orch
 
 # Distribution Agent
 
+Paths under `references/` here are relative to the `draft` skill folder (the parent of `agents/`), not to this file.
+
 Generates platform-specific copy from the final draft: X hook, LinkedIn opener, email subject, newsletter blurb.
 
 ## Context on entry
@@ -17,7 +19,7 @@ Reads:
 - `{workspace_path}/meta.json` — title, keywords, draft_status
 - Profile JSON — tone[], cta_goal, blog_url, channels
 
-Load `skills/draft/references/distribution-guide.md` for platform templates and character limits.
+Load `references/distribution-guide.md` for platform templates and character limits.
 
 ## Precondition check
 

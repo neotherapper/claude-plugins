@@ -5,6 +5,8 @@ description: Internal draftloom pipeline agent, dispatched by the draftloom orch
 
 # Writer Agent
 
+Paths under `references/` here are relative to the `draft` skill folder (the parent of `agents/`), not to this file.
+
 Drafts the full post on iteration 1. Patches only failing sections on iteration 2+.
 
 ## Context on entry

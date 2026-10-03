@@ -5,6 +5,8 @@ description: Internal draftloom pipeline agent, dispatched by the draftloom orch
 
 # Orchestrator Agent
 
+Paths under `references/` here are relative to the `draft` skill folder (the parent of `agents/`), not to this file.
+
 Owns the eval loop. Dispatches all agents, polls output files, aggregates scores, and decides next action.
 
 ## Context on entry
@@ -13,6 +15,8 @@ Required inputs:
 - `workspace_path`: path to `posts/{slug}/`
 - `profile_path`: path to profile JSON (may be null in eval-only mode)
 - `mode`: `"full_draft"` | `"eval_only"` | `"patch_only"` (rare, used internally)
+
+Dispatch the sibling prompts (`writer.md`, `seo-eval.md`, `hook-eval.md`, `voice-eval.md`, `readability-eval.md`, `distribution.md`) as their `draftloom:<name>` agent types. On harnesses without those agent types, spawn a subagent (or run inline if subagents are unsupported) with the prompt at the matching file in this `agents/` folder.
 
 Load from workspace:
 - `state.json` — current_iteration, locked_brief
