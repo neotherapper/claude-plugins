@@ -135,3 +135,17 @@ When the user's request matches any of these patterns, use the corresponding too
 2. The chrome-devtools MCP is available for browser testing — use it via `agent-skills:browser-testing-with-devtools`, not directly
 3. All new plugin code goes in `plugins/<plugin-name>/` — never in `docs/` or project root
 4. Specs for new plugins go in `docs/superpowers/specs/` before any implementation begins
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as GitHub issues in `neotherapper/claude-plugins`, driven by the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical triage roles, each label string equal to its name. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
