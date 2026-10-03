@@ -82,7 +82,7 @@ fi
 
 check "beacon har-reconstruct.py --help" python3 "$S/site-recon/scripts/har-reconstruct.py" --help
 
-for f in evaluate/agents/scoring.md site-recon/technologies/REGISTRY.md; do
+for f in evaluate/agents/scoring.md site-recon/technologies/REGISTRY.md draft/agents/orchestrator.md draft/references/scoring-rubric.md; do
   if [ -f "$S/$f" ]; then pass "bundled resource present: $f"; else fail "bundled resource missing from the copy: $f"; fi
 done
 
