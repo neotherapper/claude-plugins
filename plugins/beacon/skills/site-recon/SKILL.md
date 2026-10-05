@@ -132,6 +132,10 @@ set both `OUTPUT_ROOT` and `OUTPUT_ROOT_OVERRIDDEN=1`:
 OUTPUT_ROOT="docs/research/{slug}" OUTPUT_ROOT_OVERRIDDEN=1 URL="{url}" bash scripts/scaffold.sh
 ```
 
+Keep a caller-supplied `OUTPUT_ROOT` under `docs/`, relative to the repo root you run from. The
+Claude Code `Stop` hook only looks for the `.beacon/recon-active.json` marker under `docs/`, so
+a bundle scaffolded anywhere else is never checked by it.
+
 Record the printed path as `{OUTPUT_ROOT}` (scaffold.sh echoes `[SCAFFOLD:${OUTPUT_ROOT}]` on
 success) — every later phase and the Phase 12 gate refer back to it as `{OUTPUT_ROOT}`. Note:
 `{OUTPUT_ROOT}` is the scaffolded path itself (a placeholder you substitute, like `{url}`/`{slug}`),
