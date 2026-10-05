@@ -298,7 +298,7 @@ Reference for the setup skill. Load this file when running the 3-question interv
 ## Essential questions (asked every time)
 
 ### Q1 — Profile name
-"What would you like to call this profile? Use a short slug like `george-personal` or `vanguard-corporate`."
+"What would you like to call this profile? Use a short slug like `george-personal` or `acme-corporate`."
 
 Validation rules:
 - Lowercase only

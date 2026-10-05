@@ -6,7 +6,7 @@
 - [x] `/draftloom:setup` — 3-question onboarding (profile name, audience, tone)
 - [x] Deferred optional fields (blog URL, content pillars, channels, length, inspiration, CTA goal)
 - [x] Field-by-field profile editing via `/draftloom:setup edit {name}`
-- [x] Multiple named profiles per user (e.g. `george-personal`, `vanguard-corporate`)
+- [x] Multiple named profiles per user (e.g. `george-personal`, `acme-corporate`)
 - [x] Project-local storage (`.draftloom/profiles/`) with global fallback (`~/.draftloom/`)
 - [x] Profile delete with confirmation
 - [x] Tone presets for users who aren't sure what adjectives to use

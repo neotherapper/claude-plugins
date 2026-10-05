@@ -42,7 +42,7 @@ Create one profile per context — personal blog, corporate brand, client accoun
 
 ```
 /draftloom:setup                        → create george-personal
-/draftloom:setup                        → create vanguard-corporate
+/draftloom:setup                        → create acme-corporate
 /draftloom:draft                        → pick which profile to write as
 ```
 

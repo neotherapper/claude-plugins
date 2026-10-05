@@ -60,7 +60,7 @@ Feature: setup skill — create and manage voice profiles for Draftloom
   # ── Multiple profiles ─────────────────────────────────────────────────────
 
   Scenario: Multiple profiles listed with recency on setup open
-    Given .draftloom/profiles/ contains george-personal.json and vanguard-corp.json
+    Given .draftloom/profiles/ contains george-personal.json and acme-corp.json
     When I run /draftloom:setup
     Then the skill shows: "create new / edit existing / delete"
     And edit shows profiles ordered by last-used date with draft count

@@ -10,7 +10,7 @@
 
 Draftloom is a public Claude Code plugin that guides any user through writing viral, catchy blog posts. It conducts a voice-profile interview, proposes a section wireframe, drafts prose via a writer agent, then runs four specialist eval agents in parallel — scoring SEO, hook strength, voice match, and readability. Failing dimensions are patched by the writer agent and re-evaluated, iterating up to three times until all scores pass a 75/100 threshold. A distribution agent then generates platform-specific copy (X, LinkedIn, email, newsletter). The whole system communicates through a structured file workspace — no state passes through conversation history.
 
-**Target users:** Any writer using Claude Code — indie hackers, developer bloggers, content marketers, corporate comms teams. Adapts via named voice profiles (e.g. `george-personal`, `vanguard-corporate`).
+**Target users:** Any writer using Claude Code — indie hackers, developer bloggers, content marketers, corporate comms teams. Adapts via named voice profiles (e.g. `george-personal`, `acme-corporate`).
 
 **Plugin name:** `draftloom`
 **Location in repo:** `plugins/draftloom/`
