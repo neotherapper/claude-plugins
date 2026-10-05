@@ -30,6 +30,8 @@ fi
 [ -n "${OUTPUT_ROOT_OVERRIDDEN:-}" ] && echo "[OUTPUT-OVERRIDE:${OUTPUT_ROOT}]"
 TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 mkdir -p "$OUTPUT_ROOT/api-surfaces" "$OUTPUT_ROOT/specs" "$OUTPUT_ROOT/.beacon"
+# Keep raw captures and browser state out of git (beacon D-16, D-22). Never overwrite an existing file.
+[ -f "$OUTPUT_ROOT/.gitignore" ] || printf '%s\n' '.beacon/' > "$OUTPUT_ROOT/.gitignore"
 # Literal (non-regex) token substitution via python3 — a sed-based render corrupts or
 # aborts on URLs containing &, #, or \ (sed replacement-text metacharacters); python's
 # str.replace() treats the URL as opaque literal text, so it cannot be corrupted.
