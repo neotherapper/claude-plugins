@@ -50,7 +50,7 @@
 - SEO eval enforces keyword density, heading structure, and meta fields automatically
 - Distribution agent generates LinkedIn opener and email subject immediately
 
-**Profile example:** `vanguard-corporate` · audience: CTOs and engineering managers · tone: authoritative, practical, data-driven
+**Profile example:** `acme-corporate` · audience: CTOs and engineering managers · tone: authoritative, practical, data-driven
 
 ---
 

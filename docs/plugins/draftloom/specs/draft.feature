@@ -18,7 +18,7 @@ Feature: draft skill — write a blog post through brief, wireframe, eval loop, 
     Then the skill confirms the profile name and proceeds without asking
 
   Scenario: Multiple profiles shown with recency order
-    Given profiles george-personal.json and vanguard-corp.json exist
+    Given profiles george-personal.json and acme-corp.json exist
     When I run /draftloom:draft
     Then the skill shows a numbered list with draft count and last-used date
     And I can select by typing the number or a search string
