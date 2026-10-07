@@ -59,6 +59,23 @@ Skills, commands, agents, and hooks are auto-discovered per plugin. Install any 
 `beacon`, `aegis`, `reframe`, `namesmith`, `draftloom`, `idea-forge`, `paidagogos`, `visual-kit`
 (all `@neotherapper-plugins`).
 
+### Codex — native plugins
+
+With a current Codex CLI, register the marketplace and install the plugin:
+
+```bash
+codex plugin marketplace add neotherapper/claude-plugins
+codex plugin add beacon@neotherapper-plugins
+codex plugin list --marketplace neotherapper-plugins --json
+```
+
+For a local development checkout, use `codex plugin marketplace add /absolute/path/to/claude-plugins`
+instead of the GitHub source. Start a new Codex chat after installation. Beacon's skills load
+as `beacon:site-recon`, `beacon:site-intel`, and `beacon:site-fleet` across your projects.
+Installing a plugin in Claude Code does not install it in Codex.
+
+Older Codex clients can use the skills-only installation below with `-a codex -g`.
+
 ### Everything else — Pi, OpenCode, Cline, Kiro, Codex, Cursor, Gemini CLI, Copilot, and 70+ more
 
 ```bash
@@ -154,9 +171,11 @@ gh skill update --all
 <details>
 <summary><b>Manual per-tool notes — Codex, OpenCode, Antigravity, Kiro, Cursor, Windsurf</b></summary>
 
-**OpenAI Codex CLI** — reads this repo's root `AGENTS.md` automatically. Skills at `.agents/skills/`
-(a documented Codex scan root) are symlinks back into `plugins/`, so clone the repo and work inside
-it, or use `npx skills add` above. MCP servers go in `~/.codex/config.toml`.
+**OpenAI Codex CLI** — supports the native plugin installation above. Opening this repository
+also discovers its `.agents/skills/` symlinks and root `AGENTS.md`, but that workspace discovery
+does not expose the skills in unrelated projects. Use native plugin installation or a global
+skills-only install (`npx skills@latest add neotherapper/claude-plugins --skill site-recon --skill site-intel --skill site-fleet -a codex -g -y`).
+MCP servers go in `~/.codex/config.toml`.
 
 **OpenCode** — reads the root `AGENTS.md` and falls back to scanning `.agents/skills/`, so cloning
 this repo exposes every skill with **no extra config**. MCP servers go in `opencode.json` under `mcp`.
