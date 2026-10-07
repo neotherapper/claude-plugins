@@ -12,18 +12,16 @@ with the least duplication possible — and installable into any other project, 
 > - **OpenCode** — ✅ **verified live**: `opencode debug skill` in this repo discovers every skill
 >   from `.agents/skills/<name>/SKILL.md` (the symlink farm), following the links to the canonical
 >   `plugins/` content. Retiring the earlier custom loader is confirmed non-regressive.
-> - **Codex, Antigravity, Kiro** — structured per each tool's **documented workspace conventions**
->   (as of 2026-07) but **not** run against a live install here (Codex is installed but its native
->   binary is broken on this machine; Antigravity/Kiro not installed). They use the same
->   `.agents/skills/` / `.kiro/skills/` mechanism OpenCode verifies. Where docs and community
->   reporting disagree on a path, we prefer the **workspace** path and flag the disputed **global**
->   one.
+> - **Codex** — native marketplace installation verified locally on 2026-10-07: Beacon 0.10.3
+>   installs and is enabled; `skills/list` discovers all three namespaced skills from its cache
+>   when the working directory is a different project. The desktop app's bundled CLI works even
+>   though this machine's separate npm-installed CLI has a missing native binary.
+> - **Antigravity, Kiro** — workspace conventions have not been exercised against a live install.
 >
-> **How non-Claude tools consume this repo.** Claude Code users `/plugin install` individual
-> plugins. The other four tools do **not** install a plugin — they read the workspace files
-> (`AGENTS.md`, `.agents/`, `.kiro/`), so you **clone or open this repo as the workspace** (or copy
-> those top-level files into your project). A `/plugin install` consumer never receives repo-root
-> `.agents/`.
+> **How tools consume this repo.** Claude Code and current Codex clients install individual
+> plugins through their own marketplace configuration. An installation in one does not enable
+> the other. Workspace skill discovery through `AGENTS.md`, `.agents/`, and `.kiro/` applies
+> while working inside this repository; install globally to use skills in unrelated projects.
 
 ---
 
@@ -227,15 +225,34 @@ a broken frontmatter can never silently drop a skill from the non-Claude install
 Skills, commands, agents, and hooks are auto-discovered from each plugin by directory convention.
 
 ### OpenAI Codex CLI
-Codex reads the root `AGENTS.md` automatically. To expose the skills, point Codex at this repo (or
-clone it as a workspace) — the skills are at `.agents/skills/`, which is one of Codex's documented
-scan roots. There is **no** plugin/marketplace primitive in Codex, so skills + `AGENTS.md` (+ MCP
-in `~/.codex/config.toml`) are the whole integration surface.
 
-> **Disputed path:** the primary Codex docs say skills load from `.agents/skills` (repo root, cwd,
-> parents), `$HOME/.agents/skills`, `/etc/codex/skills`. Some third-party posts instead cite
-> `~/.codex/skills` / `.codex/skills`. We ship `.agents/skills/` (the documented-primary path);
-> verify against your installed Codex version before relying on the alternatives.
+Current Codex clients support native plugins, including this repository's legacy-compatible
+`.claude-plugin/marketplace.json` and plugin manifests. No duplicate Codex manifest is needed.
+
+```bash
+codex plugin marketplace add neotherapper/claude-plugins
+codex plugin add beacon@neotherapper-plugins
+codex plugin list --marketplace neotherapper-plugins --json
+```
+
+For local development, register the checkout's absolute path instead of the GitHub source.
+Codex installs its own cached copy under `~/.codex/plugins/cache/` and saves marketplace and
+plugin enablement in `~/.codex/config.toml`. Start a new chat after installation so the updated
+skill catalog is loaded. Ask to use `beacon:site-recon`, `beacon:site-intel`, or `beacon:site-fleet`.
+Claude Code plugin installation does not configure Codex.
+
+The `.agents/skills/` symlink farm still provides workspace discovery when Codex is opened
+inside this repository. For older clients without `codex plugin`, install the three sibling
+skills globally:
+
+```bash
+npx skills@latest add neotherapper/claude-plugins \
+  --skill site-recon --skill site-intel --skill site-fleet -a codex -g -y
+```
+
+This fallback installs skills only. Keep `site-recon` alongside `site-intel` and `site-fleet`
+because they share its bundled scripts and tech packs. Native plugin installation is preferred
+when available. See [official plugin documentation](https://developers.openai.com/plugins/build/plugins).
 
 ### OpenCode
 OpenCode reads the root `AGENTS.md` automatically and merges it into context. It discovers skills

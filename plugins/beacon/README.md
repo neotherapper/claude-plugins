@@ -45,12 +45,24 @@ git clone https://github.com/neotherapper/claude-plugins.git
 cp -r claude-plugins/plugins/beacon/skills/* .cursor/rules/
 ```
 
-### OpenCode / Codex
-Add to your `AGENTS.md`:
-```markdown
-@claude-plugins/plugins/beacon/skills/site-recon/SKILL.md
-@claude-plugins/plugins/beacon/skills/site-intel/SKILL.md
+### Codex
+```bash
+codex plugin marketplace add neotherapper/claude-plugins
+codex plugin add beacon@neotherapper-plugins
 ```
+
+For a local checkout, pass its absolute path to `marketplace add`. Start a new Codex chat;
+Beacon loads as `beacon:site-recon`, `beacon:site-intel`, and `beacon:site-fleet`.
+Claude Code and Codex maintain separate installations.
+
+### OpenCode / older Codex (skills only)
+```bash
+npx skills@latest add neotherapper/claude-plugins \
+  --skill site-recon --skill site-intel --skill site-fleet -a opencode -g -y
+```
+
+Use `-a codex` for older Codex clients without native plugin support. Keep all three sibling
+skills together so the shared scripts and tech packs resolve.
 
 See [`docs/platform/`](docs/platform/) for detailed per-platform setup guides.
 
