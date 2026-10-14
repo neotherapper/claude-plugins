@@ -32,3 +32,7 @@ docs/sites/**/redesign/.crawl/
 docs/redesign/**/.crawl/
 docs/sites/**/*.png
 docs/research/**/*.png
+
+# Beacon research bundles: raw captures and browser state stay local (beacon D-16, D-22)
+docs/sites/**/research/.beacon/
+docs/research/**/.beacon/
