@@ -1,0 +1,25 @@
+{
+  "reviews": [
+    {
+      "run_id": "eval-0-greek-schools-with_skill",
+      "feedback": "seems ok so far why though All CLI research tools were unavailable for this evaluation ? i thought they worked",
+      "timestamp": "2026-03-27T05:39:09.396Z"
+    },
+    {
+      "run_id": "eval-0-greek-schools-without_skill",
+      "feedback": "i liked Recommended Next Steps , i liked that mentioned Competitors to Research\n\nBefore committing, check whether these types of products exist in Greece or in comparable small European markets:\n\n- `e-yliko.gr` (Ministry of Education portal) \u2014 fragmented, not a directory\n- `schools.gr` or similar Greek domains \u2014 may already exist in partial form\n- `scholia.gr`, `ekpaideysi.gr` \u2014 worth searching\n\n",
+      "timestamp": "2026-03-27T05:39:09.396Z"
+    },
+    {
+      "run_id": "eval-1-greek-salary-calculator-with_skill",
+      "feedback": "i liked the research, i expected more output though",
+      "timestamp": "2026-03-27T05:39:09.396Z"
+    },
+    {
+      "run_id": "eval-1-greek-salary-calculator-without_skill",
+      "feedback": "seems ok",
+      "timestamp": "2026-03-27T05:39:09.396Z"
+    }
+  ],
+  "status": "in_progress"
+}

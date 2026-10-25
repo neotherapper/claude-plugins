@@ -1,0 +1,71 @@
+{
+  "verdict": "BET",
+  "score_percentage": 87.2,
+  "weighted_score": 4.36,
+  "business_model_classified": "tool-site",
+  "criteria_count": 12,
+  "files_saved_to_vault": true,
+  "has_competitor_section": true,
+  "has_business_foundation_section": true,
+  "cli_tools_used": true,
+  "cli_tools_that_worked": [
+    "google_trends",
+    "google_suggest",
+    "reddit",
+    "youtube",
+    "wikipedia",
+    "tranco",
+    "wayback",
+    "commoncrawl",
+    "pagespeed",
+    "cloudflare_dns",
+    "rdap",
+    "crt_sh",
+    "newsfeed",
+    "github_search",
+    "datagov_gr",
+    "econdb",
+    "bluesky",
+    "trustpilot",
+    "hunter",
+    "eu_opendata"
+  ],
+  "notes": {
+    "vs_v1": "Upgraded from BUILD (71.6%) to BET (87.2%) — +15.6 percentage points",
+    "key_new_finding": "e-misthologio.gr (primary competitor) confirmed defunct via 3 independent CLI tools: pagespeed (CONNECTION FAILED), tranco (not in top 1M), commoncrawl (0 pages)",
+    "timing_signal": "Greece announces €920 minimum wage effective April 1, 2026 — announced March 26, 2026 — creates peak demand window",
+    "global_signal": "'net salary calculator greece' = #1 global Google suggestion for 'net salary calculator' (google_suggest CLI)",
+    "score_breakdown": {
+      "weighted_sum_before_bonus": 3.86,
+      "data_repurposing_bonus": 0.5,
+      "raw_score": 4.36,
+      "final_score": 4.36,
+      "capped_at": 5.0
+    },
+    "scores_by_criterion": {
+      "C1_market_demand": 4,
+      "C2_problem_severity": 4,
+      "C3_revenue_potential": 4,
+      "C4_competitor_revenue": 3,
+      "C5_competition_gap": 5,
+      "C6_timing": 5,
+      "C7_build_complexity": 3,
+      "C8_distribution": 4,
+      "C9_defensibility": 3,
+      "C10_data_availability": 3,
+      "C11_founder_fit": 4,
+      "C12_mvp_speed": 3
+    },
+    "critic_adjustments": {
+      "C8_distribution": "5 → 4 (search volume trap: absolute volume unverified; Greek-language constraint)"
+    },
+    "tools_not_available": [
+      "dataforseo (no API credentials)",
+      "serper (no API key)",
+      "producthunt (no token)",
+      "hunter (no API key)",
+      "builtwith (no API key)",
+      "similarweb (no API key)"
+    ]
+  }
+}

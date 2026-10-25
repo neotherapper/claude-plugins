@@ -1,0 +1,6 @@
+{
+  "eval_id": 0,
+  "eval_name": "greek-schools-directory",
+  "prompt": "I want to build a Greek schools directory — a website that lists all public and private primary and secondary schools in Greece with key info: location, type (public/private), contact details, and eventually parent ratings. Greece has no good central directory for this. I already have a dataset of ~14,000 schools scraped from the Ministry of Education website. I have a background in web dev and I'm Greek so I understand the market. Should I build this?",
+  "assertions": []
+}

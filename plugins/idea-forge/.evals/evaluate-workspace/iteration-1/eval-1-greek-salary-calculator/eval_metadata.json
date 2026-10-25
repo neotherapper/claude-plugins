@@ -1,0 +1,6 @@
+{
+  "eval_id": 1,
+  "eval_name": "greek-salary-calculator",
+  "prompt": "I'm thinking about building a Greek salary calculator — a free tool where people in Greece can enter their job title, years of experience, and city, and see what the market rate is for their salary. Greece has a very opaque salary market and people don't know if they're underpaid. I'd monetize through ads and maybe a premium 'get personalized salary report' feature. I have some data from job boards. Is this worth pursuing?",
+  "assertions": []
+}

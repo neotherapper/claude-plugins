@@ -1,0 +1,82 @@
+[
+  {
+    "query": "I've been researching the property market in Athens for the past 3 months \u2014 what business ideas haven't been explored yet that could emerge from this data?",
+    "should_trigger": true
+  },
+  {
+    "query": "what could i build in the edtech space? been watching the market for a while and think there are gaps nobody's filling",
+    "should_trigger": true
+  },
+  {
+    "query": "Find me business ideas in the legal tech space \u2014 I've accumulated research about pain points from 4 different scored idea cards",
+    "should_trigger": true
+  },
+  {
+    "query": "Given everything we know about the automotive market from our vault, what gaps exist that we haven't tried building yet?",
+    "should_trigger": true
+  },
+  {
+    "query": "I've been deep in the B2B sales tools space \u2014 what should I build? There are signals pointing to a few interesting patterns in the research",
+    "should_trigger": true
+  },
+  {
+    "query": "explore the opportunity space in the greek health market \u2014 we have some research from previous evaluations",
+    "should_trigger": true
+  },
+  {
+    "query": "what business opportunities exist in the SaaS dev tools market based on what we've researched so far?",
+    "should_trigger": true
+  },
+  {
+    "query": "generate ideas from the real estate domain \u2014 we've done a bunch of research there",
+    "should_trigger": true
+  },
+  {
+    "query": "i want to find unexplored niches in the e-commerce space, what does the data suggest?",
+    "should_trigger": true
+  },
+  {
+    "query": "given our research into the freelancer marketplace, what haven't we tried building yet? looking for the gaps",
+    "should_trigger": true
+  },
+  {
+    "query": "evaluate this idea: a directory for Greek private schools that serves expat families relocating from the UK",
+    "should_trigger": false
+  },
+  {
+    "query": "is there a market for a SaaS tool that helps freelance designers manage client contracts? curious if it's worth building",
+    "should_trigger": false
+  },
+  {
+    "query": "what is Mastra and how does it compare to LangChain for building AI agents?",
+    "should_trigger": false
+  },
+  {
+    "query": "should I build a marketplace for vintage car parts? I have a prototype and 3 waitlist signups",
+    "should_trigger": false
+  },
+  {
+    "query": "I want to write a lean canvas for my edtech startup that's targeting university students in Greece",
+    "should_trigger": false
+  },
+  {
+    "query": "what's the typical search volume for 'greek schools abroad' and who's ranking for it?",
+    "should_trigger": false
+  },
+  {
+    "query": "what do you know about the property market in Athens? just trying to understand the space",
+    "should_trigger": false
+  },
+  {
+    "query": "rate my startup idea: an app that helps parents in Greece find after-school tutoring for their kids",
+    "should_trigger": false
+  },
+  {
+    "query": "what tools exist for B2B onboarding automation? looking for something under $100/mo",
+    "should_trigger": false
+  },
+  {
+    "query": "tell me about the automotive industry trends in Europe \u2014 specifically EV adoption in southern markets",
+    "should_trigger": false
+  }
+]

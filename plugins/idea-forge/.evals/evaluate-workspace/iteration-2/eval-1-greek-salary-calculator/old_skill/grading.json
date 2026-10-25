@@ -1,0 +1,39 @@
+{
+  "eval_id": 1,
+  "eval_name": "greek-salary-calculator",
+  "run_type": "old_skill",
+  "expectations": [
+    {
+      "text": "verdict_present: output contains one of BET/BUILD/PIVOT/KILL",
+      "passed": false,
+      "evidence": "summary.json verdict='PURSUE WITH CAUTION' — not a valid BET/BUILD/PIVOT/KILL verdict format"
+    },
+    {
+      "text": "business_model_classified_as_tool_site: classified as 'tool-site'",
+      "passed": false,
+      "evidence": "summary.json business_model_classified='Freemium + Advertising' — not 'tool-site' lens classification"
+    },
+    {
+      "text": "twelve_criteria_scored: output shows all 12 scoring criteria with scores",
+      "passed": false,
+      "evidence": "summary.json criteria_count=10 — only 10 criteria scored"
+    },
+    {
+      "text": "scored_card_saved_to_vault: scored card file written to ideas/{slug}/",
+      "passed": false,
+      "evidence": "summary.json files_saved_to_vault=false — no vault persistence"
+    },
+    {
+      "text": "competitor_section_present: output includes competitor landscape section",
+      "passed": true,
+      "evidence": "summary.json has_competitor_section=true — competitor discussion present, but did not know e-misthologio.gr is defunct"
+    },
+    {
+      "text": "real_data_evidence: evidence column contains specific numbers from CLI research",
+      "passed": false,
+      "evidence": "summary.json cli_tools_used=false — purely model knowledge, believed e-misthologio.gr was still active"
+    }
+  ],
+  "pass_rate": 0.167,
+  "notes": "Without skill: non-standard verdict format, wrong model classification, 10/12 criteria, no vault, no CLI data. Critically: did not know primary competitor is defunct — this would lead to underestimating Competition Gap by 2 points."
+}

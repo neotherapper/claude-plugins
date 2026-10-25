@@ -1,0 +1,10 @@
+{
+  "verdict": "BUILD",
+  "score_percentage": 64,
+  "business_model_classified": "directory/marketplace (premium school profiles B2B + advertising)",
+  "criteria_count": 10,
+  "files_saved_to_vault": false,
+  "has_competitor_section": true,
+  "has_business_foundation_section": true,
+  "cli_tools_used": false
+}

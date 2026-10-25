@@ -1,0 +1,89 @@
+{
+  "skill_name": "idea-generator",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I've been researching the greek education market a lot lately — given everything we've found, what business ideas haven't we explored yet?",
+      "expected_output": "Skill reads master-index.yaml, finds greek-education domain, loads greek-schools-directory scored card, runs gap patterns with evidence cited from the scored card, produces a scoring table, and generates at least one evaluator-ready seed saved to ideas/_registry/.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "evidence_cites_scored_card",
+          "description": "EVIDENCE fields contain '[from scored-card' citations with a source file reference, not vague claims",
+          "check": "string_contains",
+          "target": "from scored-card"
+        },
+        {
+          "name": "scoring_table_present",
+          "description": "Output contains a markdown table with columns: Rank, Candidate, Pattern, Evidence, Timing, Executable, Total",
+          "check": "string_contains",
+          "target": "| Rank |"
+        },
+        {
+          "name": "seed_file_created",
+          "description": "A file matching idea-seeds-*education* or idea-seeds-*greek* exists in ideas/_registry/ after the run",
+          "check": "file_exists_pattern",
+          "target": "ideas/_registry/idea-seeds-*"
+        },
+        {
+          "name": "deduplicates_vault",
+          "description": "Output does NOT reproduce 'Greek Schools Directory' as a new candidate idea",
+          "check": "string_not_contains",
+          "target": "Greek Schools Directory"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "What could I build in the automotive / car data space that we haven't tried yet?",
+      "expected_output": "Skill finds automotive domain in master-index.yaml, loads car-database scored card (PIVOT verdict), notes the PIVOT as Pattern 1 evidence for a different angle, de-duplicates against existing car-database slug, produces candidates with a different angle on the car data demand.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "loads_pivot_verdict",
+          "description": "Output acknowledges the car-database PIVOT verdict and treats it as evidence for a new angle",
+          "check": "string_contains_any",
+          "targets": ["PIVOT", "pivot", "car-database", "failed approach", "different angle"]
+        },
+        {
+          "name": "scoring_table_present",
+          "description": "Output contains a markdown table with columns: Rank, Candidate, Pattern, Evidence, Timing, Executable, Total",
+          "check": "string_contains",
+          "target": "| Rank |"
+        },
+        {
+          "name": "deduplicates_car_database",
+          "description": "Output does NOT reproduce the exact 'IMDB for Cars' concept as a new idea",
+          "check": "string_not_contains",
+          "target": "IMDB for Cars"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Find me business ideas in the B2B SaaS onboarding space — I've been watching this market and think there are some gaps.",
+      "expected_output": "Skill reports no vault match for this domain, prompts user for a 1-2 sentence description, runs generation from description only with evidence marked as inferred, either hits score floor and explains why, or produces seeds marked with inferred evidence.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "no_match_warning_shown",
+          "description": "Output contains the no-vault-match warning mentioning inferred evidence or missing vault data",
+          "check": "string_contains_any",
+          "targets": ["No existing ideas", "inferred rather than cited", "without vault research"]
+        },
+        {
+          "name": "evidence_marked_inferred",
+          "description": "Candidate EVIDENCE fields explicitly say '(inferred)' to signal no vault data was available",
+          "check": "string_contains",
+          "target": "inferred"
+        },
+        {
+          "name": "score_floor_or_seeds",
+          "description": "Output either shows the quality threshold message OR produces seeds — it does not silently produce candidates without scoring",
+          "check": "string_contains_any",
+          "targets": ["quality threshold", "6/9", "Idea Seed:", "scoring threshold"]
+        }
+      ]
+    }
+  ]
+}

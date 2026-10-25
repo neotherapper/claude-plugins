@@ -1,0 +1,34 @@
+{
+  "eval_id": 0,
+  "eval_name": "greek-schools-directory",
+  "run_type": "without_skill",
+  "expectations": [
+    {
+      "text": "verdict_present: output contains one of BET/BUILD/PIVOT/KILL",
+      "passed": false,
+      "evidence": "summary.json verdict is a long narrative paragraph, not one of the 4 standardized verdicts. Readable but not machine-comparable."
+    },
+    {
+      "text": "business_model_classified_as_directory: classified as clean 'directory' value",
+      "passed": false,
+      "evidence": "summary.json business_model_classified='Directory / Marketplace (advertising, premium listings, data licensing)' — verbose, not standardized"
+    },
+    {
+      "text": "twelve_criteria_scored: output shows all 12 scoring criteria with scores",
+      "passed": false,
+      "evidence": "summary.json criteria_count=0; evaluation is free-form narrative with no structured scoring rubric"
+    },
+    {
+      "text": "scored_card_saved_to_vault: scored card file written to ideas/{slug}/",
+      "passed": false,
+      "evidence": "summary.json files_saved_to_vault=false; output is only in workspace, not written to idea vault"
+    },
+    {
+      "text": "competitor_section_present: output includes competitor landscape section",
+      "passed": true,
+      "evidence": "summary.json has_competitor_section=true; agent mentioned indirect competition (Google Maps, Facebook groups, edu4schools)"
+    }
+  ],
+  "pass_rate": 0.2,
+  "notes": "Qualitative analysis is reasonable but lacks structure, comparability, and persistence. Cannot be used for ranking or cross-idea comparison."
+}

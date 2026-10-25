@@ -1,0 +1,31 @@
+{
+  "verdict": "BET",
+  "score_percentage": 89.6,
+  "weighted_score": 4.48,
+  "business_model_classified": "directory",
+  "criteria_count": 12,
+  "files_saved_to_vault": true,
+  "has_competitor_section": true,
+  "has_business_foundation_section": true,
+  "cli_tools_used": true,
+  "cli_tools_that_worked": [
+    "google_trends",
+    "google_suggest",
+    "wikipedia",
+    "duckduckgo",
+    "tranco",
+    "rdap",
+    "wayback",
+    "commoncrawl",
+    "cloudflare_dns",
+    "trustpilot",
+    "reddit",
+    "youtube",
+    "newsfeed",
+    "github_search",
+    "hipolabs",
+    "datagov_gr",
+    "itunes",
+    "bluesky"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "skill_name": "idea-evaluator",
+  "iteration": 2,
+  "generated": "2026-03-27",
+  "configurations": [
+    {
+      "name": "with_skill (iteration-2)",
+      "evals": [
+        {
+          "eval_id": 0,
+          "eval_name": "greek-schools-directory",
+          "pass_rate": 1.0,
+          "duration_seconds": 1083.5,
+          "total_tokens": 143159
+        },
+        {
+          "eval_id": 1,
+          "eval_name": "greek-salary-calculator",
+          "pass_rate": 1.0,
+          "duration_seconds": 1498.4,
+          "total_tokens": 139394
+        }
+      ],
+      "summary": {
+        "mean_pass_rate": 1.0,
+        "mean_duration_seconds": 1291.0,
+        "mean_tokens": 141276
+      }
+    },
+    {
+      "name": "old_skill / without_skill (baseline)",
+      "evals": [
+        {
+          "eval_id": 0,
+          "eval_name": "greek-schools-directory",
+          "pass_rate": 0.333,
+          "duration_seconds": 87.7,
+          "total_tokens": 15212
+        },
+        {
+          "eval_id": 1,
+          "eval_name": "greek-salary-calculator",
+          "pass_rate": 0.167,
+          "duration_seconds": 94.6,
+          "total_tokens": 15221
+        }
+      ],
+      "summary": {
+        "mean_pass_rate": 0.25,
+        "mean_duration_seconds": 91.2,
+        "mean_tokens": 15217
+      }
+    }
+  ],
+  "delta": {
+    "pass_rate": "+75pp (100% vs 25%)",
+    "duration": "+1200s (14x slower)",
+    "tokens": "+126K tokens (9.3x more)"
+  },
+  "analyst_notes": [
+    "Both with_skill runs passed all 6 assertions including the new real_data_evidence assertion — CLI tools are now fully functional.",
+    "CLI tools confirmed 2 findings that changed verdicts: (1) Greek schools competitors only cover international schools, not 14K Greek schools — Competition Gap 5/5; (2) e-misthologio.gr (salary calculator primary competitor) is definitively defunct via 3 independent CLI checks.",
+    "Scores jumped significantly vs iteration-1: schools 65.2%→89.6% (+24.4pp), salary 71.6%→87.2% (+15.6pp). Some of this jump may reflect genuine data-driven insight (defunct competitor, competitor scope mismatch), but the magnitude warrants scrutiny in user review.",
+    "The real_data_evidence assertion is non-discriminating for old_skill (always fails) — but it IS discriminating for measuring skill improvement across iterations.",
+    "old_skill baseline uses non-standard verdict format ('PURSUE WITH CAUTION') — the skill enforces BET/BUILD/PIVOT/KILL vocabulary which is a meaningful structural improvement.",
+    "14x time cost and 9.3x token cost of with_skill vs baseline is expected and acceptable given the CLI-intensive research pipeline.",
+    "18-20 CLI tools working per eval run confirms the alias fixes from this session are complete."
+  ],
+  "comparison_with_iteration_1": {
+    "iteration_1_with_skill_pass_rate": 1.0,
+    "iteration_2_with_skill_pass_rate": 1.0,
+    "note": "Pass rate unchanged (both 100%) because iteration-1 CLI failures didn't surface in structural assertions — only in the new real_data_evidence assertion which was added in iteration-2. The new assertion now distinguishes real CLI research from estimated output."
+  }
+}

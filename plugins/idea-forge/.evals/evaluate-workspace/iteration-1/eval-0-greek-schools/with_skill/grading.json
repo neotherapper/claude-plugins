@@ -1,0 +1,34 @@
+{
+  "eval_id": 0,
+  "eval_name": "greek-schools-directory",
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "verdict_present: output contains one of BET/BUILD/PIVOT/KILL",
+      "passed": true,
+      "evidence": "summary.json verdict='BUILD'; scored-card.md header shows 'Verdict: BUILD | Score: 65.2%'"
+    },
+    {
+      "text": "business_model_classified_as_directory: classified as 'directory' not ecommerce/saas/etc.",
+      "passed": true,
+      "evidence": "summary.json business_model_classified='directory'; scored-card.md frontmatter model='directory'"
+    },
+    {
+      "text": "twelve_criteria_scored: output shows all 12 scoring criteria with scores",
+      "passed": true,
+      "evidence": "summary.json criteria_count=12; scored-card.md contains full 12-row scorecard table"
+    },
+    {
+      "text": "scored_card_saved_to_vault: scored card file written to ideas/{slug}/",
+      "passed": true,
+      "evidence": "summary.json files_saved_to_vault=true; agent confirmed ideas/greek-schools-directory/scored-card-v2.md created"
+    },
+    {
+      "text": "competitor_section_present: output includes competitor landscape section",
+      "passed": true,
+      "evidence": "summary.json has_competitor_section=true; scored-card.md contains 5-row competitor table + feature gap matrix"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "CLI tools unavailable — all research estimated. Data repurposing bonus not in output (criterion added after this run). No Lean Canvas box format despite Business Foundation section."
+}

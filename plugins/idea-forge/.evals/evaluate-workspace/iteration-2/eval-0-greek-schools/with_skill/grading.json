@@ -1,0 +1,39 @@
+{
+  "eval_id": 0,
+  "eval_name": "greek-schools-directory",
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "verdict_present: output contains one of BET/BUILD/PIVOT/KILL",
+      "passed": true,
+      "evidence": "summary.json verdict='BET'; scored-card.md shows 'Verdict: BET | Score: 89.6%'"
+    },
+    {
+      "text": "business_model_classified_as_directory: classified as 'directory'",
+      "passed": true,
+      "evidence": "summary.json business_model_classified='directory'; correct lens applied"
+    },
+    {
+      "text": "twelve_criteria_scored: output shows all 12 scoring criteria with scores",
+      "passed": true,
+      "evidence": "summary.json criteria_count=12; full 12-row scorecard table plus 10b bonus row"
+    },
+    {
+      "text": "scored_card_saved_to_vault: scored card file written to ideas/{slug}/",
+      "passed": true,
+      "evidence": "summary.json files_saved_to_vault=true; ideas/greek-schools-directory/scored-card-v3.md created"
+    },
+    {
+      "text": "competitor_section_present: output includes competitor landscape section",
+      "passed": true,
+      "evidence": "summary.json has_competitor_section=true; competitor table with Tranco ranks and domain ages present"
+    },
+    {
+      "text": "real_data_evidence: evidence column contains specific numbers from CLI research",
+      "passed": true,
+      "evidence": "18 CLI tools returned data: google_trends, google_suggest, tranco (Tranco #306K for international-schools-database.com), rdap (9yr domain age), wayback, commoncrawl, reddit, youtube, etc. Evidence column contains real numbers throughout."
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "CLI tools working in iteration-2. Key finding: all 5 competitors only list international schools (23-74 schools vs 14,000 in dataset) — confirmed via CLI competitor research. Competition Gap upgraded to 5/5. Verdict upgraded from BUILD 65.2% to BET 89.6%."
+}

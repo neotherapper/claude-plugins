@@ -1,0 +1,24 @@
+{
+  "eval_id": 2,
+  "eval_name": "saas-onboarding-no-vault-match",
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "Output contains the no-vault-match warning mentioning inferred evidence or missing vault data",
+      "passed": true,
+      "evidence": "2 occurrences of warning text found — skill correctly showed the 'No existing ideas for this domain' message with inferred-evidence caveat before proceeding."
+    },
+    {
+      "text": "Candidate EVIDENCE fields explicitly say '(inferred)' to signal no vault data was available",
+      "passed": true,
+      "evidence": "6 occurrences of 'inferred' found in output. All candidate EVIDENCE fields marked accordingly."
+    },
+    {
+      "text": "Output either shows the quality threshold message OR produces seeds — does not silently produce candidates without scoring",
+      "passed": true,
+      "evidence": "8 occurrences of scoring threshold/Idea Seed text — 4 seeds produced and written to ideas/_registry/. Evidence criterion capped at 2/3 per inferred corpus, resulting in 7/9 scores."
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "No-match path executed exactly per spec. Interesting that all 4 candidates still reached ≥6/9 with inferred evidence — the timing (2024 LLM cost drop) and executable scores carried them. The quality floor warning was correctly shown before generation started."
+}

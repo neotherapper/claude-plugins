@@ -1,0 +1,39 @@
+{
+  "eval_id": 1,
+  "eval_name": "greek-salary-calculator",
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "verdict_present: output contains one of BET/BUILD/PIVOT/KILL",
+      "passed": true,
+      "evidence": "summary.json verdict='BET'; scored-card.md shows 'Verdict: BET | Score: 87.2%'"
+    },
+    {
+      "text": "business_model_classified_as_tool_site: classified as 'tool-site'",
+      "passed": true,
+      "evidence": "summary.json business_model_classified='tool-site'; tool-site lens weights applied"
+    },
+    {
+      "text": "twelve_criteria_scored: output shows all 12 scoring criteria with scores",
+      "passed": true,
+      "evidence": "summary.json criteria_count=12; full 12-row scorecard with tool-site weights"
+    },
+    {
+      "text": "scored_card_saved_to_vault: scored card file written to ideas/{slug}/",
+      "passed": true,
+      "evidence": "summary.json files_saved_to_vault=true; ideas/greek-salary-calculator/scored-card-v2.md created"
+    },
+    {
+      "text": "competitor_section_present: output includes competitor landscape section",
+      "passed": true,
+      "evidence": "summary.json has_competitor_section=true; e-misthologio.gr confirmed defunct via 3 CLI tools"
+    },
+    {
+      "text": "real_data_evidence: evidence column contains specific numbers from CLI research",
+      "passed": true,
+      "evidence": "20 CLI tools returned data. Key: google_suggest confirmed 'net salary calculator greece' = #1 global autocomplete; pagespeed/tranco/commoncrawl confirmed e-misthologio.gr defunct; pagespeed CONNECTION FAILED + tranco not in top 1M + commoncrawl 0 pages."
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "All 6 assertions passed. CLI tools confirmed primary competitor defunct — critical finding that could not be known without live data. Upgraded from BUILD 71.6% to BET 87.2%. €920 minimum wage timing signal (April 1, 2026) confirmed via newsfeed CLI."
+}

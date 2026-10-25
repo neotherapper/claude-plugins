@@ -1,0 +1,24 @@
+{
+  "eval_id": 2,
+  "eval_name": "saas-onboarding-no-vault-match",
+  "run": "without_skill",
+  "expectations": [
+    {
+      "text": "Output contains the no-vault-match warning mentioning inferred evidence or missing vault data",
+      "passed": false,
+      "evidence": "Baseline noted no vault match at the bottom as a self-assessment limitation but produced no upfront warning to the user about evidence quality before generating ideas."
+    },
+    {
+      "text": "Candidate EVIDENCE fields explicitly say '(inferred)' to signal no vault data was available",
+      "passed": false,
+      "evidence": "Baseline has no EVIDENCE fields at all — ideas are described in prose. No inferred/cited tagging."
+    },
+    {
+      "text": "Output either shows the quality threshold message OR produces seeds — does not silently produce candidates without scoring",
+      "passed": false,
+      "evidence": "Baseline produced 5 unscored ideas with no scoring table or threshold check. No seed format, no vault output file."
+    }
+  ],
+  "pass_rate": 0.0,
+  "notes": "Baseline produced creative and reasonable ideas but with none of the structured output pipeline: no evidence quality signaling, no scoring, no seed format, no vault write. The unstructured output cannot be fed directly into the idea-evaluator."
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "eval_name": "greek-salary-calculator",
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "verdict_present: output contains one of BET/BUILD/PIVOT/KILL",
+      "passed": true,
+      "evidence": "summary.json verdict='BUILD'; scored-card.md shows 'Verdict: BUILD | Score: 71.6%'"
+    },
+    {
+      "text": "business_model_classified_as_tool_site: classified as 'tool-site'",
+      "passed": true,
+      "evidence": "summary.json business_model_classified='tool-site'; correct lens applied (tool-site.md weights)"
+    },
+    {
+      "text": "twelve_criteria_scored: output shows all 12 scoring criteria with scores",
+      "passed": true,
+      "evidence": "summary.json criteria_count=12; full 12-row scorecard table in scored-card.md"
+    },
+    {
+      "text": "scored_card_saved_to_vault: scored card file written to ideas/{slug}/",
+      "passed": true,
+      "evidence": "summary.json files_saved_to_vault=true; ideas/greek-salary-calculator/scored-card-v1.md created"
+    },
+    {
+      "text": "competitor_section_present: output includes competitor landscape section",
+      "passed": true,
+      "evidence": "summary.json has_competitor_section=true; profiled e-misthologio.gr, AADE, kariera.gr, Glassdoor, LinkedIn Salary"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "EU Pay Transparency Directive 2026 correctly identified as 'Why Now' catalyst. Critic correctly adjusted Revenue Potential 4→3 for Greece RPM ceiling. CLI unavailable — all research estimated."
+}

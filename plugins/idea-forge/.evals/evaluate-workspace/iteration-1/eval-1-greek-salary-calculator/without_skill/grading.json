@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "eval_name": "greek-salary-calculator",
+  "run_type": "without_skill",
+  "expectations": [
+    {
+      "text": "verdict_present: output contains one of BET/BUILD/PIVOT/KILL",
+      "passed": false,
+      "evidence": "summary.json verdict='CONDITIONAL GO — valid niche...' — not a standardized verdict label"
+    },
+    {
+      "text": "business_model_classified_as_tool_site: classified as 'tool-site'",
+      "passed": true,
+      "evidence": "summary.json business_model_classified='tool-site' — correctly identified the model type without the skill"
+    },
+    {
+      "text": "twelve_criteria_scored: output shows all 12 scoring criteria with scores",
+      "passed": false,
+      "evidence": "summary.json criteria_count=7; only 7 informal dimensions scored, not the standard 12 criteria framework"
+    },
+    {
+      "text": "scored_card_saved_to_vault: scored card file written to ideas/{slug}/",
+      "passed": false,
+      "evidence": "summary.json files_saved_to_vault=false; no vault integration without the skill"
+    },
+    {
+      "text": "competitor_section_present: output includes competitor landscape section",
+      "passed": true,
+      "evidence": "summary.json has_competitor_section=true; agent mentioned salary.com, levels.fyi, glassdoor as competitors"
+    }
+  ],
+  "pass_rate": 0.4,
+  "notes": "Better than eval-0 baseline — correctly identified tool-site model. But still no standardized scoring, no vault persistence, no lens-specific weights."
+}

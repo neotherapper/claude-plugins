@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "greek-salary-calculator",
+  "prompt": "I'm thinking about building a Greek salary calculator — a free tool where people in Greece can enter their job title, years of experience, and city, and see what the market rate is for their salary. Greece has a very opaque salary market and people don't know if they're underpaid. I'd monetize through ads and maybe a premium 'get personalized salary report' feature. I have some data from job boards. Is this worth pursuing?",
+  "assertions": [
+    {"name": "verdict_present", "description": "Output contains a verdict: one of BET, BUILD, PIVOT, or KILL"},
+    {"name": "business_model_classified_as_tool_site", "description": "Business model is classified as 'tool-site'"},
+    {"name": "twelve_criteria_scored", "description": "Output shows all 12 scoring criteria with scores"},
+    {"name": "scored_card_saved_to_vault", "description": "Scored card file exists at ideas/greek-salary-calculator/"},
+    {"name": "competitor_section_present", "description": "Output includes a competitor landscape section"},
+    {"name": "real_data_evidence", "description": "Evidence column contains specific numbers from CLI research (subscriber counts, Tranco ranks, domain ages)"}
+  ]
+}

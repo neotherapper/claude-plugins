@@ -1,0 +1,29 @@
+{
+  "eval_id": 0,
+  "eval_name": "greek-education-known-domain",
+  "run": "without_skill",
+  "expectations": [
+    {
+      "text": "EVIDENCE fields contain '[from scored-card' citations with a source file reference, not vague claims",
+      "passed": false,
+      "evidence": "Baseline output uses no structured EVIDENCE fields and no '[from scored-card' citation format. Ideas are described in prose with generic research references but no sourced citation format."
+    },
+    {
+      "text": "Output contains a markdown table with columns: Rank, Candidate, Pattern, Evidence, Timing, Executable, Total",
+      "passed": false,
+      "evidence": "Baseline uses a priority table (Idea | Model | Key differentiator) but not the scoring rubric format. No Rank/Evidence/Timing/Executable/Total columns."
+    },
+    {
+      "text": "A file matching idea-seeds-*education* or idea-seeds-*greek* exists in ideas/_registry/ after the run",
+      "passed": false,
+      "evidence": "Baseline produced output.md only — no seed file written to ideas/_registry/. Ideas are not formatted as evaluator-ready seeds."
+    },
+    {
+      "text": "Output does NOT reproduce 'Greek Schools Directory' as a new candidate idea",
+      "passed": true,
+      "evidence": "Baseline correctly did not propose GSD again — it read the vault and noted it as existing before generating new ideas."
+    }
+  ],
+  "pass_rate": 0.25,
+  "notes": "Baseline produced high-quality ideas but without structured pipeline output: no evidence citations, no scoring table, no seed files in vault."
+}

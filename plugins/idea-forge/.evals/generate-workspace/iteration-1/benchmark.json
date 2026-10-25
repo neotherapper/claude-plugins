@@ -1,0 +1,72 @@
+{
+  "skill_name": "idea-generator",
+  "iteration": 1,
+  "configurations": [
+    {
+      "name": "with_skill",
+      "evals": [
+        {
+          "eval_id": 0,
+          "eval_name": "greek-education-known-domain",
+          "pass_rate": 1.0,
+          "assertions_passed": 4,
+          "assertions_total": 4
+        },
+        {
+          "eval_id": 1,
+          "eval_name": "automotive-pivot-domain",
+          "pass_rate": 1.0,
+          "assertions_passed": 3,
+          "assertions_total": 3
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "saas-onboarding-no-vault-match",
+          "pass_rate": 1.0,
+          "assertions_passed": 3,
+          "assertions_total": 3
+        }
+      ],
+      "overall_pass_rate": 1.0,
+      "total_passed": 10,
+      "total_assertions": 10
+    },
+    {
+      "name": "without_skill",
+      "evals": [
+        {
+          "eval_id": 0,
+          "eval_name": "greek-education-known-domain",
+          "pass_rate": 0.25,
+          "assertions_passed": 1,
+          "assertions_total": 4
+        },
+        {
+          "eval_id": 1,
+          "eval_name": "automotive-pivot-domain",
+          "pass_rate": 0.67,
+          "assertions_passed": 2,
+          "assertions_total": 3
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "saas-onboarding-no-vault-match",
+          "pass_rate": 0.0,
+          "assertions_passed": 0,
+          "assertions_total": 3
+        }
+      ],
+      "overall_pass_rate": 0.3,
+      "total_passed": 3,
+      "total_assertions": 10
+    }
+  ],
+  "delta": "+0.70 pass rate improvement (with_skill 100% vs without_skill 30%)",
+  "analyst_observations": [
+    "The skill's structured pipeline (evidence citations, scoring table, seed format, vault writes) is the primary differentiator — the baseline produced good ideas but zero structured output.",
+    "The baseline's Eval 1 partial pass (0.67) shows that reading the vault directly gives Claude enough context to avoid reproducing PIVOT ideas, even without the skill. The skill adds the structured framing on top.",
+    "Eval 2 (no vault match) is the clearest win — baseline 0% vs skill 100%. Without the skill, there is no evidence quality signaling, no scoring, and no evaluator-ready output. The skill adds all three.",
+    "The 'deduplicates_vault' assertion is a false-negative risk: string-not-contains checks fire on context references, not just new candidates. Recommend scoping assertion to candidate sections only in future iterations.",
+    "All with-skill runs produced vault-written seed files ready for immediate idea-evaluator ingestion. No baseline run produced any vault output."
+  ]
+}

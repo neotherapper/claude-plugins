@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "skill_name": "idea-evaluator",
+    "skill_path": "/Users/georgiospilitsoglou/Developer/projects/nikai/.claude/skills/idea-evaluator",
+    "executor_model": "claude-sonnet-4-6",
+    "timestamp": "2026-03-26T21:35:48Z",
+    "evals_run": ["greek-schools-directory", "greek-salary-calculator"],
+    "runs_per_configuration": 1,
+    "note": "1 run per config (each run spawns 5-7 sub-agents; full pipeline ~10min per run)"
+  },
+  "runs": [
+    {
+      "eval_id": "greek-schools-directory",
+      "config": "with_skill",
+      "pass_rate": 1.0,
+      "assertions_passed": 5,
+      "assertions_total": 5,
+      "duration_seconds": 653.5,
+      "total_tokens": 81079,
+      "verdict": "BUILD (65.2%)",
+      "model_classified_correctly": true,
+      "files_saved_to_vault": true
+    },
+    {
+      "eval_id": "greek-schools-directory",
+      "config": "without_skill",
+      "pass_rate": 0.2,
+      "assertions_passed": 1,
+      "assertions_total": 5,
+      "duration_seconds": 83.5,
+      "total_tokens": 15043,
+      "verdict": "narrative (no structured verdict)",
+      "model_classified_correctly": false,
+      "files_saved_to_vault": false
+    },
+    {
+      "eval_id": "greek-salary-calculator",
+      "config": "with_skill",
+      "pass_rate": 1.0,
+      "assertions_passed": 5,
+      "assertions_total": 5,
+      "duration_seconds": 688.0,
+      "total_tokens": 75797,
+      "verdict": "BUILD (71.6%)",
+      "model_classified_correctly": true,
+      "files_saved_to_vault": true
+    },
+    {
+      "eval_id": "greek-salary-calculator",
+      "config": "without_skill",
+      "pass_rate": 0.4,
+      "assertions_passed": 2,
+      "assertions_total": 5,
+      "duration_seconds": 100.4,
+      "total_tokens": 18584,
+      "verdict": "CONDITIONAL GO (no standard label)",
+      "model_classified_correctly": true,
+      "files_saved_to_vault": false
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "mean_pass_rate": 1.0,
+      "mean_duration_seconds": 670.75,
+      "mean_tokens": 78438
+    },
+    "without_skill": {
+      "mean_pass_rate": 0.3,
+      "mean_duration_seconds": 91.95,
+      "mean_tokens": 16814
+    },
+    "delta": {
+      "pass_rate": "+0.70",
+      "time_seconds": "+578.8s",
+      "tokens": "+61624"
+    }
+  },
+  "analyst_observations": [
+    "100% vs 30% pass rate: the skill delivers a 70pp structural advantage — standardized verdict, 12-criterion rubric, vault persistence, lens weights",
+    "competitor_section assertion passes for BOTH configs — not discriminating, should be removed or replaced with a stricter check (e.g. 'contains competitor table with Tranco rank data')",
+    "business_model classification: without_skill correctly identified 'tool-site' for the salary calculator (1/2 correct) but failed on directory (classified as 'Directory / Marketplace...'). Skill is 2/2.",
+    "Time tradeoff is real: 11 minutes per evaluation vs 90 seconds. For a 25-idea vault, that's ~4.5 hours vs ~37 minutes. Consider a 'quick eval' mode that skips competitor deep-dive and runs only 3 research agents.",
+    "Token cost: with_skill averages 78K tokens vs 17K without — 4.7x more. At API prices this matters for automated re-evaluation of the full vault.",
+    "No Lean Canvas output in either run (has_lean_canvas=false both). The Business Foundation section exists but isn't structured as a Lean Canvas. If BDF integration is important, this should become an assertion.",
+    "CLI tools were unavailable for both with_skill runs — all research was estimated. Real CLI runs will produce higher-quality evidence but similar structural pass rates."
+  ]
+}

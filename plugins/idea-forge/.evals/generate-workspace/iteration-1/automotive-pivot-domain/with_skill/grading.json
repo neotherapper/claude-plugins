@@ -1,0 +1,24 @@
+{
+  "eval_id": 1,
+  "eval_name": "automotive-pivot-domain",
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "Output acknowledges the car-database PIVOT verdict and treats it as evidence for a new angle",
+      "passed": true,
+      "evidence": "23 occurrences of PIVOT/pivot/car-database in output. Explicit 'PIVOT handling' section describes loading scored card and extracting pre-1981 vehicles, JDM imports, B2B data licensing as unexplored angles."
+    },
+    {
+      "text": "Output contains a markdown table with columns: Rank, Candidate, Pattern, Evidence, Timing, Executable, Total",
+      "passed": true,
+      "evidence": "'| Rank |' found in output — full scoring table present with all required columns."
+    },
+    {
+      "text": "Output does NOT reproduce the exact 'IMDB for Cars' concept as a new idea",
+      "passed": true,
+      "evidence": "Single mention of 'IMDB for Cars' is on line 18 in de-duplication context table ('Car Database (IMDB for Cars) | evaluated | PIVOT | scored-card-v1.md loaded'). Not proposed as a new candidate. 5 seeds produced are all distinct angles."
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "Excellent PIVOT handling — the skill correctly fed the failed approach into Pattern 1 and generated 5 different-angle candidates. 3 candidates below 6/9 threshold were correctly rejected."
+}

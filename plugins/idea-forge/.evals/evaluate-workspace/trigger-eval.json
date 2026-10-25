@@ -1,0 +1,82 @@
+[
+  {
+    "query": "i have this idea for an AI tools comparison site — like a directory where devs can find and compare different LLM providers. been thinking about it for a while. is this actually worth building?",
+    "should_trigger": true
+  },
+  {
+    "query": "rate my saas idea: a platform that helps small accounting firms automate their client onboarding. thinking of charging $99/month per firm. any thoughts on viability?",
+    "should_trigger": true
+  },
+  {
+    "query": "should i build a marketplace for vintage clothing? i have a fashion blog with 12k followers and some existing supplier contacts. wondering if the market is there",
+    "should_trigger": true
+  },
+  {
+    "query": "/evaluate-idea: a recipe ingredient delivery service that auto-orders grocery items based on your weekly meal plan. it would integrate with grocery store APIs",
+    "should_trigger": true
+  },
+  {
+    "query": "I want to build a directory of Greek tutors — like a comprehensive listing site for all private tutors in Greece with filtering by subject and area. validate this for me",
+    "should_trigger": true
+  },
+  {
+    "query": "honest feedback on my startup concept: a chrome extension that summarizes slack threads using gpt. i already have a working prototype but not sure if people would actually pay for it",
+    "should_trigger": true
+  },
+  {
+    "query": "is there market demand for a B2B SaaS tool that helps marketing teams manage their brand assets and digital files? the competitors i've found seem pretty weak tbh",
+    "should_trigger": true
+  },
+  {
+    "query": "thinking about a content site focused on remote work productivity — curated guides, tool reviews, weekly newsletter. would ads or premium access make more sense? is this worth starting?",
+    "should_trigger": true
+  },
+  {
+    "query": "got this side project idea — a free web calculator that estimates your cloud cost savings if you migrate from AWS to GCP or Azure. monetize with affiliate links. good idea?",
+    "should_trigger": true
+  },
+  {
+    "query": "evaluate: a two-sided marketplace connecting independent architects with homeowners who want small interior renovation projects. thinking of taking 15% commission",
+    "should_trigger": true
+  },
+  {
+    "query": "what are the best school directories in greece right now?",
+    "should_trigger": false
+  },
+  {
+    "query": "can you help me write the landing page copy for my saas product? the idea is already validated, i just need the messaging",
+    "should_trigger": false
+  },
+  {
+    "query": "help me fill in the competitive analysis section of the PRD for my project. here's the PRD so far...",
+    "should_trigger": false
+  },
+  {
+    "query": "what is the lean canvas and how do i fill it out for a marketplace?",
+    "should_trigger": false
+  },
+  {
+    "query": "should I use Next.js or Astro for my directory site? i'm a solo developer and need to launch fast",
+    "should_trigger": false
+  },
+  {
+    "query": "tell me about Clay — the sales enrichment tool. what does it do and who uses it?",
+    "should_trigger": false
+  },
+  {
+    "query": "what SaaS tools in the knowledge vault support MCP integration?",
+    "should_trigger": false
+  },
+  {
+    "query": "write me a pitch deck for my startup. we're building an AI writing assistant for legal teams",
+    "should_trigger": false
+  },
+  {
+    "query": "i want to do market research on the edtech space in europe. can you summarize what you know about it?",
+    "should_trigger": false
+  },
+  {
+    "query": "what's the difference between a directory and a marketplace business model? i'm trying to decide which to build",
+    "should_trigger": false
+  }
+]

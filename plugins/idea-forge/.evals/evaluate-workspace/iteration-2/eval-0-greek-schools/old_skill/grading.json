@@ -1,0 +1,39 @@
+{
+  "eval_id": 0,
+  "eval_name": "greek-schools-directory",
+  "run_type": "old_skill",
+  "expectations": [
+    {
+      "text": "verdict_present: output contains one of BET/BUILD/PIVOT/KILL",
+      "passed": true,
+      "evidence": "summary.json verdict='BUILD' — valid verdict format"
+    },
+    {
+      "text": "business_model_classified_as_directory: classified as 'directory'",
+      "passed": false,
+      "evidence": "summary.json business_model_classified='directory/marketplace (premium school profiles B2B + advertising)' — hybrid classification, not clean 'directory'"
+    },
+    {
+      "text": "twelve_criteria_scored: output shows all 12 scoring criteria with scores",
+      "passed": false,
+      "evidence": "summary.json criteria_count=10 — only 10 criteria scored, missing 2 required criteria"
+    },
+    {
+      "text": "scored_card_saved_to_vault: scored card file written to ideas/{slug}/",
+      "passed": false,
+      "evidence": "summary.json files_saved_to_vault=false — no vault persistence"
+    },
+    {
+      "text": "competitor_section_present: output includes competitor landscape section",
+      "passed": true,
+      "evidence": "summary.json has_competitor_section=true — competitor discussion present in evaluation.md"
+    },
+    {
+      "text": "real_data_evidence: evidence column contains specific numbers from CLI research",
+      "passed": false,
+      "evidence": "summary.json cli_tools_used=false — all analysis from model knowledge, no CLI data"
+    }
+  ],
+  "pass_rate": 0.333,
+  "notes": "Without the skill: correct verdict direction (BUILD) but wrong format (hybrid model), 10/12 criteria, no vault persistence, no CLI data. Business model lens not applied so weights are unstructured."
+}

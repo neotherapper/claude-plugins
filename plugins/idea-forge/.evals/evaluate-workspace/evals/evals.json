@@ -1,0 +1,81 @@
+{
+  "skill_name": "idea-evaluator",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I want to build a Greek schools directory — a website that lists all public and private primary and secondary schools in Greece with key info: location, type (public/private), contact details, and eventually parent ratings. Greece has no good central directory for this. I already have a dataset of ~14,000 schools scraped from the Ministry of Education website. I have a background in web dev and I'm Greek so I understand the market. Should I build this?",
+      "expected_output": "A complete evaluation with: (1) business model classified as 'directory', (2) 12 criteria scored with evidence containing real data from CLI tools (subreddit subscriber counts, domain ages, Tranco ranks), (3) a verdict of BUILD (score ~55-70%), (4) scored card saved to ideas/greek-schools-directory/scored-card-v*.md, (5) Business Foundation section present, (6) ranking updated.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "verdict_present",
+          "description": "Output contains a verdict: one of BET, BUILD, PIVOT, or KILL",
+          "check": "grep -iE '\\b(BET|BUILD|PIVOT|KILL)\\b' scored-card.md"
+        },
+        {
+          "name": "business_model_classified_as_directory",
+          "description": "Business model is classified as 'directory' (not ecommerce, saas, etc.)",
+          "check": "summary.json field business_model_classified == 'directory'"
+        },
+        {
+          "name": "twelve_criteria_scored",
+          "description": "Output shows all 12 scoring criteria with scores",
+          "check": "summary.json field criteria_count >= 12"
+        },
+        {
+          "name": "scored_card_saved_to_vault",
+          "description": "Scored card file exists at ideas/greek-schools-directory/",
+          "check": "summary.json field files_saved_to_vault == true"
+        },
+        {
+          "name": "competitor_section_present",
+          "description": "Output includes a competitor landscape section",
+          "check": "summary.json field has_competitor_section == true"
+        },
+        {
+          "name": "real_data_evidence",
+          "description": "Scored card evidence column contains specific numbers from CLI research (subscriber counts, Tranco ranks, domain ages, trend data) — not just qualitative estimates",
+          "check": "grep -iE '(subscribers|Tranco|rank #|domain age|[0-9]+K subs|rising|stable|declining)' scored-card.md"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "I'm thinking about building a Greek salary calculator — a free tool where people in Greece can enter their job title, years of experience, and city, and see what the market rate is for their salary. Greece has a very opaque salary market and people don't know if they're underpaid. I'd monetize through ads and maybe a premium 'get personalized salary report' feature. I have some data from job boards. Is this worth pursuing?",
+      "expected_output": "A complete evaluation with: (1) business model classified as 'tool-site', (2) 12 criteria scored with evidence containing real data from CLI tools, (3) verdict likely BUILD or PIVOT, (4) scored card saved to ideas/greek-salary-calculator/scored-card-v*.md, (5) correct tool-site lens weights applied, (6) Business Foundation section present.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "verdict_present",
+          "description": "Output contains a verdict: one of BET, BUILD, PIVOT, or KILL",
+          "check": "grep -iE '\\b(BET|BUILD|PIVOT|KILL)\\b' scored-card.md"
+        },
+        {
+          "name": "business_model_classified_as_tool_site",
+          "description": "Business model is classified as 'tool-site' (not directory, saas, etc.)",
+          "check": "summary.json field business_model_classified == 'tool-site'"
+        },
+        {
+          "name": "twelve_criteria_scored",
+          "description": "Output shows all 12 scoring criteria with scores",
+          "check": "summary.json field criteria_count >= 12"
+        },
+        {
+          "name": "scored_card_saved_to_vault",
+          "description": "Scored card file exists at ideas/greek-salary-calculator/",
+          "check": "summary.json field files_saved_to_vault == true"
+        },
+        {
+          "name": "competitor_section_present",
+          "description": "Output includes a competitor landscape section",
+          "check": "summary.json field has_competitor_section == true"
+        },
+        {
+          "name": "real_data_evidence",
+          "description": "Scored card evidence column contains specific numbers from CLI research (subscriber counts, Tranco ranks, domain ages, trend data) — not just qualitative estimates",
+          "check": "grep -iE '(subscribers|Tranco|rank #|domain age|[0-9]+K subs|rising|stable|declining)' scored-card.md"
+        }
+      ]
+    }
+  ]
+}

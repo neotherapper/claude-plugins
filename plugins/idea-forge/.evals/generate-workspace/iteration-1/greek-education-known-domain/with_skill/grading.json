@@ -1,0 +1,29 @@
+{
+  "eval_id": 0,
+  "eval_name": "greek-education-known-domain",
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "EVIDENCE fields contain '[from scored-card' citations with a source file reference, not vague claims",
+      "passed": true,
+      "evidence": "7 occurrences of 'from scored-card' found in output — all candidates cite specific sections of scored-card-v3.md"
+    },
+    {
+      "text": "Output contains a markdown table with columns: Rank, Candidate, Pattern, Evidence, Timing, Executable, Total",
+      "passed": true,
+      "evidence": "'| Rank |' found in output — full scoring table present with all 8 columns"
+    },
+    {
+      "text": "A file matching idea-seeds-*education* or idea-seeds-*greek* exists in ideas/_registry/ after the run",
+      "passed": true,
+      "evidence": "idea-seeds-greek-education-2026-04-06-run-1.md found in ideas/_registry/"
+    },
+    {
+      "text": "Output does NOT reproduce 'Greek Schools Directory' as a new candidate idea",
+      "passed": true,
+      "evidence": "Both mentions of 'Greek Schools Directory' are in de-duplication context (line 16: corpus table) and as a 'Founder fit' reference (line 265: seed annotation) — not proposed as a new candidate. Assertion string-match was too strict; actual behavior is correct."
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "The 'deduplicates_vault' assertion would have triggered a false negative with a strict string-not-contains check. Recommend refining assertion to check candidate section rather than full output."
+}

@@ -1,0 +1,24 @@
+{
+  "eval_id": 1,
+  "eval_name": "automotive-pivot-domain",
+  "run": "without_skill",
+  "expectations": [
+    {
+      "text": "Output acknowledges the car-database PIVOT verdict and treats it as evidence for a new angle",
+      "passed": true,
+      "evidence": "Baseline read the scored card and noted the PIVOT failure mode, then deliberately avoided the generalist-database trap. Good intuition, but no structured 'Pattern 1 evidence' framing."
+    },
+    {
+      "text": "Output contains a markdown table with columns: Rank, Candidate, Pattern, Evidence, Timing, Executable, Total",
+      "passed": false,
+      "evidence": "Baseline produced a summary table (# | Idea | Model | Key differentiator) but not the standardized scoring rubric table with numeric scores."
+    },
+    {
+      "text": "Output does NOT reproduce the exact 'IMDB for Cars' concept as a new idea",
+      "passed": true,
+      "evidence": "Baseline correctly avoided re-proposing the existing car-database idea."
+    }
+  ],
+  "pass_rate": 0.67,
+  "notes": "Baseline performed better here because it read the scored card and derived insights — but produced no standardized output format, no numeric scoring, no seed files."
+}
