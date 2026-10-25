@@ -140,7 +140,7 @@ Change from original: {+/- X points, +/- Y%}
 
 ## Rules
 
-1. You MUST review every single criterion — no skipping
+1. Review all 13 criteria. A skipped criterion silently keeps a score that may be biased
 2. Confirm at least some scores — not everything should be adjusted (that signals you're biasing toward negativity)
 3. If 0 adjustments are made, you must still justify why each score is confirmed
 4. Adjustments greater than 1 point require exceptional justification

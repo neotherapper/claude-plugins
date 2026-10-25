@@ -1,9 +1,9 @@
 ---
 name: generate
-description: "This skill should be used when the user wants to generate, discover, or surface business ideas FROM domain/vault research — not evaluate a specific idea they already have. Trigger phrases: 'find ideas in [domain]', 'what could I build in [space]?', 'generate business ideas from [domain] research', 'what gaps exist in [market]?', '/idea-forge:generate'. Does NOT trigger for evaluating a specific idea, 'should I build X?', or 'is there a market for X?' — those go to /idea-forge:evaluate."
+description: "Generate new business ideas from the research already in the idea vault: surface gaps, unexplored niches, and opportunities in a domain, then turn the best into evaluator-ready seeds. Use when the user wants to go from research to ideas: 'find ideas in [domain]', 'what could I build in [space]?', 'what gaps exist in [market]?', 'given our research, what haven't we tried?', 'explore the [domain] opportunity space', 'what does the data suggest I should build?', or the /idea-forge:generate prefix. Not for judging a specific idea the user already has, including 'should I build X?' or 'is there a market for X?' (→ /idea-forge:evaluate). Not for understanding a market with no intent to generate ideas, or for tool lookups."
 license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   author: Georgios Pilitsoglou
 ---
 
@@ -11,48 +11,18 @@ metadata:
 
 > Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
 
-Surfaces business opportunity gaps from existing vault research using 5 gap patterns. Produces evaluator-ready idea seeds in three stages: generate candidates → light score → flesh out top ideas.
-
-## When to Invoke
-
-Trigger on any of:
-- "Find ideas in [domain]"
-- "What could I build in [space]?"
-- "Generate business ideas from [domain] research"
-- "What gaps exist in [market]?"
-- "I've been researching [domain], what should I build?"
-- "Explore the [domain] opportunity space"
-
-Does NOT trigger for:
-- Evaluating a specific idea (→ /idea-forge:evaluate)
-- General market research without generative intent
-- Knowledge vault lookups
-
-## What It Does
-
-1. Looks up existing vault research for the domain in `ideas/_registry/master-index.yaml`
-2. Assembles a corpus from scored cards (or idea.md frontmatter for brainstorm-only domains)
-3. Applies up to 5 gap patterns against the corpus (subset may run depending on corpus quality) to surface up to 14 opportunity candidates
-4. Light-scores all candidates on 3 criteria — only ideas scoring ≥6/9 advance
-5. Fleshes out top 3-5 candidates into evaluator-ready idea seeds
-6. Saves all seeds to `ideas/_registry/idea-seeds-{domain}-{YYYY-MM-DD}-run-N.md`
-
-## How to Use
-
-Load and follow the orchestration prompt:
+Mines existing vault research for opportunity gaps using 5 gap patterns, light-scores the candidates, and fleshes out the strongest into seeds that feed straight into `/idea-forge:evaluate`:
 
 ```
-Read generator.md
+/idea-forge:generate → ideas/_registry/idea-seeds-{domain}-{YYYY-MM-DD}-run-N.md → /idea-forge:evaluate (per seed)
 ```
 
-The generator.md file contains the complete pipeline instructions for all four sections.
+## Run it
 
-## Relationship to Evaluate
+Read `generator.md` and follow its four sections in order:
+1. **Data layer:** domain lookup in `ideas/_registry/master-index.yaml`, corpus, de-dup, confirm with the user.
+2. **Generation:** apply the gap patterns in `references/gap-patterns.md`.
+3. **Light scoring:** three criteria; ideas scoring ≥ 6/9 advance.
+4. **Seeds:** flesh out the top 3–5 into evaluator-ready seeds and save the seed file.
 
-The generate and evaluate skills are designed to work in sequence:
-
-```
-/idea-forge:generate → idea-seeds-{domain}.md → /idea-forge:evaluate (per seed)
-```
-
-After generation, the user picks any seed and runs `/idea-forge:evaluate` on it.
+The run is done when the seed file is saved and the user has the shortlist with one line per seed. Then offer to evaluate whichever seed they pick.

@@ -153,10 +153,12 @@ Look for:
 
 **HN Story Volume (free numeric signal for C6/C8):**
 ```bash
-# Algolia HN API returns nbHits — total story count for the keyword
+# Total story count: query HN Algolia directly (cli.newsfeed hn returns articles, not nbHits)
+curl -s "https://hn.algolia.com/api/v1/search?query={primary_keyword}&tags=story&hitsPerPage=0" | python3 -c "import json,sys; print(json.load(sys.stdin)['nbHits'])"
+# Recent stories with titles/URLs for quotes
 cd tools && ./venv/bin/python -m cli.newsfeed hn "{primary_keyword}" --limit 20 --json
 ```
-The `nbHits` field from the Algolia API gives total historical HN story count — a genuine integer signal of developer community activation.
+`nbHits` is the total historical HN story count, a genuine integer signal of developer community activation.
 
 ### Step 9: Book / Publishing Niche Signal (if applicable)
 

@@ -32,14 +32,17 @@ You will receive:
 
 ### Step 1: Reddit Pain Mining
 
+Reddit's API is blocked from this network (see `references/tool-status.md`), so mine Reddit through Google SERP results restricted to the site:
+
 ```bash
-cd tools && python -m cli.reddit search "{niche} problem" --json
-cd tools && python -m cli.reddit search "{niche} frustrating" --json
-cd tools && python -m cli.reddit search "{niche} help" --json
-cd tools && python -m cli.reddit search "{niche} alternative" --json
-cd tools && python -m cli.reddit search "switched from {competitor}" --json
-cd tools && python -m cli.reddit search "what do you use for {niche}" --json
+cd tools && ./venv/bin/python -m cli.serper search "site:reddit.com {niche} problem" --json
+cd tools && ./venv/bin/python -m cli.serper search "site:reddit.com {niche} frustrating" --json
+cd tools && ./venv/bin/python -m cli.serper search "site:reddit.com {niche} alternative" --json
+cd tools && ./venv/bin/python -m cli.serper search "site:reddit.com switched from {competitor}" --json
+cd tools && ./venv/bin/python -m cli.serper search "site:reddit.com what do you use for {niche}" --json
 ```
+
+SERP snippets carry the real thread URL and title, but usually no upvotes or date; record those as "not available" rather than estimating them.
 
 For each relevant post found:
 - Record the EXACT title and top comment text (these are customer quotes)

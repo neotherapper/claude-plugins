@@ -560,7 +560,7 @@ Percentage: {(final_score / 5.0) * 100}%
 
 ## Rules
 
-1. NEVER score higher than 3 without specific quantitative evidence
+1. Scores of 4–5 require specific quantitative evidence; without it, the ceiling is 3
 2. If a research report returned "NO DATA" for key commands, score that criterion at 2 or lower
 3. Be precise — "20+ autocomplete suggestions" is better than "lots of suggestions"
 4. Criterion 11 (Founder-Team Fit) can ONLY be scored from the user's direct answers to all four sub-questions

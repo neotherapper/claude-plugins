@@ -33,8 +33,8 @@ Runs 5 parallel research agents (market, competition, data, distribution, custom
 
 ```
 ideas/{slug}/
-├── scored-card-v1.md       — final verdict: BET / BUILD / PIVOT / KILL
-└── research/
+├── scored-card-v{N}.md     — final verdict: BET / BUILD / PIVOT / KILL (N = evaluation version)
+└── research/v{N}/
     ├── market.md
     ├── competition.md
     ├── data.md
@@ -44,6 +44,8 @@ ideas/{slug}/
     ├── scoring.md
     └── critic.md
 ```
+
+Re-evaluating an idea writes the next version, so earlier evidence is kept. Research agents read `skills/evaluate/references/tool-status.md` first for broken CLIs and their substitutes.
 
 ## Verdict scale
 

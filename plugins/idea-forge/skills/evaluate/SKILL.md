@@ -1,9 +1,9 @@
 ---
 name: evaluate
-description: "This skill should be used for ANY business idea validation, evaluation, or viability check. Key trigger signals: 'should I build', 'is this worth building', 'validate this', 'good idea?', 'rate my startup', 'honest feedback on my startup', 'is there market demand', 'wondering if the market is there', 'is this worth starting', 'any thoughts on viability', 'evaluate', 'got this side project idea', 'thinking about building', 'is this viable'. Also triggers for the /idea-forge:evaluate prefix and any message where someone describes a SaaS, marketplace, directory, e-commerce, content site, or free tool idea and wants to know whether it's worth pursuing. Runs 5+ research agents + scoring + critic pipeline and returns BET/BUILD/PIVOT/KILL verdict. Does NOT trigger for: writing copy/PRDs/pitch decks, filling in document sections, tech stack questions, knowledge vault lookups, general market research without a specific idea to evaluate."
+description: "Evaluate whether a specific business idea is worth building. Runs 6 research agents, 13-criterion evidence-based scoring, and a critic pass, then returns a BET/BUILD/PIVOT/KILL verdict with a scored card. Use when someone describes an idea (SaaS, marketplace, directory, e-commerce, content site, free tool site) and wants it evaluated, rated, validated, or honestly critiqued, or asks whether it's viable, worth building, or has market demand. That includes casual framings ('got this side project idea', 'thinking about building…') and the /idea-forge:evaluate prefix. Not for writing copy, PRDs, or pitch decks; tech-stack questions; knowledge vault lookups; or market research with no specific idea (finding ideas → /idea-forge:generate)."
 license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   author: Georgios Pilitsoglou
 ---
 
@@ -11,77 +11,38 @@ metadata:
 
 > Paths in this skill are relative to the folder that contains this SKILL.md. Resolve them to absolute paths before reading a file or running a script.
 
-Evaluates business ideas across 6 model types (directory, e-commerce, SaaS, marketplace, content, tool-site) through a rigorous multi-stage research and scoring pipeline with lens-specific rubrics.
+Evaluates one business idea, or a family of related ideas, through a staged pipeline:
 
-## When to Invoke
+1. A short founder interview.
+2. Five parallel research agents (market, competition, data, distribution, customer voice), plus a competitor deep-dive.
+3. Scoring on 13 weighted criteria through a business-model lens.
+4. A critic pass.
+5. A final verdict.
 
-Trigger on any of:
-- "evaluate idea", "score idea", "rate idea", "validate idea"
-- "/idea-forge:evaluate"
-- "is this a good idea?", "should I build X?", "is there a market for X?"
-- "what are the chances of success?", "give me honest feedback on this"
-- "evaluate this e-commerce idea", "rate this SaaS concept"
-- "is this marketplace viable?", "should I build a directory for X?"
-- User describes any business concept and asks for assessment or feedback
+Every score cites the evidence behind it. Outputs land in the project's idea vault (`ideas/`).
 
-## What It Does
+## Run it
 
-1. Receives an idea description (1-2 paragraphs)
-2. Asks 5 targeted questions about founder fit and early validation (Criteria 11 + 13)
-3. Runs 5 parallel research agents: market demand, competition (with funding intelligence + tech stack detection), data availability, distribution (with traction channel fit), and customer voice
-4. Runs a competitor deep-dive agent: Tranco rank, domain age, page count, robots.txt signals, HTTP headers, funding history
-5. Scores the idea across 13 weighted criteria with evidence — source attribution required for all claims
-6. Classifies PMF archetype (Hair on Fire / Hard Fact / Future Vision) and checks for tarpit patterns
-7. Stress-tests scores through a critic agent to catch bias
-8. Produces a final scored card with DVF assessment, competitor landscape, feature gap matrix, traction channel ranking, customer development stage, and verdict (BET / BUILD / PIVOT / KILL)
-9. Archives all raw research data to `ideas/{slug}/research/` for future reference
+Read `evaluator.md` and follow it from Step 0. It owns the whole pipeline: the modes (single vs family), vault promotion rules, agent dispatch, and outputs.
 
-## How to Use
+## Files
 
-Load and follow the orchestration prompt:
+| File | Role |
+|------|------|
+| `evaluator.md` | Orchestration: the steps, in order |
+| `references/tool-status.md` | Which research CLIs work, their substitutes, worktree setup. Every research agent reads it first |
+| `references/criteria.md` | The 13 criteria and their rubrics |
+| `references/lenses/{directory,ecommerce,saas,marketplace,content,tool-site}.md` | Per-model rubric and weight overrides |
+| `references/workspace-schema.md` | File contract for all agent outputs |
+| `references/idea-card-template.md` · `references/ranking-entry-template.md` | Output formats |
+| `agents/{market,competition,data,distribution}-research.md`, `agents/customer-voice.md` | Stage 1 research agents |
+| `agents/competitor-deep-dive.md` | Stage 1.5, which runs once competition research returns |
+| `agents/scoring.md` · `agents/critic.md` · `agents/orchestrator.md` | Stages 2–4 |
+| `agents/family-evaluator.md` | Family mode |
 
-```
-Read evaluator.md
-```
+## Outputs
 
-The evaluator.md file contains the complete pipeline instructions, agent dispatch logic, and output handling.
-
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `evaluator.md` | Main orchestration — read this to run an evaluation |
-| `references/criteria.md` | 13 scoring criteria with rubrics |
-| `references/workspace-schema.md` | Complete file contract for all agent outputs |
-| `references/idea-card-template.md` | Output template for scored cards |
-| `references/ranking-entry-template.md` | Leaderboard row format |
-| `references/lenses/directory.md` | Lens: directory business model rubrics |
-| `references/lenses/ecommerce.md` | Lens: e-commerce business model rubrics |
-| `references/lenses/saas.md` | Lens: SaaS business model rubrics |
-| `references/lenses/marketplace.md` | Lens: marketplace business model rubrics |
-| `references/lenses/content.md` | Lens: content/reference business model rubrics |
-| `references/lenses/tool-site.md` | Lens: free web utility (calculator/converter/generator) rubrics |
-
-## Agents
-
-All agent prompts live in `agents/` inside this skill's folder:
-
-| Agent | Purpose |
-|-------|---------|
-| `agents/market-research.md` | Stage 1: Market research agent |
-| `agents/competition-research.md` | Stage 1: Competition research agent |
-| `agents/data-research.md` | Stage 1: Data availability agent |
-| `agents/distribution-research.md` | Stage 1: Distribution opportunity agent |
-| `agents/customer-voice.md` | Stage 1: Synthetic interview — pain signals from public sources |
-| `agents/competitor-deep-dive.md` | Stage 1.5: Deep competitor profiling agent |
-| `agents/scoring.md` | Stage 2: Evidence-based scoring agent |
-| `agents/critic.md` | Stage 3: Bias detection and score adjustment |
-| `agents/orchestrator.md` | Stage 4: Final aggregation and verdict |
-| `agents/family-evaluator.md` | Family mode: evaluate a cluster of related ideas |
-
-## Output Location
-
-- Individual idea cards: `ideas/{slug}/scored-card-v{N}.md` (always a folder)
-- Research archives: `ideas/{slug}/research/`
-- Rankings leaderboard: `ideas/_registry/ranking.md`
-- New ideas before evaluation: `ideas/drafts/{slug}.md` (promoted to folder when the evaluator first runs)
+- Scored card: `ideas/{slug}/scored-card-v{N}.md`. Ideas always get a folder; scored cards never live under `ideas/drafts/`.
+- Research archive: `ideas/{slug}/research/v{N}/`
+- Leaderboard: `ideas/_registry/ranking.md`
+- New ideas before evaluation: `ideas/drafts/{slug}.md`, promoted to a folder when the evaluator first runs.

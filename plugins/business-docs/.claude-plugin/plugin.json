@@ -1,0 +1,14 @@
+{
+  "name": "business-docs",
+  "version": "0.1.0",
+  "description": "Write business and product documents in dependency order — 85 document types, 6 phases, 4 paths — from problem statement to technical design and the business-to-code handoff.",
+  "author": {
+    "name": "Georgios Pilitsoglou",
+    "url": "https://pilitsoglou.com",
+    "github": "neotherapper"
+  },
+  "homepage": "https://github.com/neotherapper/claude-plugins/tree/main/plugins/business-docs",
+  "repository": "https://github.com/neotherapper/claude-plugins",
+  "license": "MIT",
+  "keywords": ["business-documentation", "prd", "lean-canvas", "technical-design", "handoff"]
+}

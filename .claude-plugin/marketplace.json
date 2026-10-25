@@ -44,6 +44,11 @@
       "description": "Two-stage business idea pipeline: surface opportunity gaps and evaluate viability."
     },
     {
+      "name": "business-docs",
+      "source": "./plugins/business-docs",
+      "description": "Write business and product documents in dependency order, from problem statement to technical design."
+    },
+    {
       "name": "aegis",
       "source": "./plugins/aegis",
       "description": "Passive vulnerability-coverage for your own sites — fingerprint → known-CVE + misconfig report."

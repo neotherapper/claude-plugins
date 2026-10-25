@@ -30,6 +30,8 @@ cd tools && ./venv/bin/python -m cli.<module> ...
 
 > **Note:** The research CLI tools above are optional. If unavailable, agents should use web search (WebSearch tool) and manual research as fallback. The evaluation pipeline is fully functional without the CLI toolkit — research quality may vary.
 
+Several CLIs are broken or behave differently than the prompts assume, and a fresh worktree has no `tools/venv` at all. `references/tool-status.md` lists the failures, substitutes, and setup; every research agent reads it first (the dispatch briefs below say so).
+
 ## Step 0: Parse the Idea
 
 From the user's idea description, extract:
@@ -175,94 +177,89 @@ Save INTERVIEW_CONTEXT for use in Step 3 (scoring).
 
 ## Step 2: Launch Stage 1 — Research Agents (Parallel)
 
-Dispatch 4 research subagents in parallel. Each agent should:
-- Read its specific prompt file
-- Run the CLI commands with the extracted keywords
-- Return a structured research report
+Dispatch the 5 research agents below in a single message so they run in parallel (Agent tool, `subagent_type="general-purpose"`). Each one reads its prompt file and `references/tool-status.md`, runs the research with the extracted keywords, and returns a structured report. Each brief is self-contained, because the agent sees nothing of this conversation.
 
 Substitute the absolute path of this skill's folder for `<skill-folder>` in every dispatch prompt below before dispatching — subagents start without it.
 
-### Dispatch all 4 agents simultaneously:
+### Agents 1–5
 
 **Agent 1: Market Research**
 ```
-Read the prompt at <skill-folder>/agents/market-research.md and follow its instructions exactly.
+Read the prompt at <skill-folder>/agents/market-research.md and follow its instructions exactly. First read <skill-folder>/references/tool-status.md: it lists broken CLIs and their substitutes; report any new failure you hit.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
 WIKIPEDIA_TITLES: {titles}
 
-Run all the CLI commands specified in the prompt, adapting queries to this specific idea. Return the complete Market Research Report in the format specified.
+Run the research the prompt specifies, adapting queries to this specific idea and using the tool-status.md substitute wherever a CLI is broken. Return the complete Market Research Report in the format specified.
 ```
 
 **Agent 2: Competition Research**
 ```
-Read the prompt at <skill-folder>/agents/competition-research.md and follow its instructions exactly.
+Read the prompt at <skill-folder>/agents/competition-research.md and follow its instructions exactly. First read <skill-folder>/references/tool-status.md: it lists broken CLIs and their substitutes; report any new failure you hit.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
 
-Run all the CLI commands specified in the prompt, adapting queries to this specific idea. Return the complete Competition Research Report in the format specified.
+Run the research the prompt specifies, adapting queries to this specific idea and using the tool-status.md substitute wherever a CLI is broken. Return the complete Competition Research Report in the format specified.
 ```
 
 **Agent 3: Data Research**
 ```
-Read the prompt at <skill-folder>/agents/data-research.md and follow its instructions exactly.
+Read the prompt at <skill-folder>/agents/data-research.md and follow its instructions exactly. First read <skill-folder>/references/tool-status.md: it lists broken CLIs and their substitutes; report any new failure you hit.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
 DATA_ENTITIES: {entities}
 
-Run all the CLI commands specified in the prompt, adapting queries to this specific idea. Return the complete Data Research Report in the format specified.
+Run the research the prompt specifies, adapting queries to this specific idea and using the tool-status.md substitute wherever a CLI is broken. Return the complete Data Research Report in the format specified.
 ```
 
 **Agent 4: Distribution Research**
 ```
-Read the prompt at <skill-folder>/agents/distribution-research.md and follow its instructions exactly.
+Read the prompt at <skill-folder>/agents/distribution-research.md and follow its instructions exactly. First read <skill-folder>/references/tool-status.md: it lists broken CLIs and their substitutes; report any new failure you hit.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
 DATA_ENTITIES: {entities}
 
-Run all the CLI commands specified in the prompt, adapting queries to this specific idea. Return the complete Distribution Research Report in the format specified.
+Run the research the prompt specifies, adapting queries to this specific idea and using the tool-status.md substitute wherever a CLI is broken. Return the complete Distribution Research Report in the format specified.
 ```
 
 **Agent 5: Customer Voice Research**
 ```
-Read the prompt at <skill-folder>/agents/customer-voice.md and follow its instructions exactly.
+Read the prompt at <skill-folder>/agents/customer-voice.md and follow its instructions exactly. First read <skill-folder>/references/tool-status.md: it lists broken CLIs and their substitutes; report any new failure you hit.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
 DATA_ENTITIES: {entities}
 COMPETITOR_DOMAINS: {any known competitors, or "none yet"}
 
-Run all the CLI commands specified in the prompt. Search Reddit, Google PAA, reviews, and forums for real customer pain signals. Return the complete Customer Voice Report in the format specified.
+Run the research the prompt specifies, using the tool-status.md substitute wherever a CLI is broken. Search Reddit (via site:reddit.com SERPs), Google PAA, reviews, and forums for real customer pain signals. Return the complete Customer Voice Report in the format specified.
 ```
-
-**Important:** Use the Agent tool with `subagent_type="general-purpose"` to dispatch each of these 5 agents in parallel. Wait for all 5 to complete before proceeding.
 
 ## Step 2.5: Stage 1.5 — Competitor Deep-Dive
 
-Once the Competition Research Agent returns, extract the competitor domains from its report (look for the `COMPETITOR_DOMAINS:` line).
+As soon as the Competition Research Agent (Agent 2) returns, without waiting for the other four, extract the competitor domains from its report (look for the `COMPETITOR_DOMAINS:` line).
 
 Dispatch 1 additional agent:
 
 **Agent 6: Competitor Deep-Dive**
 ```
-Read the prompt at <skill-folder>/agents/competitor-deep-dive.md and follow its instructions exactly.
+Read the prompt at <skill-folder>/agents/competitor-deep-dive.md and follow its instructions exactly. First read <skill-folder>/references/tool-status.md: it lists broken CLIs and their substitutes; report any new failure you hit.
 
 IDEA_DESCRIPTION: {idea_description}
 NICHE_KEYWORDS: {keywords}
 COMPETITOR_DOMAINS: {domains from competition research report}
 
-Run all the CLI commands specified in the prompt for each competitor domain. Return the complete Competitor Deep-Dive Report in the format specified.
+Run the research the prompt specifies for each competitor domain, using the tool-status.md substitute wherever a CLI is broken. Return the complete Competitor Deep-Dive Report in the format specified.
 ```
 
-**Important:** This agent runs AFTER the Competition Research Agent completes (it needs the competitor domain list as input). The other 3 Stage 1 agents (Market, Data, Distribution) can continue in parallel while this runs.
+It needs Agent 2's domain list, so it starts after Agent 2; Agents 1, 3, 4, and 5 keep running alongside it.
 
 ## Step 3: Stage 2 — Scoring
 
-Once all 5 research reports are collected (Market, Competition, Data, Distribution, Customer Voice):
+Once all 6 reports are in (Market, Competition, Data, Distribution, Customer Voice, Competitor Deep-Dive):
 
 1. Read `agents/scoring.md`
 2. Follow the scoring process with these inputs:
@@ -271,8 +268,8 @@ Once all 5 research reports are collected (Market, Competition, Data, Distributi
    - COMPETITION_RESEARCH (from Agent 2)
    - DATA_RESEARCH (from Agent 3)
    - DISTRIBUTION_RESEARCH (from Agent 4)
-   - COMPETITOR_DEEP_DIVE (from Agent 5)
    - CUSTOMER_VOICE (from Agent 5)
+   - COMPETITOR_DEEP_DIVE (from Agent 6)
    - BUSINESS_MODEL (from Step 0 — the scoring agent needs this to load the correct lens)
    - INTERVIEW_CONTEXT (from Step 1 — structured founder interview covering target customer, painful workaround, timing hypothesis, unfair insight, founder origin, validation signals, build ability, and infrastructure)
 3. Score all 13 criteria using the lens-specific rubrics. The Customer Voice report provides [SYNTHETIC-INTERVIEW] evidence for Problem Severity (Criterion 2) — use quoted customer language as evidence, weighted higher than aggregate metrics.
@@ -286,7 +283,7 @@ With the scoring report complete:
 2. Apply the critic process with:
    - IDEA_DESCRIPTION
    - SCORING_REPORT (from Step 3)
-   - All 5 research reports (Market, Competition, Data, Distribution, Customer Voice) for cross-reference
+   - All 6 research reports for cross-reference
 3. Review each score for bias
 4. Produce the Critic Review with adjusted scores
 
@@ -299,8 +296,8 @@ With the critic review complete:
    - IDEA_DESCRIPTION
    - IDEA_SLUG
    - CRITIC_REVIEW (from Step 4)
-   - Research summaries from all 4 agents + competitor deep-dive
-   - COMPETITOR_DEEP_DIVE (from Agent 5)
+   - Research summaries from Agents 1–5
+   - COMPETITOR_DEEP_DIVE (from Agent 6)
    - BUSINESS_MODEL (from Step 0)
 3. Calculate the weighted score using the lens-specific weights from `references/lenses/{BUSINESS_MODEL}.md`
 4. Determine the verdict
@@ -308,17 +305,18 @@ With the critic review complete:
 
 ## Step 5.5: Archive Research Data
 
-Save all raw research data for future reference. Use the Write tool to save each research report as a markdown file.
+Save all raw research data for future reference. Use the Write tool to save each research report as a markdown file under `research/v{N}/`, where N is the evaluation version from Step 0a (1 for a first evaluation), so a re-evaluation never overwrites earlier evidence.
 
 **Path assumption:** By this step, the idea is guaranteed to be at `ideas/{slug}/` (a promoted folder), because Step 0a promoted any existing draft before research began. Never write research files under `ideas/drafts/` — the drafts/ location is reserved for flat `{slug}.md` files only, and any idea that needs a research/ subfolder must already be promoted.
 
-- `ideas/{slug}/research/market.md` — full Market Research report
-- `ideas/{slug}/research/competition.md` — full Competition Research report
-- `ideas/{slug}/research/data.md` — full Data Research report
-- `ideas/{slug}/research/distribution.md` — full Distribution Research report
-- `ideas/{slug}/research/competitor-profiles.md` — full Competitor Deep-Dive report
-- `ideas/{slug}/research/scoring.md` — full Scoring Report
-- `ideas/{slug}/research/critic.md` — full Critic Review
+- `ideas/{slug}/research/v{N}/market.md` — full Market Research report
+- `ideas/{slug}/research/v{N}/competition.md` — full Competition Research report
+- `ideas/{slug}/research/v{N}/data.md` — full Data Research report
+- `ideas/{slug}/research/v{N}/distribution.md` — full Distribution Research report
+- `ideas/{slug}/research/v{N}/customer-voice.md` — full Customer Voice report
+- `ideas/{slug}/research/v{N}/competitor-profiles.md` — full Competitor Deep-Dive report
+- `ideas/{slug}/research/v{N}/scoring.md` — full Scoring Report
+- `ideas/{slug}/research/v{N}/critic.md` — full Critic Review
 
 This creates a permanent, human-reviewable archive of all evidence used in the evaluation.
 
@@ -328,7 +326,7 @@ This creates a permanent, human-reviewable archive of all evidence used in the e
 
 Write the scored card to:
 ```
-ideas/{slug}/scored-card-v1.md
+ideas/{slug}/scored-card-v{N}.md
 ```
 
 ### Update the Ranking
@@ -343,7 +341,7 @@ Ideas ranked by weighted evaluation score. Each idea was evaluated through the m
 
 | Rank | Idea | Verdict | Score | Top Strength | Top Weakness | Date |
 |------|------|---------|-------|-------------|-------------|------|
-| 1 | [{idea_name}](../{slug}/scored-card-v1.md) | {VERDICT} | {percentage}% | {strength} | {weakness} | {date} |
+| 1 | [{idea_name}](../{slug}/scored-card-v{N}.md) | {VERDICT} | {percentage}% | {strength} | {weakness} | {date} |
 ```
 
 **If it exists**, read it, insert the new entry at the correct position (sorted by score descending), and re-number all ranks.
@@ -386,7 +384,7 @@ Present the verdict clearly:
 ### Recommendation
 {2-3 sentences from the orchestrator}
 
-Full scored card saved to: ideas/{slug}/scored-card-v1.md
+Full scored card saved to: ideas/{slug}/scored-card-v{N}.md
 ```
 
 ## Error Recovery
@@ -395,11 +393,3 @@ Full scored card saved to: ideas/{slug}/scored-card-v1.md
 - If CLI tools are unavailable (network issues, missing dependencies), score affected criteria at 2 with a note that evidence was unavailable
 - If the user skips or gives minimal answers in Pass 2 (the founder insight pass), score Criterion 11 at 3 (neutral) and note the unfair insight and timing hypothesis were not assessed
 - If INTERVIEW_CONTEXT fields are `inferred` rather than `direct` for C11-relevant dimensions, treat them as supporting context rather than primary evidence — score conservatively
-
-## Timing Estimate
-
-The full pipeline typically takes 3-5 minutes:
-- Step 0-1: 30 seconds (parsing + user question)
-- Step 2: 1-2 minutes (parallel research)
-- Step 3-5: 1-2 minutes (scoring + critic + orchestration)
-- Step 6-7: 30 seconds (saving + reporting)
